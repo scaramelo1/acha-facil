@@ -40,7 +40,7 @@ function pagina_inicio(string $titulo, string $descricao, string $classe = ''): 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=6">
+<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=7">
 </head>
 <body class="<?= h($classe) ?>">
 <header class="topo">

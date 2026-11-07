@@ -204,3 +204,20 @@ details p { margin: 0 0 16px; color: var(--texto2); }
 .plano-cartao .valor small { display: block; font-size: .85rem; font-weight: 600; color: var(--texto2); }
 .plano-cartao .lista-check { flex: 1; }
 .plano-cartao .fita { position: absolute; top: -14px; right: 20px; background: var(--verde); color: var(--amarelo); font-weight: 900; font-size: .85rem; padding: 4px 12px; border-radius: 10px; }
+
+/* Administração e painel do dono (moderação) */
+.documento.largo { max-width: 1100px; }
+.admin .topo nav a { font-weight: 800; }
+.contador { display: inline-block; min-width: 24px; padding: 0 7px; border-radius: 12px; background: var(--amarelo); color: var(--verde); text-align: center; }
+.tabela { overflow-x: auto; margin: 12px 0 24px; }
+.tabela table { width: 100%; border-collapse: collapse; background: var(--branco); border-radius: 16px; overflow: hidden; }
+.tabela th, .tabela td { padding: 10px 12px; border-bottom: 1px solid var(--borda); text-align: left; vertical-align: top; }
+.tabela tr > th:first-child { white-space: nowrap; }
+.comparar td.antes { background: #fdf0ef; }
+.comparar td.depois { background: var(--verde-claro); }
+.botao.pequeno { min-height: 0; padding: 8px 14px; font-size: .95rem; }
+.decidir { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; align-items: start; }
+.mini-foto { max-width: 220px; max-height: 160px; border-radius: 12px; display: block; }
+.estreito { max-width: 420px; }
+label.marcar { display: flex; gap: 10px; align-items: center; font-weight: 700; }
+label.marcar input { width: auto; }

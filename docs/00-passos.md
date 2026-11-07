@@ -81,8 +81,18 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Falta: (a) testar no APK novo (o do site é o 1.0.0, ainda com e-mail e senha); (b) no Google Cloud, tela de
    consentimento em "Em produção" (em "Teste" só os e-mails cadastrados como testadores conseguem entrar);
    (c) para a App Store: "Entrar com Apple" junto (regra 4.8 da Apple), precisa da conta de desenvolvedor Apple
-8. ⬜ Administração web: total de downloads do APK (`<dados_dir>/apk/downloads.txt`; saiu do site em 07/11), pedidos de assumir/tirar do app, aprovar/recusar cadastros, editar, selo, cortesia, categorias, ocultar comentários
-9. ⬜ Painel do profissional (web): autocadastro, foto, dados, serviços, responder avaliações, ver contatos recebidos
+8. 🟡 Administração web em /admin (07/11): **toda mudança do dono passa por um admin** (contra fraude). Feito: entrar
+   (admins; criar com `php servidor/criar-admin.php email "Nome"`, senha sorteada e mostrada uma vez), Pendências
+   (alterações dos donos com "como está x como vai ficar", aprovar/recusar com motivo; pedidos de assumir/tirar do app),
+   liberar o painel do dono (link secreto mandado pelo WhatsApp, só depois de confirmar pelo telefone do cadastro),
+   cortar acesso, tirar do app (status pausado) e Registro de tudo que cada admin fez. Tabelas na mudança 008
+   (acessos_dono, alteracoes, registro_admin); regras em servidor/inc/moderacao.php (só aprovar_alteracao() grava os
+   dados do dono). Falta: total de downloads do APK (`/var/lib/acha-facil/apk/downloads.txt`), cadastrar negócio novo,
+   selo, cortesia, categorias, ocultar comentários
+9. 🟡 Painel do dono em /painel (07/11): entra pelo link do admin; com plano em dia pede mudança de nome, sobre, serviços,
+   WhatsApp, telefone, Instagram, site, endereço, bairro, horário, atende em casa e foto (sem dados escondidos da foto,
+   reduzida). Nada vai ao app sem aprovação; endereço novo zera a localização para o geocodificar.php achar de novo.
+   Falta: responder avaliações e ver contatos recebidos
 10. 🟡 Assinatura recorrente no Mercado Pago (07/11): planos.php -> perfil.php (nome, telefone, e-mail) -> assinatura.php?c=
    (página secreta do pedido) -> Mercado Pago (assinatura mensal no cartão, "preapproval"); avisos em mp-webhook.php,
    sempre conferidos na API (inc/mercadopago.php). Assinatura autorizada liga o plano (3 dias até a 1ª mensalidade);
