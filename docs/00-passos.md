@@ -1,6 +1,6 @@
 # Acha Fácil! — passos
 
-App para achar profissionais e comércios de **São João da Boa Vista**.
+App para achar profissionais e comércios de **São João da Boa Vista** e **Águas da Prata** (SP) e **Poços de Caldas** (MG).
 Lema: *"O comércio da sua cidade, pertinho de você."*
 Criado em 07/11/2026 a partir do **Guia Sanjoanense** (`/var/www/guia-sanjoanense`), sem a chancela da página
 Sanjoanenses e sem a aba Notícias.
@@ -22,6 +22,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 - Uma avaliação por pessoa por profissional (pode mudar depois). O comentário mostra só "Maria S.".
 - O profissional aparece se estiver **aprovado** e com a **assinatura em dia** (ou cortesia dada pelo admin).
 - Ordem justa: destaques primeiro, depois quem tem avaliação; dentro de cada grupo a ordem muda uma vez por dia.
+- Responsável: **FSA Designer** (termos e privacidade); contatos fsadesignerbr@gmail.com e Instagram @fsa.designer
+  em `/etc/acha-facil/config.php`.
 - Selo "Verificado pelo Acha Fácil" é dado pelo admin, não vem com o pagamento.
 - Os comércios vêm da **lista de leads** (fsadesigners.com.br/leads, coleta do Google Maps): `importado = 1`, aparecem
   **sem assinatura** até o dono assumir o perfil. Reimportar: `php servidor/importar-leads.php [arquivo] [cidade]` (ou `bash servidor/instalar.sh --leads`, que faz as duas cidades) (atualiza pelo nome; não mexe em
@@ -60,7 +62,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    agora é em dois passos, estado (SP, MG) e depois a cidade. Cidade nova: `CIDADES` em servidor/inc/guia.php e src/cidade.tsx
 4i. ✅ "Perto de você" só da cidade escolhida (07/11): olhando Poços estando em São João, não aparecem mais os comércios de
    São João. Se não há nada da cidade a até 15 km, o app avisa "Você não está em …" e mostra os conhecidos de lá
-5. ⬜ Testar no PC (`npm install`, `npx tsc --noEmit`, `npx expo lint`, emulador)
+5. ✅ Testar no PC (`npm install`, `npx tsc --noEmit`, `npx expo lint`, emulador)
 6. ✅ Projeto EAS próprio e 1º APK publicado no site (07/11, v1.0.0); publicar com `bash servidor/publicar-apk.sh <link do EAS>`
 7. ⬜ Contas no app: conferir se entrar/criar conta funciona (no Guia Sanjoanense isso ainda está em aberto)
 8. ⬜ Administração web: pedidos de assumir/tirar do app, aprovar/recusar cadastros, editar, selo, cortesia, categorias, ocultar comentários
@@ -70,8 +72,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 
 ## Decisões pendentes
 
-- Quem é o dono/responsável do Acha Fácil (aparece nos termos e na privacidade) e os contatos
-  (`contato_email`, `contato_whatsapp`, `instagram` no config).
+- WhatsApp de contato (`contato_whatsapp` no config); vazio, não aparece no site.
 - Arquivo da logo em alta (PNG/SVG) para trocar o redesenho, se quiser fidelidade total à arte.
 - Preço dos planos Básico e Destaque (mensal) e quantos lugares no carrossel de destaque.
 - Se volta a ter notícias no futuro.

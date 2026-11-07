@@ -17,7 +17,7 @@ pagina_inicio('Privacidade · Acha Fácil', 'Quais dados o Acha Fácil usa, para
   </div>
 
   <h2>1. Quem cuida dos seus dados</h2>
-  <p>O Acha Fácil é o responsável (controlador) pelos dados tratados no app e neste site,
+  <p>O Acha Fácil é mantido pela <strong>FSA Designer</strong>, responsável (controladora) pelos dados tratados no app e neste site,
   conforme a Lei Geral de Proteção de Dados (LGPD, Lei 13.709/2018). Fale com a gente sobre privacidade: <?= contatos_html() ?>.</p>
 
   <h2>2. Quais dados usamos e para quê</h2>
@@ -49,8 +49,8 @@ pagina_inicio('Privacidade · Acha Fácil', 'Quais dados o Acha Fácil usa, para
   usados só para confirmar e responder.</p>
 
   <h2>3. O que fica no seu celular</h2>
-  <p>O app guarda no seu celular apenas a chave de acesso da sua conta e o seu nome, para você não precisar entrar toda vez.
-  Ao tocar em "Sair", isso é apagado. O app não pede acesso a contatos, fotos, localização, câmera ou microfone,
+  <p>O app guarda no seu celular apenas a cidade escolhida e, se você entrar, a chave de acesso da sua conta e o seu nome, para você não precisar entrar toda vez.
+  Ao tocar em "Sair", a chave e o nome são apagados. Fora a localização (só quando você pede, veja acima), o app não pede acesso a contatos, fotos, câmera ou microfone,
   e não usa ferramentas de propaganda ou rastreamento.</p>
 
   <h2>4. Com quem compartilhamos</h2>

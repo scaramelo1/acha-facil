@@ -16,7 +16,7 @@ pagina_inicio('Termos de uso · Acha Fácil', 'Regras de uso do app Acha Fácil,
   </div>
 
   <h2>1. O que é o Acha Fácil</h2>
-  <p>O Acha Fácil é um aplicativo e site que reúne profissionais e comércios de São João da Boa Vista e Águas da Prata (SP) e Poços de Caldas (MG).
+  <p>O Acha Fácil, mantido pela <strong>FSA Designer</strong>, é um aplicativo e site que reúne profissionais e comércios de São João da Boa Vista e Águas da Prata (SP) e Poços de Caldas (MG).
   Ele mostra informações de contato, serviços e avaliações.
   Ao usar o app ou o site, você concorda com estes termos e com a <a href="<?= $base ?>/privacidade.php">Política de Privacidade</a>.</p>
 
