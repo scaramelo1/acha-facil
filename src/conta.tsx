@@ -1,3 +1,4 @@
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
@@ -22,6 +23,19 @@ interface ContextoConta {
 }
 
 const Contexto = createContext<ContextoConta | null>(null);
+
+/**
+ * Para onde o Google devolve: no Expo Go, o endereço do próprio Expo Go (exp://.../--/google); no APK,
+ * achafacil:///google. Sem isso, no Expo Go a volta ia para outro app instalado com o esquema achafacil (APK antigo).
+ */
+function enderecoDeVolta() {
+  const uri = Constants.linkingUri;
+  if (Constants.executionEnvironment === ExecutionEnvironment.StoreClient && uri && uri.startsWith('exp')) {
+    const base = uri.includes('/--/') ? uri : uri.replace(/\/?$/, '/--/');
+    return `${base.replace(/\/?$/, '/')}google`;
+  }
+  return Linking.createURL('google');
+}
 
 // o mesmo código pode chegar pela tela Entrar e pela rota de retorno ao mesmo tempo: troca uma vez só
 const trocas = new Map<string, Promise<{ token: string; usuario: Usuario }>>();
@@ -65,8 +79,7 @@ export function ProvedorConta({ children }: { children: ReactNode }) {
     () => ({
       usuario,
       async entrarComGoogle() {
-        // achafacil://google no APK; exp://.../--/google no Expo Go
-        const volta = Linking.createURL('google');
+        const volta = enderecoDeVolta();
         const r = await WebBrowser.openAuthSessionAsync(`${URL_GOOGLE}?volta=${encodeURIComponent(volta)}`, volta);
         if (r.type !== 'success') return false;
         const { queryParams } = Linking.parse(r.url);
