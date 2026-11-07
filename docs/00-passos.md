@@ -59,7 +59,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 4h. ✅ Poços de Caldas (MG), 07/11: 1.674 comércios (lista atualizada) (`/var/lib/acha-facil/leads/pocos-de-caldas.html`); a escolha ao abrir
    agora é em dois passos, estado (SP, MG) e depois a cidade. Cidade nova: `CIDADES` em servidor/inc/guia.php e src/cidade.tsx
 5. ⬜ Testar no PC (`npm install`, `npx tsc --noEmit`, `npx expo lint`, emulador)
-6. 🟡 Projeto EAS próprio (ligado em 07/11 ✅) e 1º APK (falta); publicar com `bash servidor/publicar-apk.sh <link do EAS>`
+6. ✅ Projeto EAS próprio e 1º APK publicado no site (07/11, v1.0.0); publicar com `bash servidor/publicar-apk.sh <link do EAS>`
 7. ⬜ Contas no app: conferir se entrar/criar conta funciona (no Guia Sanjoanense isso ainda está em aberto)
 8. ⬜ Administração web: pedidos de assumir/tirar do app, aprovar/recusar cadastros, editar, selo, cortesia, categorias, ocultar comentários
 9. ⬜ Painel do profissional (web): autocadastro, foto, dados, serviços, responder avaliações, ver contatos recebidos
