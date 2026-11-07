@@ -1,7 +1,7 @@
-import Storage from 'expo-sqlite/kv-store';
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
 import { chamar, definirToken, type Usuario } from './api/cliente';
+import { Armazenamento } from './armazenamento';
 
 // A conta só é necessária para avaliar, comentar e salvar profissionais. Navegar no app não pede login.
 const CHAVE_TOKEN = 'token';
@@ -18,8 +18,8 @@ interface ContextoConta {
 const Contexto = createContext<ContextoConta | null>(null);
 
 function lerSalvo(): Usuario | null {
-  const t = Storage.getItemSync(CHAVE_TOKEN);
-  const u = Storage.getItemSync(CHAVE_USUARIO);
+  const t = Armazenamento.ler(CHAVE_TOKEN);
+  const u = Armazenamento.ler(CHAVE_USUARIO);
   if (!t || !u) return null;
   definirToken(t);
   try {
@@ -35,11 +35,11 @@ export function ProvedorConta({ children }: { children: ReactNode }) {
   const guardar = useCallback((token: string | null, u: Usuario | null) => {
     definirToken(token);
     if (token && u) {
-      Storage.setItemSync(CHAVE_TOKEN, token);
-      Storage.setItemSync(CHAVE_USUARIO, JSON.stringify(u));
+      Armazenamento.gravar(CHAVE_TOKEN, token);
+      Armazenamento.gravar(CHAVE_USUARIO, JSON.stringify(u));
     } else {
-      Storage.removeItemSync(CHAVE_TOKEN);
-      Storage.removeItemSync(CHAVE_USUARIO);
+      Armazenamento.apagar(CHAVE_TOKEN);
+      Armazenamento.apagar(CHAVE_USUARIO);
     }
     setUsuario(u);
   }, []);

@@ -1,7 +1,7 @@
-import Storage from 'expo-sqlite/kv-store';
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
 import { definirCidade, type Cidade, type Estado } from './api/cliente';
+import { Armazenamento } from './armazenamento';
 import { EscolherCidade } from './componentes/EscolherCidade';
 
 // Estados e cidades atendidas (iguais às do servidor, servidor/inc/guia.php). Ficam fixos no app para a escolha
@@ -26,7 +26,7 @@ interface ContextoCidade {
 const Contexto = createContext<ContextoCidade | null>(null);
 
 function lerSalva(): Cidade {
-  const slug = Storage.getItemSync(CHAVE);
+  const slug = Armazenamento.ler(CHAVE);
   const c = CIDADES.find((x) => x.slug === slug) ?? CIDADES[0];
   definirCidade(c.slug);
   return c;
@@ -39,7 +39,7 @@ export function ProvedorCidade({ children }: { children: ReactNode }) {
 
   const escolher = useCallback((c: Cidade) => {
     definirCidade(c.slug);
-    Storage.setItemSync(CHAVE, c.slug);
+    Armazenamento.gravar(CHAVE, c.slug);
     setCidade(c);
     setEscolhendo(false);
   }, []);
