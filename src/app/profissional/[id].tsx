@@ -1,102 +1,116 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
 import * as WebBrowser from 'expo-web-browser';
+import { useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { chamar, registrarContato, type Profissional } from '../../api/cliente';
-import {
-  Avatar,
-  Botao,
-  Carregando,
-  Estrelas,
-  Falha,
-  SeloVerificado,
-  Titulo,
-  estilos as ui,
-  useCarregar,
-} from '../../componentes/ui';
 import { useBarraClara } from '../../componentes/BarraClara';
+import { Botao, Estrelas, Falha, Carregando, Foto, Icone, SeloVerificado, Titulo, estilos as ui, useCarregar } from '../../componentes/ui';
 import { useConta } from '../../conta';
 import { cores, fonte, RAIO, sombra, TOQUE } from '../../tema';
 
+type NomeIcone = keyof typeof MaterialCommunityIcons.glyphMap;
+const CAPA = 230;
+
 export default function TelaProfissional() {
-  const { id } = useLocalSearchParams<{ id: string }>();
   useBarraClara();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const { usuario } = useConta();
+  const router = useRouter();
+  const topo = useSafeAreaInsets().top;
   const { dados: p, setDados, erro, carregando, recarregar } = useCarregar(
     () => chamar<{ profissional: Profissional }>(`profissional.php?id=${id}`).then((r) => r.profissional),
     `${id}-${usuario?.id ?? 0}`,
   );
 
-  if (carregando && !p) return <Carregando />;
-  if (erro && !p) return <Falha mensagem={erro} tentar={recarregar} />;
+  if (carregando && !p)
+    return (
+      <>
+        <Stack.Screen options={{ headerShown: true, title: '' }} />
+        <Carregando />
+      </>
+    );
+  if (erro && !p)
+    return (
+      <>
+        <Stack.Screen options={{ headerShown: true, title: '' }} />
+        <Falha mensagem={erro} tentar={recarregar} />
+      </>
+    );
   if (!p) return null;
 
   const abrir = (tipo: 'whatsapp' | 'ligar' | 'instagram' | 'mapa' | 'site', link: string) => {
     registrarContato(p.id, tipo);
     Linking.openURL(link).catch(() => Alert.alert('Não foi possível abrir', 'Confira se o aplicativo está instalado.'));
   };
-  const endereco = [p.endereco, p.bairro, p.cidade].filter(Boolean).join(' · ');
+  const compartilhar = () =>
+    Share.share({ message: `${p.nome} (${p.tipo}) no Acha Fácil${p.telefoneFormatado ? `: ${p.telefoneFormatado}` : ''}` });
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: '',
-          headerStyle: { backgroundColor: p.cor },
-          headerTintColor: '#fff',
-          headerRight: () => <BotaoSalvar p={p} aoMudar={(f) => setDados({ ...p, favorito: f })} />,
-        }}
-      />
+      <Stack.Screen options={{ headerShown: false }} />
       <ScrollView contentContainerStyle={{ paddingBottom: 48 }}>
-        {/* cabeçalho com a cor da área */}
-        <View style={[estilos.topo, { backgroundColor: p.cor }]}>
-          <View style={estilos.topoAvatar}>
-            <Avatar foto={p.foto} icone={p.icone} cor={p.cor} tamanho={84} />
+        {/* capa: a foto que o dono colocar; sem foto, a cor da área com o ícone grande */}
+        <View style={[estilos.capa, { backgroundColor: p.cor }]}>
+          {p.foto ? (
+            <Image source={p.foto} style={StyleSheet.absoluteFill} contentFit="cover" />
+          ) : (
+            <View style={estilos.capaIcone}>
+              <Icone nome={p.icone} tamanho={120} cor="rgba(255,255,255,0.28)" />
+            </View>
+          )}
+          <View style={[estilos.capaBotoes, { top: topo + 8 }]}>
+            <Redondo icone="arrow-left" rotulo="Voltar" onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
+            <BotaoSalvar p={p} aoMudar={(f) => setDados({ ...p, favorito: f })} />
           </View>
-          <Text style={estilos.nome}>{p.nome}</Text>
-          <View style={estilos.tipo}>
-            <Text style={estilos.tipoTexto}>{p.tipo}</Text>
-          </View>
-          {p.responsavel && p.responsavel !== p.nome ? <Text style={estilos.responsavel}>{p.responsavel}</Text> : null}
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 4 }}>
-            {p.verificado && <SeloVerificado claro />}
-            {p.avaliacoes > 0 && (
-              <View style={estilos.nota}>
-                <MaterialCommunityIcons name="star" size={18} color={cores.estrela} />
-                <Text style={estilos.notaTexto}>
-                  {p.nota.toFixed(1).replace('.', ',')} · {p.avaliacoes} {p.avaliacoes === 1 ? 'avaliação' : 'avaliações'}
-                </Text>
-              </View>
-            )}
-          </View>
-        </View>
-
-        {/* ações principais em botões redondos */}
-        <View style={estilos.acoes}>
-          {p.whatsapp && <Acao icone="whatsapp" texto="WhatsApp" cor={cores.whatsapp} onPress={() => abrir('whatsapp', p.whatsapp!)} />}
-          {p.telefone && <Acao icone="phone" texto="Ligar" cor={cores.verde} onPress={() => abrir('ligar', `tel:${p.telefone}`)} />}
-          {p.mapa && <Acao icone="map-marker-radius" texto="Como chegar" cor="#1864AB" onPress={() => abrir('mapa', p.mapa!)} />}
-          <Acao
-            icone="share-variant"
-            texto="Indicar"
-            cor={cores.textoSuave}
-            onPress={() =>
-              Share.share({ message: `${p.nome} (${p.tipo}) no Acha Fácil${p.telefoneFormatado ? `: ${p.telefoneFormatado}` : ''}` })
-            }
-          />
         </View>
 
         <View style={{ paddingHorizontal: 16 }}>
+          {/* cartão com nome e tipo, por cima da capa */}
+          <View style={estilos.cabeca}>
+            <Foto foto={null} icone={p.icone} cor={p.cor} largura={72} altura={72} />
+            <View style={{ flex: 1, gap: 6 }}>
+              <Text style={estilos.nome}>{p.nome}</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+                <View style={estilos.tipo}>
+                  <Text style={estilos.tipoTexto}>{p.tipo}</Text>
+                </View>
+                {p.verificado && <SeloVerificado compacto />}
+              </View>
+              {p.avaliacoes > 0 && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Estrelas nota={p.nota} tamanho={18} />
+                  <Text style={estilos.sub}>
+                    {p.nota.toFixed(1).replace('.', ',')} ({p.avaliacoes})
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          {p.whatsapp && (
+            <Pressable accessibilityRole="button" onPress={() => abrir('whatsapp', p.whatsapp!)} style={({ pressed }) => [estilos.whats, pressed && { opacity: 0.88 }]}>
+              <MaterialCommunityIcons name="whatsapp" size={30} color="#fff" />
+              <Text style={estilos.whatsTexto}>Conversar no WhatsApp</Text>
+            </Pressable>
+          )}
+          <View style={estilos.acoes}>
+            {p.telefone && <Acao icone="phone" texto="Ligar" onPress={() => abrir('ligar', `tel:${p.telefone}`)} />}
+            {p.mapa && <Acao icone="map-marker-outline" texto="Como chegar" onPress={() => abrir('mapa', p.mapa!)} />}
+            <Acao icone="share-variant" texto="Compartilhar" onPress={compartilhar} />
+          </View>
+
           {!p.whatsapp && !p.telefone && (
             <View style={estilos.aviso}>
               <MaterialCommunityIcons name="information-outline" size={24} color={cores.verde} />
-              <Text style={[ui.texto, { flex: 1 }]}>Ainda não temos o telefone deste lugar. Use o mapa para ir até lá.</Text>
+              <Text style={[ui.texto, { flex: 1 }]}>Ainda não temos o telefone deste lugar. Use o "Como chegar" para ir até lá.</Text>
             </View>
           )}
 
-          {p.descricao ? <Text style={[ui.texto, { marginTop: 8 }]}>{p.descricao}</Text> : null}
+          {p.descricao ? <Text style={[ui.texto, { marginTop: 16 }]}>{p.descricao}</Text> : null}
 
           {p.servicos.length > 0 && (
             <>
@@ -113,22 +127,29 @@ export default function TelaProfissional() {
 
           <Titulo>Informações</Titulo>
           <View style={estilos.caixa}>
-            {endereco ? <Linha icone="map-marker-outline" texto={endereco} onPress={p.mapa ? () => abrir('mapa', p.mapa!) : undefined} /> : null}
+            {p.endereco || p.bairro ? (
+              <Linha
+                icone="map-marker-outline"
+                texto={p.endereco ?? p.bairro ?? ''}
+                detalhe={[p.endereco ? p.bairro : null, p.cidade].filter(Boolean).join(' · ')}
+                onPress={p.mapa ? () => abrir('mapa', p.mapa!) : undefined}
+              />
+            ) : null}
             {p.telefoneFormatado ? <Linha icone="phone-outline" texto={p.telefoneFormatado} onPress={() => abrir('ligar', `tel:${p.telefone}`)} /> : null}
-            {p.horario ? <Linha icone="clock-outline" texto={p.horario} /> : null}
-            {p.atendeEmCasa && <Linha icone="home-outline" texto="Vai até você" />}
             {p.instagram ? <Linha icone="instagram" texto="Ver Instagram" onPress={() => abrir('instagram', p.instagram!)} /> : null}
             {p.site ? <Linha icone="web" texto={siteCurto(p.site)} onPress={() => abrir('site', p.site!)} /> : null}
+            {p.atendeEmCasa && <Linha icone="home-outline" texto="Vai até você" />}
+            <Linha icone="clock-outline" texto="Horário de funcionamento" detalhe={p.horario ?? 'Ainda não informado'} ultima />
           </View>
 
           {p.linkAssumir && (
-            <Pressable accessibilityRole="button" onPress={() => WebBrowser.openBrowserAsync(p.linkAssumir!)} style={estilos.dono}>
-              <MaterialCommunityIcons name="storefront-outline" size={30} color={cores.verde} />
+            <Pressable accessibilityRole="button" onPress={() => WebBrowser.openBrowserAsync(p.linkAssumir!)} style={({ pressed }) => [estilos.dono, pressed && { opacity: 0.9 }]}>
+              <MaterialCommunityIcons name="storefront-outline" size={38} color={cores.verde} />
               <View style={{ flex: 1 }}>
-                <Text style={estilos.donoTitulo}>É o dono deste lugar?</Text>
+                <Text style={estilos.donoTitulo}>Este comércio é seu?</Text>
                 <Text style={estilos.donoTexto}>Confira os planos para corrigir os dados e colocar fotos.</Text>
               </View>
-              <MaterialCommunityIcons name="arrow-right" size={24} color={cores.verde} />
+              <MaterialCommunityIcons name="chevron-right" size={28} color={cores.verde} />
             </Pressable>
           )}
 
@@ -153,37 +174,46 @@ function siteCurto(url: string) {
   return url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/.*$/, '');
 }
 
-function Acao({ icone, texto, cor, onPress }: { icone: keyof typeof MaterialCommunityIcons.glyphMap; texto: string; cor: string; onPress: () => void }) {
+/** Botão redondo branco sobre a capa (voltar, favoritar). */
+function Redondo({ icone, rotulo, cor = cores.texto, onPress }: { icone: NomeIcone; rotulo: string; cor?: string; onPress: () => void }) {
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={texto} onPress={onPress} style={estilos.acao}>
-      {({ pressed }) => (
-        <>
-          <View style={[estilos.acaoBola, { backgroundColor: cor }, pressed && { transform: [{ scale: 0.94 }] }]}>
-            <MaterialCommunityIcons name={icone} size={30} color="#fff" />
-          </View>
-          <Text style={estilos.acaoTexto}>{texto}</Text>
-        </>
-      )}
+    <Pressable accessibilityRole="button" accessibilityLabel={rotulo} onPress={onPress} style={({ pressed }) => [estilos.redondo, pressed && { opacity: 0.85 }]}>
+      <MaterialCommunityIcons name={icone} size={28} color={cor} />
     </Pressable>
   );
 }
 
-function Linha({ icone, texto, onPress }: { icone: keyof typeof MaterialCommunityIcons.glyphMap; texto: string; onPress?: () => void }) {
+function Acao({ icone, texto, onPress }: { icone: NomeIcone; texto: string; onPress: () => void }) {
+  return (
+    <Pressable accessibilityRole="button" accessibilityLabel={texto} onPress={onPress} style={({ pressed }) => [estilos.acao, pressed && { opacity: 0.85 }]}>
+      <MaterialCommunityIcons name={icone} size={30} color={cores.verde} />
+      <Text style={estilos.acaoTexto} numberOfLines={1}>
+        {texto}
+      </Text>
+    </Pressable>
+  );
+}
+
+function Linha({ icone, texto, detalhe, onPress, ultima }: { icone: NomeIcone; texto: string; detalhe?: string; onPress?: () => void; ultima?: boolean }) {
   const conteudo = (
     <>
       <View style={estilos.linhaIcone}>
         <MaterialCommunityIcons name={icone} size={22} color={cores.verde} />
       </View>
-      <Text style={[ui.texto, { flex: 1 }, onPress && { color: cores.destaque, fontWeight: '700' }]}>{texto}</Text>
-      {onPress && <MaterialCommunityIcons name="chevron-right" size={26} color={cores.textoSuave} />}
+      <View style={{ flex: 1 }}>
+        <Text style={estilos.linhaTexto}>{texto}</Text>
+        {detalhe ? <Text style={estilos.sub}>{detalhe}</Text> : null}
+      </View>
+      {onPress && <MaterialCommunityIcons name="chevron-right" size={26} color={cores.texto} />}
     </>
   );
+  const estilo = [estilos.linha, ultima && { borderBottomWidth: 0 }];
   return onPress ? (
-    <Pressable accessibilityRole="link" onPress={onPress} style={estilos.linha}>
+    <Pressable accessibilityRole="link" onPress={onPress} style={estilo}>
       {conteudo}
     </Pressable>
   ) : (
-    <View style={estilos.linha}>{conteudo}</View>
+    <View style={estilo}>{conteudo}</View>
   );
 }
 
@@ -194,7 +224,7 @@ function BotaoSalvar({ p, aoMudar }: { p: Profissional; aoMudar: (f: boolean) =>
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={p.favorito ? 'Tirar dos salvos' : 'Salvar'}
-      style={{ minWidth: TOQUE, minHeight: TOQUE, alignItems: 'center', justifyContent: 'center' }}
+      style={({ pressed }) => [estilos.redondo, pressed && { opacity: 0.85 }]}
       onPress={async () => {
         if (!usuario) return router.push('/entrar');
         const novo = !p.favorito;
@@ -207,7 +237,7 @@ function BotaoSalvar({ p, aoMudar }: { p: Profissional; aoMudar: (f: boolean) =>
         }
       }}
     >
-      <MaterialCommunityIcons name={p.favorito ? 'heart' : 'heart-outline'} size={30} color={p.favorito ? cores.amarelo : '#fff'} />
+      <MaterialCommunityIcons name={p.favorito ? 'heart' : 'heart-outline'} size={28} color={p.favorito ? '#E03131' : cores.texto} />
     </Pressable>
   );
 }
@@ -293,39 +323,31 @@ function Avaliacoes({ p, aoAtualizar }: { p: Profissional; aoAtualizar: (p: Prof
 }
 
 const estilos = StyleSheet.create({
-  topo: { alignItems: 'center', gap: 8, paddingHorizontal: 20, paddingBottom: 56, borderBottomLeftRadius: 36, borderBottomRightRadius: 36 },
-  topoAvatar: { padding: 6, borderRadius: 32, backgroundColor: '#fff' },
-  nome: { fontSize: fonte.titulo, fontWeight: '900', color: '#fff', textAlign: 'center', marginTop: 4 },
+  capa: { height: CAPA, overflow: 'hidden', borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
+  capaIcone: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
+  capaBotoes: { position: 'absolute', left: 16, right: 16, flexDirection: 'row', justifyContent: 'space-between' },
+  redondo: { width: TOQUE, height: TOQUE, borderRadius: TOQUE / 2, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', ...sombra },
+  cabeca: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: cores.cartao, borderRadius: RAIO, padding: 14, marginTop: -56, ...sombra },
+  nome: { fontSize: fonte.grande, fontWeight: '900', color: cores.texto, lineHeight: 29 },
   tipo: { backgroundColor: cores.amarelo, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 4 },
   tipoTexto: { fontSize: fonte.pequena, fontWeight: '900', color: cores.verde },
-  responsavel: { color: '#fff', fontSize: fonte.pequena, opacity: 0.9 },
-  nota: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#fff', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 },
-  notaTexto: { fontSize: 14, fontWeight: '800', color: cores.texto },
-  acoes: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginHorizontal: 16,
-    marginTop: -40,
-    marginBottom: 12,
-    paddingVertical: 14,
-    borderRadius: RAIO,
-    backgroundColor: cores.cartao,
-    ...sombra,
-  },
-  acao: { alignItems: 'center', gap: 6, minWidth: 72 },
-  acaoBola: { width: 60, height: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center' },
-  acaoTexto: { fontSize: 14, fontWeight: '800', color: cores.texto },
-  aviso: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: cores.verdeClaro, borderRadius: 16, padding: 12, marginTop: 8 },
-  servico: { backgroundColor: cores.fundoSuave, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8 },
-  caixa: { backgroundColor: cores.cartao, borderRadius: RAIO, paddingHorizontal: 14, paddingVertical: 6, ...sombra },
-  linha: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: TOQUE },
-  linhaIcone: { width: 38, height: 38, borderRadius: 12, backgroundColor: cores.verdeClaro, alignItems: 'center', justifyContent: 'center' },
-  dono: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: cores.amarelo, borderRadius: RAIO, padding: 16, marginTop: 20 },
-  donoTitulo: { fontSize: fonte.normal, fontWeight: '900', color: cores.verde },
-  donoTexto: { fontSize: 15, color: cores.verde },
   sub: { fontSize: fonte.pequena, color: cores.textoSuave },
+  whats: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, minHeight: 60, borderRadius: 18, backgroundColor: cores.verde, marginTop: 16 },
+  whatsTexto: { color: '#fff', fontSize: fonte.media, fontWeight: '800' },
+  acoes: { flexDirection: 'row', gap: 10, marginTop: 12 },
+  acao: { flex: 1, minHeight: 84, borderRadius: 18, backgroundColor: cores.cartao, alignItems: 'center', justifyContent: 'center', gap: 4, padding: 6, ...sombra },
+  acaoTexto: { fontSize: 15, fontWeight: '700', color: cores.texto },
+  aviso: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: cores.verdeClaro, borderRadius: 16, padding: 12, marginTop: 12 },
+  servico: { backgroundColor: cores.fundoSuave, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8 },
+  caixa: { backgroundColor: cores.cartao, borderRadius: RAIO, paddingHorizontal: 14, ...sombra },
+  linha: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 64, paddingVertical: 8, borderBottomWidth: 1, borderColor: cores.borda },
+  linhaIcone: { width: 40, height: 40, borderRadius: 20, backgroundColor: cores.verdeClaro, alignItems: 'center', justifyContent: 'center' },
+  linhaTexto: { fontSize: fonte.normal, fontWeight: '700', color: cores.texto },
+  dono: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: cores.amarelo, borderRadius: RAIO, padding: 18, marginTop: 20 },
+  donoTitulo: { fontSize: fonte.media, fontWeight: '900', color: cores.verde },
+  donoTexto: { fontSize: fonte.pequena, color: cores.verde },
   fonte: { fontSize: 14, color: cores.textoSuave, textAlign: 'center', marginTop: 28 },
   caixaAval: { backgroundColor: cores.cartao, borderRadius: RAIO, padding: 16, ...sombra },
-  comentario: { backgroundColor: cores.cartao, borderRadius: 18, padding: 14, gap: 6, marginTop: 12 },
+  comentario: { backgroundColor: cores.cartao, borderRadius: 18, padding: 14, gap: 6, marginTop: 12, ...sombra },
   resposta: { backgroundColor: cores.fundoSuave, borderRadius: 12, padding: 10, marginTop: 4 },
 });

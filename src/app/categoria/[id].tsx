@@ -1,12 +1,12 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { chamar, type ProfissionalResumo, type TipoNegocio } from '../../api/cliente';
-import { useBarraClara } from '../../componentes/BarraClara';
-import { CartaoProfissional, Carregando, Falha, Icone, Vazio, useCarregar } from '../../componentes/ui';
 import { useCidade } from '../../cidade';
-import { cores, fonte } from '../../tema';
+import { CartaoProfissional, Carregando, corClara, Falha, Icone, Vazio, useCarregar } from '../../componentes/ui';
+import { cores, fonte, sombra } from '../../tema';
 
 interface Resposta {
   categoria: { id: number; nome: string; icone: string; cor: string };
@@ -14,39 +14,48 @@ interface Resposta {
   profissionais: ProfissionalResumo[];
 }
 
-// Uma área (ex.: Alimentação): faixa colorida no topo e filtros pelo tipo de negócio (Pizzaria, Padaria…)
+/** Sem acento e em minúsculas, para a busca dentro da área achar "cafe" em "Café". */
+function simples(t: string) {
+  return t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+
+// Uma área (ex.: Mercados e bebidas): título com ícone, busca dentro da área e filtros pelo tipo de negócio
 export default function TelaCategoria() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { cidade } = useCidade();
   const { dados, erro, carregando, recarregar } = useCarregar(() => chamar<Resposta>(`categoria.php?id=${id}`), `categoria-${id}-${cidade.slug}`);
-  useBarraClara();
   const [tipo, setTipo] = useState<string | null>(null);
+  const [termo, setTermo] = useState('');
 
   if (carregando && !dados) return <Carregando />;
   if (erro && !dados) return <Falha mensagem={erro} tentar={recarregar} />;
   if (!dados) return null;
 
   const { categoria: c } = dados;
-  const lista = tipo ? dados.profissionais.filter((p) => p.tipo === tipo) : dados.profissionais;
+  const t = simples(termo.trim());
+  const lista = dados.profissionais.filter(
+    (p) => (!tipo || p.tipo === tipo) && (!t || simples(`${p.nome} ${p.tipo} ${p.bairro ?? ''}`).includes(t)),
+  );
   // só mostra filtros que valem a pena (tipos com pelo menos 2 lugares)
-  const tipos = dados.tipos.filter((t) => t.total >= 2);
+  const tipos = dados.tipos.filter((x) => x.total >= 2);
 
   return (
     <>
-      <Stack.Screen options={{ title: '', headerStyle: { backgroundColor: c.cor }, headerTintColor: '#fff' }} />
+      <Stack.Screen options={{ title: '' }} />
       <FlatList
         data={lista}
         keyExtractor={(p) => String(p.id)}
-        contentContainerStyle={{ paddingBottom: 40, flexGrow: 1 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40, flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
         refreshing={carregando}
         onRefresh={recarregar}
         initialNumToRender={12}
         windowSize={7}
         ListHeaderComponent={
-          <View>
-            <View style={[estilos.topo, { backgroundColor: c.cor }]}>
-              <View style={estilos.topoIcone}>
-                <Icone nome={c.icone} tamanho={34} cor={c.cor} />
+          <View style={{ marginBottom: 6 }}>
+            <View style={estilos.topo}>
+              <View style={[estilos.topoIcone, { backgroundColor: corClara(c.cor) }]}>
+                <Icone nome={c.icone} tamanho={36} cor={c.cor} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={estilos.topoNome}>{c.nome}</Text>
@@ -55,34 +64,50 @@ export default function TelaCategoria() {
                 </Text>
               </View>
             </View>
+
+            <View style={estilos.busca}>
+              <MaterialCommunityIcons name="magnify" size={26} color={cores.texto} />
+              <TextInput
+                value={termo}
+                onChangeText={setTermo}
+                placeholder={`Buscar em ${c.nome}`}
+                placeholderTextColor={cores.textoSuave}
+                style={estilos.buscaCampo}
+                accessibilityLabel={`Buscar em ${c.nome}`}
+              />
+              {termo.length > 0 && (
+                <Pressable accessibilityRole="button" accessibilityLabel="Limpar" hitSlop={10} onPress={() => setTermo('')}>
+                  <MaterialCommunityIcons name="close-circle" size={24} color={cores.textoSuave} />
+                </Pressable>
+              )}
+            </View>
+
             {tipos.length > 1 && (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={estilos.filtros}>
-                <Filtro texto="Todos" ativo={tipo === null} cor={c.cor} onPress={() => setTipo(null)} />
-                {tipos.map((t) => (
-                  <Filtro key={t.nome} texto={`${t.nome} (${t.total})`} ativo={tipo === t.nome} cor={c.cor} onPress={() => setTipo(tipo === t.nome ? null : t.nome)} />
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={estilos.filtros}>
+                <Filtro texto="Todos" ativo={tipo === null} onPress={() => setTipo(null)} />
+                {tipos.map((x) => (
+                  <Filtro key={x.nome} texto={`${x.nome} (${x.total})`} ativo={tipo === x.nome} onPress={() => setTipo(tipo === x.nome ? null : x.nome)} />
                 ))}
               </ScrollView>
             )}
           </View>
         }
-        renderItem={({ item }) => (
-          <View style={{ paddingHorizontal: 16 }}>
-            <CartaoProfissional p={item} />
-          </View>
-        )}
-        ListEmptyComponent={<Vazio icone="store-search-outline" texto="Ainda não há lugares nesta área. Volte em breve!" />}
+        renderItem={({ item }) => <CartaoProfissional p={item} />}
+        ListEmptyComponent={
+          <Vazio icone="store-search-outline" texto={termo || tipo ? 'Nada encontrado com esse filtro.' : 'Ainda não há lugares nesta área. Volte em breve!'} />
+        }
       />
     </>
   );
 }
 
-function Filtro({ texto, ativo, cor, onPress }: { texto: string; ativo: boolean; cor: string; onPress: () => void }) {
+function Filtro({ texto, ativo, onPress }: { texto: string; ativo: boolean; onPress: () => void }) {
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ selected: ativo }}
       onPress={onPress}
-      style={[estilos.filtro, ativo ? { backgroundColor: cor, borderColor: cor } : null]}
+      style={[estilos.filtro, ativo && { backgroundColor: cores.verde, borderColor: cores.verde }]}
     >
       <Text style={[estilos.filtroTexto, ativo && { color: '#fff' }]}>{texto}</Text>
     </Pressable>
@@ -90,11 +115,24 @@ function Filtro({ texto, ativo, cor, onPress }: { texto: string; ativo: boolean;
 }
 
 const estilos = StyleSheet.create({
-  topo: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 16, paddingBottom: 24, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
-  topoIcone: { width: 64, height: 64, borderRadius: 20, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
-  topoNome: { color: '#fff', fontSize: fonte.titulo, fontWeight: '900' },
-  topoTotal: { color: '#fff', opacity: 0.9, fontSize: fonte.pequena, fontWeight: '700' },
-  filtros: { paddingHorizontal: 16, paddingVertical: 16, gap: 8 },
-  filtro: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 16, borderRadius: 22, borderWidth: 2, borderColor: cores.borda, backgroundColor: cores.cartao },
+  topo: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingTop: 4, paddingBottom: 16 },
+  topoIcone: { width: 68, height: 68, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  topoNome: { color: cores.texto, fontSize: 28, fontWeight: '900', lineHeight: 33 },
+  topoTotal: { color: cores.textoSuave, fontSize: fonte.normal, marginTop: 2 },
+  busca: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    minHeight: 58,
+    borderRadius: 29,
+    paddingHorizontal: 18,
+    backgroundColor: cores.cartao,
+    borderWidth: 1,
+    borderColor: cores.borda,
+    ...sombra,
+  },
+  buscaCampo: { flex: 1, fontSize: fonte.normal, color: cores.texto, minHeight: 54 },
+  filtros: { paddingHorizontal: 16, paddingVertical: 14, gap: 8 },
+  filtro: { minHeight: 46, justifyContent: 'center', paddingHorizontal: 18, borderRadius: 23, borderWidth: 1, borderColor: cores.borda, backgroundColor: cores.cartao },
   filtroTexto: { fontSize: fonte.pequena, fontWeight: '800', color: cores.texto },
 });

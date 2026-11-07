@@ -43,7 +43,7 @@ export default function TelaBusca() {
   return (
     <View style={{ flex: 1 }}>
       <View style={estilos.barra}>
-        <MaterialCommunityIcons name="magnify" size={28} color={cores.verde} />
+        <MaterialCommunityIcons name="magnify" size={28} color={cores.texto} />
         <TextInput
           autoFocus={!q}
           value={termo}
@@ -96,10 +96,10 @@ const estilos = StyleSheet.create({
     paddingLeft: 14,
     paddingRight: 8,
     minHeight: 64,
-    borderRadius: 20,
+    borderRadius: 32,
     backgroundColor: cores.cartao,
-    borderWidth: 3,
-    borderColor: cores.amarelo,
+    borderWidth: 1,
+    borderColor: cores.borda,
     ...sombra,
   },
   campo: { flex: 1, fontSize: fonte.media, color: cores.texto, minHeight: 56 },

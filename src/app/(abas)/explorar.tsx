@@ -28,7 +28,7 @@ export default function TelaAreas() {
       onRefresh={recarregar}
       ListHeaderComponent={
         <Pressable accessibilityRole="search" onPress={() => router.push('/busca')} style={estilos.busca}>
-          <MaterialCommunityIcons name="magnify" size={26} color={cores.verde} />
+          <MaterialCommunityIcons name="magnify" size={26} color={cores.texto} />
           <Text style={estilos.buscaTexto}>Buscar em {cidade.curto}</Text>
         </Pressable>
       }
@@ -37,7 +37,7 @@ export default function TelaAreas() {
           accessibilityRole="button"
           accessibilityLabel={`${c.nome}, ${c.total} lugares`}
           onPress={() => router.push(`/categoria/${c.id}`)}
-          style={({ pressed }) => [estilos.area, { borderTopColor: c.cor }, pressed && { transform: [{ translateY: 2 }] }]}
+          style={({ pressed }) => [estilos.area, pressed && { opacity: 0.85 }]}
         >
           <View style={[estilos.icone, { backgroundColor: corClara(c.cor) }]}>
             <Icone nome={c.icone} tamanho={30} cor={c.cor} />
@@ -53,9 +53,9 @@ export default function TelaAreas() {
 }
 
 const estilos = StyleSheet.create({
-  busca: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 58, borderRadius: 18, paddingHorizontal: 16, backgroundColor: cores.amarelo, marginBottom: 4 },
-  buscaTexto: { fontSize: fonte.normal, fontWeight: '800', color: cores.verde },
-  area: { flex: 1, minHeight: 150, borderRadius: RAIO, borderTopWidth: 6, backgroundColor: cores.cartao, padding: 14, gap: 6, ...sombra },
+  busca: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 58, borderRadius: 29, paddingHorizontal: 18, backgroundColor: cores.cartao, borderWidth: 1, borderColor: cores.borda, marginBottom: 4, ...sombra },
+  buscaTexto: { fontSize: fonte.normal, color: cores.textoSuave },
+  area: { flex: 1, minHeight: 150, borderRadius: RAIO, backgroundColor: cores.cartao, padding: 14, gap: 6, ...sombra },
   icone: { width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
   nome: { fontSize: fonte.normal, fontWeight: '900', color: cores.texto },
   total: { fontSize: 15, color: cores.textoSuave, fontWeight: '700' },

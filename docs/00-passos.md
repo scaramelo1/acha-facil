@@ -10,8 +10,8 @@ Sanjoanenses e sem a aba Notícias.
   (`bash servidor/instalar.sh` como root; config em `/etc/acha-facil/config.php`; banco `acha_facil`).
 - **Pagamento:** Mercado Pago, assinatura recorrente no cartão (o cartão é digitado no Mercado Pago).
 - **Marca:** verde `#005C38` e amarelo `#F7C600`; símbolo (pino + loja + lupa) em `assets/logo-simbolo.svg`.
-- **Visual próprio (07/11):** fundo creme, cabeçalho verde com saudação e busca amarela, barra de abas flutuante
-  (Início, Áreas, Salvos, Conta), cada área com a sua cor, cartões com faixa colorida. Site com fonte Nunito e o mesmo estilo.
+- **Visual (07/11, modelo do usuário):** fundo claro, cartões brancos com sombra suave, abas com pílula verde
+  (Início, Categorias, Favoritos, Perfil), cidade em pílula amarela, cada área com a sua cor. Site com fonte Nunito e o mesmo estilo.
 
 Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 
@@ -45,6 +45,10 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 4d. ✅ Duas cidades (07/11): ao abrir, o app pergunta "Onde você está?" (quadrados com o pino de localização:
    São João da Boa Vista ou Águas da Prata; a última fica marcada; troca pelo cabeçalho ou na aba Conta).
    101 comércios de Águas da Prata importados (`/var/lib/acha-facil/leads/aguas-da-prata.html`)
+4e. ✅ Visual no estilo do modelo enviado (07/11): telas claras com cartões brancos, abas Início/Categorias/Favoritos/Perfil
+   com pílula verde, "Encontre o que precisa, perto de você", faixa "Explore o melhor da cidade", busca e filtros dentro da
+   categoria, comércio com capa, "Conversar no WhatsApp" e "Este comércio é seu?". Sem fotos: o espaço mostra o ícone da área
+   até o dono colocar fotos pelo plano
 5. ⬜ Testar no PC (`npm install`, `npx tsc --noEmit`, `npx expo lint`, emulador)
 6. 🟡 Projeto EAS próprio (ligado em 07/11 ✅) e 1º APK (falta); publicar com `bash servidor/publicar-apk.sh <link do EAS>`
 7. ⬜ Contas no app: conferir se entrar/criar conta funciona (no Guia Sanjoanense isso ainda está em aberto)

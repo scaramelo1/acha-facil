@@ -110,7 +110,7 @@ export function Botao({
 }) {
   const fundo = { principal: cores.verde, amarelo: cores.amarelo, whatsapp: cores.whatsapp, contorno: cores.cartao, perigo: cores.cartao }[tipo];
   const cor = { principal: '#fff', amarelo: cores.verde, whatsapp: '#fff', contorno: cores.verde, perigo: cores.erro }[tipo];
-  const borda = tipo === 'perigo' ? cores.erro : tipo === 'contorno' ? cores.verde : 'transparent';
+  const borda = tipo === 'perigo' ? cores.erro : tipo === 'contorno' ? cores.borda : 'transparent';
   return (
     <Pressable
       accessibilityRole="button"
@@ -119,7 +119,7 @@ export function Botao({
       onPress={onPress}
       style={({ pressed }) => [
         estilos.botao,
-        { backgroundColor: fundo, borderColor: borda, opacity: desativado ? 0.5 : 1, transform: [{ translateY: pressed ? 2 : 0 }] },
+        { backgroundColor: fundo, borderColor: borda, opacity: desativado ? 0.5 : pressed ? 0.85 : 1 },
         estilo,
       ]}
     >
@@ -149,6 +149,20 @@ export function corClara(cor: string, alfa = '22') {
   return /^#[0-9a-f]{6}$/i.test(cor) ? cor + alfa : cores.verdeClaro;
 }
 
+/**
+ * Espaço da foto do comércio (retângulo arredondado). Sem foto (o dono coloca depois, pelo plano),
+ * mostra o ícone da área sobre a cor clarinha da área.
+ */
+export function Foto({ foto, icone, cor = cores.verde, largura = 104, altura = 88 }: { foto: string | null; icone: string; cor?: string; largura?: number; altura?: number }) {
+  const forma = { width: largura, height: altura, borderRadius: 14 };
+  if (foto) return <Image source={foto} style={[forma, { backgroundColor: cores.fundoSuave }]} contentFit="cover" />;
+  return (
+    <View style={[forma, { backgroundColor: corClara(cor), alignItems: 'center', justifyContent: 'center' }]}>
+      <Icone nome={icone} tamanho={Math.min(largura, altura) * 0.42} cor={cor} />
+    </View>
+  );
+}
+
 /** Foto do comércio ou, sem foto, o ícone da área num quadrado arredondado com a cor da área. */
 export function Avatar({ foto, icone, cor = cores.verde, tamanho = 64 }: { foto: string | null; icone: string; cor?: string; tamanho?: number }) {
   const forma = { width: tamanho, height: tamanho, borderRadius: tamanho * 0.3 };
@@ -169,7 +183,7 @@ export function SeloVerificado({ compacto, claro }: { compacto?: boolean; claro?
   );
 }
 
-/** Cartão de comércio nas listas: faixa com a cor da área, ícone, nome, tipo, bairro e o que dá para fazer. */
+/** Cartão de comércio nas listas: espaço da foto, nome, tipo · bairro, como falar e a setinha amarela. */
 export function CartaoProfissional({ p }: { p: ProfissionalResumo }) {
   const router = useRouter();
   return (
@@ -177,9 +191,9 @@ export function CartaoProfissional({ p }: { p: ProfissionalResumo }) {
       accessibilityRole="button"
       accessibilityLabel={`${p.nome}, ${p.tipo}`}
       onPress={() => router.push(`/profissional/${p.id}`)}
-      style={({ pressed }) => [estilos.cartao, { borderLeftColor: p.cor }, pressed && { transform: [{ translateY: 2 }] }]}
+      style={({ pressed }) => [estilos.cartao, pressed && { opacity: 0.85 }]}
     >
-      <Avatar foto={p.foto} icone={p.icone} cor={p.cor} tamanho={58} />
+      <Foto foto={p.foto} icone={p.icone} cor={p.cor} />
       <View style={{ flex: 1, gap: 3 }}>
         <Text style={estilos.cartaoNome} numberOfLines={2}>
           {p.nome}
@@ -194,19 +208,27 @@ export function CartaoProfissional({ p }: { p: ProfissionalResumo }) {
           {p.avaliacoes > 0 && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
               <MaterialCommunityIcons name="star" size={18} color={cores.estrela} />
-              <Text style={estilos.cartaoSub}>
-                {p.nota.toFixed(1).replace('.', ',')} ({p.avaliacoes})
-              </Text>
+              <Text style={estilos.cartaoSub}>{p.nota.toFixed(1).replace('.', ',')}</Text>
             </View>
           )}
-          {p.temWhatsapp && <MaterialCommunityIcons name="whatsapp" size={20} color={cores.whatsapp} accessibilityLabel="Tem WhatsApp" />}
-          {p.temTelefone && <MaterialCommunityIcons name="phone" size={18} color={cores.textoSuave} accessibilityLabel="Tem telefone" />}
+          <Contato p={p} />
         </View>
       </View>
       <View style={estilos.seta}>
-        <MaterialCommunityIcons name="arrow-right" size={22} color={cores.verde} />
+        <MaterialCommunityIcons name="chevron-right" size={24} color={cores.verde} />
       </View>
     </Pressable>
+  );
+}
+
+/** "● WhatsApp" (verde) ou "● Telefone": como dá para falar com o comércio. */
+export function Contato({ p }: { p: Pick<ProfissionalResumo, 'temWhatsapp' | 'temTelefone'> }) {
+  if (!p.temWhatsapp && !p.temTelefone) return null;
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+      <View style={[estilos.bolinha, !p.temWhatsapp && { backgroundColor: cores.destaque }]} />
+      <Text style={estilos.contatoTexto}>{p.temWhatsapp ? 'Tem WhatsApp' : 'Tem telefone'}</Text>
+    </View>
   );
 }
 
@@ -239,37 +261,38 @@ export const estilos = StyleSheet.create({
   centro: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
   bolha: { width: 84, height: 84, borderRadius: 28, backgroundColor: cores.fundoSuave, alignItems: 'center', justifyContent: 'center' },
   texto: { fontSize: fonte.normal, color: cores.texto, lineHeight: 26 },
-  tituloLinha: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 28, marginBottom: 14 },
-  tracinho: { width: 8, height: 26, borderRadius: 4, backgroundColor: cores.amarelo },
+  tituloLinha: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 26, marginBottom: 12 },
+  tracinho: { width: 6, height: 26, borderRadius: 3, backgroundColor: cores.amarelo },
   titulo: { flex: 1, fontSize: fonte.grande, fontWeight: '900', color: cores.texto },
   tituloAcao: { flexDirection: 'row', alignItems: 'center', minHeight: 40 },
   tituloAcaoTexto: { fontSize: fonte.pequena, fontWeight: '800', color: cores.destaque },
   botao: {
     minHeight: TOQUE,
-    borderRadius: 18,
+    borderRadius: 16,
     borderWidth: 2,
     paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    ...sombra,
   },
   botaoTexto: { fontSize: fonte.media, fontWeight: '800' },
   cartao: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    padding: 14,
+    padding: 10,
+    paddingRight: 12,
     borderRadius: RAIO,
-    borderLeftWidth: 6,
     backgroundColor: cores.cartao,
     marginBottom: 12,
     ...sombra,
   },
-  cartaoNome: { fontSize: fonte.media, fontWeight: '800', color: cores.texto },
+  cartaoNome: { fontSize: fonte.normal + 1, fontWeight: '800', color: cores.texto },
   cartaoSub: { fontSize: fonte.pequena, color: cores.textoSuave },
-  seta: { width: 40, height: 40, borderRadius: 14, backgroundColor: cores.fundoSuave, alignItems: 'center', justifyContent: 'center' },
+  seta: { width: 36, height: 36, borderRadius: 18, backgroundColor: cores.fundoSuave, alignItems: 'center', justifyContent: 'center' },
+  bolinha: { width: 10, height: 10, borderRadius: 5, backgroundColor: cores.whatsapp },
+  contatoTexto: { fontSize: 15, fontWeight: '800', color: cores.whatsapp },
   selo: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: cores.verdeClaro, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 },
   seloTexto: { fontSize: 14, fontWeight: '800', color: cores.verde },
   etiqueta: {

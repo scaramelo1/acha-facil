@@ -1,16 +1,16 @@
-// Visual do Acha Fácil: "comércio de bairro". Fundo creme, cabeçalhos verdes, amarelo da marca nos destaques,
-// cantos bem redondos e cada área com a sua cor. Letras grandes e botões altos (fácil para a terceira idade).
+// Visual do Acha Fácil: telas claras, cartões brancos com sombra suave, verde da marca nos botões e na aba ativa,
+// amarelo nos selos e chamadas, e cada área com a sua cor. Letras grandes e botões altos (fácil para a terceira idade).
 export const cores = {
-  fundo: '#FFFBEA', // creme: fundo das telas
+  fundo: '#F6F8F3', // quase branco, levemente esverdeado
   cartao: '#FFFFFF',
-  fundoSuave: '#FFF3C4', // amarelo bem claro: etiquetas, toques
-  texto: '#10261B',
-  textoSuave: '#4B5A52',
-  borda: '#ECE4C2',
-  verde: '#005C38', // verde da logo: cabeçalhos, botões principais
-  destaque: '#00804F', // verde mais claro: ícones, links, aba ativa
-  verdeClaro: '#E3F2EA',
-  amarelo: '#F7C600', // amarelo da logo: busca, selos, aba ativa (sempre com texto verde)
+  fundoSuave: '#FFF4C7', // amarelo bem claro: etiquetas, setas
+  texto: '#0E2A1B',
+  textoSuave: '#56645B',
+  borda: '#E3E8E0',
+  verde: '#005C38', // verde da logo: botões principais, aba ativa, faixas
+  destaque: '#00804F', // verde mais claro: ícones, links
+  verdeClaro: '#E4F2E8',
+  amarelo: '#F7C600', // amarelo da logo: cidade, tipo do comércio, chamada para o dono
   whatsapp: '#1C9A3C',
   estrela: '#E8A400',
   erro: '#B00020',
@@ -26,17 +26,17 @@ export const fonte = {
 
 /** Altura mínima de qualquer coisa tocável (maior que o padrão de 44/48 px). */
 export const TOQUE = 56;
-export const RAIO = 22;
+export const RAIO = 20;
 /** Espaço que as telas das abas deixam embaixo para a barra de abas flutuante não cobrir o conteúdo. */
-export const ESPACO_BARRA = 120;
+export const ESPACO_BARRA = 130;
 
-/** Sombra "de carimbo" (deslocada para baixo), igual à do site. */
+/** Sombra suave dos cartões. */
 export const sombra = {
-  shadowColor: '#005C38',
-  shadowOpacity: 0.12,
-  shadowRadius: 0,
-  shadowOffset: { width: 0, height: 5 },
-  elevation: 3,
+  shadowColor: '#0E2A1B',
+  shadowOpacity: 0.08,
+  shadowRadius: 12,
+  shadowOffset: { width: 0, height: 4 },
+  elevation: 2,
 } as const;
 
 /** Bom dia / boa tarde / boa noite, pela hora do celular. */
