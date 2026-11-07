@@ -17,6 +17,14 @@ if [ -z "$ORIGEM" ]; then
   exit 1
 fi
 
+# link da página do build (não é o APK): explica como achar o link do arquivo
+if [[ "$ORIGEM" =~ expo\.dev/accounts/.*/builds/([0-9a-f-]+) ]]; then
+  echo "Esse é o link da PÁGINA do build, não do APK. No PC, rode:"
+  echo "  npx eas build:view ${BASH_REMATCH[1]}"
+  echo "e use o link da linha 'Application Archive URL' (https://expo.dev/artifacts/eas/....apk)."
+  exit 1
+fi
+
 mkdir -p "$DIR"
 NOVO="$DIR/acha-facil.apk.novo"
 if [[ "$ORIGEM" =~ ^https:// ]]; then
