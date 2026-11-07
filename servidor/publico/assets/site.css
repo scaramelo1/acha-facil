@@ -166,6 +166,9 @@ label { display: block; font-weight: 800; margin: 16px 0 6px; }
 .apk-ajuda { flex-basis: 100%; margin: 0; font-size: .95rem; }
 .apk-ajuda a { color: var(--verde2); font-weight: 700; }
 .verde .apk-ajuda a { color: var(--amarelo); }
+.lojas.centro { justify-content: center; }
+.lojas.centro .apk { flex-direction: column; text-align: center; }
+.lojas.centro .apk-info { justify-content: center; }
 
 /* perguntas */
 details { background: var(--branco); border: 2px solid var(--borda); border-radius: 18px; padding: 4px 20px; margin-bottom: 10px; }

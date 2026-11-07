@@ -64,7 +64,7 @@ function pagina_fim(): void {
 <?php
 }
 
-/** Botão "Baixar APK" com versão, tamanho, data da última atualização e total de downloads. */
+/** Botão "Baixar APK" com versão, tamanho, data da última atualização (o total de downloads fica só para a administração). */
 function botao_apk(): string {
     require_once __DIR__ . '/apk.php';
     $base = config()['url'];
@@ -76,8 +76,7 @@ function botao_apk(): string {
     $meta[] = h($a['mb']);
     return '<div class="apk"><a class="loja apk-botao" href="' . $base . '/baixar-apk.php" download>' . $icone
         . '<span><small>Android · direto do site</small>Baixar APK</span></a>'
-        . '<p class="apk-info"><span><b>' . apk_downloads_texto($a['downloads']) . '</b></span>'
-        . '<span>Atualizado em <b>' . h($a['atualizado']) . '</b></span><span>' . implode(' · ', $meta) . '</span></p>'
+        . '<p class="apk-info"><span>Atualizado em <b>' . h($a['atualizado']) . '</b></span><span>' . implode(' · ', $meta) . '</span></p>'
         . '<p class="apk-ajuda"><a href="' . $base . '/#instalar-apk">Como instalar o APK</a></p></div>';
 }
 

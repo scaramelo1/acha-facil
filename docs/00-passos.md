@@ -78,7 +78,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Não depende de o celular devolver um link para o app (no emulador o link caía no APK antigo). Sem senha:
    "Recuperar senha", entrar.php e criar-conta.php saíram. Termos e privacidade atualizados. Chaves do Google no
    config e migração 006 aplicadas; servidor testado de ponta a ponta. Falta: testar no emulador e no APK
-8. ⬜ Administração web: pedidos de assumir/tirar do app, aprovar/recusar cadastros, editar, selo, cortesia, categorias, ocultar comentários
+8. ⬜ Administração web: total de downloads do APK (`<dados_dir>/apk/downloads.txt`; saiu do site em 07/11), pedidos de assumir/tirar do app, aprovar/recusar cadastros, editar, selo, cortesia, categorias, ocultar comentários
 9. ⬜ Painel do profissional (web): autocadastro, foto, dados, serviços, responder avaliações, ver contatos recebidos
 10. ⬜ Assinatura recorrente no Mercado Pago (planos Básico e Destaque; webhook; atraso tira do ar)
 11. 🟡 Publicar nas lojas (Play Store e App Store): guia, textos e formulários em `docs/lojas.md`; app.json pronto

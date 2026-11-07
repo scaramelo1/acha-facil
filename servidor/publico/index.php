@@ -113,7 +113,7 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
     <div class="conteudo" style="text-align:center">
       <h2>Baixe o Acha Fácil!</h2>
       <p class="intro" style="margin-left:auto;margin-right:auto">O comércio da sua cidade, pertinho de você.</p>
-      <div class="lojas" style="justify-content:center"><?= botoes_lojas() ?></div>
+      <div class="lojas centro"><?= botoes_lojas() ?></div>
     </div>
   </section>
 </main>
