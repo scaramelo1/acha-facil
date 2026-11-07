@@ -61,7 +61,7 @@ pagina_inicio("$titulo · Acha Fácil!", 'Pedido do dono do comércio para o Ach
     <p><?= $acao === 'remover'
         ? 'É o responsável por este comércio e não quer que ele apareça no Acha Fácil? Deixe seu contato para confirmarmos.'
         : ($p ? ($com_assinatura
-                ? 'Plano ' . PLANOS_NOME[$plano] . ': ' . preco_plano($plano) . ' por mês. Preencha seus dados e, em seguida, assine pelo Mercado Pago. Depois confirmamos por WhatsApp que você é o responsável e liberamos a edição dos dados, das fotos e dos horários.'
+                ? 'Plano ' . PLANOS_NOME[$plano] . ': ' . preco_plano($plano) . ' por mês. Preencha seus dados e, em seguida, assine pelo Mercado Pago. Assinou, já pode editar os dados, as fotos e os horários; cada mudança aparece no app depois da conferência da equipe.'
                 : 'Depois de confirmarmos que você é o responsável, você poderá corrigir os dados, colocar foto, horários e ganhar o selo de verificado. Vamos passar o valor do plano e a forma de pagamento.')
               : 'Conte qual é o seu negócio. Vamos incluir e chamar você para completar o perfil.') ?></p>
     <?php if ($erro): ?><div class="aviso erro"><?= h($erro) ?></div><?php endif ?>

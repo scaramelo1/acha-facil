@@ -62,6 +62,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    agora é em dois passos, estado (SP, MG) e depois a cidade. Cidade nova: `CIDADES` em servidor/inc/guia.php e src/cidade.tsx
 4i. ✅ "Perto de você" só da cidade escolhida (07/11): olhando Poços estando em São João, não aparecem mais os comércios de
    São João. Se não há nada da cidade a até 15 km, o app avisa "Você não está em …" e mostra os conhecidos de lá
+4k. ✅ "Quero minha Cidade!" na tela de escolher a cidade (07/11): a pessoa digita a cidade e a sigla do estado
+   (api/quero-cidade.php, tabela cidades_pedidas, mudança 009); a lista com o total por cidade fica no /admin
 4j. ✅ Visual novo pelas 3 imagens do modelo (07/11, v1.1.0): cabeçalho verde com a paisagem da cidade (morros e igreja
    amarela, `assets/ilustracoes/cabecalho.png`, desenhada por `paisagem.py`), "Acha Fácil!" com traço amarelo, cidade
    em pílula branca e busca amarela; abas com tracinho verde. Telas: Início (categorias, destaque, recomendados, perto,
@@ -84,12 +86,14 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 8. 🟡 Administração web em /admin (07/11): **toda mudança do dono passa por um admin** (contra fraude). Feito: entrar
    (admins; criar com `php servidor/criar-admin.php email "Nome"`, senha sorteada e mostrada uma vez), Pendências
    (alterações dos donos com "como está x como vai ficar", aprovar/recusar com motivo; pedidos de assumir/tirar do app),
-   liberar o painel do dono (link secreto mandado pelo WhatsApp, só depois de confirmar pelo telefone do cadastro),
+   o dono que **paga entra no painel sozinho** (botão "Editar os dados do meu comércio" na página da assinatura; o
+   pagamento não precisa de aprovação, só as alterações). Na 1ª alteração de quem entrou pelo pagamento o admin vê o
+   aviso para ligar no telefone do cadastro antes de aprovar. Link manual do painel para casos sem pagamento (cortesia),
    cortar acesso, tirar do app (status pausado) e Registro de tudo que cada admin fez. Tabelas na mudança 008
    (acessos_dono, alteracoes, registro_admin); regras em servidor/inc/moderacao.php (só aprovar_alteracao() grava os
    dados do dono). Falta: total de downloads do APK (`/var/lib/acha-facil/apk/downloads.txt`), cadastrar negócio novo,
    selo, cortesia, categorias, ocultar comentários
-9. 🟡 Painel do dono em /painel (07/11): entra pelo link do admin; com plano em dia pede mudança de nome, sobre, serviços,
+9. 🟡 Painel do dono em /painel (07/11): entra pela página da assinatura (?c=código do pedido pago) ou pelo link do admin; com plano em dia pede mudança de nome, sobre, serviços,
    WhatsApp, telefone, Instagram, site, endereço, bairro, horário, atende em casa e foto (sem dados escondidos da foto,
    reduzida). Nada vai ao app sem aprovação; endereço novo zera a localização para o geocodificar.php achar de novo.
    Falta: responder avaliações e ver contatos recebidos

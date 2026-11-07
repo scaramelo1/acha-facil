@@ -1,7 +1,8 @@
 <?php
 // Moderação: o dono do comércio nunca muda o app direto. O painel do dono só cria "alterações" pendentes; um
 // administrador confere (antes x depois) e aprova ou recusa. Só aprovar_alteracao() grava em profissionais.
-// O dono entra no painel por um link secreto que o admin libera depois de confirmar que ele é o responsável.
+// O dono entra no painel assim que a assinatura do plano é confirmada (pela página da assinatura), ou por um link
+// que o admin libera (casos sem pagamento, como cortesia). O que ele muda só vai ao app depois da aprovação.
 declare(strict_types=1);
 require_once __DIR__ . '/base.php';
 require_once __DIR__ . '/guia.php';
@@ -54,6 +55,23 @@ function liberar_acesso(int $profissional_id, ?int $pedido_id, string $nome, ?st
         'telefone' => $telefone, 'token_hash' => hash('sha256', $token), 'admin_id' => $admin_id]);
     registrar($admin_id, 'liberou_acesso', $profissional_id, $nome);
     return url_publica('painel/?t=' . $token);
+}
+
+/**
+ * Entrada pelo pagamento: pedido de assumir com a assinatura autorizada no Mercado Pago. Cria o acesso na primeira
+ * vez (sem admin) e marca o pedido como resolvido. Devolve o id do acesso, ou null (não pago ou acesso cortado).
+ */
+function acesso_pelo_pagamento(string $codigo): ?int {
+    if (!preg_match('/^[a-f0-9]{64}$/', $codigo)) return null;
+    $pe = linha("SELECT * FROM pedidos WHERE codigo = ? AND tipo = 'assumir' AND profissional_id IS NOT NULL AND mp_status = 'authorized'", [$codigo]);
+    if (!$pe) return null;
+    $a = linha('SELECT id, ativo FROM acessos_dono WHERE pedido_id = ? ORDER BY id DESC LIMIT 1', [$pe['id']]);
+    if ($a) return (int)$a['ativo'] ? (int)$a['id'] : null;   // cortado pelo admin: não volta sozinho
+    $id = inserir('acessos_dono', ['profissional_id' => $pe['profissional_id'], 'pedido_id' => $pe['id'], 'nome' => $pe['nome'],
+        'telefone' => $pe['telefone'], 'token_hash' => hash('sha256', random_bytes(32))]);
+    q("UPDATE pedidos SET status = 'feito' WHERE id = ? AND status = 'novo'", [$pe['id']]);
+    registrar(null, 'acesso_pago', (int)$pe['profissional_id'], $pe['nome'] . ' (plano ' . $pe['plano'] . ')');
+    return $id;
 }
 
 /** Dono conectado no painel (acesso ativo + comércio), ou null. */

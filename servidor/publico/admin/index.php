@@ -6,8 +6,10 @@ $admin = exigir_admin();
 $alteracoes = linhas("SELECT a.id, a.criado_em, a.novos, p.id AS pid, p.nome, p.cidade, d.nome AS dono
     FROM alteracoes a JOIN profissionais p ON p.id = a.profissional_id LEFT JOIN acessos_dono d ON d.id = a.acesso_id
     WHERE a.status = 'pendente' ORDER BY a.criado_em");
-$pedidos = linhas("SELECT pe.id, pe.tipo, pe.plano, pe.nome, pe.telefone, pe.criado_em, p.nome AS comercio, p.cidade
+$pedidos = linhas("SELECT pe.id, pe.tipo, pe.plano, pe.mp_status, pe.nome, pe.telefone, pe.criado_em, p.nome AS comercio, p.cidade
     FROM pedidos pe LEFT JOIN profissionais p ON p.id = pe.profissional_id WHERE pe.status = 'novo' ORDER BY pe.criado_em");
+$cidades = linhas('SELECT MIN(cidade) AS cidade, uf, COUNT(*) AS total, MAX(criado_em) AS ultimo FROM cidades_pedidas
+    GROUP BY LOWER(cidade), uf ORDER BY total DESC, ultimo DESC LIMIT 50');
 $acessos = linhas("SELECT d.id, d.nome, d.telefone, d.criado_em, d.ultimo_uso, p.id AS pid, p.nome AS comercio
     FROM acessos_dono d JOIN profissionais p ON p.id = d.profissional_id WHERE d.ativo = 1 ORDER BY d.criado_em DESC LIMIT 100");
 
@@ -39,7 +41,7 @@ admin_inicio('Pendências', $admin);
   <tr><th>Pedido</th><th>Comércio</th><th>Quem pediu</th><th>Quando</th><th></th></tr>
   <?php foreach ($pedidos as $pe): ?>
   <tr>
-    <td><?= h(TIPO_PEDIDO[$pe['tipo']] ?? $pe['tipo']) ?><?= $pe['plano'] ? ' · plano ' . h(PLANOS_NOME[$pe['plano']] ?? $pe['plano']) : '' ?></td>
+    <td><?= h(TIPO_PEDIDO[$pe['tipo']] ?? $pe['tipo']) ?><?= $pe['plano'] ? ' · plano ' . h(PLANOS_NOME[$pe['plano']] ?? $pe['plano']) : '' ?><?= $pe['mp_status'] === 'authorized' ? ' <span class="contador">pago</span>' : '' ?></td>
     <td><?= $pe['comercio'] ? h($pe['comercio']) . ' <span class="discreto">(' . h(nome_cidade($pe['cidade'], true)) . ')</span>' : '<em>Negócio novo</em>' ?></td>
     <td><?= h($pe['nome']) ?><br><span class="discreto"><?= h(telefone_formatado($pe['telefone'])) ?></span></td>
     <td><?= h(datahora_br($pe['criado_em'])) ?></td>
@@ -63,6 +65,16 @@ admin_inicio('Pendências', $admin);
       <?= campo_csrf() ?><input type="hidden" name="id" value="<?= (int)$d['id'] ?>">
       <button class="botao pequeno contorno">Cortar acesso</button></form></td>
   </tr>
+  <?php endforeach ?>
+</table></div>
+<?php endif ?>
+
+<h2>"Quero minha Cidade!" (<?= array_sum(array_column($cidades, 'total')) ?> pedidos)</h2>
+<?php if (!$cidades): ?><p class="discreto">Ninguém pediu ainda.</p><?php else: ?>
+<div class="tabela"><table>
+  <tr><th>Cidade</th><th>Estado</th><th>Pedidos</th><th>Último</th></tr>
+  <?php foreach ($cidades as $c): ?>
+  <tr><td><?= h($c['cidade']) ?></td><td><?= h($c['uf'] ?? '-') ?></td><td><strong><?= (int)$c['total'] ?></strong></td><td><?= h(datahora_br($c['ultimo'])) ?></td></tr>
   <?php endforeach ?>
 </table></div>
 <?php endif ?>

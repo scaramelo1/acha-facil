@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { chamar, type Cidade, type Estado } from '../api/cliente';
 import { cartao, cores, fonte } from '../tema';
 import { Cabecalho } from './Cabecalho';
-import { Botao, Pilula } from './ui';
+import { Botao, Campo, Pilula } from './ui';
 
 /** Sem acento e em minúsculas, para "pocos" achar "Poços". */
 function simples(t: string) {
@@ -111,6 +111,27 @@ export function EscolherCidade({
     }
   };
 
+  // "Quero minha Cidade!": pede o Acha Fácil na cidade da pessoa (fica na lista da administração)
+  const [quero, setQuero] = useState<'fechado' | 'aberto' | 'enviando' | 'enviado'>('fechado');
+  const [queroCidade, setQueroCidade] = useState('');
+  const [queroUf, setQueroUf] = useState('');
+  const [queroErro, setQueroErro] = useState('');
+  const enviarQuero = async () => {
+    const cidade = queroCidade.trim();
+    const uf = queroUf.trim().toUpperCase();
+    if (cidade.length < 2) return setQueroErro('Digite o nome da sua cidade.');
+    if (uf !== '' && !/^[A-Z]{2}$/.test(uf)) return setQueroErro('Estado: só a sigla, como SP ou MG.');
+    setQueroErro('');
+    setQuero('enviando');
+    try {
+      await chamar('quero-cidade.php', 'POST', { cidade, uf });
+      setQuero('enviado');
+    } catch (e) {
+      setQueroErro(e instanceof Error ? e.message : 'Não foi possível enviar. Tente de novo.');
+      setQuero('aberto');
+    }
+  };
+
   const escolher = (c: Cidade) => {
     mexeu.current = true;
     setEscolhida(c);
@@ -209,6 +230,43 @@ export function EscolherCidade({
               {t !== '' ? (daqui && acha(daqui) ? 'Sua cidade atual é a única com esse nome.' : 'Ainda não atendemos essa cidade.') : `Por enquanto, nenhuma outra cidade de ${nomeEstado(estado)}.`}
             </Text>
           )}
+
+          <View style={estilos.quero}>
+            {quero === 'enviado' ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <MaterialCommunityIcons name="check-circle" size={30} color={cores.verde} />
+                <Text style={[estilos.avisoTexto, { flex: 1 }]}>
+                  Pedido anotado! Quanto mais gente pedir {queroCidade.trim()}, mais rápido o Acha Fácil chega aí.
+                </Text>
+              </View>
+            ) : quero === 'fechado' ? (
+              <>
+                <Text style={estilos.queroTitulo}>Sua cidade não está aqui?</Text>
+                <Botao titulo="Quero minha Cidade!" icone="map-marker-plus" tipo="principal" onPress={() => {
+                    if (queroCidade === '' && termo.trim() !== '') setQueroCidade(termo.trim());
+                    setQuero('aberto');
+                  }}
+                  estilo={{ marginTop: 10 }}
+                />
+              </>
+            ) : (
+              <>
+                <Text style={estilos.queroTitulo}>Quero minha Cidade!</Text>
+                <Text style={[estilos.avisoTexto, { marginTop: 4, marginBottom: 10 }]}>Conte onde você mora. As cidades mais pedidas entram primeiro.</Text>
+                <Campo icone="city-variant-outline" placeholder="Nome da cidade" value={queroCidade} onChangeText={setQueroCidade} maxLength={80} autoCapitalize="words" />
+                <View style={{ height: 10 }} />
+                <Campo icone="map-outline" placeholder="Estado (ex.: SP)" value={queroUf} onChangeText={setQueroUf} maxLength={2} autoCapitalize="characters" autoCorrect={false} />
+                {queroErro !== '' && <Text style={estilos.queroErro}>{queroErro}</Text>}
+                <Botao
+                  titulo={quero === 'enviando' ? 'Enviando...' : 'Enviar pedido'}
+                  icone="send"
+                  desativado={quero === 'enviando'}
+                  onPress={enviarQuero}
+                  estilo={{ marginTop: 12 }}
+                />
+              </>
+            )}
+          </View>
         </View>
       </ScrollView>
       <View style={[estilos.rodape, { paddingBottom: baixo + 16 }]}>
@@ -228,6 +286,9 @@ const estilos = StyleSheet.create({
   sub: { fontSize: 14, color: cores.textoSuave, marginTop: 1 },
   aviso: { ...cartao, padding: 14, marginBottom: 10 },
   avisoTexto: { fontSize: fonte.pequena, color: cores.texto, lineHeight: 22 },
+  quero: { ...cartao, padding: 16, marginTop: 18, borderWidth: 2, borderColor: cores.amarelo, backgroundColor: cores.cartao },
+  queroTitulo: { fontSize: fonte.grande, fontWeight: '900', color: cores.verde },
+  queroErro: { fontSize: fonte.pequena, color: cores.erro, marginTop: 8, fontWeight: '700' },
   vazio: { fontSize: fonte.normal, color: cores.textoSuave, textAlign: 'center', marginTop: 16 },
   rodape: { paddingHorizontal: 16, paddingTop: 12, borderTopWidth: 1, borderColor: cores.borda, backgroundColor: cores.cartao },
 });

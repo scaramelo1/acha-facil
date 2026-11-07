@@ -22,12 +22,15 @@ if (e_post()) {
     ir('admin/');
 }
 
-$a = linha('SELECT a.*, d.nome AS dono, d.telefone AS dono_tel, ad.nome AS admin_nome FROM alteracoes a
+$a = linha('SELECT a.*, d.nome AS dono, d.telefone AS dono_tel, d.pedido_id, d.admin_id AS liberado_por, ad.nome AS admin_nome FROM alteracoes a
     LEFT JOIN acessos_dono d ON d.id = a.acesso_id LEFT JOIN admins ad ON ad.id = a.admin_id WHERE a.id = ?', [$id]);
 if (!$a) { http_response_code(404); exit('Alteração não encontrada.'); }
 $p = linha('SELECT * FROM profissionais WHERE id = ?', [$a['profissional_id']]);
 $novos = json_decode($a['novos'], true) ?: [];
 $antes = json_decode($a['anteriores'], true) ?: [];
+$pago = $a['pedido_id'] ? linha('SELECT * FROM pedidos WHERE id = ?', [$a['pedido_id']]) : null;
+// primeira mudança aprovada deste dono? (quem só pagou ainda não teve nada conferido por telefone)
+$ja_aprovado = $a['acesso_id'] && (int)valor("SELECT COUNT(*) FROM alteracoes WHERE acesso_id = ? AND status = 'aprovada'", [$a['acesso_id']]) > 0;
 
 admin_inicio('Conferir alteração', $admin);
 ?>
@@ -37,6 +40,15 @@ admin_inicio('Conferir alteração', $admin);
   <?= $a['dono_tel'] ? '(' . h(telefone_formatado($a['dono_tel'])) . ')' : '' ?> em <?= h(datahora_br($a['criado_em'])) ?>
   · <a href="<?= h(url_publica('busca.php?q=' . rawurlencode($p['nome']))) ?>" target="_blank" rel="noopener">ver no site</a></p>
 
+<?php if ($pago): ?>
+  <p>Plano <?= h(PLANOS_NOME[$pago['plano']] ?? '-') ?> pago por <strong><?= h($pago['nome']) ?></strong> · <?= h(telefone_formatado($pago['telefone'])) ?>
+    <?= !empty($pago['email']) ? ' · ' . h($pago['email']) : '' ?> · Mercado Pago: <?= h($pago['mp_status'] ?? '-') ?></p>
+<?php endif ?>
+<?php if ($a['status'] === 'pendente' && !$ja_aprovado && !$a['liberado_por']): ?>
+  <div class="aviso erro">Primeira mudança deste dono, que entrou só pelo pagamento. Antes de aprovar telefone, WhatsApp,
+    endereço ou nome, ligue para o telefone que já está no app (<?= h(telefone_formatado($p['telefone'] ?: $p['whatsapp'])) ?: 'sem telefone' ?>)
+    e confirme que é mesmo o responsável. Pagar não prova que a pessoa é dona do comércio.</div>
+<?php endif ?>
 <?php if ($a['status'] !== 'pendente'): ?>
   <div class="aviso <?= $a['status'] === 'aprovada' ? 'ok' : 'erro' ?>">
     <?= $a['status'] === 'aprovada' ? 'Aprovada' : 'Recusada' ?> por <?= h($a['admin_nome'] ?? '?') ?> em <?= h(datahora_br($a['decidido_em'])) ?>

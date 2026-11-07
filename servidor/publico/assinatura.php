@@ -44,7 +44,11 @@ pagina_inicio('Plano ' . PLANOS_NOME[$plano] . ' · Acha Fácil!', 'Assinatura d
 
   <?php if ($status === 'authorized'): ?>
     <div class="aviso ok">Assinatura ativa! O plano já está ligado<?= $p && $p['assinatura_ate'] ? ' até ' . h(data_br($p['assinatura_ate'])) . ' e renova sozinho a cada mês' : '' ?>.</div>
-    <p>Vamos chamar você no WhatsApp para confirmar que é o responsável pelo comércio e liberar a edição dos dados e das fotos.</p>
+    <?php if ($p): ?>
+      <p><a class="botao" href="<?= h(config()['url']) ?>/painel/?c=<?= h($codigo) ?>">Editar os dados do meu comércio</a></p>
+      <p class="discreto">Você já pode corrigir os dados e colocar foto. Para evitar fraudes, cada mudança aparece no app
+        depois que a equipe do Acha Fácil confere (normalmente em até 1 dia útil).</p>
+    <?php endif ?>
     <p class="discreto">Para cancelar, entre no Mercado Pago, em Assinaturas. O plano continua até o fim do mês já pago.</p>
   <?php elseif ($modo === 'desligado'): ?>
     <div class="aviso ok">Pedido recebido!</div>
@@ -57,7 +61,7 @@ pagina_inicio('Plano ' . PLANOS_NOME[$plano] . ' · Acha Fácil!', 'Assinatura d
       <p><button class="botao amarelo"><?= in_array($status, ['cancelled', 'paused'], true) ? 'Assinar de novo' : 'Assinar com o Mercado Pago' ?></button></p>
     </form>
     <p class="discreto">Use o e-mail <strong><?= h((string)$pedido['email']) ?></strong> na sua conta do Mercado Pago (o Mercado Pago pede o mesmo e-mail).
-      Depois de assinar, confirmamos por WhatsApp que você é o responsável e liberamos a edição dos dados e das fotos.</p>
+      Depois de assinar, você já pode editar os dados e as fotos; cada mudança aparece no app depois da conferência da equipe.</p>
   <?php endif ?>
   <p class="discreto">Guarde o endereço desta página para acompanhar a sua assinatura.</p>
 </main>

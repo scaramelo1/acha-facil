@@ -1,5 +1,6 @@
 <?php
-// Painel do dono do comércio. Entra pelo link secreto que a administração manda (?t=...). Aqui o dono só PEDE
+// Painel do dono do comércio. Entra pela página da assinatura depois de pagar (?c=código do pedido) ou pelo link que a
+// administração manda (?t=..., casos sem pagamento). Aqui o dono só PEDE
 // mudanças: tudo vira uma alteração pendente (inc/moderacao.php) e só aparece no app depois que um admin aprova.
 require __DIR__ . '/../../inc/moderacao.php';
 require __DIR__ . '/../../inc/pagina.php';
@@ -19,6 +20,18 @@ if (isset($_GET['t'])) {
     } else {
         login_falhou();
         flash('Este link não vale mais. Peça um novo para a equipe do Acha Fácil.', 'erro');
+    }
+    ir('painel/');
+}
+if (isset($_GET['c'])) {
+    $acesso_id = login_bloqueado() ? null : acesso_pelo_pagamento((string)$_GET['c']);
+    if ($acesso_id) {
+        session_regenerate_id(true);
+        $_SESSION['dono_acesso'] = $acesso_id;
+        q('UPDATE acessos_dono SET ultimo_uso = NOW() WHERE id = ?', [$acesso_id]);
+    } else {
+        login_falhou();
+        flash('A assinatura ainda não foi confirmada pelo Mercado Pago. Volte à página da assinatura e tente de novo em instantes.', 'erro');
     }
     ir('painel/');
 }
@@ -62,8 +75,8 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
 <?php mostrar_flash(); ?>
 <?php if (!$p): ?>
   <h1>Painel do comércio</h1>
-  <p>O painel é liberado pela equipe do Acha Fácil depois de confirmar que você é o responsável pelo comércio. Você recebe
-    um link pelo WhatsApp; é só abrir por ele.</p>
+  <p>O painel abre depois que você assina um plano: na página da sua assinatura, toque em <strong>Editar os dados do
+    meu comércio</strong>. Tudo o que você mudar aparece no app depois da conferência da equipe.</p>
   <p><a class="botao amarelo" href="<?= h(config()['url']) ?>/busca.php">Procurar meu negócio</a></p>
 <?php else: ?>
   <h1><?= h($p['nome']) ?></h1>
