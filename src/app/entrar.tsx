@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { URL_PRIVACIDADE, URL_TERMOS } from '../api/cliente';
@@ -12,15 +12,25 @@ import { cartao, cores, fonte } from '../tema';
 // Entrar no app: só com a conta Google (o app recebe nome, e-mail e foto)
 export default function TelaEntrar() {
   const router = useRouter();
-  const { entrarComGoogle } = useConta();
+  const { usuario, entrarComGoogle } = useConta();
   const [erro, setErro] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+
+  // entrou (por aqui ou pela volta do Google, que no Android abre a rota /google): sai desta tela uma vez
+  const saiu = useRef(false);
+  useEffect(() => {
+    if (usuario && !saiu.current) {
+      saiu.current = true;
+      if (router.canGoBack()) router.back();
+      else router.replace('/');
+    }
+  }, [usuario, router]);
 
   const entrar = async () => {
     setErro(null);
     setEnviando(true);
     try {
-      if (await entrarComGoogle()) router.back();
+      await entrarComGoogle();
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Não foi possível entrar com o Google.');
     } finally {

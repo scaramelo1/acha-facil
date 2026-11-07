@@ -15,11 +15,24 @@ interface ContextoConta {
   usuario: Usuario | null;
   /** Abre o Google. true = entrou; false = a pessoa fechou ou cancelou. Erro = algo deu errado (mensagem pronta). */
   entrarComGoogle: () => Promise<boolean>;
+  /** Troca o código que voltou do Google pela sessão (a tela de retorno e a tela Entrar podem chamar; troca uma vez só). */
+  entrarComCodigo: (codigo: string) => Promise<void>;
   sair: () => Promise<void>;
   excluirConta: () => Promise<void>;
 }
 
 const Contexto = createContext<ContextoConta | null>(null);
+
+// o mesmo código pode chegar pela tela Entrar e pela rota de retorno ao mesmo tempo: troca uma vez só
+const trocas = new Map<string, Promise<{ token: string; usuario: Usuario }>>();
+function trocarCodigo(codigo: string) {
+  let p = trocas.get(codigo);
+  if (!p) {
+    p = chamar<{ token: string; usuario: Usuario }>('google.php', 'POST', { codigo });
+    trocas.set(codigo, p);
+  }
+  return p;
+}
 
 function lerSalvo(): Usuario | null {
   const t = Armazenamento.ler(CHAVE_TOKEN);
@@ -61,9 +74,13 @@ export function ProvedorConta({ children }: { children: ReactNode }) {
         if (typeof erro === 'string' && erro) throw new Error(erro);
         const codigo = queryParams?.codigo;
         if (typeof codigo !== 'string' || !codigo) throw new Error('O Google não confirmou a entrada. Tente de novo.');
-        const s = await chamar<{ token: string; usuario: Usuario }>('google.php', 'POST', { codigo });
+        const s = await trocarCodigo(codigo);
         guardar(s.token, s.usuario);
         return true;
+      },
+      async entrarComCodigo(codigo) {
+        const s = await trocarCodigo(codigo);
+        guardar(s.token, s.usuario);
       },
       async sair() {
         await chamar('sair.php', 'POST').catch(() => {});
