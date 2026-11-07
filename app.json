@@ -34,6 +34,17 @@
         "foregroundImage": "./assets/android-icon-foreground.png"
       },
       "predictiveBackGestureEnabled": false
-    }
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "e4e21f3e-3cff-4763-a2aa-5ae7c288b1fe"
+      }
+    },
+    "owner": "scaramelo"
   }
 }
