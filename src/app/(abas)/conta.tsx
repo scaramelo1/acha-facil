@@ -38,7 +38,7 @@ export default function TelaConta() {
       )}
 
       <Titulo>Tem um comércio em São João?</Titulo>
-      <Text style={ui.texto}>Ele pode já estar no app. Procure, assuma o perfil de graça e deixe tudo certinho.</Text>
+      <Text style={ui.texto}>Ele pode já estar no app. Procure e confira os planos para corrigir os dados e colocar fotos.</Text>
       <Botao titulo="Procurar meu negócio" icone="storefront-outline" tipo="amarelo" onPress={() => WebBrowser.openBrowserAsync(URL_MEU_NEGOCIO)} />
 
       <Titulo>Sobre o app</Titulo>

@@ -126,7 +126,7 @@ export default function TelaProfissional() {
               <MaterialCommunityIcons name="storefront-outline" size={30} color={cores.verde} />
               <View style={{ flex: 1 }}>
                 <Text style={estilos.donoTitulo}>É o dono deste lugar?</Text>
-                <Text style={estilos.donoTexto}>Assuma o perfil de graça para corrigir os dados e pôr fotos.</Text>
+                <Text style={estilos.donoTexto}>Confira os planos para corrigir os dados e colocar fotos.</Text>
               </View>
               <MaterialCommunityIcons name="arrow-right" size={24} color={cores.verde} />
             </Pressable>

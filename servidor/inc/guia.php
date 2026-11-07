@@ -100,7 +100,7 @@ function prof_completo(array $p, ?int $usuario_id): array {
         'endereco' => $p['endereco'],
         'mapa' => $p['mapa'] ?: ($p['endereco'] ? 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($p['endereco'] . ', São João da Boa Vista - SP') : null),
         'site' => $p['site'],
-        'linkAssumir' => $p['importado'] ? url_publica('perfil.php?id=' . $p['id'] . '&acao=assumir') : null,
+        'linkAssumir' => $p['importado'] ? url_publica('planos.php?id=' . $p['id']) : null,
         'linkRemover' => $p['importado'] ? url_publica('perfil.php?id=' . $p['id'] . '&acao=remover') : null,
         'horario' => $p['horario'],
         'favorito' => $usuario_id ? (bool)valor('SELECT 1 FROM favoritos WHERE usuario_id = ? AND profissional_id = ?', [$usuario_id, $p['id']]) : false,

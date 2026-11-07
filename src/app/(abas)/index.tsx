@@ -122,7 +122,7 @@ export default function TelaInicio() {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={estilos.donoTitulo}>Tem um comércio aqui?</Text>
-                  <Text style={estilos.donoTexto}>Assuma seu perfil de graça e deixe tudo certinho.</Text>
+                  <Text style={estilos.donoTexto}>Confira os planos para corrigir os dados e colocar fotos.</Text>
                 </View>
                 <MaterialCommunityIcons name="arrow-right" size={26} color={cores.amarelo} />
               </Pressable>

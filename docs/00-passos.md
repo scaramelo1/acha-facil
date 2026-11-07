@@ -26,7 +26,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 - Os comércios vêm da **lista de leads** (fsadesigners.com.br/leads, coleta do Google Maps): `importado = 1`, aparecem
   **sem assinatura** até o dono assumir o perfil. Reimportar: `php servidor/importar-leads.php` (atualiza pelo nome; não mexe em
   quem assumiu nem em quem foi tirado). Os 10 exemplos fictícios foram apagados.
-- O dono procura o negócio em `/busca.php` e pede para **assumir** (grátis) ou **tirar do app** (`/perfil.php`); os pedidos
+- O dono procura o negócio em `/busca.php` e pede para **assumir** (grátis) ou **tirar do app** (`/perfil.php`); para corrigir dados e pôr fotos, o dono confere os planos em `/planos.php` (Básico e Destaque, valores em breve); os pedidos
   ficam na tabela `pedidos` até a administração web existir (passo 8).
 - Nota do Google **não aparece** no app: o número de avaliações do Google só ordena os "Conhecidos na cidade".
 

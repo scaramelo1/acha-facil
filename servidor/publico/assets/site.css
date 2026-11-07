@@ -189,3 +189,14 @@ details p { margin: 0 0 16px; color: var(--texto2); }
 .documento h2 { font-size: 1.45rem; margin-top: 2em; padding-top: .4em; border-top: 2px dashed var(--borda); }
 .documento .atualizado { color: var(--texto2); font-size: .95rem; }
 .quadro { background: var(--amarelo-claro); border: 2px solid var(--amarelo); border-radius: 18px; padding: 16px 20px; margin: 20px 0; }
+
+/* página de planos */
+.tabela-planos { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-top: 24px; }
+.plano-cartao { position: relative; background: var(--branco); border: 2px solid var(--borda); border-radius: var(--raio); padding: 26px 24px; box-shadow: var(--sombra); display: flex; flex-direction: column; }
+.plano-cartao.destaque { border: 3px solid var(--amarelo); background: var(--amarelo-claro); }
+.plano-cartao h2 { margin: 0; border: 0; padding: 0; font-size: 1.8rem; color: var(--verde); }
+.plano-cartao .sub { color: var(--texto2); margin: 4px 0 12px; }
+.plano-cartao .valor { font-size: 1.4rem; font-weight: 900; margin: 0 0 12px; }
+.plano-cartao .valor small { display: block; font-size: .85rem; font-weight: 600; color: var(--texto2); }
+.plano-cartao .lista-check { flex: 1; }
+.plano-cartao .fita { position: absolute; top: -14px; right: 20px; background: var(--verde); color: var(--amarelo); font-weight: 900; font-size: .85rem; padding: 4px 12px; border-radius: 10px; }

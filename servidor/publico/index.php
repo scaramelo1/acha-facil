@@ -69,7 +69,7 @@ pagina_inicio('Acha Fácil! O comércio de São João da Boa Vista no seu celula
     <div class="conteudo duas">
       <div>
         <h2>Seu negócio já pode estar no Acha Fácil</h2>
-        <p class="intro">Montamos o guia com os dados públicos dos comércios de São João. Procure o seu e assuma o perfil: é de graça.</p>
+        <p class="intro">Montamos o guia com os dados públicos dos comércios de São João. Procure o seu e confira os planos para corrigir os dados e colocar fotos.</p>
         <ul class="lista-check">
           <li>Corrija telefone, WhatsApp, endereço e horário</li>
           <li>Coloque foto, descrição e o que você vende ou faz</li>
@@ -85,9 +85,10 @@ pagina_inicio('Acha Fácil! O comércio de São João da Boa Vista no seu celula
           <button class="botao amarelo">Procurar</button>
         </form>
         <div class="planos">
-          <div class="plano"><h3>Perfil assumido <span class="preco">grátis</span></h3><p>Seus dados corretos, com foto e selo de verificado.</p></div>
+          <div class="plano"><h3>Básico <span class="preco">valor em breve</span></h3><p>Corrija os dados, coloque fotos e ganhe o selo de verificado.</p></div>
           <div class="plano destaque"><h3>Destaque <span class="preco">valor em breve</span></h3><p>Aparece no topo da tela inicial e na frente da sua área, para a cidade inteira ver.</p></div>
         </div>
+        <p style="margin:16px 0 0"><a class="botao" href="<?= $base ?>/planos.php">Conferir os planos</a></p>
       </div>
     </div>
   </section>
@@ -106,7 +107,7 @@ pagina_inicio('Acha Fácil! O comércio de São João da Boa Vista no seu celula
         3. Se o celular avisar que é de "fonte desconhecida", toque em <strong>Configurações</strong>, ligue <strong>Permitir desta fonte</strong> e volte.<br>
         4. Toque em <strong>Instalar</strong> e depois em <strong>Abrir</strong>.<br>
         Para atualizar, é só baixar de novo e instalar por cima. No iPhone, o app virá pela App Store.</p></details>
-      <details><summary>Achei uma informação errada. O que faço?</summary><p>Fale com a gente: <?= contatos_html() ?>. Se for o dono, assuma o perfil e corrija na hora.</p></details>
+      <details><summary>Achei uma informação errada. O que faço?</summary><p>Fale com a gente: <?= contatos_html() ?>. Se for o dono, <a href="<?= $base ?>/planos.php">confira os planos</a> para corrigir os dados e colocar fotos.</p></details>
     </div>
   </section>
 
