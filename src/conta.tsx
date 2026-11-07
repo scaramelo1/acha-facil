@@ -1,7 +1,8 @@
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { AppState } from 'react-native';
 
 import { chamar, definirToken, ErroApi, type Usuario } from './api/cliente';
 import { Armazenamento } from './armazenamento';
@@ -28,15 +29,16 @@ const Contexto = createContext<ContextoConta | null>(null);
  * disso): no Expo Go, o endereço do próprio Expo Go (exp://.../--/google); no APK, achafacil:///google.
  */
 function enderecoDeVolta() {
-  const uri = Constants.linkingUri;
-  if (Constants.executionEnvironment === ExecutionEnvironment.StoreClient && uri && uri.startsWith('exp')) {
-    const base = uri.includes('/--/') ? uri : uri.replace(/\/?$/, '/--/');
-    return `${base.replace(/\/?$/, '/')}google`;
-  }
+  // Expo Go: exp://<servidor de desenvolvimento>/--/google (hostUri é sempre informado pelo Expo Go)
+  const noExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient || String(Constants.appOwnership) === 'expo';
+  const servidor = Constants.expoConfig?.hostUri;
+  if (noExpoGo && servidor) return `exp://${servidor}/--/google`;
   return Linking.createURL('google');
 }
 
 type Sessao = { token: string; usuario: Usuario };
+type Verificacao = { pendente?: boolean; token?: string; usuario?: Usuario };
+
 const esperar = (ms: number) => new Promise<void>((pronto) => setTimeout(pronto, ms));
 
 /** Fecha o navegador do login (cada sistema tem o seu jeito; o que não existir, ignora). */
@@ -63,6 +65,11 @@ function lerSalvo(): Usuario | null {
 
 export function ProvedorConta({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(lerSalvo);
+  // Entrada pelo Google em andamento (a chave só este app conhece). Guardada aqui para a conferência de quando o
+  // app volta para a frente (no Android, enquanto o navegador está na frente, os relógios do app param).
+  const pendente = useRef<{ chave: string; ate: number } | null>(null);
+  // chave da última entrada concluída pela conferência ao voltar (para a tela Entrar não mostrar erro falso)
+  const concluida = useRef<string | null>(null);
 
   const guardar = useCallback((token: string | null, u: Usuario | null) => {
     definirToken(token);
@@ -76,17 +83,38 @@ export function ProvedorConta({ children }: { children: ReactNode }) {
     setUsuario(u);
   }, []);
 
+  // voltou para o app com uma entrada pelo Google pendente: pergunta ao servidor se terminou
+  useEffect(() => {
+    const assinatura = AppState.addEventListener('change', (agora) => {
+      const p = pendente.current;
+      if (agora !== 'active' || !p || Date.now() > p.ate) return;
+      chamar<Verificacao>('google.php', 'POST', { acao: 'verificar', chave: p.chave })
+        .then((r) => {
+          if (r.token && r.usuario && pendente.current?.chave === p.chave) {
+            pendente.current = null;
+            concluida.current = p.chave;
+            guardar(r.token, r.usuario);
+          }
+        })
+        .catch((e: unknown) => {
+          if (e instanceof ErroApi && e.status === 404 && pendente.current?.chave === p.chave) pendente.current = null;
+        });
+    });
+    return () => assinatura.remove();
+  }, [guardar]);
+
   const valor = useMemo<ContextoConta>(
     () => ({
       usuario,
       async entrarComGoogle() {
         const volta = enderecoDeVolta();
         const { endereco, chave } = await chamar<{ endereco: string; chave: string }>('google.php', 'POST', { acao: 'iniciar', volta });
+        pendente.current = { chave, ate: Date.now() + 15 * 60 * 1000 };
         const situacao: { sessao: Sessao | null; falhou: boolean; aberto: boolean } = { sessao: null, falhou: false, aberto: true };
 
         const verificar = async () => {
           try {
-            const r = await chamar<{ pendente?: boolean; token?: string; usuario?: Usuario }>('google.php', 'POST', { acao: 'verificar', chave });
+            const r = await chamar<Verificacao>('google.php', 'POST', { acao: 'verificar', chave });
             if (r.token && r.usuario) situacao.sessao = { token: r.token, usuario: r.usuario };
           } catch (e) {
             // 404 = não deu certo no Google ou expirou; outros erros (internet piscou) tentam de novo
@@ -114,10 +142,17 @@ export function ProvedorConta({ children }: { children: ReactNode }) {
         }
 
         if (situacao.sessao) {
+          if (pendente.current?.chave === chave) pendente.current = null;
           guardar(situacao.sessao.token, situacao.sessao.usuario);
           return true;
         }
-        if (situacao.falhou) throw new Error('Não foi possível entrar com o Google. Tente de novo.');
+        // a conferência ao voltar para o app chegou primeiro e já entrou com esta chave
+        if (concluida.current === chave) return true;
+        if (situacao.falhou) {
+          if (pendente.current?.chave === chave) pendente.current = null;
+          throw new Error('Não foi possível entrar com o Google. Tente de novo.');
+        }
+        // continua pendente: se a pessoa terminar no navegador depois, a conferência ao voltar para o app pega
         return false;
       },
       async sair() {
