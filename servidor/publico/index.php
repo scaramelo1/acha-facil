@@ -6,7 +6,6 @@ require __DIR__ . '/../inc/pagina.php';
 
 $areas = categorias_ativas();
 $total = (int)valor('SELECT COUNT(*) FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE ' . visivel());
-$com_whats = (int)valor('SELECT COUNT(*) FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE ' . visivel() . ' AND p.whatsapp IS NOT NULL');
 $base = config()['url'];
 $num = fn(int $n) => number_format($n, 0, ',', '.');
 // emoji de enfeite por ícone (o site não carrega a fonte de ícones do app)
@@ -26,7 +25,6 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
         <ul class="contador">
           <li><b><?= $num($total) ?></b> comércios e serviços</li>
           <li><b><?= count(CIDADES) ?></b> cidades</li>
-          <li><b><?= $num($com_whats) ?></b> com WhatsApp</li>
         </ul>
         <div class="lojas" id="baixar"><?= botoes_lojas() ?></div>
         <p class="discreto" style="margin-top:14px">Grátis. Não precisa criar conta para procurar.</p>
