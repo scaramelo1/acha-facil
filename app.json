@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Acha Fácil",
+    "slug": "acha-facil",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "version": "1.0.0",
+    "scheme": "achafacil",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#005C38"
+        }
+      ]
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "br.com.fsadesigner.achafacil"
+    },
+    "android": {
+      "package": "br.com.fsadesigner.achafacil",
+      "adaptiveIcon": {
+        "backgroundColor": "#005C38",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      },
+      "predictiveBackGestureEnabled": false
+    }
+  }
+}

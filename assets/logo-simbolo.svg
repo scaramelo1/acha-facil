@@ -1,0 +1,29 @@
+<!-- Símbolo do Acha Fácil (redesenho em vetor da logo enviada): pino amarelo, loja branca/amarela, lupa -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-70 80 1120 1120">
+  <!-- pino -->
+  <path d="M470 160 C 690 160 860 325 860 535 C 860 640 805 745 720 850 L 500 1110 Z" fill="none"/>
+  <path fill="#F7C600" d="M480 150 C 715 150 880 320 880 520 C 880 640 820 740 735 840 L 520 1080 Q 480 1120 440 1080 L 225 840 C 140 740 80 640 80 520 C 80 320 245 150 480 150 Z"/>
+  <circle cx="480" cy="510" r="300" fill="#005C38"/>
+  <!-- loja: telhado -->
+  <path fill="#fff" d="M300 320 H660 Q672 320 676 332 L690 370 H270 L284 332 Q288 320 300 320 Z"/>
+  <!-- toldo amarelo (3 gomos + 2 cantos) -->
+  <g fill="#F7C600" stroke="#005C38" stroke-width="10" stroke-linejoin="round">
+    <path d="M285 380 H360 L345 450 Q315 480 275 460 Q250 445 255 420 Z"/>
+    <path d="M370 380 H445 L445 450 Q415 480 380 465 Q355 450 358 425 Z"/>
+    <path d="M455 380 H530 L545 425 Q548 450 525 465 Q490 480 460 450 Z"/>
+    <path d="M540 380 H615 L645 420 Q650 445 625 460 Q590 480 560 450 Z"/>
+    <path d="M625 380 H680 L705 412 Q712 440 690 455 Q665 470 650 450 Z" />
+  </g>
+  <!-- fachada -->
+  <path fill="#fff" d="M290 480 Q330 500 370 480 Q410 500 450 480 Q490 500 530 480 Q570 500 610 480 Q640 495 665 482 V650 Q665 670 645 670 H310 Q290 670 290 650 Z"/>
+  <!-- porta e vitrine -->
+  <rect x="335" y="545" width="80" height="125" fill="#005C38"/>
+  <rect x="445" y="535" width="130" height="95" rx="10" fill="#005C38" stroke="#fff" stroke-width="0"/>
+    <polygon fill="#fff" points="470,596 500,564 510,573 480,605"/><polygon fill="#fff" points="495,608 532,570 542,579 505,617"/>
+  <!-- lupa -->
+  <path d="M670 790 L770 890" stroke="#005C38" stroke-width="96" stroke-linecap="round"/>
+  <path d="M670 790 L770 890" stroke="#F7C600" stroke-width="60" stroke-linecap="round"/>
+  <circle cx="600" cy="715" r="118" fill="#005C38" stroke="#005C38" stroke-width="64"/>
+  <circle cx="600" cy="715" r="112" fill="#005C38" stroke="#fff" stroke-width="32"/>
+  <path d="M545 728 A 60 60 0 0 1 606 664" fill="none" stroke="#fff" stroke-width="20" stroke-linecap="round"/>
+</svg>
