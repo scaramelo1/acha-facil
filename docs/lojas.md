@@ -73,6 +73,12 @@ Pacote/bundle: `br.com.fsadesigner.achafacil` · Projeto EAS: `scaramelo/acha-fa
 - **Comentários:** precisa haver como denunciar comentário e o admin ocultar (regra 1.2); a ocultação está no passo 8
 - **Dados dos comércios:** vêm do Google Maps; deixar claro no app/termos que o dono pode corrigir ou tirar do app (já existe)
 
+## 5b. Login com Google (Play Store)
+
+- Google Cloud > APIs e serviços > Tela de consentimento OAuth: publicar o app ("Em produção"). Só usa nome, e-mail
+  e foto (escopos básicos), então não precisa da verificação demorada do Google
+- Nome do app, logo e links de privacidade/termos na tela de consentimento iguais aos da loja
+
 ## 6. Comandos (PC, PowerShell, em C:\Users\Fellipe\acha-facil)
 
 ```powershell

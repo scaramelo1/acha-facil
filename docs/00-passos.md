@@ -77,7 +77,10 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    enquanto isso o app pergunta ao servidor a cada 1,5 s (acao=verificar, chave secreta só do app) e recebe a sessão.
    Não depende de o celular devolver um link para o app (no emulador o link caía no APK antigo). Sem senha:
    "Recuperar senha", entrar.php e criar-conta.php saíram. Termos e privacidade atualizados. Chaves do Google no
-   config e migração 006 aplicadas; servidor testado de ponta a ponta. Falta: testar no emulador e no APK
+   config e migração 006 aplicadas; servidor testado de ponta a ponta. Emulador ✅ (07/11 19:30: entrou e recebeu a sessão).
+   Falta: (a) testar no APK novo (o do site é o 1.0.0, ainda com e-mail e senha); (b) no Google Cloud, tela de
+   consentimento em "Em produção" (em "Teste" só os e-mails cadastrados como testadores conseguem entrar);
+   (c) para a App Store: "Entrar com Apple" junto (regra 4.8 da Apple), precisa da conta de desenvolvedor Apple
 8. ⬜ Administração web: total de downloads do APK (`<dados_dir>/apk/downloads.txt`; saiu do site em 07/11), pedidos de assumir/tirar do app, aprovar/recusar cadastros, editar, selo, cortesia, categorias, ocultar comentários
 9. ⬜ Painel do profissional (web): autocadastro, foto, dados, serviços, responder avaliações, ver contatos recebidos
 10. ⬜ Assinatura recorrente no Mercado Pago (planos Básico e Destaque; webhook; atraso tira do ar)
