@@ -1,15 +1,13 @@
 <?php
-// O app abre esta página (no navegador do celular) com ?volta=achafacil://google; daqui vai para o Google.
+// O app abre esta página no navegador (endereço vindo de api/google.php, acao=iniciar); daqui vai para o Google.
 require __DIR__ . '/../../inc/google.php';
 header('Cache-Control: no-store');
 header('X-Robots-Tag: noindex');
-$volta = (string)($_GET['volta'] ?? '');
-if (!volta_valida($volta)) { http_response_code(400); exit('Endereço de volta inválido.'); }
-if (!google_configurado()) { header('Location: ' . volta_com($volta, ['erro' => 'O login com o Google ainda não foi ligado no servidor.'])); exit; }
-
-q('DELETE FROM logins_google WHERE criado_em < NOW() - INTERVAL 1 HOUR');
-$estado = bin2hex(random_bytes(32));
-q('INSERT INTO logins_google (estado, volta) VALUES (?, ?)', [$estado, $volta]);
+$estado = (string)($_GET['estado'] ?? '');
+$l = preg_match('/^[a-f0-9]{64}$/', $estado)
+    ? linha('SELECT 1 FROM logins_google WHERE estado = ? AND usuario_id IS NULL AND criado_em > NOW() - INTERVAL 10 MINUTE', [$estado])
+    : null;
+if (!$l || !google_configurado()) { pagina_google('Esta entrada expirou', 'Volte ao app e toque em "Entrar com o Google" de novo.', null); exit; }
 header('Location: https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
     'client_id' => config()['google_client_id'],
     'redirect_uri' => google_retorno(),
