@@ -62,6 +62,14 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    agora é em dois passos, estado (SP, MG) e depois a cidade. Cidade nova: `CIDADES` em servidor/inc/guia.php e src/cidade.tsx
 4i. ✅ "Perto de você" só da cidade escolhida (07/11): olhando Poços estando em São João, não aparecem mais os comércios de
    São João. Se não há nada da cidade a até 15 km, o app avisa "Você não está em …" e mostra os conhecidos de lá
+4j. ✅ Visual novo pelas 3 imagens do modelo (07/11, v1.1.0): cabeçalho verde com a paisagem da cidade (morros e igreja
+   amarela, `assets/ilustracoes/cabecalho.png`, desenhada por `paisagem.py`), "Acha Fácil!" com traço amarelo, cidade
+   em pílula branca e busca amarela; abas com tracinho verde. Telas: Início (categorias, destaque, recomendados, perto,
+   "Tem um comércio?"), Categorias, área, Busca com Filtros (categoria, bairro, ordem, com telefone), comércio, Avaliar
+   (tela própria), Favoritos, Perfil (visitante e conectado), Entrar, Criar conta (confirmar senha + aceite), Recuperar
+   senha (abre o e-mail pronto para a FSA, o servidor ainda não manda e-mail), Escolher cidade (busca + confirmar, sem
+   o passo do estado), Procurar meu negócio, Planos e Sobre. Sem fotos dos comércios: a cor e o ícone da área no lugar.
+   Ficou de fora (não existe no servidor): "Editar meus dados" e "Minhas avaliações"
 5. ✅ Testar no PC (`npm install`, `npx tsc --noEmit`, `npx expo lint`, emulador)
 6. ✅ Projeto EAS próprio e 1º APK publicado no site (07/11, v1.0.0); publicar com `bash servidor/publicar-apk.sh <link do EAS>`
 7. ⬜ Contas no app: conferir se entrar/criar conta funciona (no Guia Sanjoanense isso ainda está em aberto)

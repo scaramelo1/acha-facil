@@ -1,16 +1,18 @@
-// Visual do Acha Fácil: telas claras, cartões brancos com sombra suave, verde da marca nos botões e na aba ativa,
-// amarelo nos selos e chamadas, e cada área com a sua cor. Letras grandes e botões altos (fácil para a terceira idade).
+// Visual do Acha Fácil (modelo do usuário, 07/11): cabeçalho verde-escuro com a paisagem da cidade (morros e igreja),
+// título branco com traço amarelo e busca amarela; corpo claro com cartões brancos de borda fina; botões amarelos
+// com texto verde. Letras grandes e botões altos (fácil para a terceira idade).
 export const cores = {
-  fundo: '#F6F8F3', // quase branco, levemente esverdeado
+  fundo: '#F7F8F4', // quase branco
   cartao: '#FFFFFF',
-  fundoSuave: '#FFF4C7', // amarelo bem claro: etiquetas, setas
-  texto: '#0E2A1B',
-  textoSuave: '#56645B',
-  borda: '#E3E8E0',
-  verde: '#005C38', // verde da logo: botões principais, aba ativa, faixas
-  destaque: '#00804F', // verde mais claro: ícones, links
-  verdeClaro: '#E4F2E8',
-  amarelo: '#F7C600', // amarelo da logo: cidade, tipo do comércio, chamada para o dono
+  fundoSuave: '#FFF6D1', // amarelo bem claro: cartão "Tem um comércio?", etiquetas
+  texto: '#123222',
+  textoSuave: '#5B675F',
+  borda: '#E2E6DF',
+  verde: '#005C38', // verde da logo: títulos, ícones, botões verdes
+  verdeEscuro: '#073D25', // fundo do cabeçalho por trás da paisagem
+  destaque: '#00804F', // verde mais claro: links
+  verdeClaro: '#E6F3EA',
+  amarelo: '#F7C600', // amarelo da logo: busca, botões principais, traços
   whatsapp: '#1C9A3C',
   estrela: '#E8A400',
   erro: '#B00020',
@@ -20,23 +22,32 @@ export const fonte = {
   pequena: 16,
   normal: 18,
   media: 20,
-  grande: 24,
+  grande: 22,
   titulo: 30,
 };
 
 /** Altura mínima de qualquer coisa tocável (maior que o padrão de 44/48 px). */
 export const TOQUE = 56;
-export const RAIO = 20;
-/** Espaço que as telas das abas deixam embaixo para a barra de abas flutuante não cobrir o conteúdo. */
-export const ESPACO_BARRA = 130;
+export const RAIO = 16;
+/** Espaço livre no fim das telas das abas (a barra de abas fica embaixo, sem cobrir o conteúdo). */
+export const ESPACO_BARRA = 28;
 
-/** Sombra suave dos cartões. */
+/** Sombra bem leve dos cartões (o contorno fino faz o resto). */
 export const sombra = {
-  shadowColor: '#0E2A1B',
-  shadowOpacity: 0.08,
-  shadowRadius: 12,
-  shadowOffset: { width: 0, height: 4 },
-  elevation: 2,
+  shadowColor: '#123222',
+  shadowOpacity: 0.06,
+  shadowRadius: 8,
+  shadowOffset: { width: 0, height: 2 },
+  elevation: 1,
+} as const;
+
+/** Cartão branco com contorno fino, como no modelo. */
+export const cartao = {
+  backgroundColor: '#FFFFFF',
+  borderRadius: RAIO,
+  borderWidth: 1,
+  borderColor: '#E2E6DF',
+  ...sombra,
 } as const;
 
 /** Bom dia / boa tarde / boa noite, pela hora do celular. */

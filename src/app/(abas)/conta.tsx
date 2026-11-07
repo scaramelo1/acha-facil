@@ -1,20 +1,29 @@
-import * as WebBrowser from 'expo-web-browser';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Alert, ScrollView, Text, View } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { URL_MEU_NEGOCIO, URL_PRIVACIDADE, URL_TERMOS } from '../../api/cliente';
-import { Botao, Titulo, estilos as ui } from '../../componentes/ui';
+import { URL_PRIVACIDADE, URL_TERMOS } from '../../api/cliente';
 import { useCidade } from '../../cidade';
+import { Cabecalho } from '../../componentes/Cabecalho';
+import { CartaoDono } from '../../componentes/CartaoDono';
+import { Botao, LinhaMenu } from '../../componentes/ui';
 import { useConta } from '../../conta';
-import { cores, ESPACO_BARRA, fonte } from '../../tema';
+import { cartao, cores, ESPACO_BARRA, fonte } from '../../tema';
 
-export default function TelaConta() {
+// Perfil: sem conta, convite para entrar; com conta, o menu (favoritos, cidade, meu negócio, sair…)
+export default function TelaPerfil() {
   const router = useRouter();
   const { usuario, sair, excluirConta } = useConta();
   const { cidade, trocarCidade } = useCidade();
 
+  const confirmarSaida = () =>
+    Alert.alert('Sair da conta?', 'Você pode entrar de novo quando quiser.', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Sair', onPress: () => sair() },
+    ]);
   const confirmarExclusao = () =>
-    Alert.alert('Excluir conta?', 'Suas avaliações e salvos serão apagados. Isso não pode ser desfeito.', [
+    Alert.alert('Excluir conta?', 'Suas avaliações e favoritos serão apagados. Isso não pode ser desfeito.', [
       { text: 'Cancelar', style: 'cancel' },
       {
         text: 'Excluir',
@@ -23,38 +32,79 @@ export default function TelaConta() {
       },
     ]);
 
+  const trocar = (
+    <View style={estilos.trocar}>
+      <Text style={estilos.trocarTexto}>Trocar</Text>
+      <MaterialCommunityIcons name="chevron-right" size={18} color={cores.verde} />
+    </View>
+  );
+  const linhaCidade = <LinhaMenu icone="map-marker-outline" texto="Cidade" detalhe={cidade.nome} onPress={trocarCidade} direita={trocar} />;
+  const termos = <LinhaMenu icone="file-document-outline" texto="Termos de uso" onPress={() => WebBrowser.openBrowserAsync(URL_TERMOS)} />;
+  const privacidade = <LinhaMenu icone="shield-check-outline" texto="Privacidade" onPress={() => WebBrowser.openBrowserAsync(URL_PRIVACIDADE)} />;
+  const sobre = <LinhaMenu icone="information-outline" texto="Sobre o app" onPress={() => router.push('/sobre')} />;
+
   return (
-    <ScrollView contentContainerStyle={{ padding: 20, gap: 12, paddingBottom: ESPACO_BARRA }}>
-      {usuario ? (
-        <View style={{ gap: 12 }}>
-          <Text style={{ fontSize: fonte.grande, fontWeight: '800', color: cores.texto }}>Olá, {usuario.nome.split(' ')[0]}!</Text>
-          <Text style={[ui.texto, { color: cores.textoSuave }]}>{usuario.email}</Text>
-          <Botao titulo="Meus salvos" icone="heart-outline" tipo="contorno" onPress={() => router.push('/salvos')} />
-          <Botao titulo="Sair" icone="logout" tipo="contorno" onPress={sair} />
-        </View>
-      ) : (
-        <View style={{ gap: 12 }}>
-          <Text style={ui.texto}>Entre para avaliar, comentar e salvar seus lugares favoritos.</Text>
-          <Botao titulo="Entrar ou criar conta" icone="login" onPress={() => router.push('/entrar')} />
-        </View>
-      )}
-
-      <Titulo>Cidade</Titulo>
-      <Botao titulo={`${cidade.nome} · trocar`} icone="map-marker-outline" tipo="contorno" onPress={trocarCidade} />
-
-      <Titulo>Tem um comércio em {cidade.curto}?</Titulo>
-      <Text style={ui.texto}>Ele pode já estar no app. Procure e confira os planos para corrigir os dados e colocar fotos.</Text>
-      <Botao titulo="Procurar meu negócio" icone="storefront-outline" tipo="amarelo" onPress={() => WebBrowser.openBrowserAsync(URL_MEU_NEGOCIO)} />
-
-      <Titulo>Sobre o app</Titulo>
-      <Botao titulo="Termos de uso" icone="file-document-outline" tipo="contorno" onPress={() => WebBrowser.openBrowserAsync(URL_TERMOS)} />
-      <Botao titulo="Privacidade" icone="shield-account-outline" tipo="contorno" onPress={() => WebBrowser.openBrowserAsync(URL_PRIVACIDADE)} />
-
-      {usuario && (
-        <View style={{ marginTop: 32 }}>
-          <Botao titulo="Excluir minha conta" icone="delete-outline" tipo="perigo" onPress={confirmarExclusao} />
-        </View>
-      )}
+    <ScrollView contentContainerStyle={{ paddingBottom: ESPACO_BARRA }}>
+      <Cabecalho titulo={usuario ? 'Meu perfil' : 'Perfil'} />
+      <View style={{ padding: 16 }}>
+        {usuario ? (
+          <>
+            <View style={estilos.eu}>
+              <View style={estilos.avatar}>
+                <MaterialCommunityIcons name="account" size={60} color="#fff" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={estilos.euNome} numberOfLines={2}>
+                  {usuario.nome}
+                </Text>
+                <Text style={estilos.euEmail} numberOfLines={1}>
+                  {usuario.email}
+                </Text>
+              </View>
+            </View>
+            <LinhaMenu icone="heart-outline" texto="Meus favoritos" onPress={() => router.push('/salvos')} />
+            {linhaCidade}
+            <LinhaMenu icone="storefront-outline" texto="Meu negócio" onPress={() => router.push('/meu-negocio')} />
+            <LinhaMenu icone="star-outline" texto="Planos para comércio" onPress={() => router.push('/planos')} />
+            {sobre}
+            {termos}
+            {privacidade}
+            <LinhaMenu icone="logout" texto="Sair" onPress={confirmarSaida} direita={<View />} />
+            <LinhaMenu icone="delete-outline" texto="Excluir minha conta" cor={cores.erro} onPress={confirmarExclusao} direita={<View />} />
+          </>
+        ) : (
+          <>
+            <View style={estilos.convite}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+                <View style={estilos.avatarClaro}>
+                  <MaterialCommunityIcons name="account-outline" size={40} color={cores.verde} />
+                </View>
+                <Text style={[estilos.conviteTexto, { flex: 1 }]}>Entre na sua conta para salvar favoritos e avaliar os comércios.</Text>
+              </View>
+              <Botao titulo="Entrar ou criar conta" tipo="amarelo" seta onPress={() => router.push('/entrar')} estilo={{ marginTop: 14 }} />
+            </View>
+            {linhaCidade}
+            <View style={{ marginVertical: 6 }}>
+              <CartaoDono />
+            </View>
+            {sobre}
+            {termos}
+            {privacidade}
+          </>
+        )}
+      </View>
     </ScrollView>
   );
 }
+
+const estilos = StyleSheet.create({
+  eu: { flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 18 },
+  avatar: { width: 84, height: 84, borderRadius: 42, backgroundColor: cores.verde, alignItems: 'center', justifyContent: 'center' },
+  euNome: { fontSize: fonte.grande + 2, fontWeight: '900', color: cores.texto },
+  euEmail: { fontSize: fonte.pequena - 1, color: cores.textoSuave, marginTop: 2 },
+  convite: { ...cartao, padding: 16, marginBottom: 12 },
+  avatarClaro: { width: 64, height: 64, borderRadius: 32, backgroundColor: cores.verdeClaro, alignItems: 'center', justifyContent: 'center' },
+  conviteTexto: { fontSize: fonte.pequena, color: cores.texto, lineHeight: 22 },
+  trocar: { flexDirection: 'row', alignItems: 'center', backgroundColor: cores.fundoSuave, borderRadius: 14, paddingLeft: 12, paddingRight: 6, minHeight: 34 },
+  trocarTexto: { fontSize: 15, fontWeight: '900', color: cores.verde },
+});

@@ -5,8 +5,8 @@ import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, Vi
 
 import { chamar, type ProfissionalResumo } from '../api/cliente';
 import { useCidade } from '../cidade';
-import { cores, fonte, RAIO, sombra } from '../tema';
-import { Botao, CartaoProfissional, Icone } from './ui';
+import { cartao, cores, fonte } from '../tema';
+import { Botao, CartaoProfissional, Pilula } from './ui';
 
 interface Atalho {
   id: string;
@@ -121,7 +121,7 @@ export function PertoDeVoce({ semLocalizacao }: { semLocalizacao?: React.ReactNo
           {estado === 'negado' && !podePerguntar ? (
             <Botao titulo="Abrir configurações" icone="cog-outline" tipo="contorno" onPress={() => Linking.openSettings()} estilo={{ alignSelf: 'stretch' }} />
           ) : (
-            <Botao titulo="Usar minha localização" icone="map-marker-radius" onPress={pedir} estilo={{ alignSelf: 'stretch' }} />
+            <Botao titulo="Usar minha localização" icone="map-marker-radius" tipo="amarelo" onPress={pedir} estilo={{ alignSelf: 'stretch' }} />
           )}
         </View>
         {semLocalizacao}
@@ -132,9 +132,9 @@ export function PertoDeVoce({ semLocalizacao }: { semLocalizacao?: React.ReactNo
     <View>
       {atalhos.length > 0 && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={estilos.atalhos}>
-          <Pilula rotulo="Tudo" icone="map-marker-radius-outline" ativo={atalho === null} onPress={() => atalho !== null && escolher(null)} />
+          <Pilula texto="Tudo" icone="map-marker-radius-outline" ativo={atalho === null} onPress={() => atalho !== null && escolher(null)} />
           {atalhos.map((a) => (
-            <Pilula key={a.id} rotulo={a.rotulo} icone={a.icone} ativo={atalho === a.id} onPress={() => escolher(atalho === a.id ? null : a.id)} />
+            <Pilula key={a.id} texto={a.rotulo} icone={a.icone} ativo={atalho === a.id} onPress={() => escolher(atalho === a.id ? null : a.id)} />
           ))}
         </ScrollView>
       )}
@@ -168,38 +168,12 @@ export function PertoDeVoce({ semLocalizacao }: { semLocalizacao?: React.ReactNo
   );
 }
 
-function Pilula({ rotulo, icone, ativo, onPress }: { rotulo: string; icone: string; ativo: boolean; onPress: () => void }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected: ativo }}
-      onPress={onPress}
-      style={[estilos.pilula, ativo && { backgroundColor: cores.verde, borderColor: cores.verde }]}
-    >
-      <Icone nome={icone} tamanho={20} cor={ativo ? '#fff' : cores.verde} />
-      <Text style={[estilos.pilulaTexto, ativo && { color: '#fff' }]}>{rotulo}</Text>
-    </Pressable>
-  );
-}
-
 const estilos = StyleSheet.create({
-  convite: { backgroundColor: cores.cartao, borderRadius: RAIO, padding: 18, alignItems: 'center', gap: 10, marginBottom: 12, ...sombra },
+  convite: { ...cartao, padding: 18, alignItems: 'center', gap: 10, marginBottom: 12 },
   conviteIcone: { width: 64, height: 64, borderRadius: 32, backgroundColor: cores.verdeClaro, alignItems: 'center', justifyContent: 'center' },
   conviteTitulo: { fontSize: fonte.media, fontWeight: '900', color: cores.texto, textAlign: 'center' },
   conviteTexto: { fontSize: fonte.pequena, color: cores.textoSuave, textAlign: 'center' },
   atalhos: { paddingHorizontal: 16, paddingBottom: 14, gap: 8 },
-  pilula: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    minHeight: 46,
-    paddingHorizontal: 16,
-    borderRadius: 23,
-    borderWidth: 1,
-    borderColor: cores.borda,
-    backgroundColor: cores.cartao,
-  },
-  pilulaTexto: { fontSize: fonte.pequena, fontWeight: '800', color: cores.texto },
   vazio: { fontSize: fonte.pequena, color: cores.textoSuave, textAlign: 'center', paddingVertical: 20 },
   atualizar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, minHeight: 44 },
   atualizarTexto: { fontSize: fonte.pequena, fontWeight: '800', color: cores.destaque },

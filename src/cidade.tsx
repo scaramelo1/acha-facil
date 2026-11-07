@@ -32,7 +32,7 @@ function lerSalva(): Cidade {
   return c;
 }
 
-/** Toda vez que o app abre, pergunta o estado e depois a cidade; a última escolha fica marcada. */
+/** Toda vez que o app abre, pergunta a cidade ("Onde você quer buscar?"); a última escolha vem marcada. */
 export function ProvedorCidade({ children }: { children: ReactNode }) {
   const [cidade, setCidade] = useState<Cidade>(lerSalva);
   const [escolhendo, setEscolhendo] = useState(true);

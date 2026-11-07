@@ -7,61 +7,42 @@ import { cores } from '../../tema';
 
 type NomeIcone = keyof typeof MaterialCommunityIcons.glyphMap;
 
-/** Aba com ícone e nome; a aba aberta vira uma pílula verde com ícone e nome brancos. */
+/** Aba com ícone e nome; a aba aberta fica verde, com o ícone cheio, nome em negrito e um tracinho embaixo. */
 function aba(titulo: string, nome: NomeIcone, ativo: NomeIcone) {
   // eslint-disable-next-line react/display-name
   return ({ focused }: { focused: boolean }) => (
-    <View
-      style={{
-        minWidth: 84,
-        height: 60,
-        paddingHorizontal: 10,
-        borderRadius: 22,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: focused ? cores.verde : 'transparent',
-      }}
-    >
-      <MaterialCommunityIcons name={focused ? ativo : nome} size={28} color={focused ? '#fff' : cores.texto} />
-      <Text numberOfLines={1} style={{ fontSize: 14, fontWeight: '700', color: focused ? '#fff' : cores.texto }}>
+    <View style={{ minWidth: 80, alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+      <MaterialCommunityIcons name={focused ? ativo : nome} size={28} color={focused ? cores.verde : cores.texto} />
+      <Text numberOfLines={1} style={{ fontSize: 14, fontWeight: focused ? '900' : '600', color: focused ? cores.verde : cores.texto }}>
         {titulo}
       </Text>
+      <View style={{ width: 40, height: 3, borderRadius: 2, backgroundColor: focused ? cores.verde : 'transparent', marginTop: 2 }} />
     </View>
   );
 }
 
-// Barra de abas branca embaixo, com a aba aberta em pílula verde (nomes sempre escritos: mais fácil que menus escondidos)
+// Barra de abas branca embaixo (nomes sempre escritos: mais fácil que menus escondidos). Cada tela tem o próprio cabeçalho verde.
 export default function Abas() {
   const baixo = useSafeAreaInsets().bottom;
   return (
     <Tabs
       screenOptions={{
+        headerShown: false,
         tabBarShowLabel: false,
         tabBarStyle: {
-          position: 'absolute',
-          height: 84 + baixo,
-          paddingTop: 12,
-          paddingBottom: baixo + 8,
-          borderTopWidth: 0,
-          borderTopLeftRadius: 26,
-          borderTopRightRadius: 26,
+          height: 76 + baixo,
+          paddingTop: 10,
+          paddingBottom: baixo + 6,
+          borderTopWidth: 1,
+          borderTopColor: cores.borda,
           backgroundColor: cores.cartao,
-          elevation: 12,
-          shadowColor: '#0E2A1B',
-          shadowOpacity: 0.1,
-          shadowRadius: 14,
-          shadowOffset: { width: 0, height: -4 },
+          elevation: 8,
         },
-        tabBarIconStyle: { width: '100%', height: 60 },
-        headerStyle: { backgroundColor: cores.fundo },
-        headerTintColor: cores.texto,
-        headerTitleStyle: { fontSize: 24, fontWeight: '900' },
-        headerTitleAlign: 'left',
-        headerShadowVisible: false,
+        tabBarIconStyle: { width: '100%', height: 58 },
         sceneStyle: { backgroundColor: cores.fundo },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Início', headerShown: false, tabBarAccessibilityLabel: 'Início', tabBarIcon: aba('Início', 'home-outline', 'home') }} />
+      <Tabs.Screen name="index" options={{ title: 'Início', tabBarAccessibilityLabel: 'Início', tabBarIcon: aba('Início', 'home-outline', 'home') }} />
       <Tabs.Screen name="explorar" options={{ title: 'Categorias', tabBarAccessibilityLabel: 'Categorias', tabBarIcon: aba('Categorias', 'view-grid-outline', 'view-grid') }} />
       <Tabs.Screen name="salvos" options={{ title: 'Favoritos', tabBarAccessibilityLabel: 'Favoritos', tabBarIcon: aba('Favoritos', 'heart-outline', 'heart') }} />
       <Tabs.Screen name="conta" options={{ title: 'Perfil', tabBarAccessibilityLabel: 'Perfil', tabBarIcon: aba('Perfil', 'account-outline', 'account') }} />

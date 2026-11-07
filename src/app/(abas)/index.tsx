@@ -1,16 +1,14 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { chamar, URL_MEU_NEGOCIO, type Categoria, type ProfissionalResumo } from '../../api/cliente';
+import { chamar, type Categoria, type ProfissionalResumo } from '../../api/cliente';
 import { useCidade } from '../../cidade';
+import { Cabecalho } from '../../componentes/Cabecalho';
+import { CartaoDono } from '../../componentes/CartaoDono';
 import { PertoDeVoce } from '../../componentes/PertoDeVoce';
 import { Vitrine } from '../../componentes/Vitrine';
-import { CartaoProfissional, Carregando, corClara, Falha, Icone, Titulo, useCarregar } from '../../componentes/ui';
-import { cores, ESPACO_BARRA, fonte, RAIO, sombra } from '../../tema';
+import { Carregando, Falha, Foto, QuadroArea, Titulo, useCarregar } from '../../componentes/ui';
+import { cartao, cores, ESPACO_BARRA, fonte } from '../../tema';
 
 interface Inicio {
   destaques: ProfissionalResumo[];
@@ -19,172 +17,109 @@ interface Inicio {
   total: number;
 }
 
-// Nome curto das áreas nos quadradinhos da tela inicial (o nome completo aparece na tela da área)
-const CURTO: Record<string, string> = { mercados: 'Mercados', casa: 'Casa', lojas: 'Lojas', esporte: 'Esporte', pet: 'Pet e agro' };
+// Nome curto das áreas nos quadros da tela inicial (o nome completo aparece na tela da área)
+const CURTO: Record<string, string> = {
+  mercados: 'Mercados',
+  casa: 'Casa',
+  lojas: 'Lojas',
+  esporte: 'Esporte',
+  pet: 'Pet e agro',
+  hospedagem: 'Hospedagem',
+  entidades: 'Igrejas',
+};
 
 export default function TelaInicio() {
   const router = useRouter();
-  const { cidade, trocarCidade } = useCidade();
+  const { cidade } = useCidade();
   const { dados, erro, carregando, recarregar } = useCarregar(() => chamar<Inicio>('inicio.php'), `inicio-${cidade.slug}`);
-  const principais = (dados?.categorias.filter((c) => c.naInicial && c.total > 0) ?? []).slice(0, 6);
+  // as áreas marcadas para a inicial vêm primeiro; as outras com lugares vêm depois
+  const areas = (dados?.categorias.filter((c) => c.total > 0) ?? []).sort((a, b) => Number(b.naInicial) - Number(a.naInicial));
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: cores.fundo }} edges={['top']}>
-      <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: ESPACO_BARRA }}
-        refreshControl={<RefreshControl refreshing={carregando && !!dados} onRefresh={recarregar} />}
-      >
-        {/* marca + cidade */}
-        <View style={estilos.topo}>
-          <Image source={require('../../../assets/logo.png')} style={{ width: 40, height: 40 }} />
-          <Text style={estilos.marca}>
-            Acha <Text style={{ color: cores.amarelo }}>Fácil!</Text>
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Cidade: ${cidade.nome}. Toque para trocar`}
-            onPress={trocarCidade}
-            style={({ pressed }) => [estilos.cidade, pressed && { opacity: 0.85 }]}
-          >
-            <MaterialCommunityIcons name="map-marker" size={18} color={cores.verde} />
-            <Text style={estilos.cidadeTexto} numberOfLines={1}>
-              {cidade.curto}
-            </Text>
-            <MaterialCommunityIcons name="chevron-down" size={20} color={cores.verde} />
-          </Pressable>
-        </View>
+    <ScrollView
+      contentContainerStyle={{ paddingBottom: ESPACO_BARRA }}
+      refreshControl={<RefreshControl refreshing={carregando && !!dados} onRefresh={recarregar} />}
+    >
+      <Cabecalho titulo="Descubra o melhor da cidade" busca={{ texto: 'Buscar comércios ou serviços', aoTocar: () => router.push('/busca') }} />
 
-        <Text style={estilos.ola}>Olá, boas-vindas!</Text>
-        <Text style={estilos.pergunta}>Encontre o que precisa, perto de você.</Text>
-
-        <Pressable
-          accessibilityRole="search"
-          accessibilityLabel="Buscar comércios e serviços"
-          onPress={() => router.push('/busca')}
-          style={({ pressed }) => [estilos.busca, pressed && { opacity: 0.85 }]}
-        >
-          <MaterialCommunityIcons name="magnify" size={28} color={cores.texto} />
-          <Text style={estilos.buscaTexto}>Buscar comércios e serviços</Text>
-        </Pressable>
-
-        {/* faixa verde "Explore o melhor da cidade" com a ilustração da cidade (assets/ilustracoes/cidade.svg) */}
-        <Pressable accessibilityRole="button" onPress={() => router.push('/explorar')} style={({ pressed }) => [estilos.faixa, pressed && { opacity: 0.9 }]}>
-          <View style={{ maxWidth: '62%', zIndex: 1 }}>
-            <Text style={estilos.faixaTitulo}>Explore o melhor{'\n'}da cidade</Text>
-            <View style={estilos.faixaTraco} />
-          </View>
-          <Image source={require('../../../assets/ilustracoes/cidade.png')} style={estilos.desenho} contentFit="contain" accessible={false} />
-        </Pressable>
-
+      <View style={{ paddingHorizontal: 16 }}>
         {carregando && !dados ? (
-          <View style={{ height: 260 }}>
+          <View style={{ height: 300 }}>
             <Carregando />
           </View>
         ) : erro && !dados ? (
-          <View style={{ height: 260 }}>
+          <View style={{ height: 300 }}>
             <Falha mensagem={erro} tentar={recarregar} />
           </View>
         ) : dados ? (
           <>
-            <Titulo>Comércios em destaque</Titulo>
-            <Vitrine itens={dados.destaques} />
-
-            <Titulo>Perto de você</Titulo>
-            <PertoDeVoce
-              semLocalizacao={
-                dados.populares.length > 0 ? (
-                  <>
-                    <Titulo>Conhecidos na cidade</Titulo>
-                    {dados.populares.slice(0, 6).map((p) => (
-                      <CartaoProfissional key={p.id} p={p} />
-                    ))}
-                  </>
-                ) : null
-              }
-            />
-
             <Titulo acao="Ver todas" aoTocarAcao={() => router.push('/explorar')}>
-              Categorias
+              Explore por categoria
             </Titulo>
-            <View style={estilos.grade}>
-              {principais.map((c) => (
-                <Pressable
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}>
+              {areas.map((c) => (
+                <QuadroArea
                   key={c.id}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${c.nome}, ${c.total} lugares`}
+                  nome={CURTO[c.slug] ?? c.nome}
+                  icone={c.icone}
+                  cor={c.cor}
+                  largura={108}
+                  altura={100}
                   onPress={() => router.push(`/categoria/${c.id}`)}
-                  style={({ pressed }) => [estilos.area, pressed && { opacity: 0.85 }]}
-                >
-                  <View style={[estilos.areaIcone, { backgroundColor: corClara(c.cor) }]}>
-                    <Icone nome={c.icone} tamanho={30} cor={c.cor} />
-                  </View>
-                  <Text style={estilos.areaNome} numberOfLines={1}>
-                    {CURTO[c.slug] ?? c.nome}
-                  </Text>
-                </Pressable>
+                />
               ))}
+            </ScrollView>
+
+            <View style={{ marginTop: 18 }}>
+              <Vitrine itens={dados.destaques} />
             </View>
 
+            {dados.populares.length > 0 && (
+              <>
+                <Titulo>Recomendados em {cidade.nome}</Titulo>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}>
+                  {dados.populares.map((p) => (
+                    <Pressable
+                      key={p.id}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${p.nome}, ${p.tipo}`}
+                      onPress={() => router.push(`/profissional/${p.id}`)}
+                      style={({ pressed }) => [estilos.mini, pressed && { opacity: 0.85 }]}
+                    >
+                      <Foto foto={p.foto} icone={p.icone} cor={p.cor} largura={140} altura={92} raio={0} />
+                      <View style={{ padding: 8 }}>
+                        <Text style={estilos.miniNome} numberOfLines={2}>
+                          {p.nome}
+                        </Text>
+                        <Text style={estilos.miniTipo} numberOfLines={1}>
+                          {p.tipo}
+                        </Text>
+                      </View>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </>
+            )}
 
-            {/* chamada para o dono do negócio */}
-            <Pressable accessibilityRole="button" onPress={() => WebBrowser.openBrowserAsync(URL_MEU_NEGOCIO)} style={estilos.dono}>
-              <MaterialCommunityIcons name="storefront-outline" size={36} color={cores.verde} />
-              <View style={{ flex: 1 }}>
-                <Text style={estilos.donoTitulo}>Tem um comércio aqui?</Text>
-                <Text style={estilos.donoTexto}>Confira os planos para corrigir os dados e colocar fotos.</Text>
-              </View>
-              <MaterialCommunityIcons name="chevron-right" size={26} color={cores.verde} />
-            </Pressable>
+            <Titulo>Perto de você</Titulo>
+            <PertoDeVoce />
+
+            <View style={{ marginTop: 24 }}>
+              <CartaoDono />
+            </View>
             <Text style={estilos.rodape}>
               {dados.total.toLocaleString('pt-BR')} comércios e serviços de {cidade.nome}
             </Text>
           </>
         ) : null}
-      </ScrollView>
-    </SafeAreaView>
+      </View>
+    </ScrollView>
   );
 }
 
 const estilos = StyleSheet.create({
-  topo: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 8 },
-  marca: { flex: 1, fontSize: fonte.grande, fontWeight: '900', color: cores.verde },
-  cidade: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    maxWidth: '52%',
-    minHeight: 44,
-    backgroundColor: cores.amarelo,
-    borderRadius: 16,
-    paddingLeft: 12,
-    paddingRight: 8,
-  },
-  cidadeTexto: { flexShrink: 1, fontSize: fonte.pequena, fontWeight: '800', color: cores.verde },
-  ola: { color: cores.textoSuave, fontSize: fonte.normal, marginTop: 22 },
-  pergunta: { color: cores.texto, fontSize: 30, fontWeight: '900', lineHeight: 36, marginTop: 2, marginBottom: 18 },
-  busca: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    minHeight: 60,
-    borderRadius: 30,
-    paddingHorizontal: 20,
-    backgroundColor: cores.cartao,
-    borderWidth: 1,
-    borderColor: cores.borda,
-    ...sombra,
-  },
-  buscaTexto: { fontSize: fonte.normal, color: cores.textoSuave },
-  faixa: { flexDirection: 'row', alignItems: 'center', backgroundColor: cores.verde, borderRadius: RAIO, paddingLeft: 20, marginTop: 18, minHeight: 132, overflow: 'hidden' },
-  faixaTitulo: { color: '#fff', fontSize: 22, fontWeight: '900', lineHeight: 28 },
-  faixaTraco: { width: 56, height: 5, borderRadius: 3, backgroundColor: cores.amarelo, marginTop: 10 },
-  desenho: { position: 'absolute', right: -6, bottom: -12, width: 184, height: 115 },
-  grade: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 12 },
-  area: { width: '31.5%', minHeight: 108, borderRadius: RAIO, backgroundColor: cores.cartao, alignItems: 'center', justifyContent: 'center', padding: 8, gap: 10, ...sombra },
-  areaIcone: { width: 56, height: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  areaNome: { fontSize: fonte.pequena, fontWeight: '800', color: cores.texto, textAlign: 'center' },
-  dono: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: cores.amarelo, borderRadius: RAIO, padding: 18, marginTop: 16 },
-  donoTitulo: { color: cores.verde, fontSize: fonte.media, fontWeight: '900' },
-  donoTexto: { color: cores.verde, fontSize: fonte.pequena },
+  mini: { ...cartao, width: 140, overflow: 'hidden', paddingBottom: 2 },
+  miniNome: { fontSize: fonte.pequena, fontWeight: '900', color: cores.texto, lineHeight: 20 },
+  miniTipo: { fontSize: 14, color: cores.textoSuave, marginTop: 2 },
   rodape: { textAlign: 'center', color: cores.textoSuave, fontSize: 14, marginTop: 20 },
 });
