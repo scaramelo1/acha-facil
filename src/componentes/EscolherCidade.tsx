@@ -10,7 +10,7 @@ import { Botao } from './ui';
 
 /** Sem acento e em minúsculas, para "pocos" achar "Poços". */
 function simples(t: string) {
-  return t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
 /**
