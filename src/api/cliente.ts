@@ -101,6 +101,44 @@ export interface Usuario {
   email: string;
   /** Foto do perfil do Google. */
   foto: string | null;
+  /** E-mail cadastrado como administrador: vê a tela Administração e recebe os avisos. */
+  admin?: boolean;
+}
+
+/** Tela Administração (api/admin.php) */
+export interface CampoAlterado {
+  campo: string;
+  rotulo: string;
+  antes: string | null;
+  depois: string | null;
+}
+export interface AlteracaoPendente {
+  id: number;
+  comercio: string;
+  cidade: string;
+  quando: string;
+  dono: string | null;
+  donoTelefone: string;
+  pago: { nome: string; telefone: string; email: string | null; plano: string | null; status: string | null } | null;
+  primeira: boolean;
+  conferirTelefone: string | null;
+  campos: CampoAlterado[];
+}
+export interface PedidoNovo {
+  id: number;
+  tipo: 'assumir' | 'remover';
+  plano: string | null;
+  pago: boolean;
+  comercio: string | null;
+  nome: string;
+  telefone: string;
+  quando: string;
+}
+export interface Pendencias {
+  alteracoes: AlteracaoPendente[];
+  pedidos: PedidoNovo[];
+  cidades: { cidade: string; uf: string | null; total: number; ultimo: string }[];
+  site: string;
 }
 
 export class ErroApi extends Error {

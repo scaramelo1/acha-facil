@@ -54,6 +54,11 @@ if ($p && $em_dia && e_post()) {
     if ($erro) apagar_foto($foto);
     else {
         $id = propor_alteracao($p, (int)$p['acesso_id'], $valores, $foto);
+        if ($id) {
+            require_once __DIR__ . '/../../inc/avisos.php';
+            $campos = array_map(fn($c) => mb_strtolower(CAMPOS_DONO[$c][0]), array_keys(alteracao_pendente((int)$p['id'])['novos'] ?? []));
+            avisar_admins('Alteração para aprovar', $p['nome'] . ' pediu para mudar: ' . implode(', ', $campos) . '.', ['alteracao' => $id]);
+        }
         flash($id ? 'Recebemos suas mudanças. Elas aparecem no app assim que a equipe conferir (normalmente em até 1 dia útil).'
                   : 'Nada mudou em relação ao que já está no app.');
         ir('painel/');

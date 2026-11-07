@@ -167,16 +167,24 @@ function aprovar_alteracao(int $id, int $admin_id): void {
     $a = linha("SELECT * FROM alteracoes WHERE id = ? AND status = 'pendente' FOR UPDATE", [$id]);
     if (!$a) { db()->rollBack(); throw new RuntimeException('Esta alteração já foi decidida.'); }
     $novos = array_intersect_key(json_decode($a['novos'], true) ?: [], CAMPOS_DONO);
+    if (array_key_exists('atende_em_casa', $novos)) $novos['atende_em_casa'] = $novos['atende_em_casa'] ? 1 : 0;
+    if (array_key_exists('nome', $novos) && !$novos['nome']) unset($novos['nome']);   // nome nunca fica vazio
     $prof = linha('SELECT id, foto FROM profissionais WHERE id = ?', [$a['profissional_id']]);
     $dados = $novos;
     if (array_key_exists('endereco', $novos) || array_key_exists('bairro', $novos)) {
         // endereço novo: a localização antiga não vale mais; geocodificar.php acha de novo
         $dados += ['lat' => null, 'lng' => null, 'geo_origem' => null, 'geo_tentado' => null, 'mapa' => null];
     }
-    if ($dados) atualizar('profissionais', (int)$a['profissional_id'], $dados);
-    q("UPDATE alteracoes SET status = 'aprovada', admin_id = ?, decidido_em = NOW() WHERE id = ?", [$admin_id, $id]);
-    registrar($admin_id, 'aprovou_alteracao', (int)$a['profissional_id'], implode(', ', array_keys($novos)));
-    db()->commit();
+    try {
+        if ($dados) atualizar('profissionais', (int)$a['profissional_id'], $dados);
+        q("UPDATE alteracoes SET status = 'aprovada', admin_id = ?, decidido_em = NOW() WHERE id = ?", [$admin_id, $id]);
+        registrar($admin_id, 'aprovou_alteracao', (int)$a['profissional_id'], implode(', ', array_keys($novos)));
+        db()->commit();
+    } catch (Throwable $e) {
+        db()->rollBack();
+        error_log('acha-facil aprovar alteração ' . $id . ': ' . $e->getMessage());
+        throw new RuntimeException('Não foi possível aplicar esta alteração. Confira os dados ou recuse.');
+    }
     if (array_key_exists('foto', $novos) && $prof['foto'] && $prof['foto'] !== $novos['foto']) apagar_foto($prof['foto']);
 }
 

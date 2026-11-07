@@ -107,6 +107,11 @@ function mp_conferir_assinatura(string $mp_id): ?array {
         // liga o plano já; os primeiros 3 dias valem até a 1ª mensalidade ser confirmada (ela estende 1 mês)
         q("UPDATE profissionais SET plano = ?, mp_assinatura = ?, assinatura = 'ativa',
             assinatura_ate = GREATEST(COALESCE(assinatura_ate, CURDATE()), CURDATE() + INTERVAL 3 DAY) WHERE id = ?", [$pedido['plano'], $mp_id, $pid]);
+        if ($pedido['mp_status'] !== 'authorized') {   // só na 1ª confirmação (webhook e volta da página chamam os dois)
+            require_once __DIR__ . '/avisos.php';
+            avisar_admins('Novo plano pago', $pedido['nome'] . ' assinou o plano ' . (PLANOS_NOME[$pedido['plano']] ?? '') . ' de '
+                . (string)valor('SELECT nome FROM profissionais WHERE id = ?', [$pid]) . '.', ['pedido' => (int)$pedido['id']]);
+        }
     } elseif ($pid && in_array($status, ['paused', 'cancelled'], true)) {
         // não renova mais; continua valendo até o fim do mês já pago
         q("UPDATE profissionais SET assinatura = 'cancelada' WHERE id = ? AND mp_assinatura = ? AND assinatura = 'ativa'", [$pid, $mp_id]);

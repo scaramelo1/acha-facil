@@ -115,3 +115,10 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 - Arquivo da logo em alta (PNG/SVG) para trocar o redesenho, se quiser fidelidade total à arte.
 - Quantos lugares no carrossel de destaque (preços definidos em 07/11: Básico R$ 19,90/mês, Destaque R$ 29,90/mês).
 - Se volta a ter notícias no futuro.
+12. 🟡 Administrador no app com avisos no celular (07/11): fellipealexandre1@gmail.com é admin (tabela admins; também
+   entra no /admin do site). Conta do app com e-mail de admin vê "Administração" no Perfil (aprovar/recusar alterações
+   com antes x depois, pedidos novos, cidades pedidas) e recebe aviso quando alguém **paga um plano**, **pede uma cidade**
+   ou **manda alterações**; tocar no aviso abre a tela. Servidor: inc/avisos.php (Expo Push), api/avisos.php,
+   api/admin.php, tabela avisos_aparelhos (mudança 010). App: src/avisos.ts, src/app/admin.tsx, pacotes expo-notifications
+   e expo-device. Falta: Firebase do Android (google-services.json na raiz + chave FCM V1 no EAS) e testar no APK;
+   no iPhone, depois da conta Apple

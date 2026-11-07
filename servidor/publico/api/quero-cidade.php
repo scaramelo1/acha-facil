@@ -10,4 +10,7 @@ if ($uf !== '' && !in_array($uf, UFS, true)) erro('Estado: só a sigla, como SP 
 if ((int)valor('SELECT COUNT(*) FROM cidades_pedidas WHERE ip = ? AND criado_em > NOW() - INTERVAL 1 DAY', [ip()]) >= 5)
     responder(['ok' => true]);   // não conta de novo, mas não incomoda a pessoa
 inserir('cidades_pedidas', ['cidade' => $cidade, 'uf' => $uf ?: null, 'ip' => ip()]);
+require_once __DIR__ . '/../../inc/avisos.php';
+$total = (int)valor('SELECT COUNT(*) FROM cidades_pedidas WHERE LOWER(cidade) = LOWER(?)', [$cidade]);
+avisar_admins('Quero minha Cidade!', "Pediram o Acha Fácil em $cidade" . ($uf ? " ($uf)" : '') . ($total > 1 ? " ({$total}º pedido)" : '') . '.');
 responder(['ok' => true]);

@@ -67,6 +67,7 @@ export default function TelaPerfil() {
                 </Text>
               </View>
             </View>
+            {usuario.admin && <LinhaMenu icone="shield-account-outline" texto="Administração" detalhe="Aprovar alterações" onPress={() => router.push('/admin')} />}
             <LinhaMenu icone="heart-outline" texto="Meus favoritos" onPress={() => router.push('/salvos')} />
             {linhaCidade}
             <LinhaMenu icone="storefront-outline" texto="Meu negócio" onPress={() => router.push('/meu-negocio')} />

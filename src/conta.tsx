@@ -6,6 +6,7 @@ import { AppState } from 'react-native';
 
 import { chamar, definirToken, ErroApi, type Usuario } from './api/cliente';
 import { Armazenamento } from './armazenamento';
+import { desligarAvisos, ligarAvisosDeAdmin } from './avisos';
 
 // A conta só é necessária para avaliar, comentar e salvar profissionais. Navegar no app não pede login.
 // Entrar é só pelo Google, sem depender de o celular devolver um link para o app (isso varia entre Expo Go, APK e
@@ -82,6 +83,25 @@ export function ProvedorConta({ children }: { children: ReactNode }) {
     }
     setUsuario(u);
   }, []);
+
+  // ao abrir com a conta salva: confere no servidor (nome, foto e se é administrador podem ter mudado)
+  useEffect(() => {
+    if (!Armazenamento.ler(CHAVE_TOKEN)) return;
+    chamar<{ usuario: Usuario }>('eu.php')
+      .then((r) => {
+        const t = Armazenamento.ler(CHAVE_TOKEN);
+        if (t) guardar(t, r.usuario);
+      })
+      .catch((e: unknown) => {
+        if (e instanceof ErroApi && e.status === 401) guardar(null, null);   // sessão não vale mais
+      });
+  }, [guardar]);
+
+  // administrador conectado: liga os avisos no celular (pagamentos, cidades pedidas, alterações para aprovar)
+  const ehAdmin = !!usuario?.admin;
+  useEffect(() => {
+    if (ehAdmin) ligarAvisosDeAdmin();
+  }, [ehAdmin]);
 
   // voltou para o app com uma entrada pelo Google pendente: pergunta ao servidor se terminou
   useEffect(() => {
@@ -169,10 +189,12 @@ export function ProvedorConta({ children }: { children: ReactNode }) {
         return false;
       },
       async sair() {
+        await desligarAvisos();
         await chamar('sair.php', 'POST').catch(() => {});
         guardar(null, null);
       },
       async excluirConta() {
+        await desligarAvisos();
         await chamar('eu.php', 'DELETE');
         guardar(null, null);
       },
