@@ -10,6 +10,8 @@ Sanjoanenses e sem a aba Notícias.
   (`bash servidor/instalar.sh` como root; config em `/etc/acha-facil/config.php`; banco `acha_facil`).
 - **Pagamento:** Mercado Pago, assinatura recorrente no cartão (o cartão é digitado no Mercado Pago).
 - **Marca:** verde `#005C38` e amarelo `#F7C600`; símbolo (pino + loja + lupa) em `assets/logo-simbolo.svg`.
+- **Visual próprio (07/11):** fundo creme, cabeçalho verde com saudação e busca amarela, barra de abas flutuante
+  (Início, Áreas, Salvos, Conta), cada área com a sua cor, cartões com faixa colorida. Site com fonte Nunito e o mesmo estilo.
 
 Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 
@@ -21,7 +23,12 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 - O profissional aparece se estiver **aprovado** e com a **assinatura em dia** (ou cortesia dada pelo admin).
 - Ordem justa: destaques primeiro, depois quem tem avaliação; dentro de cada grupo a ordem muda uma vez por dia.
 - Selo "Verificado pelo Acha Fácil" é dado pelo admin, não vem com o pagamento.
-- Os 10 profissionais de `sql/exemplos.sql` são **fictícios** (`exemplo = 1`); apagar antes de lançar.
+- Os comércios vêm da **lista de leads** (fsadesigners.com.br/leads, coleta do Google Maps): `importado = 1`, aparecem
+  **sem assinatura** até o dono assumir o perfil. Reimportar: `php servidor/importar-leads.php` (atualiza pelo nome; não mexe em
+  quem assumiu nem em quem foi tirado). Os 10 exemplos fictícios foram apagados.
+- O dono procura o negócio em `/busca.php` e pede para **assumir** (grátis) ou **tirar do app** (`/perfil.php`); os pedidos
+  ficam na tabela `pedidos` até a administração web existir (passo 8).
+- Nota do Google **não aparece** no app: o número de avaliações do Google só ordena os "Conhecidos na cidade".
 
 ## Passos
 
@@ -32,10 +39,13 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    ("Acha **Fácil!**" + lema), logo da tela inicial, favicon do site, cores verde/amarelo no app e no site.
    O símbolo foi redesenhado em vetor a partir da arte enviada (`assets/logo-simbolo.svg`)
 4. ✅ Instalado na VPS (`bash servidor/instalar.sh --exemplos`); https://fsadesigners.com.br/acha-facil/ no ar
+4b. ✅ Visual completamente diferente do Guia Sanjoanense (07/11): app (inicial, áreas, área com filtros por tipo, busca,
+   perfil do comércio, abas) e site (inicial com números reais, busca do dono, assumir/tirar do app, privacidade)
+4c. ✅ 2.754 comércios da lista de leads no banco, em 17 áreas (07/11) — `bash servidor/instalar.sh --leads`
 5. ⬜ Testar no PC (`npm install`, `npx tsc --noEmit`, `npx expo lint`, emulador)
 6. 🟡 Projeto EAS próprio (ligado em 07/11 ✅) e 1º APK (falta); publicar com `bash servidor/publicar-apk.sh <link do EAS>`
 7. ⬜ Contas no app: conferir se entrar/criar conta funciona (no Guia Sanjoanense isso ainda está em aberto)
-8. ⬜ Administração web: aprovar/recusar cadastros, editar, selo, cortesia, categorias, ocultar comentários, apagar exemplos
+8. ⬜ Administração web: pedidos de assumir/tirar do app, aprovar/recusar cadastros, editar, selo, cortesia, categorias, ocultar comentários
 9. ⬜ Painel do profissional (web): autocadastro, foto, dados, serviços, responder avaliações, ver contatos recebidos
 10. ⬜ Assinatura recorrente no Mercado Pago (planos Básico e Destaque; webhook; atraso tira do ar)
 11. ⬜ Publicar nas lojas (Play Store e App Store) — conferir se o nome "Acha Fácil" está livre nas duas

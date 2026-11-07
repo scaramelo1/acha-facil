@@ -1,6 +1,6 @@
 <?php
-// Visual comum das páginas públicas (divulgação, termos, privacidade): minimalista, letra grande, preto e branco
-// com detalhes ciano/magenta, como o app.
+// Visual comum das páginas públicas (divulgação, busca, termos, privacidade): creme, verde e amarelo da marca,
+// cantos redondos e letra grande (Nunito), como o app.
 declare(strict_types=1);
 
 /** Contatos e links das lojas, definidos em /etc/acha-facil/config.php (vazio = ainda não existe). */
@@ -37,12 +37,15 @@ function pagina_inicio(string $titulo, string $descricao, string $classe = ''): 
 <link rel="icon" type="image/png" href="<?= $base ?>/assets/favicon.png">
 <link rel="apple-touch-icon" href="<?= $base ?>/assets/apple-touch-icon.png">
 <meta name="theme-color" content="#005c38">
-<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
+<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=3">
 </head>
 <body class="<?= h($classe) ?>">
 <header class="topo">
-  <a class="marca" href="<?= $base ?>/"><img src="<?= $base ?>/assets/logo.png" alt="" width="40" height="40"><span>Acha Fácil</span></a>
-  <nav><a href="<?= $base ?>/#como-funciona">Como funciona</a><a href="<?= $base ?>/#profissionais">Para profissionais</a><a href="<?= $base ?>/#baixar" class="nav-botao">Baixar o app</a></nav>
+  <a class="marca" href="<?= $base ?>/"><img src="<?= $base ?>/assets/logo.png" alt="" width="40" height="40"><span>Acha <b>Fácil!</b></span></a>
+  <nav><a href="<?= $base ?>/#areas">O que tem</a><a href="<?= $base ?>/#seu-negocio">Seu negócio</a><a href="<?= $base ?>/#baixar" class="nav-botao">Baixar o app</a></nav>
 </header>
 <?php
 }
@@ -51,9 +54,9 @@ function pagina_fim(): void {
     $base = config()['url'];
     ?>
 <footer class="rodape">
-  <div class="faixa"><span></span><span></span></div>
-  <p class="rodape-marca"><img src="<?= $base ?>/assets/logo.png" alt="" width="32" height="32"> <strong>Acha Fácil</strong> · São João da Boa Vista – SP</p>
-  <p><a href="<?= $base ?>/termos.php">Termos de uso</a> · <a href="<?= $base ?>/privacidade.php">Privacidade</a> · <a href="<?= $base ?>/privacidade.php#excluir-conta">Excluir minha conta</a> · <a href="<?= $base ?>/painel/">Quero aparecer no guia</a></p>
+  <p class="rodape-marca"><img src="<?= $base ?>/assets/logo.png" alt="" width="36" height="36"> <strong>Acha <b>Fácil!</b></strong></p>
+  <p class="lema">O comércio da sua cidade, pertinho de você.</p>
+  <p><a href="<?= $base ?>/busca.php">Procurar meu negócio</a> · <a href="<?= $base ?>/termos.php">Termos de uso</a> · <a href="<?= $base ?>/privacidade.php">Privacidade</a> · <a href="<?= $base ?>/privacidade.php#excluir-conta">Excluir minha conta</a></p>
   <p>Fale conosco: <?= contatos_html() ?></p>
   <p class="discreto">São João da Boa Vista – SP · <?= date('Y') ?></p>
 </footer>

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Acha Fácil — instalação/atualização na VPS (rodar como root). Pode rodar de novo sem estragar nada.
 #   bash instalar.sh              cria/atualiza banco, config e publicação
-#   bash instalar.sh --exemplos   também (re)coloca os 10 profissionais fictícios de demonstração
+#   bash instalar.sh --leads      também importa/atualiza os comércios da lista de leads (fsadesigners.com.br/leads)
 set -euo pipefail
 cd "$(dirname "$0")"
 RAIZ="$(pwd)"
@@ -56,7 +56,6 @@ fi
 # 2. tabelas + mudanças numeradas (cada uma uma vez, com backup antes)
 mkdir -p /var/backups/$NOME && chmod 700 /var/backups/$NOME
 mysql $BANCO < sql/schema.sql
-mysql $BANCO < sql/categorias.sql
 mysql $BANCO -e "CREATE TABLE IF NOT EXISTS migracoes (nome VARCHAR(100) PRIMARY KEY, aplicada_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)"
 for f in sql/migracoes/*.sql; do
   [ -e "$f" ] || continue
@@ -69,14 +68,14 @@ for f in sql/migracoes/*.sql; do
     echo "✔ mudança $n aplicada (backup em $b)"
   fi
 done
-if [ "${1:-}" = "--exemplos" ]; then mysql $BANCO < sql/exemplos.sql; echo "✔ profissionais de exemplo colocados"; fi
+mysql $BANCO < sql/categorias.sql   # depois das mudanças: usa colunas novas (cor)
 echo "✔ tabelas conferidas"
 mkdir -p $DADOS/fotos && chown -R www-data:www-data $DADOS && chmod 750 $DADOS $DADOS/fotos
 
 # 3. arquivos e publicação em https://fsadesigners.com.br/acha-facil/
 find "$RAIZ" -type d -exec chmod 755 {} +
 find "$RAIZ" -type f -exec chmod 644 {} +
-chmod 755 "$RAIZ/instalar.sh"
+chmod 755 "$RAIZ/instalar.sh" "$RAIZ/publicar-apk.sh" "$RAIZ/importar-leads.php"
 ln -sfn "$RAIZ/publico" /var/www/fsa-designer/$NOME
 echo "✔ /var/www/fsa-designer/$NOME -> $RAIZ/publico"
 
@@ -89,4 +88,5 @@ if grep -q '|leads/)\[^/\]+/' "$APACHE_SSL" && ! grep -q "$NOME/" "$APACHE_SSL";
 else
   echo "• Apache já ajustado (ou padrão diferente; confira a LocationMatch em $APACHE_SSL)"
 fi
+if [ "${1:-}" = "--leads" ]; then php "$RAIZ/importar-leads.php"; fi
 echo; echo "Pronto: https://fsadesigners.com.br/$NOME/api/inicio.php"

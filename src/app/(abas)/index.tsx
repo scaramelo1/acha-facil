@@ -1,133 +1,159 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { chamar, type Categoria, type ProfissionalResumo } from '../../api/cliente';
+import { chamar, URL_MEU_NEGOCIO, type Categoria, type ProfissionalResumo } from '../../api/cliente';
+import { useBarraClara } from '../../componentes/BarraClara';
 import { Vitrine } from '../../componentes/Vitrine';
-import { Carregando, Falha, Icone, Titulo, useCarregar } from '../../componentes/ui';
-import { cores, fonte, TOQUE } from '../../tema';
+import { Carregando, corClara, Falha, Icone, Titulo, useCarregar } from '../../componentes/ui';
+import { cores, ESPACO_BARRA, fonte, RAIO, saudacao, sombra } from '../../tema';
 
 interface Inicio {
   destaques: ProfissionalResumo[];
   categorias: Categoria[];
+  populares: ProfissionalResumo[];
+  total: number;
 }
 
+const SUGESTOES = ['Pizzaria', 'Farmácia', 'Mecânica', 'Pet shop', 'Padaria', 'Academia'];
+
 export default function TelaInicio() {
+  useBarraClara();
   const router = useRouter();
   const { dados, erro, carregando, recarregar } = useCarregar(() => chamar<Inicio>('inicio.php'), 'inicio');
   const principais = dados?.categorias.filter((c) => c.naInicial) ?? [];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: cores.fundo }} edges={['top']}>
-      <View style={estilos.topo}>
-        <Image source={require('../../../assets/logo.png')} style={{ width: 48, height: 48 }} />
-        <View style={{ flex: 1 }}>
-          <Text style={estilos.marca}>Acha Fácil</Text>
-          <Text style={estilos.lema}>Profissionais de São João</Text>
-        </View>
-      </View>
-
+    <View style={{ flex: 1, backgroundColor: cores.fundo }}>
       <ScrollView
-        contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
-        refreshControl={<RefreshControl refreshing={carregando && !!dados} onRefresh={recarregar} />}
+        contentContainerStyle={{ paddingBottom: ESPACO_BARRA }}
+        refreshControl={<RefreshControl refreshing={carregando && !!dados} onRefresh={recarregar} tintColor="#fff" />}
       >
-        <Pressable
-          accessibilityRole="search"
-          accessibilityLabel="Buscar profissional ou serviço"
-          onPress={() => router.push('/busca')}
-          style={estilos.busca}
-        >
-          <MaterialCommunityIcons name="magnify" size={28} color={cores.textoSuave} />
-          <Text style={estilos.buscaTexto}>O que você precisa?</Text>
-        </Pressable>
-
-        {carregando && !dados ? (
-          <View style={{ height: 300 }}>
-            <Carregando />
-          </View>
-        ) : erro && !dados ? (
-          <View style={{ height: 300 }}>
-            <Falha mensagem={erro} tentar={recarregar} />
-          </View>
-        ) : dados ? (
-          <>
-            {dados.destaques.length > 0 && (
-              <View style={{ marginTop: 20 }}>
-                <Vitrine itens={dados.destaques} />
+        {/* Cabeçalho verde com saudação e busca amarela */}
+        <View style={estilos.cabecalho}>
+          <SafeAreaView edges={['top']}>
+            <View style={estilos.marcaLinha}>
+              <Image source={require('../../../assets/logo.png')} style={{ width: 40, height: 40 }} />
+              <Text style={estilos.marca}>
+                Acha <Text style={{ color: cores.amarelo }}>Fácil!</Text>
+              </Text>
+              <View style={estilos.cidade}>
+                <MaterialCommunityIcons name="map-marker" size={16} color={cores.verde} />
+                <Text style={estilos.cidadeTexto}>São João</Text>
               </View>
-            )}
-
-            <Titulo>Escolha o serviço</Titulo>
-            <View style={estilos.grade}>
-              {principais.map((c) => (
-                <Pressable
-                  key={c.id}
-                  accessibilityRole="button"
-                  accessibilityLabel={c.nome}
-                  onPress={() => router.push(`/categoria/${c.id}`)}
-                  style={({ pressed }) => [estilos.categoria, pressed && { backgroundColor: cores.borda }]}
-                >
-                  <Icone nome={c.icone} tamanho={36} />
-                  <Text style={estilos.categoriaTexto} numberOfLines={2}>
-                    {c.nome}
-                  </Text>
-                </Pressable>
-              ))}
             </View>
+            <Text style={estilos.ola}>{saudacao()}!</Text>
+            <Text style={estilos.pergunta}>O que você procura hoje?</Text>
             <Pressable
-              accessibilityRole="button"
-              onPress={() => router.push('/categorias')}
-              style={({ pressed }) => [estilos.todas, pressed && { opacity: 0.8 }]}
+              accessibilityRole="search"
+              accessibilityLabel="Buscar comércio ou serviço"
+              onPress={() => router.push('/busca')}
+              style={({ pressed }) => [estilos.busca, pressed && { transform: [{ translateY: 2 }] }]}
             >
-              <MaterialCommunityIcons name="view-grid-outline" size={26} color="#fff" />
-              <Text style={estilos.todasTexto}>Ver todas as categorias</Text>
+              <MaterialCommunityIcons name="magnify" size={30} color={cores.verde} />
+              <Text style={estilos.buscaTexto}>Buscar em São João</Text>
             </Pressable>
-          </>
-        ) : null}
+          </SafeAreaView>
+        </View>
+
+        <View style={{ paddingHorizontal: 16 }}>
+          {/* atalhos de busca rápida */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16, marginTop: 16 }} contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}>
+            {SUGESTOES.map((s) => (
+              <Pressable key={s} accessibilityRole="button" onPress={() => router.push({ pathname: '/busca', params: { q: s } })} style={estilos.sugestao}>
+                <Text style={estilos.sugestaoTexto}>{s}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+
+          {carregando && !dados ? (
+            <View style={{ height: 300 }}>
+              <Carregando />
+            </View>
+          ) : erro && !dados ? (
+            <View style={{ height: 300 }}>
+              <Falha mensagem={erro} tentar={recarregar} />
+            </View>
+          ) : dados ? (
+            <>
+              {dados.destaques.length > 0 && (
+                <>
+                  <Titulo>Em destaque</Titulo>
+                  <Vitrine itens={dados.destaques} destaque />
+                </>
+              )}
+
+              <Titulo acao="Todas" aoTocarAcao={() => router.push('/explorar')}>
+                Áreas
+              </Titulo>
+              <View style={estilos.grade}>
+                {principais.map((c) => (
+                  <Pressable
+                    key={c.id}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${c.nome}, ${c.total} lugares`}
+                    onPress={() => router.push(`/categoria/${c.id}`)}
+                    style={({ pressed }) => [estilos.area, pressed && { transform: [{ translateY: 2 }] }]}
+                  >
+                    <View style={[estilos.areaIcone, { backgroundColor: corClara(c.cor) }]}>
+                      <Icone nome={c.icone} tamanho={32} cor={c.cor} />
+                    </View>
+                    <Text style={estilos.areaNome} numberOfLines={2}>
+                      {c.nome}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              {dados.populares.length > 0 && (
+                <>
+                  <Titulo>Conhecidos na cidade</Titulo>
+                  <Vitrine itens={dados.populares} />
+                </>
+              )}
+
+              {/* chamada para o dono do negócio */}
+              <Pressable accessibilityRole="button" onPress={() => WebBrowser.openBrowserAsync(URL_MEU_NEGOCIO)} style={estilos.dono}>
+                <View style={estilos.donoIcone}>
+                  <MaterialCommunityIcons name="storefront-outline" size={34} color={cores.verde} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={estilos.donoTitulo}>Tem um comércio aqui?</Text>
+                  <Text style={estilos.donoTexto}>Assuma seu perfil de graça e deixe tudo certinho.</Text>
+                </View>
+                <MaterialCommunityIcons name="arrow-right" size={26} color={cores.amarelo} />
+              </Pressable>
+              <Text style={estilos.rodape}>{dados.total.toLocaleString('pt-BR')} comércios e serviços de São João da Boa Vista</Text>
+            </>
+          ) : null}
+        </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const estilos = StyleSheet.create({
-  topo: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 8 },
-  marca: { fontSize: fonte.media, fontWeight: '800', color: cores.texto },
-  lema: { fontSize: 14, color: cores.textoSuave },
-  busca: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    minHeight: 60,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: cores.borda,
-    paddingHorizontal: 16,
-    backgroundColor: cores.fundoSuave,
-  },
-  buscaTexto: { fontSize: fonte.media, color: cores.textoSuave },
+  cabecalho: { backgroundColor: cores.verde, paddingHorizontal: 16, paddingBottom: 24, borderBottomLeftRadius: 32, borderBottomRightRadius: 32 },
+  marcaLinha: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 8 },
+  marca: { flex: 1, fontSize: fonte.media, fontWeight: '900', color: '#fff' },
+  cidade: { flexDirection: 'row', alignItems: 'center', gap: 2, backgroundColor: cores.amarelo, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
+  cidadeTexto: { fontSize: 14, fontWeight: '800', color: cores.verde },
+  ola: { color: '#CFE6D9', fontSize: fonte.normal, fontWeight: '700', marginTop: 20 },
+  pergunta: { color: '#fff', fontSize: fonte.titulo, fontWeight: '900', lineHeight: 36, marginBottom: 16 },
+  busca: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 64, borderRadius: 20, paddingHorizontal: 16, backgroundColor: cores.amarelo, ...sombra },
+  buscaTexto: { fontSize: fonte.media, fontWeight: '800', color: cores.verde },
+  sugestao: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 16, borderRadius: 22, backgroundColor: cores.cartao, borderWidth: 2, borderColor: cores.borda },
+  sugestaoTexto: { fontSize: fonte.pequena, fontWeight: '800', color: cores.texto },
   grade: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 12 },
-  categoria: {
-    width: '48.5%',
-    minHeight: 110,
-    borderRadius: 16,
-    backgroundColor: cores.fundoSuave,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 10,
-    gap: 8,
-  },
-  categoriaTexto: { fontSize: fonte.normal, fontWeight: '700', color: cores.texto, textAlign: 'center' },
-  todas: {
-    marginTop: 16,
-    minHeight: TOQUE,
-    borderRadius: 14,
-    backgroundColor: cores.verde,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-  },
-  todasTexto: { color: '#fff', fontSize: fonte.media, fontWeight: '700' },
+  area: { width: '31.5%', minHeight: 116, borderRadius: RAIO, backgroundColor: cores.cartao, alignItems: 'center', justifyContent: 'center', padding: 8, gap: 8, ...sombra },
+  areaIcone: { width: 56, height: 56, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  areaNome: { fontSize: 15, fontWeight: '800', color: cores.texto, textAlign: 'center' },
+  dono: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: cores.verde, borderRadius: RAIO, padding: 16, marginTop: 28 },
+  donoIcone: { width: 56, height: 56, borderRadius: 18, backgroundColor: cores.amarelo, alignItems: 'center', justifyContent: 'center' },
+  donoTitulo: { color: '#fff', fontSize: fonte.media, fontWeight: '900' },
+  donoTexto: { color: '#CFE6D9', fontSize: fonte.pequena },
+  rodape: { textAlign: 'center', color: cores.textoSuave, fontSize: 14, marginTop: 20 },
 });

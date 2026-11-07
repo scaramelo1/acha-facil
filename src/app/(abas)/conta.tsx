@@ -2,10 +2,10 @@ import * as WebBrowser from 'expo-web-browser';
 import { useRouter } from 'expo-router';
 import { Alert, ScrollView, Text, View } from 'react-native';
 
-import { URL_PAINEL, URL_PRIVACIDADE, URL_TERMOS } from '../../api/cliente';
+import { URL_MEU_NEGOCIO, URL_PRIVACIDADE, URL_TERMOS } from '../../api/cliente';
 import { Botao, Titulo, estilos as ui } from '../../componentes/ui';
 import { useConta } from '../../conta';
-import { cores, fonte } from '../../tema';
+import { cores, ESPACO_BARRA, fonte } from '../../tema';
 
 export default function TelaConta() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function TelaConta() {
     ]);
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 20, gap: 12 }}>
+    <ScrollView contentContainerStyle={{ padding: 20, gap: 12, paddingBottom: ESPACO_BARRA }}>
       {usuario ? (
         <View style={{ gap: 12 }}>
           <Text style={{ fontSize: fonte.grande, fontWeight: '800', color: cores.texto }}>Olá, {usuario.nome.split(' ')[0]}!</Text>
@@ -32,14 +32,14 @@ export default function TelaConta() {
         </View>
       ) : (
         <View style={{ gap: 12 }}>
-          <Text style={ui.texto}>Entre para avaliar, comentar e salvar profissionais.</Text>
+          <Text style={ui.texto}>Entre para avaliar, comentar e salvar seus lugares favoritos.</Text>
           <Botao titulo="Entrar ou criar conta" icone="login" onPress={() => router.push('/entrar')} />
         </View>
       )}
 
-      <Titulo>É profissional em São João?</Titulo>
-      <Text style={ui.texto}>Cadastre seu serviço e apareça para toda a cidade.</Text>
-      <Botao titulo="Quero aparecer no Acha Fácil" icone="storefront-outline" onPress={() => WebBrowser.openBrowserAsync(URL_PAINEL)} />
+      <Titulo>Tem um comércio em São João?</Titulo>
+      <Text style={ui.texto}>Ele pode já estar no app. Procure, assuma o perfil de graça e deixe tudo certinho.</Text>
+      <Botao titulo="Procurar meu negócio" icone="storefront-outline" tipo="amarelo" onPress={() => WebBrowser.openBrowserAsync(URL_MEU_NEGOCIO)} />
 
       <Titulo>Sobre o app</Titulo>
       <Botao titulo="Termos de uso" icone="file-document-outline" tipo="contorno" onPress={() => WebBrowser.openBrowserAsync(URL_TERMOS)} />

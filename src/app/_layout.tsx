@@ -14,14 +14,13 @@ export default function Raiz() {
           screenOptions={{
             headerStyle: { backgroundColor: cores.fundo },
             headerTintColor: cores.texto,
-            headerTitleStyle: { fontSize: fonte.media, fontWeight: '800' },
+            headerTitleStyle: { fontSize: fonte.media, fontWeight: '900' },
             headerShadowVisible: false,
             headerBackTitle: 'Voltar',
             contentStyle: { backgroundColor: cores.fundo },
           }}
         >
           <Stack.Screen name="(abas)" options={{ headerShown: false }} />
-          <Stack.Screen name="categorias" options={{ title: 'Todas as categorias' }} />
           <Stack.Screen name="categoria/[id]" options={{ title: '' }} />
           <Stack.Screen name="busca" options={{ title: 'Buscar' }} />
           <Stack.Screen name="profissional/[id]" options={{ title: '' }} />

@@ -5,6 +5,7 @@ import { FlatList, View } from 'react-native';
 import { chamar, type ProfissionalResumo } from '../../api/cliente';
 import { Botao, CartaoProfissional, Carregando, Falha, Vazio, useCarregar } from '../../componentes/ui';
 import { useConta } from '../../conta';
+import { ESPACO_BARRA } from '../../tema';
 
 export default function TelaSalvos() {
   const { usuario } = useConta();
@@ -26,7 +27,7 @@ export default function TelaSalvos() {
   if (!usuario)
     return (
       <View style={{ flex: 1, padding: 24 }}>
-        <Vazio icone="heart-outline" texto="Entre na sua conta para guardar os profissionais de confiança." />
+        <Vazio icone="heart-outline" texto="Entre na sua conta para guardar seus lugares favoritos." />
         <Botao titulo="Entrar" onPress={() => router.push('/entrar')} />
       </View>
     );
@@ -36,9 +37,9 @@ export default function TelaSalvos() {
     <FlatList
       data={dados ?? []}
       keyExtractor={(p) => String(p.id)}
-      contentContainerStyle={{ padding: 16, flexGrow: 1 }}
+      contentContainerStyle={{ padding: 16, paddingBottom: ESPACO_BARRA, flexGrow: 1 }}
       renderItem={({ item }) => <CartaoProfissional p={item} />}
-      ListEmptyComponent={<Vazio icone="heart-outline" texto="Toque no coração de um profissional para guardar aqui." />}
+      ListEmptyComponent={<Vazio icone="heart-outline" texto="Toque no coração de um comércio para guardar aqui." />}
     />
   );
 }

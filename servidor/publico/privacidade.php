@@ -35,6 +35,13 @@ pagina_inicio('Privacidade · Acha Fácil', 'Quais dados o Acha Fácil usa, para
   <p>As bases legais são: execução do contrato (sua conta e o anúncio do profissional), legítimo interesse (segurança e estatísticas sem identificação)
   e cumprimento de obrigação legal (registros de acesso).</p>
 
+  <h3>Dados dos comércios mostrados no app</h3>
+  <p>Parte dos comércios foi incluída a partir de informações que eles mesmos tornam públicas na internet (nome,
+  endereço, telefone, WhatsApp, site e redes sociais do negócio), para que os moradores encontrem o comércio local.
+  O responsável pode <a href="<?= h(config()['url']) ?>/busca.php">procurar o negócio</a> e assumir o perfil para corrigir os dados,
+  ou pedir para tirar do app; o pedido é atendido em até 2 dias úteis. Quem faz o pedido informa nome e telefone,
+  usados só para confirmar e responder.</p>
+
   <h2>3. O que fica no seu celular</h2>
   <p>O app guarda no seu celular apenas a chave de acesso da sua conta e o seu nome, para você não precisar entrar toda vez.
   Ao tocar em "Sair", isso é apagado. O app não pede acesso a contatos, fotos, localização, câmera ou microfone,

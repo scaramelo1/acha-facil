@@ -3,12 +3,15 @@ export const URL_API = 'https://fsadesigners.com.br/acha-facil/api';
 export const URL_PAINEL = 'https://fsadesigners.com.br/acha-facil/painel/';
 export const URL_TERMOS = 'https://fsadesigners.com.br/acha-facil/termos.php';
 export const URL_PRIVACIDADE = 'https://fsadesigners.com.br/acha-facil/privacidade.php';
+/** Página onde o dono procura o próprio comércio para assumir o perfil ou pedir para tirar do app. */
+export const URL_MEU_NEGOCIO = 'https://fsadesigners.com.br/acha-facil/busca.php';
 
 export interface Categoria {
   id: number;
   nome: string;
   slug: string;
   icone: string;
+  cor: string;
   naInicial: boolean;
   total: number;
 }
@@ -19,6 +22,9 @@ export interface ProfissionalResumo {
   categoria: string;
   categoriaId: number;
   icone: string;
+  cor: string;
+  /** Tipo de negócio (ex.: "Pizzaria", "Academia"). */
+  tipo: string;
   servicos: string[];
   bairro: string | null;
   atendeEmCasa: boolean;
@@ -29,6 +35,13 @@ export interface ProfissionalResumo {
   avaliacoes: number;
   temWhatsapp: boolean;
   temTelefone: boolean;
+  /** false = veio da lista pública de comércios; o dono ainda não assumiu o perfil. */
+  cadastrado: boolean;
+}
+
+export interface TipoNegocio {
+  nome: string;
+  total: number;
 }
 
 export interface Comentario {
@@ -49,6 +62,9 @@ export interface Profissional extends ProfissionalResumo {
   instagram: string | null;
   endereco: string | null;
   mapa: string | null;
+  site: string | null;
+  linkAssumir: string | null;
+  linkRemover: string | null;
   horario: string | null;
   favorito: boolean;
   minhaAvaliacao: { estrelas: number; comentario: string | null } | null;
@@ -94,6 +110,6 @@ export async function chamar<T>(caminho: string, metodo: 'GET' | 'POST' | 'DELET
 }
 
 /** Conta toques em WhatsApp, ligar etc. (estatística para o profissional). Falha em silêncio. */
-export function registrarContato(id: number, tipo: 'whatsapp' | 'ligar' | 'instagram' | 'mapa') {
+export function registrarContato(id: number, tipo: 'whatsapp' | 'ligar' | 'instagram' | 'mapa' | 'site') {
   chamar('contato.php', 'POST', { id, tipo }).catch(() => {});
 }

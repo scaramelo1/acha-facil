@@ -1,12 +1,16 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { FlatList, TextInput, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { chamar, type ProfissionalResumo } from '../api/cliente';
-import { CartaoProfissional, Carregando, Vazio, estilos } from '../componentes/ui';
-import { cores } from '../tema';
+import { CartaoProfissional, Carregando, Vazio } from '../componentes/ui';
+import { cores, fonte, sombra } from '../tema';
 
 export default function TelaBusca() {
-  const [termo, setTermo] = useState('');
+  // pode chegar com um termo pronto (atalhos da tela inicial)
+  const { q } = useLocalSearchParams<{ q?: string }>();
+  const [termo, setTermo] = useState(q ?? '');
   const [itens, setItens] = useState<ProfissionalResumo[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -25,7 +29,7 @@ export default function TelaBusca() {
       } catch (e) {
         if (!cancelado) setErro(e instanceof Error ? e.message : 'Não foi possível buscar.');
       }
-    }, 500);
+    }, 450);
     return () => {
       cancelado = true;
       clearTimeout(espera);
@@ -36,20 +40,26 @@ export default function TelaBusca() {
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={{ padding: 16, paddingBottom: 8 }}>
+      <View style={estilos.barra}>
+        <MaterialCommunityIcons name="magnify" size={28} color={cores.verde} />
         <TextInput
-          autoFocus
+          autoFocus={!q}
           value={termo}
           onChangeText={setTermo}
-          placeholder="Ex.: chuveiro, bolo, faxina"
+          placeholder="Ex.: pizza, farmácia, borracharia"
           placeholderTextColor={cores.textoSuave}
           returnKeyType="search"
           style={estilos.campo}
-          accessibilityLabel="Digite o que você precisa"
+          accessibilityLabel="Digite o que você procura"
         />
+        {termo.length > 0 && (
+          <Pressable accessibilityRole="button" accessibilityLabel="Limpar" hitSlop={10} onPress={() => setTermo('')} style={estilos.limpar}>
+            <MaterialCommunityIcons name="close" size={22} color={cores.verde} />
+          </Pressable>
+        )}
       </View>
       {curto ? (
-        <Vazio icone="magnify" texto="Digite o serviço, o nome do profissional ou o bairro." />
+        <Vazio icone="store-search-outline" texto="Digite o nome, o tipo de negócio (pizzaria, oficina…) ou o bairro." />
       ) : erro ? (
         <Vazio icone="wifi-off" texto={erro} />
       ) : itens === null ? (
@@ -58,12 +68,39 @@ export default function TelaBusca() {
         <FlatList
           data={itens}
           keyExtractor={(p) => String(p.id)}
-          contentContainerStyle={{ padding: 16, flexGrow: 1 }}
+          contentContainerStyle={{ padding: 16, paddingTop: 4, flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
+          ListHeaderComponent={
+            itens.length > 0 ? (
+              <Text style={estilos.contagem}>
+                {itens.length >= 50 ? 'Os 50 primeiros resultados' : `${itens.length} ${itens.length === 1 ? 'resultado' : 'resultados'}`}
+              </Text>
+            ) : null
+          }
           renderItem={({ item }) => <CartaoProfissional p={item} />}
-          ListEmptyComponent={<Vazio icone="account-search-outline" texto="Nada encontrado. Tente outra palavra." />}
+          ListEmptyComponent={<Vazio icone="store-search-outline" texto="Nada encontrado. Tente outra palavra." />}
         />
       )}
     </View>
   );
 }
+
+const estilos = StyleSheet.create({
+  barra: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    margin: 16,
+    paddingLeft: 14,
+    paddingRight: 8,
+    minHeight: 64,
+    borderRadius: 20,
+    backgroundColor: cores.cartao,
+    borderWidth: 3,
+    borderColor: cores.amarelo,
+    ...sombra,
+  },
+  campo: { flex: 1, fontSize: fonte.media, color: cores.texto, minHeight: 56 },
+  limpar: { width: 40, height: 40, borderRadius: 14, backgroundColor: cores.fundoSuave, alignItems: 'center', justifyContent: 'center' },
+  contagem: { fontSize: fonte.pequena, fontWeight: '800', color: cores.textoSuave, marginBottom: 10 },
+});

@@ -15,7 +15,7 @@ npx expo start --android   # com o emulador do Android Studio aberto
 
 ```bash
 bash servidor/instalar.sh              # cria/atualiza banco, tabelas e publicação
-bash servidor/instalar.sh --exemplos   # recoloca os 10 profissionais fictícios
+bash servidor/instalar.sh --leads      # importa/atualiza os comércios da lista de leads
 ```
 
 API: https://fsadesigners.com.br/acha-facil/api/inicio.php
