@@ -167,7 +167,8 @@ label { display: block; font-weight: 800; margin: 16px 0 6px; }
 .apk-ajuda a { color: var(--verde2); font-weight: 700; }
 .verde .apk-ajuda a { color: var(--amarelo); }
 .lojas.centro { justify-content: center; }
-.lojas.centro .apk { flex-direction: column; text-align: center; }
+.lojas.centro .apk { flex-direction: column; flex-wrap: nowrap; align-items: center; text-align: center; }
+.lojas.centro .apk-ajuda { flex-basis: auto; }
 .lojas.centro .apk-info { justify-content: center; }
 
 /* perguntas */
