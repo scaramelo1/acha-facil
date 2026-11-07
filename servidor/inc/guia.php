@@ -115,7 +115,8 @@ function atalhos_perto(): array {
  * $atalho (de ATALHOS_PERTO) filtra pelo tipo de negócio. A distância é em linha reta e aproximada
  * (muitos endereços só foram achados pela rua).
  */
-function perto(float $lat, float $lng, ?string $atalho, float $raio_km = 15, int $limite = 30): array {
+// só comércios da cidade escolhida no app (quem está em São João olhando Poços não vê os de São João)
+function perto(float $lat, float $lng, ?string $atalho, string $cidade, float $raio_km = 15, int $limite = 30): array {
     $filtro = '';
     $params = [$lat, $lat];
     if ($atalho !== null && isset(ATALHOS_PERTO[$atalho])) {
@@ -129,7 +130,7 @@ function perto(float $lat, float $lng, ?string $atalho, float $raio_km = 15, int
     return array_map(fn($p) => prof_resumo($p) + ['distancia' => round((float)$p['distancia'], 2)], linhas('SELECT ' . CAMPOS_RESUMO . ',
         6371 * 2 * ASIN(SQRT(POW(SIN(RADIANS(p.lat - ?) / 2), 2) + COS(RADIANS(?)) * COS(RADIANS(p.lat)) * POW(SIN(RADIANS(p.lng - ' . (float)$lng . ') / 2), 2))) AS distancia
         FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
-        WHERE ' . visivel() . " AND p.lat IS NOT NULL$filtro AND p.lat BETWEEN ? AND ? AND p.lng BETWEEN ? AND ?
+        WHERE ' . visivel($cidade) . " AND p.lat IS NOT NULL$filtro AND p.lat BETWEEN ? AND ? AND p.lng BETWEEN ? AND ?
         HAVING distancia <= ? ORDER BY distancia LIMIT $limite", $params));
 }
 

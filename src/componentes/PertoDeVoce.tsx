@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { chamar, type ProfissionalResumo } from '../api/cliente';
+import { useCidade } from '../cidade';
 import { cores, fonte, RAIO, sombra } from '../tema';
 import { Botao, CartaoProfissional, Icone } from './ui';
 
@@ -13,11 +14,12 @@ interface Atalho {
   icone: string;
 }
 type Perto = ProfissionalResumo & { distancia: number };
-type Estado = 'conferindo' | 'pedir' | 'negado' | 'buscando' | 'pronto' | 'falha';
+type Estado = 'conferindo' | 'pedir' | 'negado' | 'buscando' | 'pronto' | 'longe' | 'falha';
 
 /**
  * "Perto de você": pede a localização (só quando a pessoa toca no botão), mostra os comércios mais perto
  * e deixa escolher o tipo (Restaurantes, Floriculturas, Farmácias…). A posição não é guardada no servidor.
+ * Só lista comércios da cidade escolhida; se a pessoa está em outra cidade (longe), avisa e mostra `semLocalizacao`.
  * Sem localização, mostra `semLocalizacao` (os conhecidos da cidade).
  */
 export function PertoDeVoce({ semLocalizacao }: { semLocalizacao?: React.ReactNode }) {
@@ -27,6 +29,7 @@ export function PertoDeVoce({ semLocalizacao }: { semLocalizacao?: React.ReactNo
   const [atalhos, setAtalhos] = useState<Atalho[]>([]);
   const [lista, setLista] = useState<Perto[]>([]);
   const [podePerguntar, setPodePerguntar] = useState(true);
+  const { cidade } = useCidade();
 
   const localizar = useCallback(async () => {
     setEstado('buscando');
@@ -50,24 +53,25 @@ export function PertoDeVoce({ semLocalizacao }: { semLocalizacao?: React.ReactNo
       .catch(() => setEstado('pedir'));
   }, [localizar]);
 
-  // com a posição (ou ao trocar o tipo), busca os mais perto
+  // com a posição (ou ao trocar o tipo ou a cidade), busca os mais perto dentro da cidade escolhida
   useEffect(() => {
     if (!posicao) return;
     let cancelado = false;
-    chamar<{ atalhos: Atalho[]; profissionais: Perto[] }>(
+    setEstado('buscando');
+    chamar<{ atalhos: Atalho[]; profissionais: Perto[]; longe?: boolean }>(
       `perto.php?lat=${posicao.lat.toFixed(5)}&lng=${posicao.lng.toFixed(5)}${atalho ? `&atalho=${atalho}` : ''}`,
     )
       .then((r) => {
         if (cancelado) return;
         setAtalhos(r.atalhos);
         setLista(r.profissionais);
-        setEstado('pronto');
+        setEstado(r.longe ? 'longe' : 'pronto');
       })
       .catch(() => !cancelado && setEstado('falha'));
     return () => {
       cancelado = true;
     };
-  }, [posicao, atalho]);
+  }, [posicao, atalho, cidade.slug]);
 
   // trocar o tipo: mostra "carregando" já no toque (o efeito acima busca de novo)
   const escolher = (id: string | null) => {
@@ -83,6 +87,23 @@ export function PertoDeVoce({ semLocalizacao }: { semLocalizacao?: React.ReactNo
   };
 
   if (estado === 'conferindo') return null;
+
+  // em outra cidade: o "perto" não serve para a cidade que a pessoa está olhando
+  if (estado === 'longe')
+    return (
+      <>
+        <View style={estilos.convite}>
+          <View style={estilos.conviteIcone}>
+            <MaterialCommunityIcons name="map-marker-distance" size={34} color={cores.verde} />
+          </View>
+          <Text style={estilos.conviteTitulo}>Você não está em {cidade.curto}</Text>
+          <Text style={estilos.conviteTexto}>
+            O "Perto de você" mostra os lugares mais perto quando você estiver na cidade. Enquanto isso, veja os conhecidos de lá.
+          </Text>
+        </View>
+        {semLocalizacao}
+      </>
+    );
 
   if (estado === 'pedir' || estado === 'negado')
     return (
