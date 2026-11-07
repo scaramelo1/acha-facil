@@ -5,15 +5,15 @@ import { Armazenamento } from './armazenamento';
 import { EscolherCidade } from './componentes/EscolherCidade';
 
 // Estados e cidades atendidas (iguais às do servidor, servidor/inc/guia.php). Ficam fixos no app para a escolha
-// funcionar até sem internet.
+// funcionar até sem internet. lat/lng = centro da cidade (para achar a cidade pela localização). Cidade nova: pôr aqui também.
 export const ESTADOS: Estado[] = [
   { uf: 'SP', nome: 'São Paulo' },
   { uf: 'MG', nome: 'Minas Gerais' },
 ];
 export const CIDADES: Cidade[] = [
-  { slug: 'sao-joao', nome: 'São João da Boa Vista', curto: 'São João', estado: 'SP' },
-  { slug: 'aguas-da-prata', nome: 'Águas da Prata', curto: 'Águas da Prata', estado: 'SP' },
-  { slug: 'pocos-de-caldas', nome: 'Poços de Caldas', curto: 'Poços de Caldas', estado: 'MG' },
+  { slug: 'sao-joao', nome: 'São João da Boa Vista', curto: 'São João', estado: 'SP', lat: -21.9696, lng: -46.7981 },
+  { slug: 'aguas-da-prata', nome: 'Águas da Prata', curto: 'Águas da Prata', estado: 'SP', lat: -21.9371, lng: -46.7172 },
+  { slug: 'pocos-de-caldas', nome: 'Poços de Caldas', curto: 'Poços de Caldas', estado: 'MG', lat: -21.7878, lng: -46.5614 },
 ];
 const CHAVE = 'cidade';
 
