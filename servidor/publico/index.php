@@ -83,8 +83,8 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
           <button class="botao amarelo">Procurar</button>
         </form>
         <div class="planos">
-          <div class="plano"><h3>Básico <span class="preco">valor em breve</span></h3><p>Corrija os dados, coloque fotos e ganhe o selo de verificado.</p></div>
-          <div class="plano destaque"><h3>Destaque <span class="preco">valor em breve</span></h3><p>Aparece no topo da tela inicial e na frente da sua área, para a cidade inteira ver.</p></div>
+          <div class="plano"><h3>Básico <span class="preco">R$ 19,90/mês</span></h3><p>Corrija os dados, coloque fotos e ganhe o selo de verificado.</p></div>
+          <div class="plano destaque"><h3>Destaque <span class="preco">R$ 29,90/mês</span></h3><p>Aparece no topo da tela inicial e na frente da sua área, para a cidade inteira ver.</p></div>
         </div>
         <p style="margin:16px 0 0"><a class="botao" href="<?= $base ?>/planos.php">Conferir os planos</a></p>
       </div>

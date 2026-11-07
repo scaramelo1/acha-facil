@@ -28,7 +28,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 - Os comércios vêm da **lista de leads** (fsadesigners.com.br/leads, coleta do Google Maps): `importado = 1`, aparecem
   **sem assinatura** até o dono assumir o perfil. Reimportar: `php servidor/importar-leads.php [arquivo] [cidade]` (ou `bash servidor/instalar.sh --leads`, que faz as duas cidades) (atualiza pelo nome; não mexe em
   quem assumiu nem em quem foi tirado). Os 10 exemplos fictícios foram apagados.
-- O dono procura o negócio em `/busca.php` e pede para **assumir** (grátis) ou **tirar do app** (`/perfil.php`); para corrigir dados e pôr fotos, o dono confere os planos em `/planos.php` (Básico e Destaque, valores em breve); os pedidos
+- O dono procura o negócio em `/busca.php` e pede para **assumir** (grátis) ou **tirar do app** (`/perfil.php`); para corrigir dados e pôr fotos, o dono confere os planos em `/planos.php` (Básico R$ 19,90/mês e Destaque R$ 29,90/mês); os pedidos
   ficam na tabela `pedidos` até a administração web existir (passo 8).
 - Nota do Google **não aparece** no app: o número de avaliações do Google só ordena os "Conhecidos na cidade".
 
@@ -92,5 +92,5 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 
 - WhatsApp de contato (`contato_whatsapp` no config); vazio, não aparece no site.
 - Arquivo da logo em alta (PNG/SVG) para trocar o redesenho, se quiser fidelidade total à arte.
-- Preço dos planos Básico e Destaque (mensal) e quantos lugares no carrossel de destaque.
+- Quantos lugares no carrossel de destaque (preços definidos em 07/11: Básico R$ 19,90/mês, Destaque R$ 29,90/mês).
 - Se volta a ter notícias no futuro.

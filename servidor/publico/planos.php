@@ -41,7 +41,7 @@ pagina_inicio('Planos para o seu negócio · Acha Fácil!', 'Corrija os dados, c
         <?php if ($chave === 'destaque'): ?><span class="fita">Mais visto</span><?php endif ?>
         <h2><?= h($nome) ?></h2>
         <p class="sub"><?= h($sub) ?></p>
-        <p class="valor">Valor em breve<small>assinatura mensal no cartão, cancele quando quiser</small></p>
+        <p class="valor"><?= $chave === 'destaque' ? 'R$ 29,90' : 'R$ 19,90' ?> por mês<small>assinatura mensal no cartão, cancele quando quiser</small></p>
         <ul class="lista-check">
           <?php foreach ($itens as $i): ?><li><?= h($i) ?></li><?php endforeach ?>
         </ul>

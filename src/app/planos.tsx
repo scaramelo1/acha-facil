@@ -10,11 +10,12 @@ import { cartao, cores, fonte } from '../tema';
 
 type NomeIcone = keyof typeof MaterialCommunityIcons.glyphMap;
 
-// Iguais aos do site (servidor/publico/planos.php); valores ainda "em breve"
-const PLANOS: { chave: string; nome: string; sub: string; icone: NomeIcone; itens: string[] }[] = [
+// Iguais aos do site (servidor/publico/planos.php e index.php); preço mensal no cartão
+const PLANOS: { chave: string; nome: string; preco: string; sub: string; icone: NomeIcone; itens: string[] }[] = [
   {
     chave: 'basico',
     nome: 'Básico',
+    preco: 'R$ 19,90',
     sub: 'Seu perfil completo e sempre atualizado.',
     icone: 'storefront-outline',
     itens: ['Corrigir nome, telefone, WhatsApp, endereço e horário', 'Colocar fotos', 'Descrição e o que você vende ou faz', 'Selo "Verificado"', 'Responder as avaliações'],
@@ -22,6 +23,7 @@ const PLANOS: { chave: string; nome: string; sub: string; icone: NomeIcone; iten
   {
     chave: 'destaque',
     nome: 'Destaque',
+    preco: 'R$ 29,90',
     sub: 'Seu comércio em evidência na cidade.',
     icone: 'star-outline',
     itens: ['Tudo o que tem no Básico', 'Aparece no topo da tela inicial', 'Na frente dos outros na área e na busca'],
@@ -56,6 +58,10 @@ export default function TelaPlanos() {
                   <Text style={estilos.sub}>{p.sub}</Text>
                 </View>
               </View>
+              <View style={estilos.precoLinha}>
+                <Text style={estilos.preco}>{p.preco}</Text>
+                <Text style={estilos.porMes}>por mês</Text>
+              </View>
               <View style={{ gap: 6, marginTop: 12 }}>
                 {p.itens.map((i) => (
                   <View key={i} style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-start' }}>
@@ -74,7 +80,9 @@ export default function TelaPlanos() {
         </View>
       </ScrollView>
       <View style={estilos.rodape}>
-        <Botao titulo="Solicitar informações" tipo="amarelo" onPress={pedirInformacoes} />
+        {/* por enquanto desativado (pedido do usuário em 07/11); o pedido de plano é pelo "Consultar condições" */}
+        <Botao titulo="Solicitar informações" tipo="amarelo" onPress={pedirInformacoes} desativado />
+        <Text style={estilos.emBreve}>Em breve</Text>
       </View>
     </View>
   );
@@ -88,6 +96,10 @@ const estilos = StyleSheet.create({
   item: { flex: 1, fontSize: fonte.pequena, color: cores.texto, lineHeight: 22 },
   condicoes: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, minHeight: 50, borderRadius: 25, borderWidth: 2, borderColor: cores.verde, marginTop: 14 },
   condicoesTexto: { fontSize: fonte.pequena + 1, fontWeight: '900', color: cores.verde },
+  precoLinha: { flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 12 },
+  preco: { fontSize: 28, fontWeight: '900', color: cores.texto },
+  porMes: { fontSize: fonte.pequena, color: cores.textoSuave },
+  emBreve: { fontSize: 14, color: cores.textoSuave, textAlign: 'center', marginTop: 6 },
   nota: { fontSize: 15, color: cores.textoSuave, textAlign: 'center' },
   rodape: { padding: 16, paddingBottom: 24, borderTopWidth: 1, borderColor: cores.borda, backgroundColor: cores.cartao },
 });
