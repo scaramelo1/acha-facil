@@ -77,7 +77,7 @@ export default function TelaBusca() {
               <Text style={estilos.contagem}>
                 {itens.length >= 50 ? 'Os 50 primeiros resultados' : `${itens.length} ${itens.length === 1 ? 'resultado' : 'resultados'}`}
               </Text>
-            ) : null
+            ) : undefined
           }
           renderItem={({ item }) => <CartaoProfissional p={item} />}
           ListEmptyComponent={<Vazio icone="store-search-outline" texto="Nada encontrado. Tente outra palavra." />}

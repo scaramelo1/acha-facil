@@ -106,7 +106,7 @@ export default function TelaProfissional() {
           {!p.whatsapp && !p.telefone && (
             <View style={estilos.aviso}>
               <MaterialCommunityIcons name="information-outline" size={24} color={cores.verde} />
-              <Text style={[ui.texto, { flex: 1 }]}>Ainda não temos o telefone deste lugar. Use o "Como chegar" para ir até lá.</Text>
+              <Text style={[ui.texto, { flex: 1 }]}>Ainda não temos o telefone deste lugar. Use o “Como chegar” para ir até lá.</Text>
             </View>
           )}
 
@@ -324,7 +324,7 @@ function Avaliacoes({ p, aoAtualizar }: { p: Profissional; aoAtualizar: (p: Prof
 
 const estilos = StyleSheet.create({
   capa: { height: CAPA, overflow: 'hidden', borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
-  capaIcone: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
+  capaIcone: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, alignItems: 'center', justifyContent: 'center' },
   capaBotoes: { position: 'absolute', left: 16, right: 16, flexDirection: 'row', justifyContent: 'space-between' },
   redondo: { width: TOQUE, height: TOQUE, borderRadius: TOQUE / 2, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', ...sombra },
   cabeca: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: cores.cartao, borderRadius: RAIO, padding: 14, marginTop: -56, ...sombra },
