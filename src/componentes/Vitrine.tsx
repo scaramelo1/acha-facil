@@ -59,7 +59,7 @@ export function Vitrine({ itens }: { itens: ProfissionalResumo[] }) {
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Seu comércio aqui. Ver planos"
+        accessibilityLabel="Seu comércio aqui. Saiba mais"
         onPress={() => router.push('/planos')}
         style={({ pressed }) => [estilos.anuncie, { width: largura }, pressed && { opacity: 0.9 }]}
       >
@@ -70,7 +70,7 @@ export function Vitrine({ itens }: { itens: ProfissionalResumo[] }) {
           <Text style={estilos.anuncieTitulo}>Seu comércio aqui</Text>
           <Text style={estilos.anuncieTexto}>Apareça em destaque para toda a cidade.</Text>
           <View style={estilos.anuncieBotao}>
-            <Text style={estilos.anuncieBotaoTexto}>Ver planos</Text>
+            <Text style={estilos.anuncieBotaoTexto}>Saiba mais</Text>
             <MaterialCommunityIcons name="chevron-right" size={20} color="#fff" />
           </View>
         </View>

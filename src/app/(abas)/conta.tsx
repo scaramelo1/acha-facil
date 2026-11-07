@@ -70,7 +70,7 @@ export default function TelaPerfil() {
             <LinhaMenu icone="heart-outline" texto="Meus favoritos" onPress={() => router.push('/salvos')} />
             {linhaCidade}
             <LinhaMenu icone="storefront-outline" texto="Meu negócio" onPress={() => router.push('/meu-negocio')} />
-            <LinhaMenu icone="star-outline" texto="Planos para comércio" onPress={() => router.push('/planos')} />
+            <LinhaMenu icone="star-outline" texto="Para o seu comércio" onPress={() => router.push('/planos')} />
             {sobre}
             {termos}
             {privacidade}

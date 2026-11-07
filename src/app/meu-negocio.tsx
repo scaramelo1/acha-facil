@@ -12,7 +12,7 @@ import { cartao, cores, fonte } from '../tema';
 
 /**
  * "Procurar meu negócio": o dono acha o comércio dele na cidade escolhida, marca e toca em
- * "Sou responsável por este negócio", que leva aos planos daquele comércio (onde ele assume o perfil).
+ * "Sou responsável por este negócio", que leva à tela "Este comércio é seu?" (e dali ao site, onde ele assume o perfil).
  */
 export default function TelaMeuNegocio() {
   const router = useRouter();
