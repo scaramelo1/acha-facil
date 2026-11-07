@@ -6,7 +6,7 @@ import { useCidade } from '../cidade';
 import { cores, fonte, RAIO } from '../tema';
 import { Botao } from './ui';
 
-/** Cartão amarelo-claro "Tem um comércio em …?" com o botão verde que leva a procurar o próprio negócio. */
+/** Cartão amarelo-claro "Tem um comércio em ...?" com o botão verde que leva a procurar o próprio negócio. */
 export function CartaoDono() {
   const router = useRouter();
   const { cidade } = useCidade();

@@ -18,7 +18,7 @@ type Estado = 'conferindo' | 'pedir' | 'negado' | 'buscando' | 'pronto' | 'longe
 
 /**
  * "Perto de você": pede a localização (só quando a pessoa toca no botão), mostra os comércios mais perto
- * e deixa escolher o tipo (Restaurantes, Floriculturas, Farmácias…). A posição não é guardada no servidor.
+ * e deixa escolher o tipo (Restaurantes, Floriculturas, Farmácias...). A posição não é guardada no servidor.
  * Só lista comércios da cidade escolhida; se a pessoa está em outra cidade (longe), avisa e mostra `semLocalizacao`.
  * Sem localização, mostra `semLocalizacao` (os conhecidos da cidade).
  */
@@ -105,7 +105,7 @@ export function PertoDeVoce({ semLocalizacao }: { semLocalizacao?: React.ReactNo
           </View>
           <Text style={estilos.conviteTitulo}>Você não está em {cidade.curto}</Text>
           <Text style={estilos.conviteTexto}>
-            O “Perto de você” mostra os lugares mais perto quando você estiver na cidade. Enquanto isso, veja os conhecidos de lá.
+            O {'"Perto de você"'} mostra os lugares mais perto quando você estiver na cidade. Enquanto isso, veja os conhecidos de lá.
           </Text>
         </View>
         {semLocalizacao}

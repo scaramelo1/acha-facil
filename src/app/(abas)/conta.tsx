@@ -11,7 +11,7 @@ import { Botao, LinhaMenu } from '../../componentes/ui';
 import { useConta } from '../../conta';
 import { cartao, cores, ESPACO_BARRA, fonte } from '../../tema';
 
-// Perfil: sem conta, convite para entrar; com conta, o menu (favoritos, cidade, meu negócio, sair…)
+// Perfil: sem conta, convite para entrar; com conta, o menu (favoritos, cidade, meu negócio, sair...)
 export default function TelaPerfil() {
   const router = useRouter();
   const { usuario, sair, excluirConta } = useConta();

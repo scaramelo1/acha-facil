@@ -204,7 +204,7 @@ export function SeloVerificado({ compacto, claro }: { compacto?: boolean; claro?
 }
 
 /** Cartão de comércio nas listas: espaço da foto, nome, tipo · bairro, como falar e a setinha amarela. */
-/** 0,35 → "350 m"; 1,24 → "1,2 km" (distância aproximada, em linha reta). */
+/** 0,35 -> "350 m"; 1,24 -> "1,2 km" (distância aproximada, em linha reta). */
 export function textoDistancia(km: number) {
   if (km < 1) return `${Math.max(50, Math.round((km * 1000) / 50) * 50)} m`;
   return `${km < 10 ? km.toFixed(1).replace('.', ',') : Math.round(km)} km`;
@@ -251,7 +251,7 @@ export function CartaoProfissional({ p, distancia }: { p: ProfissionalResumo; di
   );
 }
 
-/** "● WhatsApp" (verde) ou "● Telefone": como dá para falar com o comércio. */
+/** "* WhatsApp" (verde) ou "* Telefone": como dá para falar com o comércio. */
 export function Contato({ p }: { p: Pick<ProfissionalResumo, 'temWhatsapp' | 'temTelefone'> }) {
   if (!p.temWhatsapp && !p.temTelefone) return null;
   return (
@@ -288,7 +288,7 @@ export function Titulo({ children, acao, aoTocarAcao }: { children: ReactNode; a
   );
 }
 
-/** Pílula de filtro (Todos, Lanchonete, Padaria…): verde cheia quando escolhida, branca com contorno quando não. */
+/** Pílula de filtro (Todos, Lanchonete, Padaria...): verde cheia quando escolhida, branca com contorno quando não. */
 export function Pilula({ texto, ativo, onPress, icone }: { texto: string; ativo: boolean; onPress: () => void; icone?: string }) {
   return (
     <Pressable
@@ -352,7 +352,7 @@ export function Campo({ icone, senha, ...props }: TextInputProps & { icone: Nome
   );
 }
 
-/** Quadro de uma área (Alimentação, Mercados…) na cor dela, com o ícone em branco e o nome embaixo. */
+/** Quadro de uma área (Alimentação, Mercados...) na cor dela, com o ícone em branco e o nome embaixo. */
 export function QuadroArea({ nome, icone, cor, largura, altura, onPress }: { nome: string; icone: string; cor: string; largura: number; altura: number; onPress: () => void }) {
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={nome} onPress={onPress} style={({ pressed }) => [{ width: largura }, pressed && { opacity: 0.85 }]}>

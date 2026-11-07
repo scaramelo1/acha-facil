@@ -180,7 +180,7 @@ export default function TelaProfissional() {
   );
 }
 
-/** "https://www.exemplo.com.br/pagina" → "exemplo.com.br" */
+/** "https://www.exemplo.com.br/pagina" -> "exemplo.com.br" */
 function siteCurto(url: string) {
   return url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/.*$/, '');
 }

@@ -72,7 +72,7 @@ export default function TelaBusca() {
       <Cabecalho voltar />
       <View style={{ paddingHorizontal: 16, paddingTop: 18 }}>
         <Text style={estilos.titulo} numberOfLines={2}>
-          {curto ? 'O que você procura?' : `Resultados para “${termo.trim()}”`}
+          {curto ? 'O que você procura?' : `Resultados para "${termo.trim()}"`}
         </Text>
         <Text style={estilos.sub}>
           {curto || itens === null
@@ -113,7 +113,7 @@ export default function TelaBusca() {
       </View>
 
       {curto ? (
-        <Vazio icone="store-search-outline" texto="Digite o nome, o tipo de negócio (pizzaria, oficina…) ou o bairro." />
+        <Vazio icone="store-search-outline" texto="Digite o nome, o tipo de negócio (pizzaria, oficina...) ou o bairro." />
       ) : erro ? (
         <Vazio icone="wifi-off" texto={erro} />
       ) : itens === null ? (
@@ -155,7 +155,7 @@ export default function TelaBusca() {
   );
 }
 
-/** ["Pizzaria", "Bar", "Pizzaria"] → [["Pizzaria", 2], ["Bar", 1]] (sem vazios, do mais comum ao menos). */
+/** ["Pizzaria", "Bar", "Pizzaria"] -> [["Pizzaria", 2], ["Bar", 1]] (sem vazios, do mais comum ao menos). */
 function contar(valores: (string | null)[]) {
   const m = new Map<string, number>();
   for (const v of valores) if (v) m.set(v, (m.get(v) ?? 0) + 1);
@@ -223,7 +223,7 @@ function TelaFiltros({
             {(
               [
                 ['relevancia', 'Mais relevantes'],
-                ['az', 'A – Z'],
+                ['az', 'A a Z'],
               ] as const
             ).map(([valor, texto], i) => {
               const ativo = f.ordem === valor;
