@@ -76,6 +76,51 @@ function populares(string $cidade, int $limite = 12): array {
         ORDER BY RAND(?) LIMIT $limite", [semente_dia()]));
 }
 
+// Atalhos do "Perto de você": rótulo, ícone e partes do tipo de negócio que entram (LIKE). Ficam no servidor
+// para poder mudar sem lançar app novo.
+const ATALHOS_PERTO = [
+    'restaurantes' => ['Restaurantes', 'silverware-fork-knife', ['Restaurante', 'Brasileira', 'Japonesa', 'Churrasc', 'Self-service', 'Marmit', 'Comida']],
+    'lanches' => ['Lanches', 'hamburger', ['Lanchonete', 'Lanche', 'Fast Food', 'Hamburg', 'Pastéis', 'Pastel']],
+    'pizzarias' => ['Pizzarias', 'pizza', ['Pizza']],
+    'padarias' => ['Padarias', 'baguette', ['Padaria', 'Confeitaria']],
+    'mercados' => ['Mercados', 'cart-outline', ['Mercado', 'Mercearia', 'Hortifruti', 'Empório', 'Açougue']],
+    'farmacias' => ['Farmácias', 'pill', ['Farmácia', 'Drogaria']],
+    'floriculturas' => ['Floriculturas', 'flower-tulip-outline', ['Floricultura', 'Flores']],
+    'pet' => ['Pet shops', 'paw', ['Pet', 'Veterin', 'animais']],
+    'beleza' => ['Beleza', 'content-cut', ['Salão de Beleza', 'Barbearia', 'Manicure', 'Cabeleireir', 'Estética', 'Sobrancelha']],
+    'sorvetes' => ['Sorvetes', 'ice-cream', ['Sorvet', 'Açaí', 'Gelat']],
+    'oficinas' => ['Oficinas', 'car-wrench', ['Oficina', 'Autopeças', 'Pneu', 'Borracharia', 'Lava-rápido']],
+    'postos' => ['Postos', 'gas-station', ['Posto de combustível', 'Conveniência']],
+    'saude' => ['Saúde', 'medical-bag', ['Dentista', 'Clínica', 'Médic', 'Fisioterap', 'Psicólog', 'Odonto', 'Laboratório']],
+];
+
+function atalhos_perto(): array {
+    return array_map(fn($id, $a) => ['id' => $id, 'rotulo' => $a[0], 'icone' => $a[1]], array_keys(ATALHOS_PERTO), ATALHOS_PERTO);
+}
+
+/**
+ * Comércios mais perto de um ponto (todas as cidades), do mais perto ao mais longe, até $raio_km.
+ * $atalho (de ATALHOS_PERTO) filtra pelo tipo de negócio. A distância é em linha reta e aproximada
+ * (muitos endereços só foram achados pela rua).
+ */
+function perto(float $lat, float $lng, ?string $atalho, float $raio_km = 15, int $limite = 30): array {
+    $filtro = '';
+    $params = [$lat, $lat];
+    if ($atalho !== null && isset(ATALHOS_PERTO[$atalho])) {
+        $partes = ATALHOS_PERTO[$atalho][2];
+        $filtro = ' AND (' . implode(' OR ', array_fill(0, count($partes), 'p.tipo LIKE ?')) . ')';
+        foreach ($partes as $t) $params[] = '%' . $t . '%';
+    }
+    // caixa para usar o índice, depois a distância de verdade (Haversine, raio da Terra 6371 km)
+    $dlat = $raio_km / 111; $dlng = $raio_km / (111 * max(0.2, cos(deg2rad($lat))));
+    $params = array_merge($params, [$lat - $dlat, $lat + $dlat, $lng - $dlng, $lng + $dlng, $raio_km]);
+    return array_map(fn($p) => prof_resumo($p) + ['distancia' => round((float)$p['distancia'], 2)], linhas('SELECT ' . CAMPOS_RESUMO . ',
+        6371 * 2 * ASIN(SQRT(POW(SIN(RADIANS(p.lat - ?) / 2), 2) + COS(RADIANS(?)) * COS(RADIANS(p.lat)) * POW(SIN(RADIANS(p.lng - ' . (float)$lng . ') / 2), 2))) AS distancia
+        FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
+        WHERE ' . visivel() . " AND p.lat IS NOT NULL$filtro AND p.lat BETWEEN ? AND ? AND p.lng BETWEEN ? AND ?
+        HAVING distancia <= ? ORDER BY distancia LIMIT $limite", $params));
+}
+
 // tipos de negócio dentro de uma área (filtros da tela da área), do mais comum ao menos
 function tipos_da_categoria(int $categoria_id, string $cidade): array {
     return array_map(fn($t) => ['nome' => $t['tipo'], 'total' => (int)$t['total']], linhas('SELECT p.tipo, COUNT(*) AS total

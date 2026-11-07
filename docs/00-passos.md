@@ -49,6 +49,11 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    com pílula verde, "Encontre o que precisa, perto de você", faixa "Explore o melhor da cidade", busca e filtros dentro da
    categoria, comércio com capa, "Conversar no WhatsApp" e "Este comércio é seu?". Sem fotos: o espaço mostra o ícone da área
    até o dono colocar fotos pelo plano
+4f. ✅ "Perto de você" com a localização do celular (07/11): pede só ao tocar, lista do mais perto ao mais longe, com
+   atalhos Restaurantes, Lanches, Pizzarias, Padarias, Mercados, Farmácias, Floriculturas, Pet shops, Beleza, Sorvetes,
+   Oficinas, Postos e Saúde (lista em `ATALHOS_PERTO`, servidor/inc/guia.php). Localização dos comércios: link do Google
+   ou endereço no OpenStreetMap (`php servidor/geocodificar.php`, ~1 h na 1ª vez; aproximada, muitas vezes pela rua).
+   Novo pacote no app: expo-location
 5. ⬜ Testar no PC (`npm install`, `npx tsc --noEmit`, `npx expo lint`, emulador)
 6. 🟡 Projeto EAS próprio (ligado em 07/11 ✅) e 1º APK (falta); publicar com `bash servidor/publicar-apk.sh <link do EAS>`
 7. ⬜ Contas no app: conferir se entrar/criar conta funciona (no Guia Sanjoanense isso ainda está em aberto)

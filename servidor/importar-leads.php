@@ -40,6 +40,13 @@ $area_fixa = [
     'eventos' => 'hospedagem', 'hospedagem' => 'hospedagem', 'fisioterapia' => 'saude', 'fábrica' => 'industria',
 ];
 foreach ($area_fixa as $t => $slug) if (isset($cat[$slug])) $area_do_tipo[$t] = $cat[$slug];
+const PALAVRAS_AREA = [
+    '/pizza|hamburg|restaurante|lanche|sushi|japonesa|marmit|churras|pastel|past[ée]is|sorvet|a[çc]a[íi]/iu' => 'alimentacao',
+    '/sobrancelha|cabeleireir|barbear|manicure|est[ée]tica|maquiag/iu' => 'beleza',
+    '/animais|pet\b|veterin/iu' => 'pet',
+    '/nutr|m[ée]dic|cl[íi]nica|odont|dentista|psic/iu' => 'saude',
+    '/mercad|mercearia|hortifr|a[çc]ougue|bebidas/iu' => 'mercados',
+];
 // cidade pelo endereço ("..., Águas da Prata - SP")
 function cidade_do_endereco(string $e, string $padrao): string {
     foreach (CIDADES as $slug => [$nome]) if (mb_stripos($e, $nome) !== false) return $slug;
@@ -105,6 +112,10 @@ foreach ($linhas_html as [, $status, $tipo, $area, $tr]) {
     $tipo = mb_substr(html_entity_decode($tipo, ENT_QUOTES | ENT_HTML5, 'UTF-8'), 0, 80);
     $area = html_entity_decode((string)$area, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     $categoria_id = isset($areas[$area]) ? ($cat[$areas[$area]] ?? $cat['outros']) : ($area_do_tipo[mb_strtolower($tipo)] ?? $cat['outros']);
+    // "Outros" com tipo que claramente é de outra área (ex.: Pizzaria, Hamburgueria, Cabeleireiro)
+    if ($categoria_id === $cat['outros']) {
+        foreach (PALAVRAS_AREA as $re => $slug) if (preg_match($re, $tipo) && isset($cat[$slug])) { $categoria_id = $cat[$slug]; break; }
+    }
     $dados = [
         'categoria_id' => $categoria_id,
         'tipo' => $tipo ?: null,

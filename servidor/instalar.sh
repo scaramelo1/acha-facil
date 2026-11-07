@@ -75,7 +75,7 @@ mkdir -p $DADOS/fotos && chown -R www-data:www-data $DADOS && chmod 750 $DADOS $
 # 3. arquivos e publicação em https://fsadesigners.com.br/acha-facil/
 find "$RAIZ" -type d -exec chmod 755 {} +
 find "$RAIZ" -type f -exec chmod 644 {} +
-chmod 755 "$RAIZ/instalar.sh" "$RAIZ/publicar-apk.sh" "$RAIZ/importar-leads.php"
+chmod 755 "$RAIZ/instalar.sh" "$RAIZ/publicar-apk.sh" "$RAIZ/importar-leads.php" "$RAIZ/geocodificar.php"
 ln -sfn "$RAIZ/publico" /var/www/fsa-designer/$NOME
 echo "✔ /var/www/fsa-designer/$NOME -> $RAIZ/publico"
 

@@ -35,6 +35,12 @@ pagina_inicio('Privacidade · Acha Fácil', 'Quais dados o Acha Fácil usa, para
   <p>As bases legais são: execução do contrato (sua conta e o anúncio do profissional), legítimo interesse (segurança e estatísticas sem identificação)
   e cumprimento de obrigação legal (registros de acesso).</p>
 
+  <h3>Sua localização</h3>
+  <p>Só se você tocar em "Usar minha localização", o app pega a posição do celular para mostrar os comércios perto de você.
+  Ela é enviada apenas para calcular as distâncias naquele momento e <strong>não é guardada</strong>. Você pode desligar
+  a qualquer momento nas configurações do celular. A localização aproximada dos comércios vem do endereço deles, com
+  dados do OpenStreetMap (© colaboradores do OpenStreetMap, licença ODbL).</p>
+
   <h3>Dados dos comércios mostrados no app</h3>
   <p>Parte dos comércios foi incluída a partir de informações que eles mesmos tornam públicas na internet (nome,
   endereço, telefone, WhatsApp, site e redes sociais do negócio), para que os moradores encontrem o comércio local.

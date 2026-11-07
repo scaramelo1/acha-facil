@@ -184,7 +184,13 @@ export function SeloVerificado({ compacto, claro }: { compacto?: boolean; claro?
 }
 
 /** Cartão de comércio nas listas: espaço da foto, nome, tipo · bairro, como falar e a setinha amarela. */
-export function CartaoProfissional({ p }: { p: ProfissionalResumo }) {
+/** 0,35 → "350 m"; 1,24 → "1,2 km" (distância aproximada, em linha reta). */
+export function textoDistancia(km: number) {
+  if (km < 1) return `${Math.max(50, Math.round((km * 1000) / 50) * 50)} m`;
+  return `${km < 10 ? km.toFixed(1).replace('.', ',') : Math.round(km)} km`;
+}
+
+export function CartaoProfissional({ p, distancia }: { p: ProfissionalResumo; distancia?: number }) {
   const router = useRouter();
   return (
     <Pressable
@@ -203,6 +209,12 @@ export function CartaoProfissional({ p }: { p: ProfissionalResumo }) {
           {p.bairro ? ` · ${p.bairro}` : ''}
         </Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginTop: 2 }}>
+          {distancia !== undefined && (
+            <View style={estilos.distancia} accessibilityLabel={`A cerca de ${textoDistancia(distancia)}`}>
+              <MaterialCommunityIcons name="map-marker-outline" size={15} color={cores.verde} />
+              <Text style={estilos.distanciaTexto}>{textoDistancia(distancia)}</Text>
+            </View>
+          )}
           {p.destaque && <Etiqueta texto="Destaque" icone="star-four-points" amarela />}
           {p.verificado && <SeloVerificado compacto />}
           {p.avaliacoes > 0 && (
@@ -291,6 +303,8 @@ export const estilos = StyleSheet.create({
   cartaoNome: { fontSize: fonte.normal + 1, fontWeight: '800', color: cores.texto },
   cartaoSub: { fontSize: fonte.pequena, color: cores.textoSuave },
   seta: { width: 36, height: 36, borderRadius: 18, backgroundColor: cores.fundoSuave, alignItems: 'center', justifyContent: 'center' },
+  distancia: { flexDirection: 'row', alignItems: 'center', gap: 2, backgroundColor: cores.verdeClaro, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 },
+  distanciaTexto: { fontSize: 14, fontWeight: '800', color: cores.verde },
   bolinha: { width: 10, height: 10, borderRadius: 5, backgroundColor: cores.whatsapp },
   contatoTexto: { fontSize: 15, fontWeight: '800', color: cores.whatsapp },
   selo: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: cores.verdeClaro, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 },

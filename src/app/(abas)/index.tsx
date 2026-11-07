@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { chamar, URL_MEU_NEGOCIO, type Categoria, type ProfissionalResumo } from '../../api/cliente';
 import { useCidade } from '../../cidade';
+import { PertoDeVoce } from '../../componentes/PertoDeVoce';
 import { Vitrine } from '../../componentes/Vitrine';
 import { CartaoProfissional, Carregando, corClara, Falha, Icone, Titulo, useCarregar } from '../../componentes/ui';
 import { cores, ESPACO_BARRA, fonte, RAIO, sombra } from '../../tema';
@@ -119,14 +120,19 @@ export default function TelaInicio() {
               </>
             )}
 
-            {dados.populares.length > 0 && (
-              <>
-                <Titulo>Perto de você</Titulo>
-                {dados.populares.slice(0, 6).map((p) => (
-                  <CartaoProfissional key={p.id} p={p} />
-                ))}
-              </>
-            )}
+            <Titulo>Perto de você</Titulo>
+            <PertoDeVoce
+              semLocalizacao={
+                dados.populares.length > 0 ? (
+                  <>
+                    <Titulo>Conhecidos na cidade</Titulo>
+                    {dados.populares.slice(0, 6).map((p) => (
+                      <CartaoProfissional key={p.id} p={p} />
+                    ))}
+                  </>
+                ) : null
+              }
+            />
 
             {/* chamada para o dono do negócio */}
             <Pressable accessibilityRole="button" onPress={() => WebBrowser.openBrowserAsync(URL_MEU_NEGOCIO)} style={estilos.dono}>

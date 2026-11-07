@@ -21,6 +21,12 @@
           "resizeMode": "contain",
           "backgroundColor": "#005C38"
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O Acha Fácil usa sua localização só para mostrar os comércios perto de você. Ela não é guardada."
+        }
       ]
     ],
     "ios": {
