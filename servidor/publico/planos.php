@@ -30,7 +30,7 @@ pagina_inicio('Planos para o seu negócio · Acha Fácil!', 'Corrija os dados, c
 ?>
 <main class="documento" style="max-width:960px">
   <h1>Planos para o seu negócio</h1>
-  <p>Com um plano, você corrige os dados, coloca fotos e deixa seu comércio do jeito certo para toda São João ver.</p>
+  <p>Com um plano, você corrige os dados, coloca fotos e deixa seu comércio do jeito certo para toda a cidade ver.</p>
   <?php if ($p): ?>
     <div class="quadro"><strong><?= h($p['nome']) ?></strong><br><?= h($p['tipo'] ?? '') ?><?= $p['endereco'] ? ' · ' . h($p['endereco']) : '' ?></div>
   <?php endif ?>

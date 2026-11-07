@@ -5,11 +5,13 @@ import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-na
 
 import { chamar, type ProfissionalResumo } from '../api/cliente';
 import { CartaoProfissional, Carregando, Vazio } from '../componentes/ui';
+import { useCidade } from '../cidade';
 import { cores, fonte, sombra } from '../tema';
 
 export default function TelaBusca() {
   // pode chegar com um termo pronto (atalhos da tela inicial)
   const { q } = useLocalSearchParams<{ q?: string }>();
+  const { cidade } = useCidade();
   const [termo, setTermo] = useState(q ?? '');
   const [itens, setItens] = useState<ProfissionalResumo[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
@@ -34,7 +36,7 @@ export default function TelaBusca() {
       cancelado = true;
       clearTimeout(espera);
     };
-  }, [termo]);
+  }, [termo, cidade.slug]);
 
   const curto = termo.trim().length < 2;
 
@@ -59,7 +61,7 @@ export default function TelaBusca() {
         )}
       </View>
       {curto ? (
-        <Vazio icone="store-search-outline" texto="Digite o nome, o tipo de negócio (pizzaria, oficina…) ou o bairro." />
+        <Vazio icone="store-search-outline" texto={`Procurando em ${cidade.nome}. Digite o nome, o tipo de negócio (pizzaria, oficina…) ou o bairro.`} />
       ) : erro ? (
         <Vazio icone="wifi-off" texto={erro} />
       ) : itens === null ? (

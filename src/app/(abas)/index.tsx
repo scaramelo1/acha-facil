@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { chamar, URL_MEU_NEGOCIO, type Categoria, type ProfissionalResumo } from '../../api/cliente';
 import { useBarraClara } from '../../componentes/BarraClara';
+import { useCidade } from '../../cidade';
 import { Vitrine } from '../../componentes/Vitrine';
 import { Carregando, corClara, Falha, Icone, Titulo, useCarregar } from '../../componentes/ui';
 import { cores, ESPACO_BARRA, fonte, RAIO, saudacao, sombra } from '../../tema';
@@ -23,7 +24,8 @@ const SUGESTOES = ['Pizzaria', 'Farmácia', 'Mecânica', 'Pet shop', 'Padaria', 
 export default function TelaInicio() {
   useBarraClara();
   const router = useRouter();
-  const { dados, erro, carregando, recarregar } = useCarregar(() => chamar<Inicio>('inicio.php'), 'inicio');
+  const { cidade, trocarCidade } = useCidade();
+  const { dados, erro, carregando, recarregar } = useCarregar(() => chamar<Inicio>('inicio.php'), `inicio-${cidade.slug}`);
   const principais = dados?.categorias.filter((c) => c.naInicial) ?? [];
 
   return (
@@ -40,10 +42,11 @@ export default function TelaInicio() {
               <Text style={estilos.marca}>
                 Acha <Text style={{ color: cores.amarelo }}>Fácil!</Text>
               </Text>
-              <View style={estilos.cidade}>
+              <Pressable accessibilityRole="button" accessibilityLabel={`Cidade: ${cidade.nome}. Toque para trocar`} onPress={trocarCidade} style={estilos.cidade}>
                 <MaterialCommunityIcons name="map-marker" size={16} color={cores.verde} />
-                <Text style={estilos.cidadeTexto}>São João</Text>
-              </View>
+                <Text style={estilos.cidadeTexto}>{cidade.curto}</Text>
+                <MaterialCommunityIcons name="chevron-down" size={18} color={cores.verde} />
+              </Pressable>
             </View>
             <Text style={estilos.ola}>{saudacao()}!</Text>
             <Text style={estilos.pergunta}>O que você procura hoje?</Text>
@@ -54,7 +57,7 @@ export default function TelaInicio() {
               style={({ pressed }) => [estilos.busca, pressed && { transform: [{ translateY: 2 }] }]}
             >
               <MaterialCommunityIcons name="magnify" size={30} color={cores.verde} />
-              <Text style={estilos.buscaTexto}>Buscar em São João</Text>
+              <Text style={estilos.buscaTexto} numberOfLines={1}>Buscar em {cidade.curto}</Text>
             </Pressable>
           </SafeAreaView>
         </View>
@@ -126,7 +129,7 @@ export default function TelaInicio() {
                 </View>
                 <MaterialCommunityIcons name="arrow-right" size={26} color={cores.amarelo} />
               </Pressable>
-              <Text style={estilos.rodape}>{dados.total.toLocaleString('pt-BR')} comércios e serviços de São João da Boa Vista</Text>
+              <Text style={estilos.rodape}>{dados.total.toLocaleString('pt-BR')} comércios e serviços de {cidade.nome}</Text>
             </>
           ) : null}
         </View>
@@ -139,7 +142,7 @@ const estilos = StyleSheet.create({
   cabecalho: { backgroundColor: cores.verde, paddingHorizontal: 16, paddingBottom: 24, borderBottomLeftRadius: 32, borderBottomRightRadius: 32 },
   marcaLinha: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 8 },
   marca: { flex: 1, fontSize: fonte.media, fontWeight: '900', color: '#fff' },
-  cidade: { flexDirection: 'row', alignItems: 'center', gap: 2, backgroundColor: cores.amarelo, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
+  cidade: { flexDirection: 'row', alignItems: 'center', gap: 2, minHeight: 40, backgroundColor: cores.amarelo, borderRadius: 14, paddingLeft: 10, paddingRight: 6 },
   cidadeTexto: { fontSize: 14, fontWeight: '800', color: cores.verde },
   ola: { color: '#CFE6D9', fontSize: fonte.normal, fontWeight: '700', marginTop: 20 },
   pergunta: { color: '#fff', fontSize: fonte.titulo, fontWeight: '900', lineHeight: 36, marginBottom: 16 },

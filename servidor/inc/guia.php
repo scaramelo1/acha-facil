@@ -2,14 +2,32 @@
 // Regras do guia: quem aparece, ordem da vitrine, formato dos dados enviados ao app, notas
 declare(strict_types=1);
 
+// Cidades atendidas: slug => [nome completo, nome curto]. O app manda ?cidade=<slug> em todas as chamadas.
+const CIDADES = [
+    'sao-joao' => ['São João da Boa Vista', 'São João'],
+    'aguas-da-prata' => ['Águas da Prata', 'Águas da Prata'],
+];
+const CIDADE_PADRAO = 'sao-joao';
+
+/** Cidade pedida pelo app (?cidade=); desconhecida ou vazia vira a padrão. */
+function cidade_pedida(): string {
+    $c = (string)($_GET['cidade'] ?? '');
+    return isset(CIDADES[$c]) ? $c : CIDADE_PADRAO;
+}
+function nome_cidade(string $slug, bool $curto = false): string { return CIDADES[$slug][$curto ? 1 : 0] ?? CIDADES[CIDADE_PADRAO][0]; }
+
 // Aparece no app: aprovado e com assinatura em dia (ou cortesia dada pelo admin).
 // Comércios importados da lista de leads aparecem sem assinatura até o dono assumir o perfil.
-const VISIVEL = "p.status = 'ativo' AND (p.assinatura IN ('ativa','cortesia') OR p.importado = 1) AND c.ativa = 1";
+// Com $cidade, só os daquela cidade (o slug vem da lista fixa CIDADES, então pode ir direto no SQL).
+function visivel(?string $cidade = null): string {
+    $sql = "p.status = 'ativo' AND (p.assinatura IN ('ativa','cortesia') OR p.importado = 1) AND c.ativa = 1";
+    return $cidade !== null && isset(CIDADES[$cidade]) ? "$sql AND p.cidade = '$cidade'" : $sql;
+}
 
 // Ordem do dia: muda uma vez por dia, para ninguém ficar sempre no topo nem sempre no fim
 function semente_dia(): int { return (int)date('Ymd'); }
 
-const CAMPOS_RESUMO = 'p.id, p.nome, p.tipo, p.importado, p.servicos, p.bairro, p.atende_em_casa, p.foto, p.verificado, p.plano,
+const CAMPOS_RESUMO = 'p.id, p.nome, p.tipo, p.cidade, p.importado, p.servicos, p.bairro, p.atende_em_casa, p.foto, p.verificado, p.plano,
     p.nota_media, p.total_avaliacoes, p.whatsapp, p.telefone, c.id AS categoria_id, c.nome AS categoria, c.icone, c.cor';
 
 function foto_url(?string $foto): ?string { return $foto ? url_publica('foto.php?f=' . rawurlencode($foto)) : null; }
@@ -25,6 +43,7 @@ function prof_resumo(array $p): array {
         'tipo' => $p['tipo'] ?: $p['categoria'],
         'servicos' => $p['servicos'] ? array_values(array_filter(array_map('trim', explode(',', $p['servicos'])))) : [],
         'bairro' => $p['bairro'],
+        'cidade' => nome_cidade($p['cidade'], true),
         'atendeEmCasa' => (bool)$p['atende_em_casa'],
         'foto' => foto_url($p['foto']),
         'verificado' => (bool)$p['verificado'],
@@ -37,54 +56,55 @@ function prof_resumo(array $p): array {
     ];
 }
 
-function categorias_ativas(): array {
+function categorias_ativas(?string $cidade = null): array {
     return array_map(fn($c) => [
         'id' => (int)$c['id'], 'nome' => $c['nome'], 'slug' => $c['slug'], 'icone' => $c['icone'], 'cor' => $c['cor'],
         'naInicial' => (bool)$c['na_inicial'], 'total' => (int)$c['total'],
-    ], linhas('SELECT c.*, (SELECT COUNT(*) FROM profissionais p WHERE p.categoria_id = c.id AND ' . VISIVEL . ') AS total
+    ], linhas('SELECT c.*, (SELECT COUNT(*) FROM profissionais p WHERE p.categoria_id = c.id AND ' . visivel($cidade) . ') AS total
         FROM categorias c WHERE c.ativa = 1 ORDER BY c.ordem, c.nome'));
 }
 
-function destaques(int $limite = 10): array {
+function destaques(string $cidade, int $limite = 10): array {
     return array_map('prof_resumo', linhas('SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
-        WHERE ' . VISIVEL . " AND p.plano = 'destaque' ORDER BY RAND(?) LIMIT $limite", [semente_dia()]));
+        WHERE ' . visivel($cidade) . " AND p.plano = 'destaque' ORDER BY RAND(?) LIMIT $limite", [semente_dia()]));
 }
 
 // "Conhecidos na cidade": sorteio do dia entre os 60 mais procurados (sem destaque pago, que já tem vitrine)
-function populares(int $limite = 12): array {
+function populares(string $cidade, int $limite = 12): array {
     return array_map('prof_resumo', linhas('SELECT * FROM (SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
-        WHERE ' . VISIVEL . " AND p.plano <> 'destaque' ORDER BY p.popularidade + p.total_avaliacoes * 5 DESC LIMIT 60) t
+        WHERE ' . visivel($cidade) . " AND p.plano <> 'destaque' ORDER BY p.popularidade + p.total_avaliacoes * 5 DESC LIMIT 60) t
         ORDER BY RAND(?) LIMIT $limite", [semente_dia()]));
 }
 
 // tipos de negócio dentro de uma área (filtros da tela da área), do mais comum ao menos
-function tipos_da_categoria(int $categoria_id): array {
+function tipos_da_categoria(int $categoria_id, string $cidade): array {
     return array_map(fn($t) => ['nome' => $t['tipo'], 'total' => (int)$t['total']], linhas('SELECT p.tipo, COUNT(*) AS total
-        FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE ' . VISIVEL . ' AND p.categoria_id = ? AND p.tipo IS NOT NULL
+        FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE ' . visivel($cidade) . ' AND p.categoria_id = ? AND p.tipo IS NOT NULL
         GROUP BY p.tipo ORDER BY total DESC, p.tipo LIMIT 30', [$categoria_id]));
 }
 
 // destaques primeiro, depois quem se cadastrou, depois quem tem nota; rodízio diário dentro de cada grupo
-function da_categoria(int $categoria_id): array {
+function da_categoria(int $categoria_id, string $cidade): array {
     return array_map('prof_resumo', linhas('SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
-        WHERE ' . VISIVEL . " AND p.categoria_id = ?
+        WHERE ' . visivel($cidade) . " AND p.categoria_id = ?
         ORDER BY p.plano = 'destaque' DESC, p.importado ASC, p.total_avaliacoes > 0 DESC, RAND(?)",
         [$categoria_id, semente_dia()]));
 }
 
-function buscar(string $termo, int $limite = 50): array {
+// $cidade null = todas (busca do site, para o dono achar o negócio)
+function buscar(string $termo, ?string $cidade, int $limite = 50): array {
     $termo = trim(mb_substr($termo, 0, 60));
     if (mb_strlen($termo) < 2) return [];
     $like = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $termo) . '%';
     return array_map('prof_resumo', linhas('SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
-        WHERE ' . VISIVEL . ' AND (p.nome LIKE ? OR p.tipo LIKE ? OR p.servicos LIKE ? OR p.descricao LIKE ? OR p.bairro LIKE ? OR c.nome LIKE ?)
+        WHERE ' . visivel($cidade) . ' AND (p.nome LIKE ? OR p.tipo LIKE ? OR p.servicos LIKE ? OR p.descricao LIKE ? OR p.bairro LIKE ? OR c.nome LIKE ?)
         ORDER BY (c.nome LIKE ? OR p.tipo LIKE ? OR p.nome LIKE ?) DESC, p.plano = \'destaque\' DESC, p.importado ASC, RAND(?) LIMIT ' . $limite,
         [$like, $like, $like, $like, $like, $like, $like, $like, $like, semente_dia()]));
 }
 
 function profissional_visivel(int $id): ?array {
     return $id ? linha('SELECT p.*, c.nome AS categoria, c.icone, c.cor FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
-        WHERE p.id = ? AND ' . VISIVEL, [$id]) : null;
+        WHERE p.id = ? AND ' . visivel(), [$id]) : null;
 }
 
 function prof_completo(array $p, ?int $usuario_id): array {
@@ -98,7 +118,7 @@ function prof_completo(array $p, ?int $usuario_id): array {
         'whatsapp' => $p['whatsapp'] ? link_whatsapp($p['whatsapp'], 'Olá! Encontrei você no Acha Fácil.') : null,
         'instagram' => $p['instagram'] ? 'https://instagram.com/' . ltrim($p['instagram'], '@') : null,
         'endereco' => $p['endereco'],
-        'mapa' => $p['mapa'] ?: ($p['endereco'] ? 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($p['endereco'] . ', São João da Boa Vista - SP') : null),
+        'mapa' => $p['mapa'] ?: ($p['endereco'] ? 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($p['endereco'] . ', ' . nome_cidade($p['cidade']) . ' - SP') : null),
         'site' => $p['site'],
         'linkAssumir' => $p['importado'] ? url_publica('planos.php?id=' . $p['id']) : null,
         'linkRemover' => $p['importado'] ? url_publica('perfil.php?id=' . $p['id'] . '&acao=remover') : null,

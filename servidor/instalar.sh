@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Acha Fácil — instalação/atualização na VPS (rodar como root). Pode rodar de novo sem estragar nada.
 #   bash instalar.sh              cria/atualiza banco, config e publicação
-#   bash instalar.sh --leads      também importa/atualiza os comércios da lista de leads (fsadesigners.com.br/leads)
+#   bash instalar.sh --leads      também importa/atualiza os comércios das listas de leads (São João e Águas da Prata)
 set -euo pipefail
 cd "$(dirname "$0")"
 RAIZ="$(pwd)"
@@ -88,5 +88,9 @@ if grep -q '|leads/)\[^/\]+/' "$APACHE_SSL" && ! grep -q "$NOME/" "$APACHE_SSL";
 else
   echo "• Apache já ajustado (ou padrão diferente; confira a LocationMatch em $APACHE_SSL)"
 fi
-if [ "${1:-}" = "--leads" ]; then php "$RAIZ/importar-leads.php"; fi
+if [ "${1:-}" = "--leads" ]; then
+  php "$RAIZ/importar-leads.php"                                   # São João (lista de fsadesigners.com.br/leads)
+  PRATA=$DADOS/leads/aguas-da-prata.html
+  [ -f "$PRATA" ] && php "$RAIZ/importar-leads.php" "$PRATA" aguas-da-prata || echo "• sem lista de Águas da Prata em $PRATA"
+fi
 echo; echo "Pronto: https://fsadesigners.com.br/$NOME/api/inicio.php"

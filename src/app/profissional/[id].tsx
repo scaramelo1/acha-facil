@@ -37,7 +37,7 @@ export default function TelaProfissional() {
     registrarContato(p.id, tipo);
     Linking.openURL(link).catch(() => Alert.alert('Não foi possível abrir', 'Confira se o aplicativo está instalado.'));
   };
-  const endereco = [p.endereco, p.bairro].filter(Boolean).join(' · ');
+  const endereco = [p.endereco, p.bairro, p.cidade].filter(Boolean).join(' · ');
 
   return (
     <>

@@ -4,12 +4,14 @@ import { Alert, ScrollView, Text, View } from 'react-native';
 
 import { URL_MEU_NEGOCIO, URL_PRIVACIDADE, URL_TERMOS } from '../../api/cliente';
 import { Botao, Titulo, estilos as ui } from '../../componentes/ui';
+import { useCidade } from '../../cidade';
 import { useConta } from '../../conta';
 import { cores, ESPACO_BARRA, fonte } from '../../tema';
 
 export default function TelaConta() {
   const router = useRouter();
   const { usuario, sair, excluirConta } = useConta();
+  const { cidade, trocarCidade } = useCidade();
 
   const confirmarExclusao = () =>
     Alert.alert('Excluir conta?', 'Suas avaliações e salvos serão apagados. Isso não pode ser desfeito.', [
@@ -37,7 +39,10 @@ export default function TelaConta() {
         </View>
       )}
 
-      <Titulo>Tem um comércio em São João?</Titulo>
+      <Titulo>Cidade</Titulo>
+      <Botao titulo={`${cidade.nome} · trocar`} icone="map-marker-outline" tipo="contorno" onPress={trocarCidade} />
+
+      <Titulo>Tem um comércio em {cidade.curto}?</Titulo>
       <Text style={ui.texto}>Ele pode já estar no app. Procure e confira os planos para corrigir os dados e colocar fotos.</Text>
       <Botao titulo="Procurar meu negócio" icone="storefront-outline" tipo="amarelo" onPress={() => WebBrowser.openBrowserAsync(URL_MEU_NEGOCIO)} />
 

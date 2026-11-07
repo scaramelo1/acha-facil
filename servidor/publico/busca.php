@@ -5,7 +5,7 @@ require __DIR__ . '/../inc/guia.php';
 require __DIR__ . '/../inc/pagina.php';
 
 $termo = trim(mb_substr((string)($_GET['q'] ?? ''), 0, 60));
-$achados = mb_strlen($termo) >= 2 ? buscar($termo, 30) : [];
+$achados = mb_strlen($termo) >= 2 ? buscar($termo, null, 30) : [];
 $base = config()['url'];
 
 pagina_inicio('Procure seu negócio · Acha Fácil!', 'Ache o seu comércio no Acha Fácil e confira os planos para corrigir os dados e colocar fotos.');
@@ -24,7 +24,7 @@ pagina_inicio('Procure seu negócio · Acha Fácil!', 'Ache o seu comércio no A
     <ul class="resultados">
       <?php foreach ($achados as $p): ?>
         <li>
-          <span><b><?= h($p['nome']) ?></b><small><?= h($p['tipo']) ?><?= $p['bairro'] ? ' · ' . h($p['bairro']) : '' ?></small></span>
+          <span><b><?= h($p['nome']) ?></b><small><?= h($p['tipo']) ?> · <?= h($p['cidade']) ?><?= $p['bairro'] ? ' · ' . h($p['bairro']) : '' ?></small></span>
           <span class="acoes">
             <?php if ($p['cadastrado']): ?><small>Perfil já assumido</small>
             <?php else: ?>

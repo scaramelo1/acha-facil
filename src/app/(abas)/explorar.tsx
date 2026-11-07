@@ -4,14 +4,16 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { chamar, type Categoria } from '../../api/cliente';
 import { Carregando, corClara, Falha, Icone, useCarregar } from '../../componentes/ui';
+import { useCidade } from '../../cidade';
 import { cores, ESPACO_BARRA, fonte, RAIO, sombra } from '../../tema';
 
 // Todas as áreas, em duas colunas, cada uma com a sua cor e quantos lugares tem
 export default function TelaAreas() {
   const router = useRouter();
+  const { cidade } = useCidade();
   const { dados, erro, carregando, recarregar } = useCarregar(
     () => chamar<{ categorias: Categoria[] }>('inicio.php').then((r) => r.categorias),
-    'areas',
+    `areas-${cidade.slug}`,
   );
   if (carregando && !dados) return <Carregando />;
   if (erro && !dados) return <Falha mensagem={erro} tentar={recarregar} />;
@@ -27,7 +29,7 @@ export default function TelaAreas() {
       ListHeaderComponent={
         <Pressable accessibilityRole="search" onPress={() => router.push('/busca')} style={estilos.busca}>
           <MaterialCommunityIcons name="magnify" size={26} color={cores.verde} />
-          <Text style={estilos.buscaTexto}>Buscar pelo nome ou tipo</Text>
+          <Text style={estilos.buscaTexto}>Buscar em {cidade.curto}</Text>
         </Pressable>
       }
       renderItem={({ item: c }) => (

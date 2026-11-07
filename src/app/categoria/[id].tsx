@@ -5,6 +5,7 @@ import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 import { chamar, type ProfissionalResumo, type TipoNegocio } from '../../api/cliente';
 import { useBarraClara } from '../../componentes/BarraClara';
 import { CartaoProfissional, Carregando, Falha, Icone, Vazio, useCarregar } from '../../componentes/ui';
+import { useCidade } from '../../cidade';
 import { cores, fonte } from '../../tema';
 
 interface Resposta {
@@ -16,7 +17,8 @@ interface Resposta {
 // Uma área (ex.: Alimentação): faixa colorida no topo e filtros pelo tipo de negócio (Pizzaria, Padaria…)
 export default function TelaCategoria() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { dados, erro, carregando, recarregar } = useCarregar(() => chamar<Resposta>(`categoria.php?id=${id}`), `categoria-${id}`);
+  const { cidade } = useCidade();
+  const { dados, erro, carregando, recarregar } = useCarregar(() => chamar<Resposta>(`categoria.php?id=${id}`), `categoria-${id}-${cidade.slug}`);
   useBarraClara();
   const [tipo, setTipo] = useState<string | null>(null);
 
@@ -49,7 +51,7 @@ export default function TelaCategoria() {
               <View style={{ flex: 1 }}>
                 <Text style={estilos.topoNome}>{c.nome}</Text>
                 <Text style={estilos.topoTotal}>
-                  {dados.profissionais.length.toLocaleString('pt-BR')} {dados.profissionais.length === 1 ? 'lugar' : 'lugares'} em São João
+                  {dados.profissionais.length.toLocaleString('pt-BR')} {dados.profissionais.length === 1 ? 'lugar' : 'lugares'} em {cidade.curto}
                 </Text>
               </View>
             </View>

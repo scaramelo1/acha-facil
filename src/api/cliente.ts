@@ -6,6 +6,13 @@ export const URL_PRIVACIDADE = 'https://fsadesigners.com.br/acha-facil/privacida
 /** Página onde o dono procura o próprio comércio para assumir o perfil ou pedir para tirar do app. */
 export const URL_MEU_NEGOCIO = 'https://fsadesigners.com.br/acha-facil/busca.php';
 
+export interface Cidade {
+  slug: string;
+  nome: string;
+  /** Nome curto para cabeçalhos ("São João"). */
+  curto: string;
+}
+
 export interface Categoria {
   id: number;
   nome: string;
@@ -27,6 +34,8 @@ export interface ProfissionalResumo {
   tipo: string;
   servicos: string[];
   bairro: string | null;
+  /** Nome curto da cidade do comércio. */
+  cidade: string;
   atendeEmCasa: boolean;
   foto: string | null;
   verificado: boolean;
@@ -90,10 +99,17 @@ export function definirToken(t: string | null) {
   tokenAtual = t;
 }
 
+// Cidade escolhida ao abrir o app: vai em todas as chamadas (?cidade=), e o servidor só devolve comércios dela.
+let cidadeAtual = 'sao-joao';
+export function definirCidade(slug: string) {
+  cidadeAtual = slug;
+}
+
 export async function chamar<T>(caminho: string, metodo: 'GET' | 'POST' | 'DELETE' = 'GET', corpo?: unknown): Promise<T> {
   let r: Response;
   try {
-    r = await fetch(`${URL_API}/${caminho}`, {
+    const url = `${URL_API}/${caminho}${caminho.includes('?') ? '&' : '?'}cidade=${encodeURIComponent(cidadeAtual)}`;
+    r = await fetch(url, {
       method: metodo,
       headers: {
         'Content-Type': 'application/json',

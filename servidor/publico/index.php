@@ -5,8 +5,8 @@ require __DIR__ . '/../inc/guia.php';
 require __DIR__ . '/../inc/pagina.php';
 
 $areas = categorias_ativas();
-$total = (int)valor('SELECT COUNT(*) FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE ' . VISIVEL);
-$com_whats = (int)valor('SELECT COUNT(*) FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE ' . VISIVEL . ' AND p.whatsapp IS NOT NULL');
+$total = (int)valor('SELECT COUNT(*) FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE ' . visivel());
+$com_whats = (int)valor('SELECT COUNT(*) FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE ' . visivel() . ' AND p.whatsapp IS NOT NULL');
 $base = config()['url'];
 $num = fn(int $n) => number_format($n, 0, ',', '.');
 // emoji de enfeite por ícone (o site não carrega a fonte de ícones do app)
@@ -14,18 +14,18 @@ $emoji = ['silverware-fork-knife' => '🍽️', 'cart-outline' => '🛒', 'tools
     'tshirt-crew-outline' => '👕', 'home-roof' => '🏠', 'car-wrench' => '🚗', 'shopping-outline' => '🛍️', 'school-outline' => '🎓',
     'dumbbell' => '🏋️', 'paw' => '🐾', 'bed-outline' => '🛏️', 'bank-outline' => '🏦', 'factory' => '🏭', 'hand-heart-outline' => '🤝'];
 
-pagina_inicio('Acha Fácil! O comércio de São João da Boa Vista no seu celular',
-    "App gratuito com $total comércios e serviços de São João da Boa Vista: restaurantes, mercados, oficinas, clínicas, lojas e muito mais. Chame no WhatsApp com um toque.");
+pagina_inicio('Acha Fácil! O comércio de São João da Boa Vista e Águas da Prata no seu celular',
+    "App gratuito com $total comércios e serviços de São João da Boa Vista e Águas da Prata: restaurantes, mercados, oficinas, clínicas, lojas e muito mais. Chame no WhatsApp com um toque.");
 ?>
 <main>
   <section class="hero">
     <div class="conteudo">
       <div>
-        <h1>Tudo o que tem em <mark>São João</mark>, num toque.</h1>
-        <p class="lead">Restaurante, mercado, oficina, clínica, loja ou quem faz aquele conserto. Procure no Acha Fácil e chame no WhatsApp, ligue ou veja como chegar.</p>
+        <h1>Tudo o que tem na <mark>sua cidade</mark>, num toque.</h1>
+        <p class="lead">São João da Boa Vista e Águas da Prata. Restaurante, mercado, oficina, clínica, loja ou quem faz aquele conserto. Procure no Acha Fácil e chame no WhatsApp, ligue ou veja como chegar.</p>
         <ul class="contador">
           <li><b><?= $num($total) ?></b> comércios e serviços</li>
-          <li><b><?= count($areas) ?></b> áreas</li>
+          <li><b><?= count(CIDADES) ?></b> cidades</li>
           <li><b><?= $num($com_whats) ?></b> com WhatsApp</li>
         </ul>
         <div class="lojas" id="baixar"><?= botoes_lojas() ?></div>
@@ -35,7 +35,7 @@ pagina_inicio('Acha Fácil! O comércio de São João da Boa Vista no seu celula
         <div class="ola"><small>Boa tarde!</small>O que você procura hoje?</div>
         <div class="busca">🔍 pizza, borracharia, farmácia…</div>
         <div class="grade"><span>🍽️</span><span>🛒</span><span>🛠️</span><span>🩺</span><span>💄</span><span>🚗</span></div>
-        <div class="item"><b>Conhecidos na cidade</b>Os mais procurados de São João, todo dia uma seleção nova</div>
+        <div class="item"><b>Conhecidos na cidade</b>Os mais procurados da cidade, todo dia uma seleção nova</div>
       </div>
     </div>
     <svg class="onda" viewBox="0 0 1200 48" preserveAspectRatio="none" aria-hidden="true"><path d="M0 24 C200 0 400 48 600 24 S1000 0 1200 24 V48 H0Z" fill="#fff"/></svg>
@@ -44,7 +44,7 @@ pagina_inicio('Acha Fácil! O comércio de São João da Boa Vista no seu celula
   <section class="branco" id="areas" style="padding-top:24px">
     <div class="conteudo">
       <h2>De padaria a oficina</h2>
-      <p class="intro">Os comércios de São João organizados por área. Dentro de cada uma, filtre pelo tipo: pizzaria, academia, pet shop…</p>
+      <p class="intro">Os comércios de São João da Boa Vista e Águas da Prata organizados por área. Dentro de cada uma, filtre pelo tipo: pizzaria, academia, pet shop…</p>
       <div class="areas">
         <?php foreach ($areas as $a): ?>
           <div class="area"><i style="background:<?= h($a['cor']) ?>"><?= $emoji[$a['icone']] ?? '📍' ?></i><span><b><?= h($a['nome']) ?></b><small><?= $num($a['total']) ?> lugares</small></span></div>
@@ -69,7 +69,7 @@ pagina_inicio('Acha Fácil! O comércio de São João da Boa Vista no seu celula
     <div class="conteudo duas">
       <div>
         <h2>Seu negócio já pode estar no Acha Fácil</h2>
-        <p class="intro">Montamos o guia com os dados públicos dos comércios de São João. Procure o seu e confira os planos para corrigir os dados e colocar fotos.</p>
+        <p class="intro">Montamos o guia com os dados públicos dos comércios de São João e Águas da Prata. Procure o seu e confira os planos para corrigir os dados e colocar fotos.</p>
         <ul class="lista-check">
           <li>Corrija telefone, WhatsApp, endereço e horário</li>
           <li>Coloque foto, descrição e o que você vende ou faz</li>

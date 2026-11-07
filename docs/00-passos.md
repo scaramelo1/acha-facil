@@ -24,7 +24,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 - Ordem justa: destaques primeiro, depois quem tem avaliação; dentro de cada grupo a ordem muda uma vez por dia.
 - Selo "Verificado pelo Acha Fácil" é dado pelo admin, não vem com o pagamento.
 - Os comércios vêm da **lista de leads** (fsadesigners.com.br/leads, coleta do Google Maps): `importado = 1`, aparecem
-  **sem assinatura** até o dono assumir o perfil. Reimportar: `php servidor/importar-leads.php` (atualiza pelo nome; não mexe em
+  **sem assinatura** até o dono assumir o perfil. Reimportar: `php servidor/importar-leads.php [arquivo] [cidade]` (ou `bash servidor/instalar.sh --leads`, que faz as duas cidades) (atualiza pelo nome; não mexe em
   quem assumiu nem em quem foi tirado). Os 10 exemplos fictícios foram apagados.
 - O dono procura o negócio em `/busca.php` e pede para **assumir** (grátis) ou **tirar do app** (`/perfil.php`); para corrigir dados e pôr fotos, o dono confere os planos em `/planos.php` (Básico e Destaque, valores em breve); os pedidos
   ficam na tabela `pedidos` até a administração web existir (passo 8).
@@ -42,6 +42,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 4b. ✅ Visual completamente diferente do Guia Sanjoanense (07/11): app (inicial, áreas, área com filtros por tipo, busca,
    perfil do comércio, abas) e site (inicial com números reais, busca do dono, assumir/tirar do app, privacidade)
 4c. ✅ 2.754 comércios da lista de leads no banco, em 17 áreas (07/11) — `bash servidor/instalar.sh --leads`
+4d. ✅ Duas cidades (07/11): ao abrir, o app pergunta "Onde você está?" (quadrados com o pino de localização:
+   São João da Boa Vista ou Águas da Prata; a última fica marcada; troca pelo cabeçalho ou na aba Conta).
+   101 comércios de Águas da Prata importados (`/var/lib/acha-facil/leads/aguas-da-prata.html`)
 5. ⬜ Testar no PC (`npm install`, `npx tsc --noEmit`, `npx expo lint`, emulador)
 6. 🟡 Projeto EAS próprio (ligado em 07/11 ✅) e 1º APK (falta); publicar com `bash servidor/publicar-apk.sh <link do EAS>`
 7. ⬜ Contas no app: conferir se entrar/criar conta funciona (no Guia Sanjoanense isso ainda está em aberto)

@@ -11,4 +11,4 @@ if ($m === 'POST') {
 }
 responder(['profissionais' => array_map('prof_resumo', linhas('SELECT ' . CAMPOS_RESUMO . ' FROM favoritos f
     JOIN profissionais p ON p.id = f.profissional_id JOIN categorias c ON c.id = p.categoria_id
-    WHERE f.usuario_id = ? AND ' . VISIVEL . ' ORDER BY f.criado_em DESC', [$u['id']]))]);
+    WHERE f.usuario_id = ? AND ' . visivel() . ' ORDER BY f.criado_em DESC', [$u['id']]))]);
