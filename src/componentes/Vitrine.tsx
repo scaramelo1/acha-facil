@@ -1,19 +1,21 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
-import type { ProfissionalResumo } from '../api/cliente';
+import { URL_PLANOS, type ProfissionalResumo } from '../api/cliente';
 import { cores, fonte, RAIO, sombra } from '../tema';
-import { Avatar, SeloVerificado } from './ui';
+import { Contato, Foto, SeloVerificado } from './ui';
 
 /**
- * Fileira de cartões que rola para o lado, com o próximo aparecendo na beirada (mostra que tem mais).
- * `destaque`: cartões amarelos da vitrine paga. Sem ele: cartões brancos ("Conhecidos na cidade").
+ * "Comércios em destaque": cartões brancos que rolam para o lado, com o espaço da foto em cima
+ * (ícone da área enquanto o dono não põe foto). Quem paga o plano Destaque ganha a fita amarela.
+ * No fim, um cartão amarelo convida o dono a aparecer aqui.
  */
-export function Vitrine({ itens, destaque }: { itens: ProfissionalResumo[]; destaque?: boolean }) {
+export function Vitrine({ itens }: { itens: ProfissionalResumo[] }) {
   const router = useRouter();
   const { width } = useWindowDimensions();
-  const largura = Math.min(width * (destaque ? 0.8 : 0.62), 340);
+  const largura = Math.min(width * 0.62, 280);
   if (itens.length === 0) return null;
 
   return (
@@ -22,61 +24,81 @@ export function Vitrine({ itens, destaque }: { itens: ProfissionalResumo[]; dest
       showsHorizontalScrollIndicator={false}
       snapToInterval={largura + 12}
       decelerationRate="fast"
-      contentContainerStyle={{ paddingHorizontal: 16, gap: 12, paddingBottom: 8 }}
+      contentContainerStyle={{ paddingHorizontal: 16, gap: 12, paddingTop: 2, paddingBottom: 10 }}
       style={{ marginHorizontal: -16 }}
     >
       {itens.map((p) => (
         <Pressable
           key={p.id}
           accessibilityRole="button"
-          accessibilityLabel={`${destaque ? 'Destaque: ' : ''}${p.nome}, ${p.tipo}`}
+          accessibilityLabel={`${p.destaque ? 'Destaque: ' : ''}${p.nome}, ${p.tipo}`}
           onPress={() => router.push(`/profissional/${p.id}`)}
-          style={({ pressed }) => [
-            estilos.cartao,
-            { width: largura, backgroundColor: destaque ? cores.amarelo : cores.cartao },
-            pressed && { transform: [{ translateY: 2 }] },
-          ]}
+          style={({ pressed }) => [estilos.cartao, { width: largura }, pressed && { opacity: 0.85 }]}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Avatar foto={p.foto} icone={p.icone} cor={destaque ? cores.verde : p.cor} tamanho={destaque ? 64 : 52} />
-            {destaque ? (
-              <View style={estilos.faixa}>
-                <MaterialCommunityIcons name="star-four-points" size={14} color={cores.amarelo} />
-                <Text style={estilos.faixaTexto}>DESTAQUE</Text>
+          <View>
+            <Foto foto={p.foto} icone={p.icone} cor={p.cor} largura={largura - 20} altura={118} />
+            {p.destaque && (
+              <View style={estilos.fita}>
+                <MaterialCommunityIcons name="star-four-points" size={14} color={cores.verde} />
+                <Text style={estilos.fitaTexto}>Destaque</Text>
               </View>
-            ) : (
-              <View style={[estilos.ponto, { backgroundColor: p.cor }]} />
             )}
           </View>
-          <Text style={[estilos.nome, destaque && { fontSize: fonte.grande }]} numberOfLines={2}>
+          <Text style={estilos.nome} numberOfLines={2}>
             {p.nome}
           </Text>
           <Text style={estilos.tipo} numberOfLines={1}>
             {p.tipo}
             {p.bairro ? ` · ${p.bairro}` : ''}
           </Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 'auto' }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginTop: 'auto' }}>
             {p.verificado && <SeloVerificado compacto />}
-            {p.temWhatsapp && (
-              <View style={estilos.whats}>
-                <MaterialCommunityIcons name="whatsapp" size={16} color="#fff" />
-                <Text style={estilos.whatsTexto}>WhatsApp</Text>
-              </View>
-            )}
+            <Contato p={p} />
           </View>
         </Pressable>
       ))}
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Seu comércio aqui. Ver planos"
+        onPress={() => WebBrowser.openBrowserAsync(URL_PLANOS)}
+        style={({ pressed }) => [estilos.cartao, estilos.anuncie, { width: largura }, pressed && { opacity: 0.9 }]}
+      >
+        <View style={estilos.anuncieIcone}>
+          <MaterialCommunityIcons name="storefront-outline" size={40} color={cores.verde} />
+        </View>
+        <Text style={estilos.anuncieTitulo}>Seu comércio aqui</Text>
+        <Text style={estilos.anuncieTexto}>Apareça em destaque para toda a cidade.</Text>
+        <View style={estilos.anuncieBotao}>
+          <Text style={estilos.anuncieBotaoTexto}>Ver planos</Text>
+          <MaterialCommunityIcons name="chevron-right" size={20} color="#fff" />
+        </View>
+      </Pressable>
     </ScrollView>
   );
 }
 
 const estilos = StyleSheet.create({
-  cartao: { borderRadius: RAIO, padding: 16, gap: 6, minHeight: 190, ...sombra },
-  faixa: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: cores.verde, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4 },
-  faixaTexto: { color: cores.amarelo, fontSize: 13, fontWeight: '900', letterSpacing: 1 },
-  ponto: { width: 14, height: 14, borderRadius: 7 },
-  nome: { color: cores.texto, fontSize: fonte.media, fontWeight: '900', marginTop: 6 },
+  cartao: { backgroundColor: cores.cartao, borderRadius: RAIO, padding: 10, gap: 4, minHeight: 250, ...sombra },
+  fita: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: cores.amarelo,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  fitaTexto: { color: cores.verde, fontSize: 14, fontWeight: '900' },
+  nome: { color: cores.texto, fontSize: fonte.normal, fontWeight: '900', marginTop: 6 },
   tipo: { color: cores.textoSuave, fontSize: fonte.pequena },
-  whats: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: cores.whatsapp, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3 },
-  whatsTexto: { color: '#fff', fontSize: 14, fontWeight: '800' },
+  anuncie: { backgroundColor: cores.amarelo, alignItems: 'center', justifyContent: 'center', padding: 16, gap: 6 },
+  anuncieIcone: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
+  anuncieTitulo: { color: cores.verde, fontSize: fonte.media, fontWeight: '900', textAlign: 'center' },
+  anuncieTexto: { color: cores.verde, fontSize: fonte.pequena, textAlign: 'center' },
+  anuncieBotao: { flexDirection: 'row', alignItems: 'center', gap: 2, backgroundColor: cores.verde, borderRadius: 14, paddingLeft: 14, paddingRight: 8, minHeight: 44, marginTop: 6 },
+  anuncieBotaoTexto: { color: '#fff', fontSize: fonte.pequena, fontWeight: '800' },
 });

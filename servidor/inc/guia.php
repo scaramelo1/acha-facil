@@ -69,11 +69,24 @@ function destaques(string $cidade, int $limite = 10): array {
         WHERE ' . visivel($cidade) . " AND p.plano = 'destaque' ORDER BY RAND(?) LIMIT $limite", [semente_dia()]));
 }
 
-// "Conhecidos na cidade": sorteio do dia entre os 60 mais procurados (sem destaque pago, que já tem vitrine)
-function populares(string $cidade, int $limite = 12): array {
+// "Conhecidos na cidade": sorteio do dia entre os 80 mais procurados (sem destaque pago, que já tem vitrine).
+// $fora: ids que já apareceram em outra parte da tela; $com_contato: só quem tem WhatsApp ou telefone.
+function populares(string $cidade, int $limite = 12, array $fora = [], bool $com_contato = false): array {
+    $fora = array_map('intval', $fora) ?: [0];
     return array_map('prof_resumo', linhas('SELECT * FROM (SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
-        WHERE ' . visivel($cidade) . " AND p.plano <> 'destaque' ORDER BY p.popularidade + p.total_avaliacoes * 5 DESC LIMIT 60) t
-        ORDER BY RAND(?) LIMIT $limite", [semente_dia()]));
+        WHERE ' . visivel($cidade) . " AND p.plano <> 'destaque' AND p.id NOT IN (" . implode(',', $fora) . ')'
+        . ($com_contato ? ' AND (p.whatsapp IS NOT NULL OR p.telefone IS NOT NULL)' : '') . "
+        ORDER BY p.popularidade + p.total_avaliacoes * 5 DESC LIMIT 80) t ORDER BY RAND(?) LIMIT $limite", [semente_dia()]));
+}
+
+/**
+ * "Comércios em destaque" da tela inicial: primeiro quem paga o plano Destaque; enquanto houver poucos,
+ * completa com conhecidos da cidade (esses não ganham o selo "Destaque").
+ */
+function vitrine_inicio(string $cidade, int $total = 8): array {
+    $pagos = destaques($cidade, $total);
+    if (count($pagos) >= $total) return $pagos;
+    return array_merge($pagos, populares($cidade, $total - count($pagos), array_column($pagos, 'id'), true));
 }
 
 // Atalhos do "Perto de você": rótulo, ícone e partes do tipo de negócio que entram (LIKE). Ficam no servidor

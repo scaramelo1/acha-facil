@@ -54,6 +54,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Oficinas, Postos e Saúde (lista em `ATALHOS_PERTO`, servidor/inc/guia.php). Localização dos comércios: link do Google
    ou endereço no OpenStreetMap (`php servidor/geocodificar.php`, ~1 h na 1ª vez; aproximada, muitas vezes pela rua).
    Novo pacote no app: expo-location
+4g. ✅ "Comércios em destaque" na tela inicial (07/11): carrossel de cartões com espaço da foto; primeiro quem paga o
+   Destaque (fita amarela), completado com conhecidos da cidade com telefone/WhatsApp (sorteio do dia, sem fita) enquanto
+   houver menos de 8; cartão final "Seu comércio aqui → Ver planos"
 5. ⬜ Testar no PC (`npm install`, `npx tsc --noEmit`, `npx expo lint`, emulador)
 6. 🟡 Projeto EAS próprio (ligado em 07/11 ✅) e 1º APK (falta); publicar com `bash servidor/publicar-apk.sh <link do EAS>`
 7. ⬜ Contas no app: conferir se entrar/criar conta funciona (no Guia Sanjoanense isso ainda está em aberto)

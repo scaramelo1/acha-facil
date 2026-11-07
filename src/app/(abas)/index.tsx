@@ -115,8 +115,8 @@ export default function TelaInicio() {
 
             {dados.destaques.length > 0 && (
               <>
-                <Titulo>Em destaque</Titulo>
-                <Vitrine itens={dados.destaques} destaque />
+                <Titulo>Comércios em destaque</Titulo>
+                <Vitrine itens={dados.destaques} />
               </>
             )}
 

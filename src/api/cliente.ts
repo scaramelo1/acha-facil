@@ -4,6 +4,8 @@ export const URL_PAINEL = 'https://fsadesigners.com.br/acha-facil/painel/';
 export const URL_TERMOS = 'https://fsadesigners.com.br/acha-facil/termos.php';
 export const URL_PRIVACIDADE = 'https://fsadesigners.com.br/acha-facil/privacidade.php';
 /** Página onde o dono procura o próprio comércio para assumir o perfil ou pedir para tirar do app. */
+/** Planos para o dono (corrigir dados, fotos, aparecer em destaque). */
+export const URL_PLANOS = 'https://fsadesigners.com.br/acha-facil/planos.php';
 export const URL_MEU_NEGOCIO = 'https://fsadesigners.com.br/acha-facil/busca.php';
 
 export interface Cidade {
