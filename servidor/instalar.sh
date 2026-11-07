@@ -80,9 +80,10 @@ ln -sfn "$RAIZ/publico" /var/www/fsa-designer/$NOME
 echo "✔ /var/www/fsa-designer/$NOME -> $RAIZ/publico"
 
 # 4. Apache: sem marca d'água de protótipo (a API devolve JSON)
-if grep -q '|leads/)\[^/\]+/' "$APACHE_SSL" && ! grep -q "$NOME/" "$APACHE_SSL"; then
+# (acrescenta "|acha-facil/" no fim da lista de exceções da LocationMatch "^/(?!assets/|...)[^/]+/")
+if grep -q 'LocationMatch "^/(?!assets/' "$APACHE_SSL" && ! grep -q "|$NOME/" "$APACHE_SSL"; then
   cp "$APACHE_SSL" "/root/fsadesigners-le-ssl.conf.antes-$NOME.$(date +%Y%m%d%H%M%S)"
-  sed -i "s#|leads/)\[^/\]+/#|leads/|$NOME/)[^/]+/#" "$APACHE_SSL"
+  sed -i "/LocationMatch \"^\/(?!assets\//s#/)\[^/\]+/\">#/|$NOME/)[^/]+/\">#" "$APACHE_SSL"
   if apache2ctl configtest; then systemctl reload apache2; echo "✔ Apache recarregado"
   else echo "✘ configtest falhou; voltando a cópia"; cp "$(ls -t /root/fsadesigners-le-ssl.conf.antes-$NOME.* | head -1)" "$APACHE_SSL"; exit 1; fi
 else
