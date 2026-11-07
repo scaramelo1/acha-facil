@@ -56,7 +56,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Novo pacote no app: expo-location
 4g. ✅ "Comércios em destaque" na tela inicial (07/11): **só quem paga o plano Destaque** (fita amarela); sem pagantes,
    aparece só o cartão "Seu comércio aqui → Ver planos"
-4h. ✅ Poços de Caldas (MG), 07/11: 623 comércios (`/var/lib/acha-facil/leads/pocos-de-caldas.html`); a escolha ao abrir
+4h. ✅ Poços de Caldas (MG), 07/11: 1.674 comércios (lista atualizada) (`/var/lib/acha-facil/leads/pocos-de-caldas.html`); a escolha ao abrir
    agora é em dois passos, estado (SP, MG) e depois a cidade. Cidade nova: `CIDADES` em servidor/inc/guia.php e src/cidade.tsx
 5. ⬜ Testar no PC (`npm install`, `npx tsc --noEmit`, `npx expo lint`, emulador)
 6. 🟡 Projeto EAS próprio (ligado em 07/11 ✅) e 1º APK (falta); publicar com `bash servidor/publicar-apk.sh <link do EAS>`

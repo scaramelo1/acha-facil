@@ -44,6 +44,8 @@ $area_fixa = [
     'comunicação visual' => 'servicos', 'convites' => 'servicos',
     'acessórios para celular' => 'lojas', 'artigos domésticos' => 'lojas', 'papelaria fina' => 'lojas', 'papelaria personalizada' => 'lojas',
     'descartáveis' => 'lojas', 'embalagens' => 'lojas', 'ateliê de arte' => 'lojas',
+    'loja de roupas' => 'moda', 'loja de calçados' => 'moda', 'sapataria' => 'moda', 'loja de acessórios' => 'moda',
+    'cosméticos' => 'beleza', 'chocolateria' => 'alimentacao', 'artigos para festas' => 'lojas', 'suplementos' => 'saude',
     'escola infantil' => 'educacao', 'loja de queijos' => 'mercados', 'fondue' => 'alimentacao', 'equipamentos industriais' => 'industria',
 ];
 foreach ($area_fixa as $t => $slug) if (isset($cat[$slug])) $area_do_tipo[$t] = $cat[$slug];
