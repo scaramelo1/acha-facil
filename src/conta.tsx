@@ -108,7 +108,16 @@ export function ProvedorConta({ children }: { children: ReactNode }) {
       usuario,
       async entrarComGoogle() {
         const volta = enderecoDeVolta();
-        const { endereco, chave } = await chamar<{ endereco: string; chave: string }>('google.php', 'POST', { acao: 'iniciar', volta });
+        // ambiente: de onde o app está rodando (Expo Go, APK...), só para o registro do servidor ajudar a achar problemas
+        const ambiente = {
+          execucao: String(Constants.executionEnvironment),
+          dono: String(Constants.appOwnership),
+          linkingUri: Constants.linkingUri ?? null,
+          hostUri: Constants.expoConfig?.hostUri ?? null,
+          versao: Constants.expoConfig?.version ?? null,
+          codigoLogin: 3,
+        };
+        const { endereco, chave } = await chamar<{ endereco: string; chave: string }>('google.php', 'POST', { acao: 'iniciar', volta, ambiente });
         pendente.current = { chave, ate: Date.now() + 15 * 60 * 1000 };
         const situacao: { sessao: Sessao | null; falhou: boolean; aberto: boolean } = { sessao: null, falhou: false, aberto: true };
 

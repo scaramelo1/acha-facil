@@ -14,6 +14,8 @@ if ($acao === 'iniciar') {
     if (login_bloqueado()) erro('Muitas tentativas. Espere 15 minutos.', 429);
     if (!google_configurado()) erro('O login com o Google ainda não foi ligado no servidor.', 503);
     $volta = campo('volta', 300);
+    // registro para achar problemas: de onde o app está rodando (Expo Go, APK...) e para onde pediu para voltar
+    error_log('acha-facil google iniciar: volta=' . $volta . ' ambiente=' . mb_substr(json_encode(corpo()['ambiente'] ?? null, JSON_UNESCAPED_SLASHES), 0, 400));
     if (!volta_valida($volta)) erro('Endereço de volta inválido.');
     q('DELETE FROM logins_google WHERE criado_em < NOW() - INTERVAL 1 HOUR');
     $estado = bin2hex(random_bytes(32));
