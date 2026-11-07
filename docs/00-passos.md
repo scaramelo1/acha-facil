@@ -83,7 +83,14 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (c) para a App Store: "Entrar com Apple" junto (regra 4.8 da Apple), precisa da conta de desenvolvedor Apple
 8. ⬜ Administração web: total de downloads do APK (`<dados_dir>/apk/downloads.txt`; saiu do site em 07/11), pedidos de assumir/tirar do app, aprovar/recusar cadastros, editar, selo, cortesia, categorias, ocultar comentários
 9. ⬜ Painel do profissional (web): autocadastro, foto, dados, serviços, responder avaliações, ver contatos recebidos
-10. ⬜ Assinatura recorrente no Mercado Pago (planos Básico e Destaque; webhook; atraso tira do ar)
+10. 🟡 Assinatura recorrente no Mercado Pago (07/11): planos.php -> perfil.php (nome, telefone, e-mail) -> assinatura.php?c=
+   (página secreta do pedido) -> Mercado Pago (assinatura mensal no cartão, "preapproval"); avisos em mp-webhook.php,
+   sempre conferidos na API (inc/mercadopago.php). Assinatura autorizada liga o plano (3 dias até a 1ª mensalidade);
+   cada mensalidade paga estende 1 mês, uma vez só; cancelada vale até o fim do mês pago; vencida sai do destaque
+   (e do app, se não é importado). Testado numa cópia isolada (18 testes + páginas). Falta: (a) aplicar
+   sql/migracoes/007-mercado-pago.sql, (b) criar a aplicação no Mercado Pago e pôr mp_modo, mp_access_token e
+   mp_webhook_secret em /etc/acha-facil/config.php, (c) testar no modo sandbox e depois ligar em producao.
+   O app não mostra preço nem botão de contratar (regra das lojas): "Este comércio é seu?" -> "Saiba mais no site"
 11. 🟡 Publicar nas lojas (Play Store e App Store): guia, textos e formulários em `docs/lojas.md`; app.json pronto
    para o iOS (07/11). Nome "Acha Fácil" não achado em nenhuma das duas. Faltam: contas de desenvolvedor, capturas de
    tela, builds de produção (.aab e iOS), teste fechado de 14 dias na Play (conta pessoal) e conta de demonstração (passo 7)

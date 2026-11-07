@@ -20,11 +20,21 @@ function cidade_pedida(): string {
 function nome_cidade(string $slug, bool $curto = false): string { return CIDADES[$slug][$curto ? 1 : 0] ?? CIDADES[CIDADE_PADRAO][0]; }
 function uf_cidade(string $slug): string { return CIDADES[$slug][2] ?? 'SP'; }
 
-// Aparece no app: aprovado e com assinatura em dia (ou cortesia dada pelo admin).
+// Planos do dono do comércio (preço mensal, cobrado pelo Mercado Pago; ver inc/mercadopago.php)
+const PLANOS_PRECO = ['basico' => 19.90, 'destaque' => 29.90];
+const PLANOS_NOME = ['basico' => 'Básico', 'destaque' => 'Destaque'];
+function preco_plano(string $plano): string { return 'R$ ' . number_format(PLANOS_PRECO[$plano] ?? 0, 2, ',', '.'); }
+
+// Assinatura em dia: cortesia dada pelo admin, ou paga até hoje (assinatura_ate é estendida a cada mensalidade paga;
+// cancelada continua valendo até o fim do mês já pago). Atrasou: sai do destaque e, se não é importado, sai do app.
+const SQL_EM_DIA = "(p.assinatura = 'cortesia' OR (p.assinatura IN ('ativa','cancelada') AND p.assinatura_ate >= CURDATE()))";
+const SQL_DESTAQUE = "(p.plano = 'destaque' AND " . SQL_EM_DIA . ')';
+
+// Aparece no app: aprovado e com assinatura em dia.
 // Comércios importados da lista de leads aparecem sem assinatura até o dono assumir o perfil.
 // Com $cidade, só os daquela cidade (o slug vem da lista fixa CIDADES, então pode ir direto no SQL).
 function visivel(?string $cidade = null): string {
-    $sql = "p.status = 'ativo' AND (p.assinatura IN ('ativa','cortesia') OR p.importado = 1) AND c.ativa = 1";
+    $sql = "p.status = 'ativo' AND (p.importado = 1 OR " . SQL_EM_DIA . ") AND c.ativa = 1";
     return $cidade !== null && isset(CIDADES[$cidade]) ? "$sql AND p.cidade = '$cidade'" : $sql;
 }
 
@@ -32,6 +42,7 @@ function visivel(?string $cidade = null): string {
 function semente_dia(): int { return (int)date('Ymd'); }
 
 const CAMPOS_RESUMO = 'p.id, p.nome, p.tipo, p.cidade, p.importado, p.servicos, p.bairro, p.atende_em_casa, p.foto, p.verificado, p.plano,
+    ' . SQL_DESTAQUE . ' AS destaque_pago,
     p.nota_media, p.total_avaliacoes, p.whatsapp, p.telefone, c.id AS categoria_id, c.nome AS categoria, c.icone, c.cor';
 
 function foto_url(?string $foto): ?string { return $foto ? url_publica('foto.php?f=' . rawurlencode($foto)) : null; }
@@ -51,7 +62,7 @@ function prof_resumo(array $p): array {
         'atendeEmCasa' => (bool)$p['atende_em_casa'],
         'foto' => foto_url($p['foto']),
         'verificado' => (bool)$p['verificado'],
-        'destaque' => $p['plano'] === 'destaque',
+        'destaque' => (bool)($p['destaque_pago'] ?? false),   // plano Destaque com a assinatura em dia
         'nota' => round((float)$p['nota_media'], 1),
         'avaliacoes' => (int)$p['total_avaliacoes'],
         'temWhatsapp' => (bool)$p['whatsapp'],
@@ -70,7 +81,7 @@ function categorias_ativas(?string $cidade = null): array {
 
 function destaques(string $cidade, int $limite = 10): array {
     return array_map('prof_resumo', linhas('SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
-        WHERE ' . visivel($cidade) . " AND p.plano = 'destaque' ORDER BY RAND(?) LIMIT $limite", [semente_dia()]));
+        WHERE ' . visivel($cidade) . ' AND ' . SQL_DESTAQUE . " ORDER BY RAND(?) LIMIT $limite", [semente_dia()]));
 }
 
 // "Conhecidos na cidade": sorteio do dia entre os 80 mais procurados (sem destaque pago, que já tem vitrine).
@@ -78,7 +89,7 @@ function destaques(string $cidade, int $limite = 10): array {
 function populares(string $cidade, int $limite = 12, array $fora = [], bool $com_contato = false): array {
     $fora = array_map('intval', $fora) ?: [0];
     return array_map('prof_resumo', linhas('SELECT * FROM (SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
-        WHERE ' . visivel($cidade) . " AND p.plano <> 'destaque' AND p.id NOT IN (" . implode(',', $fora) . ')'
+        WHERE ' . visivel($cidade) . ' AND NOT ' . SQL_DESTAQUE . " AND p.id NOT IN (" . implode(',', $fora) . ')'
         . ($com_contato ? ' AND (p.whatsapp IS NOT NULL OR p.telefone IS NOT NULL)' : '') . "
         ORDER BY p.popularidade + p.total_avaliacoes * 5 DESC LIMIT 80) t ORDER BY RAND(?) LIMIT $limite", [semente_dia()]));
 }
@@ -145,7 +156,7 @@ function tipos_da_categoria(int $categoria_id, string $cidade): array {
 function da_categoria(int $categoria_id, string $cidade): array {
     return array_map('prof_resumo', linhas('SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
         WHERE ' . visivel($cidade) . " AND p.categoria_id = ?
-        ORDER BY p.plano = 'destaque' DESC, p.importado ASC, p.total_avaliacoes > 0 DESC, RAND(?)",
+        ORDER BY " . SQL_DESTAQUE . " DESC, p.importado ASC, p.total_avaliacoes > 0 DESC, RAND(?)",
         [$categoria_id, semente_dia()]));
 }
 
@@ -156,7 +167,7 @@ function buscar(string $termo, ?string $cidade, int $limite = 50): array {
     $like = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $termo) . '%';
     return array_map('prof_resumo', linhas('SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
         WHERE ' . visivel($cidade) . ' AND (p.nome LIKE ? OR p.tipo LIKE ? OR p.servicos LIKE ? OR p.descricao LIKE ? OR p.bairro LIKE ? OR c.nome LIKE ?)
-        ORDER BY (c.nome LIKE ? OR p.tipo LIKE ? OR p.nome LIKE ?) DESC, p.plano = \'destaque\' DESC, p.importado ASC, RAND(?) LIMIT ' . $limite,
+        ORDER BY (c.nome LIKE ? OR p.tipo LIKE ? OR p.nome LIKE ?) DESC, ' . SQL_DESTAQUE . ' DESC, p.importado ASC, RAND(?) LIMIT ' . $limite,
         [$like, $like, $like, $like, $like, $like, $like, $like, $like, semente_dia()]));
 }
 

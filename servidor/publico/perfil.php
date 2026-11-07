@@ -1,9 +1,12 @@
 <?php
 // Pedido do dono: assumir o perfil de um comércio importado (ou incluir um novo) ou tirar do app.
 // Fica em "pedidos" para a equipe conferir (ligando no telefone do comércio) antes de liberar ou retirar.
+// Com plano escolhido (e a mudança 007 do banco aplicada), pede também o e-mail e leva à página da assinatura
+// (assinatura.php), onde o dono assina pelo Mercado Pago.
 require __DIR__ . '/../inc/base.php';
 require __DIR__ . '/../inc/guia.php';
 require __DIR__ . '/../inc/pagina.php';
+require __DIR__ . '/../inc/mercadopago.php';
 iniciar_sessao();
 
 $acao = ($_GET['acao'] ?? '') === 'remover' ? 'remover' : 'assumir';
@@ -14,16 +17,25 @@ $p = $id ? linha('SELECT p.id, p.nome, p.tipo, p.endereco FROM profissionais p W
 if ($acao === 'remover' && !$p) ir('busca.php');
 $enviado = false;
 $erro = null;
+$com_assinatura = $plano !== null && mp_pronto();
 
 if (e_post()) {
     exigir_post();
     $nome = txt('nome', 120);
     $telefone = telefone_normalizado(txt('telefone', 20));
     $mensagem = txt('mensagem', 1000);
+    $email = $com_assinatura ? email_valido(txt('email', 160)) : null;
     if (!$nome || !$telefone) $erro = 'Preencha seu nome e um telefone com DDD.';
+    elseif ($com_assinatura && !$email) $erro = 'Digite um e-mail válido (o mesmo da sua conta do Mercado Pago).';
     elseif ((int)valor('SELECT COUNT(*) FROM pedidos WHERE ip = ? AND criado_em > NOW() - INTERVAL 1 DAY', [ip()]) >= 10) $erro = 'Muitos pedidos hoje. Tente amanhã.';
     else {
-        inserir('pedidos', ['profissional_id' => $p['id'] ?? null, 'tipo' => $acao, 'plano' => $plano, 'nome' => $nome, 'telefone' => $telefone, 'mensagem' => $mensagem, 'ip' => ip()]);
+        $dados = ['profissional_id' => $p['id'] ?? null, 'tipo' => $acao, 'plano' => $plano, 'nome' => $nome, 'telefone' => $telefone, 'mensagem' => $mensagem, 'ip' => ip()];
+        if ($com_assinatura) {
+            $dados += ['email' => $email, 'codigo' => bin2hex(random_bytes(32)), 'valor' => PLANOS_PRECO[$plano]];
+            inserir('pedidos', $dados);
+            ir('assinatura.php?c=' . $dados['codigo']);
+        }
+        inserir('pedidos', $dados);
         $enviado = true;
     }
 }
@@ -48,7 +60,9 @@ pagina_inicio("$titulo · Acha Fácil!", 'Pedido do dono do comércio para o Ach
   <?php else: ?>
     <p><?= $acao === 'remover'
         ? 'É o responsável por este comércio e não quer que ele apareça no Acha Fácil? Deixe seu contato para confirmarmos.'
-        : ($p ? 'Depois de confirmarmos que você é o responsável, você poderá corrigir os dados, colocar foto, horários e ganhar o selo de verificado. Vamos passar o valor do plano e a forma de pagamento.'
+        : ($p ? ($com_assinatura
+                ? 'Plano ' . PLANOS_NOME[$plano] . ': ' . preco_plano($plano) . ' por mês. Preencha seus dados e, em seguida, assine pelo Mercado Pago. Depois confirmamos por WhatsApp que você é o responsável e liberamos a edição dos dados, das fotos e dos horários.'
+                : 'Depois de confirmarmos que você é o responsável, você poderá corrigir os dados, colocar foto, horários e ganhar o selo de verificado. Vamos passar o valor do plano e a forma de pagamento.')
               : 'Conte qual é o seu negócio. Vamos incluir e chamar você para completar o perfil.') ?></p>
     <?php if ($erro): ?><div class="aviso erro"><?= h($erro) ?></div><?php endif ?>
     <form method="post">
@@ -57,10 +71,14 @@ pagina_inicio("$titulo · Acha Fácil!", 'Pedido do dono do comércio para o Ach
       <input id="nome" name="nome" required maxlength="120" value="<?= h($_POST['nome'] ?? '') ?>">
       <label for="telefone">Telefone ou WhatsApp (com DDD)</label>
       <input id="telefone" name="telefone" required inputmode="tel" maxlength="20" value="<?= h($_POST['telefone'] ?? '') ?>">
+      <?php if ($com_assinatura): ?>
+        <label for="email">E-mail (o mesmo da sua conta do Mercado Pago)</label>
+        <input id="email" name="email" type="email" required maxlength="160" autocomplete="email" value="<?= h($_POST['email'] ?? '') ?>">
+      <?php endif ?>
       <label for="mensagem"><?= $p ? 'Algo a mais? (opcional)' : 'Nome, endereço e o que o seu negócio faz' ?></label>
       <textarea id="mensagem" name="mensagem" rows="4" maxlength="1000"<?= $p ? '' : ' required' ?>><?= h($_POST['mensagem'] ?? '') ?></textarea>
-      <p><button class="botao<?= $acao === 'remover' ? ' contorno' : '' ?>"><?= $acao === 'remover' ? 'Pedir para tirar' : 'Enviar pedido' ?></button></p>
-      <p class="discreto">Usamos seu nome e telefone só para responder este pedido. Veja a <a href="<?= h(config()['url']) ?>/privacidade.php">privacidade</a>.</p>
+      <p><button class="botao<?= $acao === 'remover' ? ' contorno' : '' ?>"><?= $acao === 'remover' ? 'Pedir para tirar' : ($com_assinatura ? 'Continuar para o pagamento' : 'Enviar pedido') ?></button></p>
+      <p class="discreto">Usamos seu nome, telefone<?= $com_assinatura ? ' e e-mail' : '' ?> só para este pedido<?= $com_assinatura ? ' e a assinatura' : '' ?>. Veja a <a href="<?= h(config()['url']) ?>/privacidade.php">privacidade</a>.</p>
     </form>
   <?php endif ?>
 </main>
