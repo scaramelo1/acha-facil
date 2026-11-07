@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -50,9 +51,13 @@ export default function TelaPerfil() {
         {usuario ? (
           <>
             <View style={estilos.eu}>
-              <View style={estilos.avatar}>
-                <MaterialCommunityIcons name="account" size={60} color="#fff" />
-              </View>
+              {usuario.foto ? (
+                <Image source={usuario.foto} style={estilos.avatar} contentFit="cover" accessibilityLabel="Sua foto" />
+              ) : (
+                <View style={estilos.avatar}>
+                  <MaterialCommunityIcons name="account" size={60} color="#fff" />
+                </View>
+              )}
               <View style={{ flex: 1 }}>
                 <Text style={estilos.euNome} numberOfLines={2}>
                   {usuario.nome}
@@ -79,9 +84,9 @@ export default function TelaPerfil() {
                 <View style={estilos.avatarClaro}>
                   <MaterialCommunityIcons name="account-outline" size={40} color={cores.verde} />
                 </View>
-                <Text style={[estilos.conviteTexto, { flex: 1 }]}>Entre na sua conta para salvar favoritos e avaliar os comércios.</Text>
+                <Text style={[estilos.conviteTexto, { flex: 1 }]}>Entre com a sua conta Google para salvar favoritos e avaliar os comércios.</Text>
               </View>
-              <Botao titulo="Entrar ou criar conta" tipo="amarelo" seta onPress={() => router.push('/entrar')} estilo={{ marginTop: 14 }} />
+              <Botao titulo="Entrar com o Google" icone="google" tipo="amarelo" onPress={() => router.push('/entrar')} estilo={{ marginTop: 14 }} />
             </View>
             {linhaCidade}
             <View style={{ marginVertical: 6 }}>

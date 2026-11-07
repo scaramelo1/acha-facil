@@ -1,16 +1,20 @@
+import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
-import { chamar, definirToken, type Usuario } from './api/cliente';
+import { chamar, definirToken, URL_GOOGLE, type Usuario } from './api/cliente';
 import { Armazenamento } from './armazenamento';
 
 // A conta só é necessária para avaliar, comentar e salvar profissionais. Navegar no app não pede login.
+// Entrar é só pelo Google: o app abre a página do servidor, que leva ao Google e volta com um código de uso único
+// (achafacil://google?codigo=...); o app troca o código pela sessão em api/google.php.
 const CHAVE_TOKEN = 'token';
 const CHAVE_USUARIO = 'usuario';
 
 interface ContextoConta {
   usuario: Usuario | null;
-  entrar: (email: string, senha: string) => Promise<void>;
-  criarConta: (nome: string, email: string, senha: string) => Promise<void>;
+  /** Abre o Google. true = entrou; false = a pessoa fechou ou cancelou. Erro = algo deu errado (mensagem pronta). */
+  entrarComGoogle: () => Promise<boolean>;
   sair: () => Promise<void>;
   excluirConta: () => Promise<void>;
 }
@@ -47,13 +51,19 @@ export function ProvedorConta({ children }: { children: ReactNode }) {
   const valor = useMemo<ContextoConta>(
     () => ({
       usuario,
-      async entrar(email, senha) {
-        const r = await chamar<{ token: string; usuario: Usuario }>('entrar.php', 'POST', { email, senha });
-        guardar(r.token, r.usuario);
-      },
-      async criarConta(nome, email, senha) {
-        const r = await chamar<{ token: string; usuario: Usuario }>('criar-conta.php', 'POST', { nome, email, senha });
-        guardar(r.token, r.usuario);
+      async entrarComGoogle() {
+        // achafacil://google no APK; exp://.../--/google no Expo Go
+        const volta = Linking.createURL('google');
+        const r = await WebBrowser.openAuthSessionAsync(`${URL_GOOGLE}?volta=${encodeURIComponent(volta)}`, volta);
+        if (r.type !== 'success') return false;
+        const { queryParams } = Linking.parse(r.url);
+        const erro = queryParams?.erro;
+        if (typeof erro === 'string' && erro) throw new Error(erro);
+        const codigo = queryParams?.codigo;
+        if (typeof codigo !== 'string' || !codigo) throw new Error('O Google não confirmou a entrada. Tente de novo.');
+        const s = await chamar<{ token: string; usuario: Usuario }>('google.php', 'POST', { codigo });
+        guardar(s.token, s.usuario);
+        return true;
       },
       async sair() {
         await chamar('sair.php', 'POST').catch(() => {});

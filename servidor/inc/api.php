@@ -53,4 +53,4 @@ function usuario_app(): ?array {
 function exigir_usuario(): array {
     return usuario_app() ?? erro('Entre na sua conta para continuar.', 401);
 }
-function usuario_publico(array $u): array { return ['id' => (int)$u['id'], 'nome' => $u['nome'], 'email' => $u['email']]; }
+function usuario_publico(array $u): array { return ['id' => (int)$u['id'], 'nome' => $u['nome'], 'email' => $u['email'], 'foto' => $u['foto'] ?? null]; }

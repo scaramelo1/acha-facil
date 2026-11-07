@@ -11,8 +11,8 @@ pagina_inicio('Privacidade · Acha Fácil', 'Quais dados o Acha Fácil usa, para
   <p class="atualizado">Última atualização: 7 de novembro de 2026</p>
 
   <div class="quadro">
-    <strong>Resumo:</strong> dá para usar o Acha Fácil sem dar nenhum dado pessoal. Se você criar uma conta, guardamos só nome, e-mail,
-    senha (protegida) e o que você fizer no app (avaliações, comentários e salvos). Não vendemos dados, não mostramos anúncios de
+    <strong>Resumo:</strong> dá para usar o Acha Fácil sem dar nenhum dado pessoal. Se você entrar com a sua conta Google, guardamos só nome, e-mail,
+    foto do perfil e o que você fizer no app (avaliações, comentários e salvos). Não vendemos dados, não mostramos anúncios de
     terceiros e não rastreamos você. Pode excluir tudo pelo próprio app.
   </div>
 
@@ -25,9 +25,9 @@ pagina_inicio('Privacidade · Acha Fácil', 'Quais dados o Acha Fácil usa, para
     <thead><tr><th>Situação</th><th>Dados</th><th>Para quê</th></tr></thead>
     <tbody>
       <tr><td>Usar sem conta</td><td>Nenhum dado pessoal. Contamos, sem saber quem foi, quantas vezes cada perfil foi aberto e quantos toques teve em WhatsApp, ligar, Instagram e mapa.</td><td>Mostrar ao profissional o retorno do anúncio.</td></tr>
-      <tr><td>Criar conta</td><td>Nome, e-mail e senha. A senha é guardada de forma cifrada (nem nós conseguimos lê-la).</td><td>Entrar no app, avaliar, comentar e salvar profissionais.</td></tr>
+      <tr><td>Entrar com o Google</td><td>Nome, e-mail e foto do perfil, enviados pelo Google quando você escolhe entrar. Não recebemos a sua senha do Google nem outros dados da sua conta.</td><td>Entrar no app, avaliar, comentar e salvar profissionais.</td></tr>
       <tr><td>Avaliar e salvar</td><td>Estrelas, comentário, data e a lista de salvos.</td><td>Mostrar as avaliações (com primeiro nome e inicial, ex.: "Maria S.") e seus salvos.</td></tr>
-      <tr><td>Segurança</td><td>Endereço IP de tentativas de entrada com senha errada (apagado em 1 dia) e registros de acesso ao servidor (data, hora e IP).</td><td>Proteger contas contra invasão. Os registros de acesso são guardados por 6 meses, como manda o Marco Civil da Internet.</td></tr>
+      <tr><td>Segurança</td><td>Endereço IP de tentativas de entrada que falharam (apagado em 1 dia) e registros de acesso ao servidor (data, hora e IP).</td><td>Proteger contas contra invasão. Os registros de acesso são guardados por 6 meses, como manda o Marco Civil da Internet.</td></tr>
       <tr><td>Profissionais</td><td>Nome, telefone, WhatsApp, endereço, Instagram, foto, serviços e horários informados no cadastro; e-mail e senha do painel.</td><td>Montar a página pública do profissional no guia (essas informações ficam visíveis para todos, por escolha do profissional) e dar acesso ao painel.</td></tr>
       <tr><td>Assinatura (profissionais)</td><td>Situação da assinatura e identificador do Mercado Pago. Os dados do cartão são digitados no Mercado Pago e <strong>nunca passam pelo Acha Fácil</strong>.</td><td>Saber se o plano está em dia.</td></tr>
     </tbody>
@@ -63,8 +63,8 @@ pagina_inicio('Privacidade · Acha Fácil', 'Quais dados o Acha Fácil usa, para
   <p>Quando você toca em WhatsApp, ligar, Instagram ou mapa, você sai para outro serviço, que tem a sua própria política de privacidade.</p>
 
   <h2>5. Por quanto tempo</h2>
-  <p>Os dados da conta ficam guardados enquanto a conta existir. Ao excluir a conta, apagamos na hora o nome, e-mail, senha,
-  avaliações, comentários e salvos. Registros de acesso são guardados pelo prazo que a lei exige (6 meses); tentativas de senha errada são apagadas após 1 dia.</p>
+  <p>Os dados da conta ficam guardados enquanto a conta existir. Ao excluir a conta, apagamos na hora o nome, e-mail, foto,
+  avaliações, comentários e salvos. Registros de acesso são guardados pelo prazo que a lei exige (6 meses); tentativas de entrada que falharam são apagadas após 1 dia.</p>
 
   <h2>6. Seus direitos</h2>
   <p>Pela LGPD você pode, a qualquer momento: saber quais dados temos sobre você, receber uma cópia, corrigir dados errados,
@@ -80,11 +80,11 @@ pagina_inicio('Privacidade · Acha Fácil', 'Quais dados o Acha Fácil usa, para
       <li>Toque em <strong>Excluir minha conta</strong> e confirme.</li>
     </ol>
     <p><strong>Sem o app:</strong> peça a exclusão por <?= contatos_html() ?>, informando o e-mail da conta. Respondemos em até 15 dias.</p>
-    <p style="margin-bottom:0">São apagados: nome, e-mail, senha, avaliações, comentários e salvos. Nada mais fica guardado, exceto os registros de acesso que a lei obriga a manter por 6 meses.</p>
+    <p style="margin-bottom:0">São apagados: nome, e-mail, foto, avaliações, comentários e salvos. Nada mais fica guardado, exceto os registros de acesso que a lei obriga a manter por 6 meses.</p>
   </div>
 
   <h2>8. Segurança</h2>
-  <p>Usamos conexão segura (HTTPS), senhas cifradas, limite de tentativas de entrada e acesso restrito ao servidor.
+  <p>Usamos conexão segura (HTTPS), entrada pela conta Google, limite de tentativas de entrada e acesso restrito ao servidor.
   Nenhum sistema é 100% invulnerável; se acontecer um incidente que possa trazer risco a você, avisaremos e comunicaremos a ANPD.</p>
 
   <h2>9. Crianças</h2>

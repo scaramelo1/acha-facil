@@ -20,7 +20,7 @@ export default function Raiz() {
             <Stack.Screen name="profissional/[id]" />
             <Stack.Screen name="avaliar/[id]" />
             <Stack.Screen name="entrar" />
-            <Stack.Screen name="recuperar-senha" />
+            <Stack.Screen name="google" options={{ animation: 'none' }} />
             <Stack.Screen name="meu-negocio" />
             <Stack.Screen name="planos" />
             <Stack.Screen name="sobre" />

@@ -72,7 +72,13 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Ficou de fora (não existe no servidor): "Editar meus dados" e "Minhas avaliações"
 5. ✅ Testar no PC (`npm install`, `npx tsc --noEmit`, `npx expo lint`, emulador)
 6. ✅ Projeto EAS próprio e 1º APK publicado no site (07/11, v1.0.0); publicar com `bash servidor/publicar-apk.sh <link do EAS>`
-7. ⬜ Contas no app: conferir se entrar/criar conta funciona (no Guia Sanjoanense isso ainda está em aberto)
+7. 🟡 Contas no app só com o Google (07/11): o app abre /google/entrar.php, que leva ao Google e volta em
+   /google/retorno.php; a conta é criada ou atualizada com nome, e-mail e foto e o app recebe um código de uso único
+   (achafacil://google?codigo=) que troca pela sessão em /api/google.php. Sem senha: "Recuperar senha", entrar.php e
+   criar-conta.php saíram. Termos e privacidade atualizados. Falta: (a) aplicar sql/migracoes/006-login-google.sql
+   (`bash servidor/instalar.sh` ou o comando do passo), (b) criar o ID do cliente OAuth no Google Cloud (tipo Aplicativo
+   da Web, URI de redirecionamento https://fsadesigners.com.br/acha-facil/google/retorno.php) e pôr `google_client_id`
+   e `google_client_secret` em /etc/acha-facil/config.php, (c) testar no emulador e no APK
 8. ⬜ Administração web: pedidos de assumir/tirar do app, aprovar/recusar cadastros, editar, selo, cortesia, categorias, ocultar comentários
 9. ⬜ Painel do profissional (web): autocadastro, foto, dados, serviços, responder avaliações, ver contatos recebidos
 10. ⬜ Assinatura recorrente no Mercado Pago (planos Básico e Destaque; webhook; atraso tira do ar)

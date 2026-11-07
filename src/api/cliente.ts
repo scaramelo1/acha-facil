@@ -3,6 +3,8 @@ export const URL_API = 'https://fsadesigners.com.br/acha-facil/api';
 export const URL_PAINEL = 'https://fsadesigners.com.br/acha-facil/painel/';
 export const URL_TERMOS = 'https://fsadesigners.com.br/acha-facil/termos.php';
 export const URL_PRIVACIDADE = 'https://fsadesigners.com.br/acha-facil/privacidade.php';
+/** Página do servidor que leva ao Google e volta para o app com um código de uso único. */
+export const URL_GOOGLE = 'https://fsadesigners.com.br/acha-facil/google/entrar.php';
 /** Página onde o dono procura o próprio comércio para assumir o perfil ou pedir para tirar do app. */
 /** Planos para o dono (corrigir dados, fotos, aparecer em destaque). */
 export const URL_PLANOS = 'https://fsadesigners.com.br/acha-facil/planos.php';
@@ -99,6 +101,8 @@ export interface Usuario {
   id: number;
   nome: string;
   email: string;
+  /** Foto do perfil do Google. */
+  foto: string | null;
 }
 
 export class ErroApi extends Error {

@@ -43,6 +43,10 @@ return [
     'instagram' => '',                 // ex.: 'achafacil'
     'link_play' => '',                 // link da Play Store quando publicar
     'link_app_store' => '',            // link da App Store quando publicar
+    // Entrar com o Google (console.cloud.google.com > Credenciais > ID do cliente OAuth, tipo Aplicativo da Web;
+    // URI de redirecionamento: https://fsadesigners.com.br/acha-facil/google/retorno.php)
+    'google_client_id' => '',
+    'google_client_secret' => '',
     'mp_access_token' => '',
     'mp_webhook_secret' => '',
 ];

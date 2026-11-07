@@ -46,7 +46,7 @@ export default function TelaFavoritos() {
         <View style={estilos.convite}>
           <CoracaoGrande />
           <Text style={estilos.conviteTexto}>Entre na sua conta para guardar seus lugares favoritos.</Text>
-          <Botao titulo="Entrar ou criar conta" tipo="amarelo" seta onPress={() => router.push('/entrar')} estilo={{ alignSelf: 'stretch' }} />
+          <Botao titulo="Entrar com o Google" icone="google" tipo="amarelo" onPress={() => router.push('/entrar')} estilo={{ alignSelf: 'stretch' }} />
         </View>
       </View>
     );

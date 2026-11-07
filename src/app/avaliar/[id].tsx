@@ -29,7 +29,7 @@ export default function TelaAvaliar() {
           {!usuario ? (
             <View style={{ gap: 14, marginTop: 12 }}>
               <Text style={ui.texto}>Entre na sua conta para avaliar.</Text>
-              <Botao titulo="Entrar ou criar conta" tipo="amarelo" seta onPress={() => router.replace('/entrar')} />
+              <Botao titulo="Entrar com o Google" icone="google" tipo="amarelo" onPress={() => router.replace('/entrar')} />
             </View>
           ) : !p ? (
             carregando ? (

@@ -21,9 +21,9 @@ pagina_inicio('Termos de uso · Acha Fácil', 'Regras de uso do app Acha Fácil,
   Ao usar o app ou o site, você concorda com estes termos e com a <a href="<?= $base ?>/privacidade.php">Política de Privacidade</a>.</p>
 
   <h2>2. Usar sem conta e com conta</h2>
-  <p>Procurar, ver perfis e chamar profissionais não precisa de conta. A conta (nome, e-mail e senha) serve para avaliar,
+  <p>Procurar, ver perfis e chamar profissionais não precisa de conta. A conta é feita com a sua conta Google (o app recebe só nome, e-mail e foto) e serve para avaliar,
   comentar e salvar profissionais. Para criar uma conta, você precisa ter 18 anos ou mais (ou autorização de pai, mãe ou responsável),
-  informar dados verdadeiros e guardar sua senha com cuidado. Você pode excluir sua conta quando quiser, pelo app
+  manter a sua conta Google protegida. Você pode excluir sua conta quando quiser, pelo app
   (aba Conta → Excluir minha conta).</p>
 
   <h2>3. Avaliações e comentários</h2>
