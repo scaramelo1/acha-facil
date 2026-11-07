@@ -86,12 +86,8 @@ export default function TelaInicio() {
           </View>
         ) : dados ? (
           <>
-            {dados.destaques.length > 0 && (
-              <>
-                <Titulo>Comércios em destaque</Titulo>
-                <Vitrine itens={dados.destaques} />
-              </>
-            )}
+            <Titulo>Comércios em destaque</Titulo>
+            <Vitrine itens={dados.destaques} />
 
             <Titulo>Perto de você</Titulo>
             <PertoDeVoce

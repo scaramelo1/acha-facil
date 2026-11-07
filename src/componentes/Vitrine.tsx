@@ -8,15 +8,15 @@ import { cores, fonte, RAIO, sombra } from '../tema';
 import { Contato, Foto, SeloVerificado } from './ui';
 
 /**
- * "Comércios em destaque": cartões brancos que rolam para o lado, com o espaço da foto em cima
- * (ícone da área enquanto o dono não põe foto). Quem paga o plano Destaque ganha a fita amarela.
- * No fim, um cartão amarelo convida o dono a aparecer aqui.
+ * "Comércios em destaque": só quem paga o plano Destaque. Cartões brancos que rolam para o lado, com o espaço
+ * da foto em cima (ícone da área enquanto o dono não põe foto) e a fita amarela.
+ * No fim (ou sozinho, enquanto ninguém assinou), um cartão amarelo convida o dono a aparecer aqui.
  */
 export function Vitrine({ itens }: { itens: ProfissionalResumo[] }) {
   const router = useRouter();
   const { width } = useWindowDimensions();
-  const largura = Math.min(width * 0.62, 280);
-  if (itens.length === 0) return null;
+  // sem destaques pagos, o convite ocupa a largura toda
+  const largura = itens.length ? Math.min(width * 0.62, 280) : width - 32;
 
   return (
     <ScrollView

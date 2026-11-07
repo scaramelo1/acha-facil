@@ -54,9 +54,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Oficinas, Postos e Saúde (lista em `ATALHOS_PERTO`, servidor/inc/guia.php). Localização dos comércios: link do Google
    ou endereço no OpenStreetMap (`php servidor/geocodificar.php`, ~1 h na 1ª vez; aproximada, muitas vezes pela rua).
    Novo pacote no app: expo-location
-4g. ✅ "Comércios em destaque" na tela inicial (07/11): carrossel de cartões com espaço da foto; primeiro quem paga o
-   Destaque (fita amarela), completado com conhecidos da cidade com telefone/WhatsApp (sorteio do dia, sem fita) enquanto
-   houver menos de 8; cartão final "Seu comércio aqui → Ver planos"
+4g. ✅ "Comércios em destaque" na tela inicial (07/11): **só quem paga o plano Destaque** (fita amarela); sem pagantes,
+   aparece só o cartão "Seu comércio aqui → Ver planos"
 4h. ✅ Poços de Caldas (MG), 07/11: 623 comércios (`/var/lib/acha-facil/leads/pocos-de-caldas.html`); a escolha ao abrir
    agora é em dois passos, estado (SP, MG) e depois a cidade. Cidade nova: `CIDADES` em servidor/inc/guia.php e src/cidade.tsx
 5. ⬜ Testar no PC (`npm install`, `npx tsc --noEmit`, `npx expo lint`, emulador)

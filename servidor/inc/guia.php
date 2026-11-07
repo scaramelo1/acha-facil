@@ -83,14 +83,9 @@ function populares(string $cidade, int $limite = 12, array $fora = [], bool $com
         ORDER BY p.popularidade + p.total_avaliacoes * 5 DESC LIMIT 80) t ORDER BY RAND(?) LIMIT $limite", [semente_dia()]));
 }
 
-/**
- * "Comércios em destaque" da tela inicial: primeiro quem paga o plano Destaque; enquanto houver poucos,
- * completa com conhecidos da cidade (esses não ganham o selo "Destaque").
- */
-function vitrine_inicio(string $cidade, int $total = 8): array {
-    $pagos = destaques($cidade, $total);
-    if (count($pagos) >= $total) return $pagos;
-    return array_merge($pagos, populares($cidade, $total - count($pagos), array_column($pagos, 'id'), true));
+/** "Comércios em destaque" da tela inicial: só quem paga o plano Destaque (nunca completa com outros). */
+function vitrine_inicio(string $cidade, int $total = 10): array {
+    return destaques($cidade, $total);
 }
 
 // Atalhos do "Perto de você": rótulo, ícone e partes do tipo de negócio que entram (LIKE). Ficam no servidor
