@@ -31,9 +31,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 3. ✅ Marca (07/11): ícone do app, ícone adaptativo do Android, splash e abertura no fundo verde
    ("Acha **Fácil!**" + lema), logo da tela inicial, favicon do site, cores verde/amarelo no app e no site.
    O símbolo foi redesenhado em vetor a partir da arte enviada (`assets/logo-simbolo.svg`)
-4. ⬜ Instalar na VPS (`bash servidor/instalar.sh --exemplos`) e conferir https://fsadesigners.com.br/acha-facil/
+4. ✅ Instalado na VPS (`bash servidor/instalar.sh --exemplos`); https://fsadesigners.com.br/acha-facil/ no ar
 5. ⬜ Testar no PC (`npm install`, `npx tsc --noEmit`, `npx expo lint`, emulador)
-6. ⬜ Projeto EAS próprio (`npx eas init` no PC) e 1º APK; publicar com `bash servidor/publicar-apk.sh <link do EAS>`
+6. 🟡 Projeto EAS próprio (ligado em 07/11 ✅) e 1º APK (falta); publicar com `bash servidor/publicar-apk.sh <link do EAS>`
 7. ⬜ Contas no app: conferir se entrar/criar conta funciona (no Guia Sanjoanense isso ainda está em aberto)
 8. ⬜ Administração web: aprovar/recusar cadastros, editar, selo, cortesia, categorias, ocultar comentários, apagar exemplos
 9. ⬜ Painel do profissional (web): autocadastro, foto, dados, serviços, responder avaliações, ver contatos recebidos
