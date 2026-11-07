@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 150" width="240" height="150">
+  <!-- Ilustração da faixa "Explore o melhor da cidade": lojinha com toldo, casa, igreja e árvores (fundo transparente) -->
+  <!-- morro ao fundo -->
+  <ellipse cx="150" cy="168" rx="150" ry="52" fill="#0B7A47"/>
+  <ellipse cx="60" cy="172" rx="90" ry="40" fill="#13894F"/>
+  <!-- árvore de trás -->
+  <rect x="26" y="96" width="5" height="30" rx="2" fill="#6B4423"/>
+  <circle cx="28" cy="88" r="17" fill="#3E9E4F"/>
+  <circle cx="18" cy="96" r="11" fill="#4CAF50"/>
+  <circle cx="39" cy="95" r="11" fill="#43A047"/>
+  <!-- igreja -->
+  <rect x="176" y="62" width="44" height="66" fill="#F6E7C8"/>
+  <polygon points="172,64 198,40 224,64" fill="#E07A35"/>
+  <rect x="190" y="18" width="16" height="30" fill="#F6E7C8"/>
+  <polygon points="187,20 198,8 209,20" fill="#E07A35"/>
+  <rect x="197" y="0" width="2.5" height="10" fill="#F6E7C8"/>
+  <rect x="193.5" y="3" width="9.5" height="2.5" fill="#F6E7C8"/>
+  <circle cx="198" cy="30" r="4" fill="#8A5A2B"/>
+  <path d="M191 128 v-20 a7 7 0 0 1 14 0 v20z" fill="#8A5A2B"/>
+  <rect x="181" y="76" width="7" height="12" rx="3.5" fill="#9CC9E6"/>
+  <rect x="208" y="76" width="7" height="12" rx="3.5" fill="#9CC9E6"/>
+  <!-- casa da esquerda -->
+  <rect x="40" y="86" width="40" height="42" fill="#FFF1D6"/>
+  <polygon points="36,88 60,66 84,88" fill="#D9663A"/>
+  <rect x="47" y="96" width="11" height="11" fill="#9CC9E6" stroke="#FFFFFF" stroke-width="1.5"/>
+  <rect x="64" y="104" width="10" height="24" fill="#8A5A2B"/>
+  <!-- lojinha (frente) -->
+  <rect x="84" y="70" width="88" height="58" fill="#FFF7E3"/>
+  <rect x="80" y="62" width="96" height="14" rx="3" fill="#0B6B3A"/>
+  <rect x="104" y="66" width="48" height="6" rx="3" fill="#F7C600"/>
+  <!-- toldo listrado amarelo e branco, com franja ondulada -->
+  <g>
+    <rect x="80" y="76" width="12" height="16" fill="#F7C600"/>
+    <rect x="92" y="76" width="12" height="16" fill="#FFFFFF"/>
+    <rect x="104" y="76" width="12" height="16" fill="#F7C600"/>
+    <rect x="116" y="76" width="12" height="16" fill="#FFFFFF"/>
+    <rect x="128" y="76" width="12" height="16" fill="#F7C600"/>
+    <rect x="140" y="76" width="12" height="16" fill="#FFFFFF"/>
+    <rect x="152" y="76" width="12" height="16" fill="#F7C600"/>
+    <rect x="164" y="76" width="12" height="16" fill="#FFFFFF"/>
+    <path d="M80 92 a6 6 0 0 0 12 0 a6 6 0 0 0 12 0 a6 6 0 0 0 12 0 a6 6 0 0 0 12 0 a6 6 0 0 0 12 0 a6 6 0 0 0 12 0 a6 6 0 0 0 12 0 a6 6 0 0 0 12 0z" fill="#F7C600"/>
+  </g>
+  <!-- vitrine com frutas -->
+  <rect x="90" y="102" width="40" height="22" rx="2" fill="#BFE0F2"/>
+  <rect x="90" y="116" width="40" height="8" fill="#B07A3E"/>
+  <circle cx="97" cy="114" r="3.5" fill="#E53935"/><circle cx="104" cy="114" r="3.5" fill="#FB8C00"/>
+  <circle cx="111" cy="114" r="3.5" fill="#7CB342"/><circle cx="118" cy="114" r="3.5" fill="#FDD835"/><circle cx="125" cy="114" r="3.5" fill="#E53935"/>
+  <!-- porta -->
+  <rect x="138" y="100" width="24" height="28" rx="2" fill="#0B6B3A"/>
+  <rect x="142" y="104" width="16" height="12" rx="1" fill="#BFE0F2"/>
+  <circle cx="157" cy="118" r="1.5" fill="#F7C600"/>
+  <!-- calçada -->
+  <rect x="34" y="127" width="194" height="5" rx="2" fill="#E9DFC5"/>
+  <!-- árvore da frente (direita) -->
+  <rect x="226" y="104" width="4" height="24" rx="2" fill="#6B4423"/>
+  <circle cx="228" cy="100" r="11" fill="#4CAF50"/>
+  <!-- arbusto -->
+  <circle cx="76" cy="126" r="7" fill="#43A047"/><circle cx="84" cy="128" r="5" fill="#4CAF50"/>
+</svg>

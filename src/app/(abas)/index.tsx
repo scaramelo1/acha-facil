@@ -67,18 +67,13 @@ export default function TelaInicio() {
           <Text style={estilos.buscaTexto}>Buscar comércios e serviços</Text>
         </Pressable>
 
-        {/* faixa verde "Explore o melhor da cidade" com desenho de lojinhas feito com ícones */}
+        {/* faixa verde "Explore o melhor da cidade" com a ilustração da cidade (assets/ilustracoes/cidade.svg) */}
         <Pressable accessibilityRole="button" onPress={() => router.push('/explorar')} style={({ pressed }) => [estilos.faixa, pressed && { opacity: 0.9 }]}>
-          <View style={{ flex: 1 }}>
+          <View style={{ maxWidth: '62%', zIndex: 1 }}>
             <Text style={estilos.faixaTitulo}>Explore o melhor{'\n'}da cidade</Text>
             <View style={estilos.faixaTraco} />
           </View>
-          <View style={estilos.desenho} accessible={false}>
-            <MaterialCommunityIcons name="tree" size={34} color="#4CAF50" style={{ position: 'absolute', left: 0, bottom: 4 }} />
-            <MaterialCommunityIcons name="home-city" size={46} color="#FFE7A3" style={{ position: 'absolute', right: 6, bottom: 4 }} />
-            <MaterialCommunityIcons name="storefront" size={58} color={cores.amarelo} style={{ position: 'absolute', left: 24, bottom: 0 }} />
-            <MaterialCommunityIcons name="church" size={34} color="#F3E5C8" style={{ position: 'absolute', right: 2, top: -2 }} />
-          </View>
+          <Image source={require('../../../assets/ilustracoes/cidade.png')} style={estilos.desenho} contentFit="contain" accessible={false} />
         </Pressable>
 
         {carregando && !dados ? (
@@ -91,6 +86,27 @@ export default function TelaInicio() {
           </View>
         ) : dados ? (
           <>
+            {dados.destaques.length > 0 && (
+              <>
+                <Titulo>Comércios em destaque</Titulo>
+                <Vitrine itens={dados.destaques} />
+              </>
+            )}
+
+            <Titulo>Perto de você</Titulo>
+            <PertoDeVoce
+              semLocalizacao={
+                dados.populares.length > 0 ? (
+                  <>
+                    <Titulo>Conhecidos na cidade</Titulo>
+                    {dados.populares.slice(0, 6).map((p) => (
+                      <CartaoProfissional key={p.id} p={p} />
+                    ))}
+                  </>
+                ) : null
+              }
+            />
+
             <Titulo acao="Ver todas" aoTocarAcao={() => router.push('/explorar')}>
               Categorias
             </Titulo>
@@ -113,26 +129,6 @@ export default function TelaInicio() {
               ))}
             </View>
 
-            {dados.destaques.length > 0 && (
-              <>
-                <Titulo>Comércios em destaque</Titulo>
-                <Vitrine itens={dados.destaques} />
-              </>
-            )}
-
-            <Titulo>Perto de você</Titulo>
-            <PertoDeVoce
-              semLocalizacao={
-                dados.populares.length > 0 ? (
-                  <>
-                    <Titulo>Conhecidos na cidade</Titulo>
-                    {dados.populares.slice(0, 6).map((p) => (
-                      <CartaoProfissional key={p.id} p={p} />
-                    ))}
-                  </>
-                ) : null
-              }
-            />
 
             {/* chamada para o dono do negócio */}
             <Pressable accessibilityRole="button" onPress={() => WebBrowser.openBrowserAsync(URL_MEU_NEGOCIO)} style={estilos.dono}>
@@ -183,10 +179,10 @@ const estilos = StyleSheet.create({
     ...sombra,
   },
   buscaTexto: { fontSize: fonte.normal, color: cores.textoSuave },
-  faixa: { flexDirection: 'row', alignItems: 'center', backgroundColor: cores.verde, borderRadius: RAIO, padding: 20, marginTop: 18, minHeight: 120, overflow: 'hidden' },
-  faixaTitulo: { color: '#fff', fontSize: fonte.grande, fontWeight: '900', lineHeight: 30 },
+  faixa: { flexDirection: 'row', alignItems: 'center', backgroundColor: cores.verde, borderRadius: RAIO, paddingLeft: 20, marginTop: 18, minHeight: 132, overflow: 'hidden' },
+  faixaTitulo: { color: '#fff', fontSize: 22, fontWeight: '900', lineHeight: 28 },
   faixaTraco: { width: 56, height: 5, borderRadius: 3, backgroundColor: cores.amarelo, marginTop: 10 },
-  desenho: { width: 130, height: 84 },
+  desenho: { position: 'absolute', right: -6, bottom: -12, width: 184, height: 115 },
   grade: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 12 },
   area: { width: '31.5%', minHeight: 108, borderRadius: RAIO, backgroundColor: cores.cartao, alignItems: 'center', justifyContent: 'center', padding: 8, gap: 10, ...sombra },
   areaIcone: { width: 56, height: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
