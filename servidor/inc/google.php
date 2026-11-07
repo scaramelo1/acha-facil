@@ -48,18 +48,21 @@ function conta_do_google(array $p): int {
     return inserir('usuarios', ['nome' => $nome, 'email' => $email, 'google_id' => $gid, 'foto' => $foto]);
 }
 
-/** Página simples no navegador (fim da entrada ou erro), com botão para voltar ao app; $auto = volta sozinha. */
-function pagina_google(string $titulo, string $texto, ?string $volta, bool $auto = false): void {
+/**
+ * Página simples no navegador (fim da entrada ou erro). Não abre link para o app de propósito: no celular, outro app
+ * instalado com o mesmo esquema (um APK antigo, por exemplo) pegava o link e mostrava "Unmatched Route". A pessoa
+ * volta pelo X do navegador ou pelo botão voltar, e o app confere a entrada no servidor ao voltar para a frente.
+ */
+function pagina_google(string $titulo, string $texto): void {
     header('Content-Type: text/html; charset=utf-8');
-    $link = $volta && volta_valida($volta) ? $volta : null;
     echo '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
         . '<meta name="robots" content="noindex"><title>' . h($titulo) . ' · Acha Fácil</title><style>'
         . 'body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#073D25;font-family:system-ui,sans-serif;color:#fff;text-align:center;padding:24px;box-sizing:border-box}'
         . 'h1{font-size:28px;margin:0 0 10px}p{font-size:18px;margin:0 0 24px;color:#E6F3EA}'
         . 'a{display:inline-block;background:#F7C600;color:#005C38;font-weight:800;font-size:18px;text-decoration:none;padding:16px 28px;border-radius:30px}'
-        . '.marca{font-style:italic;font-weight:900;font-size:22px;margin-bottom:28px}</style></head><body><div>'
+        . '.marca{font-style:italic;font-weight:900;font-size:22px;margin-bottom:28px}'
+        . '.volta{background:#F7C600;color:#005C38;font-weight:700;font-size:18px;padding:16px 20px;border-radius:18px;line-height:1.4}</style></head><body><div>'
         . '<div class="marca">Acha Fácil!</div><h1>' . h($titulo) . '</h1><p>' . h($texto) . '</p>'
-        . ($link ? '<a href="' . h($link) . '">Voltar para o app</a>' : '<p>Pode fechar esta página.</p>')
-        . '</div>' . ($link && $auto ? '<script>setTimeout(function(){location.href=' . json_encode($link) . '},300)</script>' : '')
-        . '</body></html>';
+        . '<div class="volta">Toque no <b>X</b> lá em cima ou no botão <b>voltar</b> do celular.</div>'
+        . '</div></body></html>';
 }

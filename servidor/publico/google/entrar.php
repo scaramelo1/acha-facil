@@ -7,7 +7,7 @@ $estado = (string)($_GET['estado'] ?? '');
 $l = preg_match('/^[a-f0-9]{64}$/', $estado)
     ? linha('SELECT 1 FROM logins_google WHERE estado = ? AND usuario_id IS NULL AND criado_em > NOW() - INTERVAL 10 MINUTE', [$estado])
     : null;
-if (!$l || !google_configurado()) { pagina_google('Esta entrada expirou', 'Volte ao app e toque em "Entrar com o Google" de novo.', null); exit; }
+if (!$l || !google_configurado()) { pagina_google('Esta entrada expirou', 'Volte ao app e toque em "Entrar com o Google" de novo.'); exit; }
 header('Location: https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
     'client_id' => config()['google_client_id'],
     'redirect_uri' => google_retorno(),

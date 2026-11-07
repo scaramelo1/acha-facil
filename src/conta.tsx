@@ -107,6 +107,8 @@ export function ProvedorConta({ children }: { children: ReactNode }) {
     () => ({
       usuario,
       async entrarComGoogle() {
+        // a página final não abre mais link para o app (ver servidor/inc/google.php); a volta segue no pedido só
+        // porque o navegador do celular precisa de um endereço de volta
         const volta = enderecoDeVolta();
         // ambiente: de onde o app está rodando (Expo Go, APK...), só para o registro do servidor ajudar a achar problemas
         const ambiente = {
@@ -115,7 +117,7 @@ export function ProvedorConta({ children }: { children: ReactNode }) {
           linkingUri: Constants.linkingUri ?? null,
           hostUri: Constants.expoConfig?.hostUri ?? null,
           versao: Constants.expoConfig?.version ?? null,
-          codigoLogin: 3,
+          codigoLogin: 4,
         };
         const { endereco, chave } = await chamar<{ endereco: string; chave: string }>('google.php', 'POST', { acao: 'iniciar', volta, ambiente });
         pendente.current = { chave, ate: Date.now() + 15 * 60 * 1000 };
@@ -155,7 +157,9 @@ export function ProvedorConta({ children }: { children: ReactNode }) {
           guardar(situacao.sessao.token, situacao.sessao.usuario);
           return true;
         }
-        // a conferência ao voltar para o app chegou primeiro e já entrou com esta chave
+        // a conferência ao voltar para o app pode ter chegado primeiro e entrado com esta chave (aí o servidor
+        // responde "já usada" aqui): espera a resposta dela antes de achar que deu errado
+        if (situacao.falhou && concluida.current !== chave) await esperar(1500);
         if (concluida.current === chave) return true;
         if (situacao.falhou) {
           if (pendente.current?.chave === chave) pendente.current = null;

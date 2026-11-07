@@ -1,7 +1,7 @@
 <?php
 // O Google volta aqui com ?code=&state=. Troca o código, pega nome, e-mail e foto, acha ou cria a conta e grava
-// na entrada; o app, que está perguntando ao servidor (api/google.php, acao=verificar), recebe a sessão.
-// A página ainda tenta voltar para o app sozinha (só para fechar o navegador mais rápido).
+// na entrada; o app, que pergunta ao servidor (api/google.php, acao=verificar), recebe a sessão quando a pessoa
+// volta para ele (a página não abre link para o app: ver pagina_google em inc/google.php).
 require __DIR__ . '/../../inc/google.php';
 header('Cache-Control: no-store');
 header('X-Robots-Tag: noindex');
@@ -9,11 +9,10 @@ $estado = (string)($_GET['state'] ?? '');
 $l = preg_match('/^[a-f0-9]{64}$/', $estado)
     ? linha('SELECT * FROM logins_google WHERE estado = ? AND usuario_id IS NULL AND criado_em > NOW() - INTERVAL 10 MINUTE', [$estado])
     : null;
-if (!$l) { pagina_google('Esta entrada expirou', 'Volte ao app e toque em "Entrar com o Google" de novo.', null); exit; }
-$volta = $l['volta'];
-$falhar = function (string $msg) use ($volta, $estado): never {
+if (!$l) { pagina_google('Esta entrada expirou', 'Volte ao app e toque em "Entrar com o Google" de novo.'); exit; }
+$falhar = function (string $msg) use ($estado): never {
     q('DELETE FROM logins_google WHERE estado = ?', [$estado]);   // o app recebe "não deu certo" e mostra o aviso
-    pagina_google('Não foi possível entrar', $msg, $volta);
+    pagina_google('Não foi possível entrar', $msg . ' Volte ao app e tente de novo.');
     exit;
 };
 if (isset($_GET['error'])) $falhar('Você cancelou a entrada com o Google.');
@@ -37,4 +36,4 @@ try {
 }
 
 q('UPDATE logins_google SET usuario_id = ?, criado_em = NOW() WHERE estado = ?', [$uid, $estado]);
-pagina_google('Pronto, você entrou!', 'Voltando para o Acha Fácil...', $volta, true);
+pagina_google('Pronto, você entrou!', 'Agora é só voltar para o Acha Fácil.');
