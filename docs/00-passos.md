@@ -76,7 +76,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 8. ⬜ Administração web: pedidos de assumir/tirar do app, aprovar/recusar cadastros, editar, selo, cortesia, categorias, ocultar comentários
 9. ⬜ Painel do profissional (web): autocadastro, foto, dados, serviços, responder avaliações, ver contatos recebidos
 10. ⬜ Assinatura recorrente no Mercado Pago (planos Básico e Destaque; webhook; atraso tira do ar)
-11. ⬜ Publicar nas lojas (Play Store e App Store) — conferir se o nome "Acha Fácil" está livre nas duas
+11. 🟡 Publicar nas lojas (Play Store e App Store): guia, textos e formulários em `docs/lojas.md`; app.json pronto
+   para o iOS (07/11). Nome "Acha Fácil" não achado em nenhuma das duas. Faltam: contas de desenvolvedor, capturas de
+   tela, builds de produção (.aab e iOS), teste fechado de 14 dias na Play (conta pessoal) e conta de demonstração (passo 7)
 
 ## Decisões pendentes
 

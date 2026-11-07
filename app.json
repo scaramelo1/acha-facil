@@ -31,7 +31,10 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "br.com.fsadesigner.achafacil"
+      "bundleIdentifier": "br.com.fsadesigner.achafacil",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "br.com.fsadesigner.achafacil",
