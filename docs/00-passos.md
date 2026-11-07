@@ -57,6 +57,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 4g. ✅ "Comércios em destaque" na tela inicial (07/11): carrossel de cartões com espaço da foto; primeiro quem paga o
    Destaque (fita amarela), completado com conhecidos da cidade com telefone/WhatsApp (sorteio do dia, sem fita) enquanto
    houver menos de 8; cartão final "Seu comércio aqui → Ver planos"
+4h. ✅ Poços de Caldas (MG), 07/11: 623 comércios (`/var/lib/acha-facil/leads/pocos-de-caldas.html`); a escolha ao abrir
+   agora é em dois passos, estado (SP, MG) e depois a cidade. Cidade nova: `CIDADES` em servidor/inc/guia.php e src/cidade.tsx
 5. ⬜ Testar no PC (`npm install`, `npx tsc --noEmit`, `npx expo lint`, emulador)
 6. 🟡 Projeto EAS próprio (ligado em 07/11 ✅) e 1º APK (falta); publicar com `bash servidor/publicar-apk.sh <link do EAS>`
 7. ⬜ Contas no app: conferir se entrar/criar conta funciona (no Guia Sanjoanense isso ainda está em aberto)

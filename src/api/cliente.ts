@@ -13,6 +13,13 @@ export interface Cidade {
   nome: string;
   /** Nome curto para cabeçalhos ("São João"). */
   curto: string;
+  /** Sigla do estado ("SP", "MG"). */
+  estado: string;
+}
+
+export interface Estado {
+  uf: string;
+  nome: string;
 }
 
 export interface Categoria {

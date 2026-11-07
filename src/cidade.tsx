@@ -1,13 +1,19 @@
 import Storage from 'expo-sqlite/kv-store';
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
-import { definirCidade, type Cidade } from './api/cliente';
+import { definirCidade, type Cidade, type Estado } from './api/cliente';
 import { EscolherCidade } from './componentes/EscolherCidade';
 
-// Cidades atendidas (iguais às do servidor). Ficam fixas no app para a escolha funcionar até sem internet.
+// Estados e cidades atendidas (iguais às do servidor, servidor/inc/guia.php). Ficam fixos no app para a escolha
+// funcionar até sem internet.
+export const ESTADOS: Estado[] = [
+  { uf: 'SP', nome: 'São Paulo' },
+  { uf: 'MG', nome: 'Minas Gerais' },
+];
 export const CIDADES: Cidade[] = [
-  { slug: 'sao-joao', nome: 'São João da Boa Vista', curto: 'São João' },
-  { slug: 'aguas-da-prata', nome: 'Águas da Prata', curto: 'Águas da Prata' },
+  { slug: 'sao-joao', nome: 'São João da Boa Vista', curto: 'São João', estado: 'SP' },
+  { slug: 'aguas-da-prata', nome: 'Águas da Prata', curto: 'Águas da Prata', estado: 'SP' },
+  { slug: 'pocos-de-caldas', nome: 'Poços de Caldas', curto: 'Poços de Caldas', estado: 'MG' },
 ];
 const CHAVE = 'cidade';
 
@@ -26,7 +32,7 @@ function lerSalva(): Cidade {
   return c;
 }
 
-/** Toda vez que o app abre, pergunta a cidade (São João ou Águas da Prata); a última escolha fica marcada. */
+/** Toda vez que o app abre, pergunta o estado e depois a cidade; a última escolha fica marcada. */
 export function ProvedorCidade({ children }: { children: ReactNode }) {
   const [cidade, setCidade] = useState<Cidade>(lerSalva);
   const [escolhendo, setEscolhendo] = useState(true);
@@ -43,7 +49,7 @@ export function ProvedorCidade({ children }: { children: ReactNode }) {
   return (
     <Contexto.Provider value={valor}>
       {children}
-      {escolhendo && <EscolherCidade atual={cidade.slug} cidades={CIDADES} aoEscolher={escolher} />}
+      {escolhendo && <EscolherCidade atual={cidade} estados={ESTADOS} cidades={CIDADES} aoEscolher={escolher} />}
     </Contexto.Provider>
   );
 }

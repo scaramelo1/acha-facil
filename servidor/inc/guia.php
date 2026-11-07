@@ -2,10 +2,13 @@
 // Regras do guia: quem aparece, ordem da vitrine, formato dos dados enviados ao app, notas
 declare(strict_types=1);
 
-// Cidades atendidas: slug => [nome completo, nome curto]. O app manda ?cidade=<slug> em todas as chamadas.
+// Estados e cidades atendidas: slug => [nome completo, nome curto, UF]. O app manda ?cidade=<slug> em todas as chamadas.
+// Cidade nova: acrescentar aqui, em src/cidade.tsx (app) e, se for longe, na caixa de geocodificar.php.
+const ESTADOS = ['SP' => 'São Paulo', 'MG' => 'Minas Gerais'];
 const CIDADES = [
-    'sao-joao' => ['São João da Boa Vista', 'São João'],
-    'aguas-da-prata' => ['Águas da Prata', 'Águas da Prata'],
+    'sao-joao' => ['São João da Boa Vista', 'São João', 'SP'],
+    'aguas-da-prata' => ['Águas da Prata', 'Águas da Prata', 'SP'],
+    'pocos-de-caldas' => ['Poços de Caldas', 'Poços de Caldas', 'MG'],
 ];
 const CIDADE_PADRAO = 'sao-joao';
 
@@ -15,6 +18,7 @@ function cidade_pedida(): string {
     return isset(CIDADES[$c]) ? $c : CIDADE_PADRAO;
 }
 function nome_cidade(string $slug, bool $curto = false): string { return CIDADES[$slug][$curto ? 1 : 0] ?? CIDADES[CIDADE_PADRAO][0]; }
+function uf_cidade(string $slug): string { return CIDADES[$slug][2] ?? 'SP'; }
 
 // Aparece no app: aprovado e com assinatura em dia (ou cortesia dada pelo admin).
 // Comércios importados da lista de leads aparecem sem assinatura até o dono assumir o perfil.
@@ -176,7 +180,7 @@ function prof_completo(array $p, ?int $usuario_id): array {
         'whatsapp' => $p['whatsapp'] ? link_whatsapp($p['whatsapp'], 'Olá! Encontrei você no Acha Fácil.') : null,
         'instagram' => $p['instagram'] ? 'https://instagram.com/' . ltrim($p['instagram'], '@') : null,
         'endereco' => $p['endereco'],
-        'mapa' => $p['mapa'] ?: ($p['endereco'] ? 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($p['endereco'] . ', ' . nome_cidade($p['cidade']) . ' - SP') : null),
+        'mapa' => $p['mapa'] ?: ($p['endereco'] ? 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($p['endereco'] . ', ' . nome_cidade($p['cidade']) . ' - ' . uf_cidade($p['cidade'])) : null),
         'site' => $p['site'],
         'linkAssumir' => $p['importado'] ? url_publica('planos.php?id=' . $p['id']) : null,
         'linkRemover' => $p['importado'] ? url_publica('perfil.php?id=' . $p['id'] . '&acao=remover') : null,

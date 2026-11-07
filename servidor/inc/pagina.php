@@ -58,7 +58,7 @@ function pagina_fim(): void {
   <p class="lema">O comércio da sua cidade, pertinho de você.</p>
   <p><a href="<?= $base ?>/busca.php">Procurar meu negócio</a> · <a href="<?= $base ?>/termos.php">Termos de uso</a> · <a href="<?= $base ?>/privacidade.php">Privacidade</a> · <a href="<?= $base ?>/privacidade.php#excluir-conta">Excluir minha conta</a></p>
   <p>Fale conosco: <?= contatos_html() ?></p>
-  <p class="discreto">São João da Boa Vista e Águas da Prata – SP · <?= date('Y') ?></p>
+  <p class="discreto">São João da Boa Vista e Águas da Prata (SP) · Poços de Caldas (MG) · <?= date('Y') ?></p>
 </footer>
 </body>
 </html>

@@ -21,13 +21,13 @@ foreach (linhas("SELECT id, mapa FROM profissionais WHERE lat IS NULL AND mapa L
 echo "✔ $n localizações tiradas dos links do Google\n";
 
 // caixa em volta das cidades atendidas (descarta resultados de outra cidade com rua de mesmo nome)
-const CAIXA = ['lat' => [-22.10, -21.80], 'lng' => [-46.90, -46.60]];
+const CAIXA = ['lat' => [-22.10, -21.65], 'lng' => [-46.90, -46.40]];   // São João, Águas da Prata e Poços de Caldas
 
 function nominatim(string $consulta): ?array {
     usleep(1200000);
     $url = 'https://nominatim.openstreetmap.org/search?' . http_build_query([
         'q' => $consulta, 'format' => 'json', 'limit' => 1, 'countrycodes' => 'br',
-        'viewbox' => '-46.90,-21.80,-46.60,-22.10', 'bounded' => 1,
+        'viewbox' => '-46.90,-21.65,-46.40,-22.10', 'bounded' => 1,
     ]);
     $ctx = stream_context_create(['http' => ['timeout' => 20, 'header' => "User-Agent: AchaFacil/1.0 (guia de comercios locais; geocodificacao unica)\r\nAccept-Language: pt-BR\r\n"]]);
     $r = @file_get_contents($url, false, $ctx);
@@ -55,7 +55,7 @@ $pendentes = linhas("SELECT id, endereco, bairro, cidade FROM profissionais
 echo '• ' . count($pendentes) . " endereços para procurar no OpenStreetMap (~" . ceil(count($pendentes) * 1.3 / 60) . " min)\n";
 $ok = $falha = 0;
 foreach ($pendentes as $i => $p) {
-    $cidade = nome_cidade($p['cidade']) . ', SP, Brasil';
+    $cidade = nome_cidade($p['cidade']) . ', ' . uf_cidade($p['cidade']) . ', Brasil';
     $achado = null;
     if ($p['endereco']) {
         $achado = nominatim(por_extenso($p['endereco']) . ', ' . $cidade);

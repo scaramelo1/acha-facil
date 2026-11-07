@@ -1,7 +1,7 @@
 <?php
 // Importa (ou atualiza) os comércios de uma lista de leads para o Acha Fácil. Rodar na VPS como root:
 //   php servidor/importar-leads.php [arquivo leads.html] [cidade]
-//   cidade: sao-joao (padrão) ou aguas-da-prata. Ex.: php servidor/importar-leads.php /var/lib/acha-facil/leads/aguas-da-prata.html aguas-da-prata
+//   cidade: sao-joao (padrão), aguas-da-prata ou pocos-de-caldas. Ex.: php servidor/importar-leads.php /var/lib/acha-facil/leads/aguas-da-prata.html aguas-da-prata
 // Padrão: a lista de São João publicada em fsadesigners.com.br/leads/. Linhas cujo endereço é de outra cidade atendida
 // vão para aquela cidade. Listas sem área (data-seg) usam a área mais comum do mesmo tipo de negócio já cadastrado. Pode rodar de novo sempre que a lista mudar:
 // atualiza quem já veio dos leads (pelo nome) e não mexe em quem assumiu o perfil nem em quem foi removido.
@@ -38,6 +38,13 @@ $area_fixa = [
     'materiais de construção' => 'casa', 'materiais elétricos' => 'casa', 'paisagismo' => 'casa', 'produtos para piscina' => 'casa',
     'assistência técnica' => 'servicos', 'cobrança' => 'financeiro', 'contabilidade' => 'servicos',
     'eventos' => 'hospedagem', 'hospedagem' => 'hospedagem', 'fisioterapia' => 'saude', 'fábrica' => 'industria',
+    // Poços de Caldas
+    'autopeças' => 'veiculos', 'baterias' => 'veiculos', 'peças usadas' => 'veiculos', 'peças para caminhões' => 'veiculos', 'peças para motos' => 'veiculos',
+    'reparo de celulares' => 'servicos', 'informática' => 'servicos', 'reparo de impressoras' => 'servicos', 'copiadora' => 'servicos',
+    'comunicação visual' => 'servicos', 'convites' => 'servicos',
+    'acessórios para celular' => 'lojas', 'artigos domésticos' => 'lojas', 'papelaria fina' => 'lojas', 'papelaria personalizada' => 'lojas',
+    'descartáveis' => 'lojas', 'embalagens' => 'lojas', 'ateliê de arte' => 'lojas',
+    'escola infantil' => 'educacao', 'loja de queijos' => 'mercados', 'fondue' => 'alimentacao', 'equipamentos industriais' => 'industria',
 ];
 foreach ($area_fixa as $t => $slug) if (isset($cat[$slug])) $area_do_tipo[$t] = $cat[$slug];
 const PALAVRAS_AREA = [
@@ -61,7 +68,7 @@ function chave(string $nome): string {
 }
 // "Rua X, 410 - Jardim São Paulo, São João da Boa Vista - SP, 13875-089, Brasil" → ["Rua X, 410", "Jardim São Paulo"]
 function endereco_e_bairro(string $e): array {
-    $e = preg_replace('/,?\s*(S[ãa]o Jo[ãa]o da Boa Vista|[ÁA]guas da Prata)\b.*$/iu', '', $e);
+    $e = preg_replace('/,?\s*(S[ãa]o Jo[ãa]o da Boa Vista|[ÁA]guas da Prata|Po[çc]os de Caldas)\b.*$/iu', '', $e);
     $e = trim(preg_replace('/,?\s*\d{5}-?\d{3}.*$/', '', $e), " ,-");
     $endereco = null; $bairro = null;
     foreach (array_map('trim', explode(' - ', $e)) as $parte) {

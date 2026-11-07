@@ -14,15 +14,15 @@ $emoji = ['silverware-fork-knife' => '🍽️', 'cart-outline' => '🛒', 'tools
     'tshirt-crew-outline' => '👕', 'home-roof' => '🏠', 'car-wrench' => '🚗', 'shopping-outline' => '🛍️', 'school-outline' => '🎓',
     'dumbbell' => '🏋️', 'paw' => '🐾', 'bed-outline' => '🛏️', 'bank-outline' => '🏦', 'factory' => '🏭', 'hand-heart-outline' => '🤝'];
 
-pagina_inicio('Acha Fácil! O comércio de São João da Boa Vista e Águas da Prata no seu celular',
-    "App gratuito com $total comércios e serviços de São João da Boa Vista e Águas da Prata: restaurantes, mercados, oficinas, clínicas, lojas e muito mais. Chame no WhatsApp com um toque.");
+pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
+    "App gratuito com $total comércios e serviços de São João da Boa Vista, Águas da Prata (SP) e Poços de Caldas (MG): restaurantes, mercados, oficinas, clínicas, lojas e muito mais. Chame no WhatsApp com um toque.");
 ?>
 <main>
   <section class="hero">
     <div class="conteudo">
       <div>
         <h1>Tudo o que tem na <mark>sua cidade</mark>, num toque.</h1>
-        <p class="lead">São João da Boa Vista e Águas da Prata. Restaurante, mercado, oficina, clínica, loja ou quem faz aquele conserto. Procure no Acha Fácil e chame no WhatsApp, ligue ou veja como chegar.</p>
+        <p class="lead">São João da Boa Vista e Águas da Prata (SP) e Poços de Caldas (MG). Restaurante, mercado, oficina, clínica, loja ou quem faz aquele conserto. Procure no Acha Fácil e chame no WhatsApp, ligue ou veja como chegar.</p>
         <ul class="contador">
           <li><b><?= $num($total) ?></b> comércios e serviços</li>
           <li><b><?= count(CIDADES) ?></b> cidades</li>
@@ -44,7 +44,7 @@ pagina_inicio('Acha Fácil! O comércio de São João da Boa Vista e Águas da P
   <section class="branco" id="areas" style="padding-top:24px">
     <div class="conteudo">
       <h2>De padaria a oficina</h2>
-      <p class="intro">Os comércios de São João da Boa Vista e Águas da Prata organizados por área. Dentro de cada uma, filtre pelo tipo: pizzaria, academia, pet shop…</p>
+      <p class="intro">Os comércios de cada cidade organizados por área. Dentro de cada uma, filtre pelo tipo: pizzaria, academia, pet shop…</p>
       <div class="areas">
         <?php foreach ($areas as $a): ?>
           <div class="area"><i style="background:<?= h($a['cor']) ?>"><?= $emoji[$a['icone']] ?? '📍' ?></i><span><b><?= h($a['nome']) ?></b><small><?= $num($a['total']) ?> lugares</small></span></div>
@@ -69,7 +69,7 @@ pagina_inicio('Acha Fácil! O comércio de São João da Boa Vista e Águas da P
     <div class="conteudo duas">
       <div>
         <h2>Seu negócio já pode estar no Acha Fácil</h2>
-        <p class="intro">Montamos o guia com os dados públicos dos comércios de São João e Águas da Prata. Procure o seu e confira os planos para corrigir os dados e colocar fotos.</p>
+        <p class="intro">Montamos o guia com os dados públicos dos comércios das cidades atendidas. Procure o seu e confira os planos para corrigir os dados e colocar fotos.</p>
         <ul class="lista-check">
           <li>Corrija telefone, WhatsApp, endereço e horário</li>
           <li>Coloque foto, descrição e o que você vende ou faz</li>

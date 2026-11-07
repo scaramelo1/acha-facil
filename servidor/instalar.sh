@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Acha Fácil — instalação/atualização na VPS (rodar como root). Pode rodar de novo sem estragar nada.
 #   bash instalar.sh              cria/atualiza banco, config e publicação
-#   bash instalar.sh --leads      também importa/atualiza os comércios das listas de leads (São João e Águas da Prata)
+#   bash instalar.sh --leads      também importa/atualiza os comércios das listas de leads (São João, Águas da Prata e Poços de Caldas)
 set -euo pipefail
 cd "$(dirname "$0")"
 RAIZ="$(pwd)"
@@ -90,7 +90,8 @@ else
 fi
 if [ "${1:-}" = "--leads" ]; then
   php "$RAIZ/importar-leads.php"                                   # São João (lista de fsadesigners.com.br/leads)
-  PRATA=$DADOS/leads/aguas-da-prata.html
-  [ -f "$PRATA" ] && php "$RAIZ/importar-leads.php" "$PRATA" aguas-da-prata || echo "• sem lista de Águas da Prata em $PRATA"
+  for c in aguas-da-prata pocos-de-caldas; do                      # outras cidades: $DADOS/leads/<cidade>.html
+    [ -f "$DADOS/leads/$c.html" ] && php "$RAIZ/importar-leads.php" "$DADOS/leads/$c.html" "$c" || echo "• sem lista de $c em $DADOS/leads"
+  done
 fi
 echo; echo "Pronto: https://fsadesigners.com.br/$NOME/api/inicio.php"
