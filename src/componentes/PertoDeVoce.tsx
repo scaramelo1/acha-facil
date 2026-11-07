@@ -30,6 +30,9 @@ export function PertoDeVoce({ semLocalizacao }: { semLocalizacao?: React.ReactNo
   const [lista, setLista] = useState<Perto[]>([]);
   const [podePerguntar, setPodePerguntar] = useState(true);
   const { cidade } = useCidade();
+  // o que a lista na tela responde (posição, tipo e cidade); se mudou, mostra "carregando" até chegar a nova
+  const pedido = posicao ? `${posicao.lat},${posicao.lng},${atalho ?? ''},${cidade.slug}` : '';
+  const [respondido, setRespondido] = useState('');
 
   const localizar = useCallback(async () => {
     setEstado('buscando');
@@ -57,7 +60,7 @@ export function PertoDeVoce({ semLocalizacao }: { semLocalizacao?: React.ReactNo
   useEffect(() => {
     if (!posicao) return;
     let cancelado = false;
-    setEstado('buscando');
+    const este = `${posicao.lat},${posicao.lng},${atalho ?? ''},${cidade.slug}`;
     chamar<{ atalhos: Atalho[]; profissionais: Perto[]; longe?: boolean }>(
       `perto.php?lat=${posicao.lat.toFixed(5)}&lng=${posicao.lng.toFixed(5)}${atalho ? `&atalho=${atalho}` : ''}`,
     )
@@ -66,6 +69,7 @@ export function PertoDeVoce({ semLocalizacao }: { semLocalizacao?: React.ReactNo
         setAtalhos(r.atalhos);
         setLista(r.profissionais);
         setEstado(r.longe ? 'longe' : 'pronto');
+        setRespondido(este);
       })
       .catch(() => !cancelado && setEstado('falha'));
     return () => {
@@ -86,10 +90,13 @@ export function PertoDeVoce({ semLocalizacao }: { semLocalizacao?: React.ReactNo
     else setEstado('negado');
   };
 
-  if (estado === 'conferindo') return null;
+  // trocou a cidade (ou o tipo) e a resposta nova ainda não chegou
+  const visto: Estado = (estado === 'pronto' || estado === 'longe') && respondido !== pedido ? 'buscando' : estado;
+
+  if (visto === 'conferindo') return null;
 
   // em outra cidade: o "perto" não serve para a cidade que a pessoa está olhando
-  if (estado === 'longe')
+  if (visto === 'longe')
     return (
       <>
         <View style={estilos.convite}>
@@ -98,14 +105,14 @@ export function PertoDeVoce({ semLocalizacao }: { semLocalizacao?: React.ReactNo
           </View>
           <Text style={estilos.conviteTitulo}>Você não está em {cidade.curto}</Text>
           <Text style={estilos.conviteTexto}>
-            O "Perto de você" mostra os lugares mais perto quando você estiver na cidade. Enquanto isso, veja os conhecidos de lá.
+            O “Perto de você” mostra os lugares mais perto quando você estiver na cidade. Enquanto isso, veja os conhecidos de lá.
           </Text>
         </View>
         {semLocalizacao}
       </>
     );
 
-  if (estado === 'pedir' || estado === 'negado')
+  if (visto === 'pedir' || visto === 'negado')
     return (
       <>
         <View style={estilos.convite}>
@@ -139,11 +146,11 @@ export function PertoDeVoce({ semLocalizacao }: { semLocalizacao?: React.ReactNo
         </ScrollView>
       )}
 
-      {estado === 'buscando' ? (
+      {visto === 'buscando' ? (
         <View style={{ paddingVertical: 32 }}>
           <ActivityIndicator size="large" color={cores.verde} />
         </View>
-      ) : estado === 'falha' ? (
+      ) : visto === 'falha' ? (
         <View style={estilos.convite}>
           <Text style={estilos.conviteTexto}>Não foi possível achar sua localização agora.</Text>
           <Botao titulo="Tentar de novo" icone="refresh" tipo="contorno" onPress={localizar} estilo={{ alignSelf: 'stretch' }} />

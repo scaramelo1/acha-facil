@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { chamar, type Profissional } from '../../api/cliente';
@@ -20,30 +20,6 @@ export default function TelaAvaliar() {
     () => chamar<{ profissional: Profissional }>(`profissional.php?id=${id}`).then((r) => r.profissional),
     `avaliar-${id}-${usuario?.id ?? 0}`,
   );
-  const [estrelas, setEstrelas] = useState(0);
-  const [comentario, setComentario] = useState('');
-  const [enviando, setEnviando] = useState(false);
-
-  // quem já avaliou começa com a avaliação de antes
-  useEffect(() => {
-    if (p?.minhaAvaliacao) {
-      setEstrelas(p.minhaAvaliacao.estrelas);
-      setComentario(p.minhaAvaliacao.comentario ?? '');
-    }
-  }, [p?.minhaAvaliacao]);
-
-  const enviar = async () => {
-    if (estrelas < 1) return Alert.alert('Escolha as estrelas', 'Toque de 1 a 5 estrelas.');
-    setEnviando(true);
-    try {
-      await chamar('avaliar.php', 'POST', { id: Number(id), estrelas, comentario });
-      router.back();
-    } catch (e) {
-      Alert.alert('Não foi possível publicar', e instanceof Error ? e.message : '');
-    } finally {
-      setEnviando(false);
-    }
-  };
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -64,6 +40,35 @@ export default function TelaAvaliar() {
               <Falha mensagem={erro ?? 'Não foi possível carregar.'} tentar={recarregar} />
             )
           ) : (
+            <Formulario key={p.id} p={p} />
+          )}
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+/** Estrelas e comentário; quem já avaliou começa com a avaliação de antes. */
+function Formulario({ p }: { p: Profissional }) {
+  const router = useRouter();
+  const [estrelas, setEstrelas] = useState(p.minhaAvaliacao?.estrelas ?? 0);
+  const [comentario, setComentario] = useState(p.minhaAvaliacao?.comentario ?? '');
+  const [enviando, setEnviando] = useState(false);
+
+  const enviar = async () => {
+    if (estrelas < 1) return Alert.alert('Escolha as estrelas', 'Toque de 1 a 5 estrelas.');
+    setEnviando(true);
+    try {
+      await chamar('avaliar.php', 'POST', { id: p.id, estrelas, comentario });
+      router.back();
+    } catch (e) {
+      Alert.alert('Não foi possível publicar', e instanceof Error ? e.message : '');
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  return (
             <>
               <Pressable accessibilityRole="button" onPress={() => router.back()} style={estilos.comercio}>
                 <Foto foto={p.foto} icone={p.icone} cor={p.cor} largura={104} altura={78} raio={0} />
@@ -106,10 +111,6 @@ export default function TelaAvaliar() {
                 <Text style={[estilos.sub, { flex: 1 }]}>Ajude a comunidade com uma avaliação respeitosa e construtiva. Seu comentário aparece com o primeiro nome e a inicial.</Text>
               </View>
             </>
-          )}
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
   );
 }
 
