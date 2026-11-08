@@ -34,14 +34,34 @@ export function PertoDeVoce({ semLocalizacao }: { semLocalizacao?: React.ReactNo
   const pedido = posicao ? `${posicao.lat},${posicao.lng},${atalho ?? ''},${cidade.slug}` : '';
   const [respondido, setRespondido] = useState('');
 
-  const localizar = useCallback(async () => {
+  // `fresca`: pede ao GPS a posição de agora (botão "Atualizar"). Sem ela, mostra logo a última posição
+  // conhecida (se for recente) e depois troca pela de agora, quando o GPS responder.
+  const localizar = useCallback(async (fresca = false) => {
     setEstado('buscando');
+    let mostrou = false;
+    if (!fresca) {
+      try {
+        const ultima = await Location.getLastKnownPositionAsync({ maxAge: 2 * 60 * 1000, requiredAccuracy: 200 });
+        if (ultima) {
+          setPosicao({ lat: ultima.coords.latitude, lng: ultima.coords.longitude });
+          mostrou = true;
+        }
+      } catch {
+        // segue para a posição de agora
+      }
+    }
     try {
-      const ultima = await Location.getLastKnownPositionAsync({ maxAge: 5 * 60 * 1000 });
-      const p = ultima ?? (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }));
-      setPosicao({ lat: p.coords.latitude, lng: p.coords.longitude });
+      const agora = await Promise.race([
+        Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High }),
+        new Promise<never>((_, falhar) => setTimeout(() => falhar(new Error('tempo')), 20000)),
+      ]);
+      setPosicao({ lat: agora.coords.latitude, lng: agora.coords.longitude });
     } catch {
-      setEstado('falha');
+      if (mostrou) return;
+      // o GPS não respondeu a tempo: usa a última conhecida, mesmo mais antiga, antes de desistir
+      const antiga = await Location.getLastKnownPositionAsync().catch(() => null);
+      if (antiga) setPosicao({ lat: antiga.coords.latitude, lng: antiga.coords.longitude });
+      else setEstado('falha');
     }
   }, []);
 
@@ -153,7 +173,7 @@ export function PertoDeVoce({ semLocalizacao }: { semLocalizacao?: React.ReactNo
       ) : visto === 'falha' ? (
         <View style={estilos.convite}>
           <Text style={estilos.conviteTexto}>Não foi possível achar sua localização agora.</Text>
-          <Botao titulo="Tentar de novo" icone="refresh" tipo="contorno" onPress={localizar} estilo={{ alignSelf: 'stretch' }} />
+          <Botao titulo="Tentar de novo" icone="refresh" tipo="contorno" onPress={() => localizar(true)} estilo={{ alignSelf: 'stretch' }} />
         </View>
       ) : lista.length === 0 ? (
         <Text style={estilos.vazio}>
@@ -164,7 +184,7 @@ export function PertoDeVoce({ semLocalizacao }: { semLocalizacao?: React.ReactNo
           {lista.slice(0, 10).map((p) => (
             <CartaoProfissional key={p.id} p={p} distancia={p.distancia} />
           ))}
-          <Pressable accessibilityRole="button" onPress={localizar} style={estilos.atualizar} hitSlop={8}>
+          <Pressable accessibilityRole="button" onPress={() => localizar(true)} style={estilos.atualizar} hitSlop={8}>
             <MaterialCommunityIcons name="refresh" size={18} color={cores.destaque} />
             <Text style={estilos.atualizarTexto}>Atualizar minha localização</Text>
           </Pressable>
