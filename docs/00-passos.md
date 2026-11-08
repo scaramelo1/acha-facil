@@ -124,7 +124,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 12. 🟡 Administrador no app com avisos no celular (07/11): fellipealexandre1@gmail.com é admin (tabela admins; também
    entra no /admin do site). Conta do app com e-mail de admin vê "Administração" no Perfil (aprovar/recusar alterações
    com antes x depois, pedidos novos, cidades pedidas) e recebe aviso quando alguém **paga um plano**, **pede uma cidade**
-   ou **manda alterações**; tocar no aviso abre a tela. Servidor: inc/avisos.php (Expo Push), api/avisos.php,
+   ou **manda alterações**; tocar no aviso abre a tela. Desde 08/11 também avisa **no momento do pedido** (plano escolhido,
+   tirar do app, assumir/incluir), sem esperar o Mercado Pago. Servidor: inc/avisos.php (Expo Push), api/avisos.php,
    api/admin.php, tabela avisos_aparelhos (mudança 010). App: src/avisos.ts, src/app/admin.tsx, pacotes expo-notifications
    e expo-device. Firebase: google-services.json no projeto (08/11, projeto acha-facil-e7bfd). Chave FCM V1 no EAS ✅ (08/11). Falta: testar no APK;
    no iPhone, depois da conta Apple

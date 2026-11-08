@@ -30,12 +30,18 @@ if (e_post()) {
     elseif ((int)valor('SELECT COUNT(*) FROM pedidos WHERE ip = ? AND criado_em > NOW() - INTERVAL 1 DAY', [ip()]) >= 10) $erro = 'Muitos pedidos hoje. Tente amanhã.';
     else {
         $dados = ['profissional_id' => $p['id'] ?? null, 'tipo' => $acao, 'plano' => $plano, 'nome' => $nome, 'telefone' => $telefone, 'mensagem' => $mensagem, 'ip' => ip()];
-        if ($com_assinatura) {
-            $dados += ['email' => $email, 'codigo' => bin2hex(random_bytes(32)), 'valor' => PLANOS_PRECO[$plano]];
-            inserir('pedidos', $dados);
-            ir('assinatura.php?c=' . $dados['codigo']);
-        }
-        inserir('pedidos', $dados);
+        if ($com_assinatura) $dados += ['email' => $email, 'codigo' => bin2hex(random_bytes(32)), 'valor' => PLANOS_PRECO[$plano]];
+        $pedido_id = inserir('pedidos', $dados);
+        // aviso no celular dos admins já no pedido (o "plano pago" vem depois, quando o Mercado Pago confirmar)
+        require_once __DIR__ . '/../inc/avisos.php';
+        $comercio = $p['nome'] ?? 'um negócio novo';
+        [$titulo_aviso, $texto_aviso] = match (true) {
+            $acao === 'remover' => ['Pedido para tirar do app', "$nome pediu para tirar $comercio do app."],
+            $plano !== null => ['Novo pedido de plano', "$nome quer o plano " . PLANOS_NOME[$plano] . " ($comercio)."],
+            default => [$p ? 'Pedido para assumir' : 'Pedido para incluir', "$nome quer " . ($p ? 'assumir' : 'incluir') . " $comercio."],
+        };
+        avisar_admins($titulo_aviso, $texto_aviso, ['pedido' => (int)$pedido_id]);
+        if ($com_assinatura) ir('assinatura.php?c=' . $dados['codigo']);
         $enviado = true;
     }
 }
