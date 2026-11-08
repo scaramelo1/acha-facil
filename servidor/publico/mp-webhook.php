@@ -20,6 +20,8 @@ try {
     elseif ($tipo === 'payment') mp_conferir_pagamento($id);   // pagamento único do Básico (os outros são ignorados lá)
 } catch (Throwable $e) {
     error_log("acha-facil mp-webhook $tipo $id: " . $e->getMessage());
+    // não existe no Mercado Pago (ex.: "Simular notificação" com id 1): nada a fazer, não adianta mandar de novo
+    if (str_contains($e->getMessage(), 'respondeu 404')) { echo '{"ok":true}'; exit; }
     http_response_code(500);   // o Mercado Pago tenta de novo mais tarde
     echo '{"erro":"falha ao conferir"}';
     exit;
