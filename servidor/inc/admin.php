@@ -26,6 +26,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
   <nav>
     <a href="<?= $base ?>/admin/">Pendências<?= $pend + $novos ? ' <span class="contador">' . ($pend + $novos) . '</span>' : '' ?></a>
     <a href="<?= $base ?>/admin/registro.php">Registro</a>
+    <a href="<?= $base ?>/admin/senha.php">Trocar senha</a>
     <a href="<?= $base ?>/admin/sair.php">Sair</a>
   </nav>
   <?php endif ?>
