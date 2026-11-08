@@ -1,6 +1,8 @@
 <?php
-// Assinatura mensal dos planos (Básico e Destaque) pelo Mercado Pago: assinatura recorrente no cartão ("preapproval").
-// O dono do comércio autoriza no Mercado Pago e ele cobra sozinho todo mês. O Mercado Pago avisa o servidor
+// Pagamento dos planos pelo Mercado Pago:
+//   Básico: pagamento único pelo Checkout do Mercado Pago (cartão, Pix ou boleto); aprovado = Básico para sempre.
+//   Destaque: assinatura mensal no cartão ("preapproval"); o dono autoriza no Mercado Pago e ele cobra sozinho todo mês.
+// O Mercado Pago avisa o servidor
 // (mp-webhook.php) e cada aviso é SEMPRE conferido direto na API antes de mudar algo (nunca confia no navegador).
 // Cada mensalidade paga estende a assinatura do comércio em 1 mês, uma vez só (eventos_mp.aplicado).
 //
@@ -52,12 +54,25 @@ function pedido_por_codigo(string $codigo): ?array {
     return linha("SELECT * FROM pedidos WHERE codigo = ? AND tipo = 'assumir' AND plano IS NOT NULL", [$codigo]);
 }
 
-/** Cria (ou reaproveita, se ainda não foi concluída) a assinatura no Mercado Pago e devolve o endereço para o dono autorizar. */
+/** A mudança 011 do banco (Básico com pagamento único) já foi aplicada? */
+function mp_pronto_unico(): bool {
+    static $ok = null;
+    return $ok ??= (bool)valor("SELECT 1 FROM migracoes WHERE nome = '011-basico-pagamento-unico.sql'");
+}
+
+/** Pedido pago: assinatura do Destaque autorizada ou pagamento único do Básico aprovado. */
+function pedido_pago(?array $pedido): bool {
+    return in_array($pedido['mp_status'] ?? '', ['authorized', 'approved'], true);
+}
+const SQL_PEDIDO_PAGO = "mp_status IN ('authorized','approved')";
+
+/** Devolve o endereço do Mercado Pago para o dono pagar: Checkout (Básico, uma vez só) ou assinatura (Destaque). */
 function mp_assinar(array $pedido): string {
     $modo = mp_modo();
     if ($modo === 'desligado') throw new RuntimeException('O pagamento on-line ainda está sendo configurado.');
     if (!email_valido((string)$pedido['email'])) throw new RuntimeException('O pedido está sem um e-mail válido.');
     $plano = (string)$pedido['plano'];
+    if (plano_unico($plano)) return mp_pagar_unico($pedido);
     $valor = PLANOS_PRECO[$plano] ?? throw new RuntimeException('Plano inválido.');
 
     // já existe uma assinatura esperando o dono concluir: usa o mesmo endereço (não cria outra)
@@ -81,6 +96,68 @@ function mp_assinar(array $pedido): string {
     return (string)$a['init_point'];
 }
 
+/** Cria a cobrança única (Checkout do Mercado Pago) do plano Básico e devolve o endereço para o dono pagar. */
+function mp_pagar_unico(array $pedido): string {
+    if (!mp_pronto_unico()) throw new RuntimeException('Falta aplicar a mudança 011 do banco (bash servidor/instalar.sh).');
+    $plano = (string)$pedido['plano'];
+    $valor = PLANOS_PRECO[$plano] ?? throw new RuntimeException('Plano inválido.');
+    $comercio = $pedido['profissional_id'] ? (string)valor('SELECT nome FROM profissionais WHERE id = ?', [$pedido['profissional_id']]) : '';
+    $volta = url_publica('assinatura.php?c=' . $pedido['codigo']);
+    $pref = mp_api('POST', '/checkout/preferences', [
+        'items' => [[
+            'id' => 'plano-' . $plano,
+            'title' => mb_substr('Acha Fácil - Plano ' . PLANOS_NOME[$plano] . ($comercio !== '' ? ' - ' . $comercio : ''), 0, 250),
+            'quantity' => 1, 'unit_price' => $valor, 'currency_id' => 'BRL',
+        ]],
+        'payer' => ['email' => $pedido['email']],
+        'external_reference' => 'pedido:' . $pedido['id'],
+        'back_urls' => ['success' => $volta, 'pending' => $volta, 'failure' => $volta],
+        'auto_return' => 'approved',
+        'notification_url' => url_publica('mp-webhook.php?source_news=webhooks'),
+        'statement_descriptor' => 'ACHAFACIL',
+    ], ['X-Idempotency-Key: achafacil-unico-' . $pedido['id'] . '-' . time()]);
+    $endereco = (string)(mp_modo() === 'sandbox' ? ($pref['sandbox_init_point'] ?? $pref['init_point'] ?? '') : ($pref['init_point'] ?? ''));
+    if ($endereco === '') throw new RuntimeException('O Mercado Pago não devolveu o endereço do pagamento.');
+    q('UPDATE pedidos SET valor = ?, mp_status = IF(mp_status IS NULL, ?, mp_status), atualizado_em = NOW() WHERE id = ?', [$valor, 'pending', $pedido['id']]);
+    return $endereco;
+}
+
+/**
+ * Confere um pagamento direto na API. Só mexe se for o pagamento único do Básico (as mensalidades do Destaque chegam
+ * pela assinatura): aprovado, em reais e no valor do plano = Básico ligado para sempre, uma vez só.
+ */
+function mp_conferir_pagamento(string $mp_id): ?array {
+    if (!preg_match('/^\d{1,30}$/', $mp_id) || !mp_pronto_unico()) return null;
+    $pg = mp_api('GET', '/v1/payments/' . $mp_id);
+    if (!preg_match('/^pedido:(\d+)$/', (string)($pg['external_reference'] ?? ''), $m)) return null;
+    $pedido = linha("SELECT * FROM pedidos WHERE id = ? AND tipo = 'assumir' AND plano IS NOT NULL", [(int)$m[1]]);
+    if (!$pedido || !plano_unico((string)$pedido['plano'])) return $pedido;
+
+    $status = (string)($pg['status'] ?? 'desconhecido');
+    $valor = (float)($pg['transaction_amount'] ?? 0);
+    mp_evento((int)$pedido['id'], 'pagamento', $mp_id, $status, $valor);
+    if (pedido_pago($pedido)) return $pedido;   // já pago antes (aviso repetido ou outro pagamento do mesmo pedido)
+
+    $certo = ($pg['currency_id'] ?? '') === 'BRL' && $valor + 0.009 >= (PLANOS_PRECO[$pedido['plano']] ?? INF);
+    if ($status !== 'approved') {
+        q('UPDATE pedidos SET mp_pagamento = ?, mp_status = ?, atualizado_em = NOW() WHERE id = ?', [$mp_id, $status, $pedido['id']]);
+    } elseif (!$certo) {
+        error_log("acha-facil mp: pagamento $mp_id com valor ou moeda diferente do plano (pedido {$pedido['id']})");
+    } else {
+        // só quem conseguir marcar o pedido como pago liga o plano (webhook e volta da página podem chegar juntos)
+        $marcou = q("UPDATE pedidos SET mp_pagamento = ?, mp_status = 'approved', atualizado_em = NOW()
+            WHERE id = ? AND (mp_status IS NULL OR mp_status NOT IN ('authorized','approved'))", [$mp_id, $pedido['id']])->rowCount();
+        $pid = (int)($pedido['profissional_id'] ?? 0);
+        if ($marcou === 1 && $pid) {
+            q('UPDATE profissionais SET basico_pago_em = COALESCE(basico_pago_em, NOW()) WHERE id = ?', [$pid]);
+            require_once __DIR__ . '/avisos.php';
+            avisar_admins('Novo plano pago', $pedido['nome'] . ' pagou o plano ' . (PLANOS_NOME[$pedido['plano']] ?? '') . ' de '
+                . (string)valor('SELECT nome FROM profissionais WHERE id = ?', [$pid]) . '.', ['pedido' => (int)$pedido['id']]);
+        }
+    }
+    return linha('SELECT * FROM pedidos WHERE id = ?', [$pedido['id']]);
+}
+
 /** Registra um aviso do Mercado Pago (cada tipo + id + status uma vez só). */
 function mp_evento(?int $pedido_id, string $tipo, string $mp_id, string $status, ?float $valor): void {
     q('INSERT IGNORE INTO eventos_mp (pedido_id, tipo, mp_id, status, valor) VALUES (?, ?, ?, ?, ?)', [$pedido_id, $tipo, $mp_id, $status, $valor]);
@@ -92,7 +169,7 @@ function mp_conferir_assinatura(string $mp_id): ?array {
     $a = mp_api('GET', '/preapproval/' . rawurlencode($mp_id));
     if (!preg_match('/^pedido:(\d+)$/', (string)($a['external_reference'] ?? ''), $m)) return null;
     $pedido = linha("SELECT * FROM pedidos WHERE id = ? AND tipo = 'assumir' AND plano IS NOT NULL", [(int)$m[1]]);
-    if (!$pedido) return null;
+    if (!$pedido || plano_unico((string)$pedido['plano'])) return $pedido;   // o Básico não tem assinatura
     // uma assinatura antiga do mesmo pedido (ex.: a pessoa assinou de novo) não mexe na atual
     if ($pedido['mp_assinatura'] && $pedido['mp_assinatura'] !== $mp_id) return $pedido;
 
@@ -166,5 +243,6 @@ function mp_aviso_valido(string $data_id): bool {
 }
 
 function mp_status_nome(?string $s): string {
-    return ['pending' => 'aguardando você concluir no Mercado Pago', 'authorized' => 'ativa', 'paused' => 'pausada', 'cancelled' => 'cancelada'][$s ?? ''] ?? 'ainda não assinada';
+    return ['pending' => 'aguardando você concluir no Mercado Pago', 'authorized' => 'ativa', 'approved' => 'paga',
+        'in_process' => 'em análise no Mercado Pago', 'rejected' => 'recusada', 'cancelled' => 'cancelada', 'paused' => 'pausada', 'cancelled' => 'cancelada'][$s ?? ''] ?? 'ainda não assinada';
 }

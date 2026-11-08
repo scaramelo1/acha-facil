@@ -71,8 +71,7 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
         <ul class="lista-check">
           <li>Corrija telefone, WhatsApp, endereço e horário</li>
           <li>Coloque foto, descrição e o que você vende ou faz</li>
-          <li>Ganhe o selo "Verificado pelo Acha Fácil"</li>
-          <li>Veja quantas pessoas abriram sua página e chamaram no WhatsApp</li>
+          <li>No Destaque: selo "Verificado pelo Acha Fácil", responder as avaliações e ver quantas pessoas abriram sua página</li>
         </ul>
         <p class="discreto">Não quer aparecer? Procure o seu negócio e toque em "Tirar do app". Retiramos sem perguntas.</p>
       </div>
@@ -83,8 +82,8 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
           <button class="botao amarelo">Procurar</button>
         </form>
         <div class="planos">
-          <div class="plano"><h3>Básico <span class="preco">R$ 19,90/mês</span></h3><p>Corrija os dados, coloque fotos e ganhe o selo de verificado.</p></div>
-          <div class="plano destaque"><h3>Destaque <span class="preco">R$ 29,90/mês</span></h3><p>Aparece no topo da tela inicial e na frente da sua área, para a cidade inteira ver.</p></div>
+          <div class="plano"><h3>Básico <span class="preco"><?= h(preco_plano('basico')) ?> uma vez só</span></h3><p>Corrija os dados, coloque fotos, a descrição e o que você vende ou faz. Sem mensalidade.</p></div>
+          <div class="plano destaque"><h3>Destaque <span class="preco"><?= h(preco_plano('destaque')) ?>/mês</span></h3><p>Tudo do Básico, selo de verificado, responder as avaliações, ver os números da sua página e aparecer no topo da tela inicial e da sua área.</p></div>
         </div>
         <p style="margin:16px 0 0"><a class="botao" href="<?= $base ?>/planos.php">Conferir os planos</a></p>
       </div>

@@ -18,14 +18,21 @@ const PLANOS: { chave: string; nome: string; sub: string; icone: NomeIcone; iten
     nome: 'Básico',
     sub: 'Seu perfil completo e sempre atualizado.',
     icone: 'storefront-outline',
-    itens: ['Corrigir nome, telefone, WhatsApp, endereço e horário', 'Colocar fotos', 'Descrição e o que você vende ou faz', 'Selo "Verificado"', 'Responder as avaliações'],
+    itens: ['Corrigir nome, telefone, WhatsApp, endereço e horário', 'Colocar fotos do lugar e dos produtos', 'Descrição e o que você vende ou faz'],
   },
   {
     chave: 'destaque',
     nome: 'Destaque',
     sub: 'Seu comércio em evidência na cidade.',
     icone: 'star-outline',
-    itens: ['Tudo o que tem no Básico', 'Aparece no topo da tela inicial', 'Na frente dos outros na área e na busca'],
+    itens: [
+      'Tudo o que tem no Básico',
+      'Selo "Verificado pelo Acha Fácil"',
+      'Responder as avaliações dos clientes',
+      'Ver quantas pessoas abriram sua página e chamaram no WhatsApp',
+      'Aparece no topo da tela inicial',
+      'Na frente dos outros na área e na busca',
+    ],
   },
 ];
 

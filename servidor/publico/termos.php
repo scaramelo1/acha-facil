@@ -7,7 +7,7 @@ pagina_inicio('Termos de uso · Acha Fácil', 'Regras de uso do app Acha Fácil,
 ?>
 <main class="documento">
   <h1>Termos de uso</h1>
-  <p class="atualizado">Última atualização: 7 de novembro de 2026</p>
+  <p class="atualizado">Última atualização: 8 de novembro de 2026</p>
 
   <div class="quadro">
     <strong>Resumo:</strong> o Acha Fácil é uma vitrine de profissionais e comércios de São João da Boa Vista e Águas da Prata (SP) e Poços de Caldas (MG).
@@ -47,12 +47,14 @@ pagina_inicio('Termos de uso · Acha Fácil', 'Regras de uso do app Acha Fácil,
     <li>Você é responsável pelas informações, fotos e textos da sua página, e garante que tem direito de usá-los.</li>
     <li>Todo cadastro passa pela aprovação da equipe do Acha Fácil, que pode recusar ou retirar cadastros falsos, enganosos,
     ilegais ou que recebam reclamações graves.</li>
-    <li>Para aparecer no app é preciso manter a assinatura do plano em dia (Básico ou Destaque). A assinatura é mensal, no cartão,
-    pelo Mercado Pago, e pode ser cancelada a qualquer momento; ela vale até o fim do mês já pago. Com pagamento em atraso,
-    a página sai do ar até a regularização.</li>
+    <li>O plano Básico é pago uma vez só, pelo Mercado Pago, e não tem mensalidade: a página fica no app enquanto seguir estes termos.
+    O plano Destaque é uma assinatura mensal no cartão, pelo Mercado Pago, que pode ser cancelada a qualquer momento e vale até
+    o fim do mês já pago. Com o Destaque em atraso ou cancelado, a página perde os recursos do Destaque; se o Básico foi pago,
+    continua no app com o Básico, e se não foi, sai do ar até a regularização.</li>
     <li>A ordem em que os profissionais aparecem muda todos os dias. Quem assina o plano Destaque aparece também no carrossel
     do topo da tela inicial. Avaliações não podem ser compradas, trocadas nem apagadas a pedido.</li>
-    <li>O selo "Verificado pelo Acha Fácil" é dado pela equipe e não vem automaticamente com o pagamento.</li>
+    <li>O selo "Verificado pelo Acha Fácil", responder as avaliações e ver os números da página são recursos do plano Destaque.
+    O selo aparece depois que a equipe confere o comércio; não vem automaticamente com o pagamento.</li>
   </ul>
 
   <h2>6. Uso correto</h2>

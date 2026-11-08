@@ -8,7 +8,7 @@ Sanjoanenses e sem a aba Notícias.
 - **App:** Expo (TypeScript), na raiz do repositório (`src/`), pacote `br.com.fsadesigner.achafacil`.
 - **Servidor:** PHP 8.3 + MariaDB em `servidor/`, publicado em https://fsadesigners.com.br/acha-facil/
   (`bash servidor/instalar.sh` como root; config em `/etc/acha-facil/config.php`; banco `acha_facil`).
-- **Pagamento:** Mercado Pago, assinatura recorrente no cartão (o cartão é digitado no Mercado Pago).
+- **Pagamento:** Mercado Pago (08/11): Básico R$ 5,99 pagamento único (Checkout: cartão, Pix ou boleto); Destaque R$ 29,90/mês, assinatura no cartão.
 - **Marca:** verde `#005C38` e amarelo `#F7C600`; símbolo (pino + loja + lupa) em `assets/logo-simbolo.svg`.
 - **Visual (07/11, modelo do usuário):** fundo claro, cartões brancos com sombra suave, abas com pílula verde
   (Início, Categorias, Favoritos, Perfil), cidade em pílula amarela, cada área com a sua cor. Site com fonte Nunito e o mesmo estilo.
@@ -24,11 +24,11 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 - Ordem justa: destaques primeiro, depois quem tem avaliação; dentro de cada grupo a ordem muda uma vez por dia.
 - Responsável: **FSA Designer** (termos e privacidade); contatos fsadesignerbr@gmail.com e Instagram @fsa.designer
   em `/etc/acha-facil/config.php`.
-- Selo "Verificado pelo Acha Fácil" é dado pelo admin, não vem com o pagamento.
+- Selo "Verificado pelo Acha Fácil" é do plano Destaque (08/11): o admin marca `verificado`, mas o selo só aparece com o Destaque em dia.
 - Os comércios vêm da **lista de leads** (fsadesigners.com.br/leads, coleta do Google Maps): `importado = 1`, aparecem
   **sem assinatura** até o dono assumir o perfil. Reimportar: `php servidor/importar-leads.php [arquivo] [cidade]` (ou `bash servidor/instalar.sh --leads`, que faz as duas cidades) (atualiza pelo nome; não mexe em
   quem assumiu nem em quem foi tirado). Os 10 exemplos fictícios foram apagados.
-- O dono procura o negócio em `/busca.php` e pede para **assumir** (grátis) ou **tirar do app** (`/perfil.php`); para corrigir dados e pôr fotos, o dono confere os planos em `/planos.php` (Básico R$ 19,90/mês e Destaque R$ 29,90/mês); os pedidos
+- O dono procura o negócio em `/busca.php` e pede para **assumir** (grátis) ou **tirar do app** (`/perfil.php`); para corrigir dados e pôr fotos, o dono confere os planos em `/planos.php` (08/11: Básico R$ 5,99 uma vez só = corrigir dados, fotos, descrição e o que vende; Destaque R$ 29,90/mês = tudo do Básico + selo, responder avaliações, números da página e topo); os pedidos
   ficam na tabela `pedidos` até a administração web existir (passo 8).
 - Nota do Google **não aparece** no app: o número de avaliações do Google só ordena os "Conhecidos na cidade".
 
@@ -105,6 +105,12 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    sql/migracoes/007-mercado-pago.sql, (b) criar a aplicação no Mercado Pago e pôr mp_modo, mp_access_token e
    mp_webhook_secret em /etc/acha-facil/config.php, (c) testar no modo sandbox e depois ligar em producao.
    O app não mostra preço nem botão de contratar (regra das lojas): "Este comércio é seu?" -> "Saiba mais no site"
+10b. ✅ Planos novos (08/11, pedido do usuário): **Básico R$ 5,99 pagamento único** (Checkout Pro, aviso `payment` no
+   mp-webhook.php -> mp_conferir_pagamento; aprovado grava `profissionais.basico_pago_em` e o comércio fica no app para
+   sempre) e **Destaque R$ 29,90/mês** (assinatura, como antes). Selo, responder avaliações e números da página passaram
+   para o Destaque; Destaque vencido volta ao Básico se ele foi pago. Mudança 011 (aplicada pelo instalar.sh). Site
+   (planos, inicial, pedido, página do pagamento, termos) e app (tela "Este comércio é seu?") ajustados.
+   No Mercado Pago, marcar também o evento "Pagamentos" no Webhook
 11. 🟡 Publicar nas lojas (Play Store e App Store): guia, textos e formulários em `docs/lojas.md`; app.json pronto
    para o iOS (07/11). Nome "Acha Fácil" não achado em nenhuma das duas. Faltam: contas de desenvolvedor, capturas de
    tela, builds de produção (.aab e iOS), teste fechado de 14 dias na Play (conta pessoal) e conta de demonstração (passo 7)
@@ -113,7 +119,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 
 - WhatsApp de contato (`contato_whatsapp` no config); vazio, não aparece no site.
 - Arquivo da logo em alta (PNG/SVG) para trocar o redesenho, se quiser fidelidade total à arte.
-- Quantos lugares no carrossel de destaque (preços definidos em 07/11: Básico R$ 19,90/mês, Destaque R$ 29,90/mês).
+- Quantos lugares no carrossel de destaque (preços desde 08/11: Básico R$ 5,99 uma vez só, Destaque R$ 29,90/mês).
 - Se volta a ter notícias no futuro.
 12. 🟡 Administrador no app com avisos no celular (07/11): fellipealexandre1@gmail.com é admin (tabela admins; também
    entra no /admin do site). Conta do app com e-mail de admin vê "Administração" no Perfil (aprovar/recusar alterações

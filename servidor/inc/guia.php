@@ -20,15 +20,24 @@ function cidade_pedida(): string {
 function nome_cidade(string $slug, bool $curto = false): string { return CIDADES[$slug][$curto ? 1 : 0] ?? CIDADES[CIDADE_PADRAO][0]; }
 function uf_cidade(string $slug): string { return CIDADES[$slug][2] ?? 'SP'; }
 
-// Planos do dono do comércio (preço mensal, cobrado pelo Mercado Pago; ver inc/mercadopago.php)
-const PLANOS_PRECO = ['basico' => 19.90, 'destaque' => 29.90];
+// Planos do dono do comércio (ver inc/mercadopago.php):
+//   Básico: pagamento único (corrigir os dados, fotos, descrição e o que vende; vale para sempre)
+//   Destaque: assinatura mensal no cartão (tudo do Básico + selo "Verificado", responder avaliações, números da página
+//             e o topo da tela inicial e da área)
+const PLANOS_PRECO = ['basico' => 5.99, 'destaque' => 29.90];
 const PLANOS_NOME = ['basico' => 'Básico', 'destaque' => 'Destaque'];
+function plano_unico(string $plano): bool { return $plano === 'basico'; }
 function preco_plano(string $plano): string { return 'R$ ' . number_format(PLANOS_PRECO[$plano] ?? 0, 2, ',', '.'); }
+/** "R$ 5,99 uma vez só" ou "R$ 29,90 por mês". */
+function preco_plano_texto(string $plano): string { return preco_plano($plano) . (plano_unico($plano) ? ' uma vez só' : ' por mês'); }
 
-// Assinatura em dia: cortesia dada pelo admin, ou paga até hoje (assinatura_ate é estendida a cada mensalidade paga;
-// cancelada continua valendo até o fim do mês já pago). Atrasou: sai do destaque e, se não é importado, sai do app.
-const SQL_EM_DIA = "(p.assinatura = 'cortesia' OR (p.assinatura IN ('ativa','cancelada') AND p.assinatura_ate >= CURDATE()))";
-const SQL_DESTAQUE = "(p.plano = 'destaque' AND " . SQL_EM_DIA . ')';
+// Assinatura do Destaque em dia: cortesia dada pelo admin, ou paga até hoje (assinatura_ate é estendida a cada
+// mensalidade paga; cancelada continua valendo até o fim do mês já pago).
+const SQL_ASSINATURA_EM_DIA = "(p.assinatura = 'cortesia' OR (p.assinatura IN ('ativa','cancelada') AND p.assinatura_ate >= CURDATE()))";
+// Em dia para aparecer no app: Básico pago (uma vez só, vale para sempre) ou assinatura em dia.
+// Destaque atrasado: sai do destaque e, se pagou o Básico, continua no app com o Básico.
+const SQL_EM_DIA = '(p.basico_pago_em IS NOT NULL OR ' . SQL_ASSINATURA_EM_DIA . ')';
+const SQL_DESTAQUE = "(p.plano = 'destaque' AND " . SQL_ASSINATURA_EM_DIA . ')';
 
 // Aparece no app: aprovado e com assinatura em dia.
 // Comércios importados da lista de leads aparecem sem assinatura até o dono assumir o perfil.
@@ -61,7 +70,7 @@ function prof_resumo(array $p): array {
         'cidade' => nome_cidade($p['cidade'], true),
         'atendeEmCasa' => (bool)$p['atende_em_casa'],
         'foto' => foto_url($p['foto']),
-        'verificado' => (bool)$p['verificado'],
+        'verificado' => (bool)$p['verificado'] && (bool)($p['destaque_pago'] ?? false),   // o selo é do plano Destaque
         'destaque' => (bool)($p['destaque_pago'] ?? false),   // plano Destaque com a assinatura em dia
         'nota' => round((float)$p['nota_media'], 1),
         'avaliacoes' => (int)$p['total_avaliacoes'],
@@ -172,7 +181,7 @@ function buscar(string $termo, ?string $cidade, int $limite = 50): array {
 }
 
 function profissional_visivel(int $id): ?array {
-    return $id ? linha('SELECT p.*, c.nome AS categoria, c.icone, c.cor FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
+    return $id ? linha('SELECT p.*, ' . SQL_DESTAQUE . ' AS destaque_pago, c.nome AS categoria, c.icone, c.cor FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
         WHERE p.id = ? AND ' . visivel(), [$id]) : null;
 }
 

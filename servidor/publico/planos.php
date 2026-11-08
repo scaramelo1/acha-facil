@@ -15,12 +15,12 @@ $planos = [
         'Corrigir nome, telefone, WhatsApp, endereço e horário',
         'Colocar fotos do lugar e dos produtos',
         'Descrição e lista do que você vende ou faz',
-        'Selo "Verificado pelo Acha Fácil"',
-        'Responder as avaliações dos clientes',
-        'Ver quantas pessoas abriram sua página e chamaram no WhatsApp',
     ]],
     'destaque' => ['Destaque', 'Tudo do Básico e mais visibilidade', [
         'Tudo o que tem no Básico',
+        'Selo "Verificado pelo Acha Fácil"',
+        'Responder as avaliações dos clientes',
+        'Ver quantas pessoas abriram sua página e chamaram no WhatsApp',
         'Aparece em "Em destaque" no topo da tela inicial',
         'Aparece na frente dos outros na sua área e na busca',
     ]],
@@ -41,7 +41,11 @@ pagina_inicio('Planos para o seu negócio · Acha Fácil!', 'Corrija os dados, c
         <?php if ($chave === 'destaque'): ?><span class="fita">Mais visto</span><?php endif ?>
         <h2><?= h($nome) ?></h2>
         <p class="sub"><?= h($sub) ?></p>
-        <p class="valor"><?= $chave === 'destaque' ? 'R$ 29,90' : 'R$ 19,90' ?> por mês<small>assinatura mensal no cartão, cancele quando quiser</small></p>
+        <?php if (plano_unico($chave)): ?>
+          <p class="valor"><?= h(preco_plano($chave)) ?> uma vez só<small>pagamento único, sem mensalidade (cartão, Pix ou boleto)</small></p>
+        <?php else: ?>
+          <p class="valor"><?= h(preco_plano($chave)) ?> por mês<small>assinatura mensal no cartão, cancele quando quiser</small></p>
+        <?php endif ?>
         <ul class="lista-check">
           <?php foreach ($itens as $i): ?><li><?= h($i) ?></li><?php endforeach ?>
         </ul>

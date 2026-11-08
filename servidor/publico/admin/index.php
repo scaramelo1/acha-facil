@@ -41,7 +41,7 @@ admin_inicio('Pendências', $admin);
   <tr><th>Pedido</th><th>Comércio</th><th>Quem pediu</th><th>Quando</th><th></th></tr>
   <?php foreach ($pedidos as $pe): ?>
   <tr>
-    <td><?= h(TIPO_PEDIDO[$pe['tipo']] ?? $pe['tipo']) ?><?= $pe['plano'] ? ' · plano ' . h(PLANOS_NOME[$pe['plano']] ?? $pe['plano']) : '' ?><?= $pe['mp_status'] === 'authorized' ? ' <span class="contador">pago</span>' : '' ?></td>
+    <td><?= h(TIPO_PEDIDO[$pe['tipo']] ?? $pe['tipo']) ?><?= $pe['plano'] ? ' · plano ' . h(PLANOS_NOME[$pe['plano']] ?? $pe['plano']) : '' ?><?= in_array($pe['mp_status'], ['authorized', 'approved'], true) ? ' <span class="contador">pago</span>' : '' ?></td>
     <td><?= $pe['comercio'] ? h($pe['comercio']) . ' <span class="discreto">(' . h(nome_cidade($pe['cidade'], true)) . ')</span>' : '<em>Negócio novo</em>' ?></td>
     <td><?= h($pe['nome']) ?><br><span class="discreto"><?= h(telefone_formatado($pe['telefone'])) ?></span></td>
     <td><?= h(datahora_br($pe['criado_em'])) ?></td>

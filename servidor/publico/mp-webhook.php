@@ -1,5 +1,5 @@
 <?php
-// Avisos do Mercado Pago (configurar em Suas integrações > a aplicação > Webhooks, eventos "Planos e assinaturas":
+// Avisos do Mercado Pago (configurar em Suas integrações > a aplicação > Webhooks, eventos "Pagamentos" e "Planos e assinaturas":
 // https://fsadesigners.com.br/acha-facil/mp-webhook.php). Cada aviso é conferido direto na API (inc/mercadopago.php).
 require __DIR__ . '/../inc/base.php';
 require __DIR__ . '/../inc/guia.php';
@@ -17,7 +17,7 @@ if (!mp_aviso_valido($id)) { http_response_code(401); echo '{"erro":"assinatura 
 try {
     if ($tipo === 'subscription_preapproval') mp_conferir_assinatura($id);
     elseif ($tipo === 'subscription_authorized_payment') mp_conferir_mensalidade($id);
-    // outros tipos (ex.: payment) não mudam nada: as mensalidades chegam como subscription_authorized_payment
+    elseif ($tipo === 'payment') mp_conferir_pagamento($id);   // pagamento único do Básico (os outros são ignorados lá)
 } catch (Throwable $e) {
     error_log("acha-facil mp-webhook $tipo $id: " . $e->getMessage());
     http_response_code(500);   // o Mercado Pago tenta de novo mais tarde

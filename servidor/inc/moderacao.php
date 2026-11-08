@@ -58,12 +58,12 @@ function liberar_acesso(int $profissional_id, ?int $pedido_id, string $nome, ?st
 }
 
 /**
- * Entrada pelo pagamento: pedido de assumir com a assinatura autorizada no Mercado Pago. Cria o acesso na primeira
+ * Entrada pelo pagamento: pedido de assumir pago no Mercado Pago (assinatura do Destaque autorizada ou Básico aprovado). Cria o acesso na primeira
  * vez (sem admin) e marca o pedido como resolvido. Devolve o id do acesso, ou null (não pago ou acesso cortado).
  */
 function acesso_pelo_pagamento(string $codigo): ?int {
     if (!preg_match('/^[a-f0-9]{64}$/', $codigo)) return null;
-    $pe = linha("SELECT * FROM pedidos WHERE codigo = ? AND tipo = 'assumir' AND profissional_id IS NOT NULL AND mp_status = 'authorized'", [$codigo]);
+    $pe = linha("SELECT * FROM pedidos WHERE codigo = ? AND tipo = 'assumir' AND profissional_id IS NOT NULL AND mp_status IN ('authorized','approved')", [$codigo]);
     if (!$pe) return null;
     $a = linha('SELECT id, ativo FROM acessos_dono WHERE pedido_id = ? ORDER BY id DESC LIMIT 1', [$pe['id']]);
     if ($a) return (int)$a['ativo'] ? (int)$a['id'] : null;   // cortado pelo admin: não volta sozinho

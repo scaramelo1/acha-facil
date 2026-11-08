@@ -58,7 +58,7 @@ foreach (linhas("SELECT a.*, d.nome AS dono, d.telefone AS dono_tel, d.pedido_id
 
 $pedidos = array_map(fn($pe) => [
     'id' => (int)$pe['id'], 'tipo' => $pe['tipo'], 'plano' => $pe['plano'] ? PLANOS_NOME[$pe['plano']] ?? null : null,
-    'pago' => ($pe['mp_status'] ?? '') === 'authorized', 'comercio' => $pe['comercio'], 'nome' => $pe['nome'],
+    'pago' => in_array($pe['mp_status'] ?? '', ['authorized', 'approved'], true), 'comercio' => $pe['comercio'], 'nome' => $pe['nome'],
     'telefone' => telefone_formatado($pe['telefone']), 'quando' => datahora_br($pe['criado_em']),
 ], linhas("SELECT pe.*, p.nome AS comercio FROM pedidos pe LEFT JOIN profissionais p ON p.id = pe.profissional_id
     WHERE pe.status = 'novo' ORDER BY pe.criado_em DESC LIMIT 50"));
