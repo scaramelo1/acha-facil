@@ -7,6 +7,7 @@ import { Abertura } from '../componentes/Abertura';
 import { ProvedorCidade } from '../cidade';
 import { ProvedorConta } from '../conta';
 import { cores } from '../tema';
+import { useAvisoDeVersao } from '../versao';
 
 /** Tocar num aviso de administração abre a tela Administração (também quando o app estava fechado). */
 function AbrirAvisos() {
@@ -27,6 +28,7 @@ function AbrirAvisos() {
 }
 
 export default function Raiz() {
+  useAvisoDeVersao();
   return (
     <Abertura>
       <ProvedorCidade>

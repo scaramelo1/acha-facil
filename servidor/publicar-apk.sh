@@ -43,6 +43,11 @@ if [ "$(head -c 2 "$NOVO")" != "PK" ] || ! grep -qx 'AndroidManifest.xml' <<< "$
   exit 1
 fi
 
+# a versão vem de dentro do próprio APK (a que o celular vai ter); se não achar, a do app.json ou do 2º argumento.
+# É ela que o app compara para avisar "Nova versão" (api/versao.php).
+DO_APK=$(unzip -p "$NOVO" assets/app.config 2>/dev/null | grep -o '"version":"[0-9.]*"' | head -1 | cut -d'"' -f4 || true)
+if [ -z "${2:-}" ] && [ -n "$DO_APK" ]; then VERSAO="$DO_APK"; fi
+
 mv "$NOVO" "$DIR/acha-facil.apk"          # troca de uma vez: ninguém baixa pela metade
 echo "$VERSAO" > "$DIR/versao.txt"
 [ -f "$DIR/downloads.txt" ] || echo 0 > "$DIR/downloads.txt"
@@ -54,3 +59,4 @@ echo "Downloads:  $(cat "$DIR/downloads.txt") até agora"
 echo "Página:     $(curl -s -o /dev/null -w '%{http_code}' -m 10 https://fsadesigners.com.br/acha-facil/)"
 echo "Baixar:     $(curl -s -I -o /dev/null -w '%{http_code} %{content_type}' -m 10 https://fsadesigners.com.br/acha-facil/baixar-apk.php)"
 echo "Link:       https://fsadesigners.com.br/acha-facil/baixar-apk.php"
+echo "Aviso app:  $(curl -s -m 10 https://fsadesigners.com.br/acha-facil/api/versao.php)   (quem tem versão mais velha recebe o aviso)"

@@ -76,6 +76,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Ficou de fora (não existe no servidor): "Editar meus dados" e "Minhas avaliações"
 5. ✅ Testar no PC (`npm install`, `npx tsc --noEmit`, `npx expo lint`, emulador)
 6. ✅ Projeto EAS próprio e 1º APK publicado no site (07/11, v1.0.0); publicar com `bash servidor/publicar-apk.sh <link do EAS>`
+   Aviso de versão nova (08/11, igual ao ReadyTAF): o app pergunta api/versao.php ao abrir (no máximo a cada 6 h) e,
+   se o APK do site for mais novo, mostra "Nova versão" com Baixar. A versão vem de dentro do APK (publicar-apk.sh).
+   Sempre subir o "version" do app.json antes de gerar APK novo (1.2.0 desde 08/11)
 7. 🟡 Contas no app só com o Google (07/11): o app pede uma entrada ao servidor (api/google.php, acao=iniciar), abre
    /google/entrar.php no navegador, a pessoa entra no Google e /google/retorno.php grava a conta (nome, e-mail, foto);
    enquanto isso o app pergunta ao servidor a cada 1,5 s (acao=verificar, chave secreta só do app) e recebe a sessão.
