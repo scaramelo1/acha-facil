@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "707658320934",
+    "project_id": "acha-facil-e7bfd",
+    "storage_bucket": "acha-facil-e7bfd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:707658320934:android:195f509b180b71a03c6ae7",
+        "android_client_info": {
+          "package_name": "br.com.fsadesigner.achafacil"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiuqe3uHBfzlCrwap6odxmfNCCBxNORwk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
