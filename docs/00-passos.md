@@ -117,6 +117,10 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    ao botão que abre o Mercado Pago). Testado no sandbox (Destaque autorizado; Webhook com assinatura conferida).
    **Produção ligada em 08/11** (conta AGNESAMARILIS); testes apagados (pedidos 6-11, Destaque da academia I9).
    Falta: 1º pagamento real do Básico (Checkout sem conta) e devolver
+10d. ✅ Incluir negócio de graça (08/11, pedido do usuário): /incluir.php com os dados iniciais (nome, o que é, área,
+   cidade, endereço, bairro, telefone, WhatsApp, horário, Instagram) + nome e telefone de quem pede. O comércio entra
+   'pendente' e importado = 1; pedido tipo 'incluir' (mudança 012) avisa os admins; /admin/pedido.php publica ou recusa.
+   A busca e os planos sem comércio levam para a busca/inclusão (plano é sempre de um comércio do app)
 11. 🟡 Publicar nas lojas (Play Store e App Store): guia, textos e formulários em `docs/lojas.md`; app.json pronto
    para o iOS (07/11). Nome "Acha Fácil" não achado em nenhuma das duas. Faltam: contas de desenvolvedor, capturas de
    tela, builds de produção (.aab e iOS), teste fechado de 14 dias na Play (conta pessoal) e conta de demonstração (passo 7)

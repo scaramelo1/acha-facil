@@ -18,6 +18,12 @@ if (e_post()) {
     } elseif ($acao === 'novo_link' && $p && $pe['tipo'] === 'assumir' && $pe['status'] === 'feito') {
         $_SESSION['link_novo'] = [$id, liberar_acesso((int)$p['id'], $id, $pe['nome'], $pe['telefone'], (int)$admin['id'])];
         flash('Link novo gerado. Se o antigo não deve mais valer, corte-o na lista de acessos.');
+    } elseif ($acao === 'publicar' && $p && $pe['tipo'] === 'incluir') {
+        q("UPDATE profissionais SET status = 'ativo', geo_tentado = NULL WHERE id = ? AND status = 'pendente'", [$p['id']]);
+        q("UPDATE pedidos SET status = 'feito' WHERE id = ?", [$id]);
+        registrar((int)$admin['id'], 'incluiu', (int)$p['id'], 'pedido ' . $id);
+        flash($p['nome'] . ' já aparece no app.');
+        ir('admin/');
     } elseif ($acao === 'tirar' && $p && $pe['tipo'] === 'remover') {
         q("UPDATE profissionais SET status = 'pausado' WHERE id = ?", [$p['id']]);
         q("UPDATE pedidos SET status = 'feito' WHERE id = ?", [$id]);
@@ -31,6 +37,7 @@ if (e_post()) {
         ir('admin/');
     } elseif ($acao === 'recusar') {
         q("UPDATE pedidos SET status = 'recusado' WHERE id = ?", [$id]);
+        if ($p && $pe['tipo'] === 'incluir') q("UPDATE profissionais SET status = 'recusado' WHERE id = ? AND status = 'pendente'", [$p['id']]);
         registrar((int)$admin['id'], 'recusou_pedido', $p ? (int)$p['id'] : null, 'pedido ' . $id . ': ' . (txt('motivo', 300) ?? ''));
         flash('Pedido recusado.');
         ir('admin/');
@@ -62,13 +69,24 @@ admin_inicio('Pedido', $admin);
         . '<br>Telefone do cadastro: ' . h(telefone_formatado($p['telefone'] ?: $p['whatsapp'])) : '<em>Negócio novo (não está no app)</em>' ?></td></tr>
   <tr><th>Quem pediu</th><td><?= h($pe['nome']) ?> · <?= h(telefone_formatado($pe['telefone'])) ?><?= !empty($pe['email']) ? ' · ' . h($pe['email']) : '' ?></td></tr>
   <?php if ($pe['plano']): ?><tr><th>Plano</th><td><?= h(PLANOS_NOME[$pe['plano']] ?? $pe['plano']) ?><?= !empty($pe['mp_status']) ? ' · Mercado Pago: ' . h($pe['mp_status']) : '' ?></td></tr><?php endif ?>
+  <?php if ($pe['tipo'] === 'incluir' && $p): ?>
+    <tr><th>Dados enviados</th><td>
+      <strong><?= h($p['nome']) ?></strong> · <?= h($p['tipo'] ?? '') ?> · área <?= h((string)valor('SELECT nome FROM categorias WHERE id = ?', [$p['categoria_id']])) ?><br>
+      <?= h($p['endereco'] ?? '') ?><?= $p['bairro'] ? ' · ' . h($p['bairro']) : '' ?> · <?= h(nome_cidade($p['cidade'])) ?><br>
+      Telefone: <?= h(telefone_formatado($p['telefone']) ?: '-') ?> · WhatsApp: <?= h(telefone_formatado($p['whatsapp']) ?: '-') ?><br>
+      Horário: <?= h($p['horario'] ?? '-') ?><?= $p['instagram'] ? ' · Instagram @' . h($p['instagram']) : '' ?>
+    </td></tr>
+  <?php endif ?>
   <?php if ($pe['mensagem']): ?><tr><th>Mensagem</th><td><?= nl2br(h($pe['mensagem'])) ?></td></tr><?php endif ?>
   <tr><th>Quando</th><td><?= h(datahora_br($pe['criado_em'])) ?> · IP <?= h($pe['ip'] ?? '?') ?></td></tr>
 </table></div>
 
 <?php if ($pe['status'] === 'novo'): ?>
   <div class="quadro">
-    <?php if ($pe['tipo'] === 'assumir'): ?>
+    <?php if ($pe['tipo'] === 'incluir'): ?>
+      <strong>Antes de publicar:</strong> confira se o negócio existe (Google Maps, Instagram ou ligando no telefone dele) e se os
+      dados estão certos. Publicado, ele aparece no app como os da lista, sem plano.
+    <?php elseif ($pe['tipo'] === 'assumir'): ?>
       <strong>Antes de liberar:</strong> ligue ou chame no WhatsApp <em>pelo telefone que já está no cadastro do comércio</em>
       (não pelo que a pessoa digitou) e confirme que quem pediu é mesmo o responsável. Com o painel, o dono só
       <em>pede</em> mudanças; tudo continua passando por aqui.
@@ -81,6 +99,8 @@ admin_inicio('Pedido', $admin);
     <form method="post"><?= campo_csrf() ?><input type="hidden" name="id" value="<?= $id ?>">
       <?php if ($pe['tipo'] === 'assumir' && $p): ?>
         <button class="botao" name="acao" value="liberar">Confirmei: liberar o painel</button>
+      <?php elseif ($pe['tipo'] === 'incluir' && $p): ?>
+        <button class="botao" name="acao" value="publicar">Conferi: publicar no app</button>
       <?php elseif ($pe['tipo'] === 'remover' && $p): ?>
         <button class="botao" name="acao" value="tirar">Confirmei: tirar do app</button>
       <?php else: ?>

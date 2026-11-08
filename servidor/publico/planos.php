@@ -8,7 +8,8 @@ require __DIR__ . '/../inc/pagina.php';
 $id = (int)($_GET['id'] ?? 0);
 $p = $id ? linha('SELECT id, nome, tipo, endereco FROM profissionais WHERE id = ? AND status = \'ativo\'', [$id]) : null;
 $base = config()['url'];
-$pedir = fn(string $plano) => $base . '/perfil.php?acao=assumir&plano=' . $plano . ($p ? '&id=' . $p['id'] : '');
+// sem comércio escolhido, primeiro acha (ou inclui de graça) o negócio na busca; o plano é sempre de um comércio do app
+$pedir = fn(string $plano) => $p ? $base . '/perfil.php?acao=assumir&plano=' . $plano . '&id=' . $p['id'] : $base . '/busca.php';
 
 $planos = [
     'basico' => ['Básico', 'Seu perfil completo e certinho', [
@@ -31,6 +32,10 @@ pagina_inicio('Planos para o seu negócio · Acha Fácil!', 'Corrija os dados, c
 <main class="documento" style="max-width:960px">
   <h1>Planos para o seu negócio</h1>
   <p>Com um plano, você corrige os dados, coloca fotos e deixa seu comércio do jeito certo para toda a cidade ver.</p>
+  <?php if (!$p): ?>
+    <div class="quadro">Primeiro <a href="<?= $base ?>/busca.php">procure o seu negócio</a> e toque em "É meu: ver planos".
+      Ele ainda não está no app? <a href="<?= $base ?>/incluir.php">Inclua de graça</a>.</div>
+  <?php endif ?>
   <?php if ($p): ?>
     <div class="quadro"><strong><?= h($p['nome']) ?></strong><br><?= h($p['tipo'] ?? '') ?><?= $p['endereco'] ? ' · ' . h($p['endereco']) : '' ?></div>
   <?php endif ?>

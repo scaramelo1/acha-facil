@@ -73,6 +73,7 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
           <li>Coloque foto, descrição e o que você vende ou faz</li>
           <li>No Destaque: selo "Verificado pelo Acha Fácil", responder as avaliações e ver quantas pessoas abriram sua página</li>
         </ul>
+        <p class="discreto">Não está no app? <a href="<?= $base ?>/incluir.php">Inclua o seu negócio de graça</a>; a equipe confere antes de publicar.</p>
         <p class="discreto">Não quer aparecer? Procure o seu negócio e toque em "Tirar do app". Retiramos sem perguntas.</p>
       </div>
       <div class="caixa">

@@ -126,7 +126,7 @@ export interface AlteracaoPendente {
 }
 export interface PedidoNovo {
   id: number;
-  tipo: 'assumir' | 'remover';
+  tipo: 'assumir' | 'remover' | 'incluir';
   plano: string | null;
   pago: boolean;
   comercio: string | null;

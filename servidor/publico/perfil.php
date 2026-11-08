@@ -15,6 +15,7 @@ if ($acao === 'remover') $plano = null;
 $id = (int)($_GET['id'] ?? 0);
 $p = $id ? linha('SELECT p.id, p.nome, p.tipo, p.endereco FROM profissionais p WHERE p.id = ? AND p.importado = 1', [$id]) : null;
 if ($acao === 'remover' && !$p) ir('busca.php');
+if ($acao === 'assumir' && !$p) ir($plano ? 'busca.php' : 'incluir.php');   // negócio fora do app: incluir é de graça
 $enviado = false;
 $erro = null;
 $com_assinatura = $plano !== null && mp_pronto();

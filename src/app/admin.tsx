@@ -57,7 +57,7 @@ export default function TelaAdmin() {
             {dados.pedidos.map((p) => (
               <View key={p.id} style={estilos.cartao}>
                 <Text style={estilos.titulo}>
-                  {p.tipo === 'remover' ? 'Tirar do app' : 'Assumir o perfil'}
+                  {p.tipo === 'remover' ? 'Tirar do app' : p.tipo === 'incluir' ? 'Incluir negócio' : 'Assumir o perfil'}
                   {p.plano ? ` · plano ${p.plano}` : ''}
                   {p.pago ? ' · pago' : ''}
                 </Text>

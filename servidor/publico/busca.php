@@ -19,7 +19,7 @@ pagina_inicio('Procure seu negócio · Acha Fácil!', 'Ache o seu comércio no A
   </form>
   <?php if ($termo !== '' && !$achados): ?>
     <div class="aviso erro">Nada encontrado com "<?= h($termo) ?>". Tente uma parte do nome.</div>
-    <p>Seu negócio não está no app? <a href="<?= $base ?>/planos.php">Confira os planos</a> para incluir.</p>
+    <p>Seu negócio não está no app? <a class="botao amarelo" href="<?= $base ?>/incluir.php">Incluir de graça</a></p>
   <?php elseif ($achados): ?>
     <ul class="resultados">
       <?php foreach ($achados as $p): ?>
@@ -36,5 +36,6 @@ pagina_inicio('Procure seu negócio · Acha Fácil!', 'Ache o seu comércio no A
       <?php endforeach ?>
     </ul>
   <?php endif ?>
+  <p class="discreto">Não achou? <a href="<?= $base ?>/incluir.php">Inclua o seu negócio de graça</a>.</p>
 </main>
 <?php pagina_fim();

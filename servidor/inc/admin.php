@@ -40,4 +40,4 @@ function admin_fim(): void {
     echo "</main>\n</body>\n</html>\n";
 }
 
-const TIPO_PEDIDO = ['assumir' => 'Assumir o perfil', 'remover' => 'Tirar do app'];
+const TIPO_PEDIDO = ['assumir' => 'Assumir o perfil', 'remover' => 'Tirar do app', 'incluir' => 'Incluir negócio'];
