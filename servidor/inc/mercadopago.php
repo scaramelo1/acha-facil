@@ -13,6 +13,8 @@
 //      producao:  cobrança de verdade
 //   'mp_access_token' => 'APP_USR-...' (Mercado Pago Developers > Suas integrações > a aplicação > Credenciais)
 //   'mp_webhook_secret' => assinatura secreta dos avisos (Suas integrações > a aplicação > Webhooks)
+//   'mp_public_key' => 'APP_USR-...' (mesma página das credenciais): liga o formulário do cartão no próprio site para o
+//      Destaque, sem o dono precisar de conta no Mercado Pago (o cartão vai direto para o Mercado Pago, nunca ao servidor)
 declare(strict_types=1);
 require_once __DIR__ . '/base.php';
 require_once __DIR__ . '/guia.php';
@@ -24,6 +26,8 @@ function mp_pronto(): bool {
     static $ok = null;
     return $ok ??= (bool)valor("SELECT 1 FROM migracoes WHERE nome = '007-mercado-pago.sql'");
 }
+/** Public Key da aplicação (para o formulário do cartão no próprio site). Sem ela, o Destaque abre o Mercado Pago (pede conta). */
+function mp_public_key(): string { return trim((string)(config()['mp_public_key'] ?? '')); }
 function mp_token(): string { return trim((string)(config()['mp_access_token'] ?? '')); }
 function mp_modo(): string {
     $m = (string)(config()['mp_modo'] ?? 'desligado');
@@ -96,6 +100,46 @@ function mp_assinar(array $pedido): string {
     return (string)$a['init_point'];
 }
 
+/**
+ * Destaque com o cartão digitado no próprio site (Card Payment Brick): o navegador manda o cartão direto ao Mercado Pago e
+ * recebe um token de uso único; aqui a assinatura é criada já autorizada com esse token, sem o dono ter conta no Mercado Pago.
+ * Devolve o pedido atualizado; erro do Mercado Pago (cartão recusado etc.) sobe como exceção.
+ */
+function mp_assinar_cartao(array $pedido, array $form): array {
+    if (mp_modo() === 'desligado' || mp_public_key() === '') throw new RuntimeException('Pagamento com cartão no site desligado.');
+    $plano = (string)$pedido['plano'];
+    if (plano_unico($plano)) throw new RuntimeException('O Básico é pago pelo Checkout, não por assinatura.');
+    $valor = PLANOS_PRECO[$plano] ?? throw new RuntimeException('Plano inválido.');
+    $token = (string)($form['token'] ?? '');
+    if (!preg_match('/^[A-Za-z0-9_-]{8,100}$/', $token)) throw new RuntimeException('Token do cartão inválido.');
+    $email = email_valido((string)($form['payer']['email'] ?? '')) ?: email_valido((string)$pedido['email']);
+    if (!$email) throw new RuntimeException('E-mail inválido.');
+
+    $comercio = $pedido['profissional_id'] ? (string)valor('SELECT nome FROM profissionais WHERE id = ?', [$pedido['profissional_id']]) : '';
+    $a = mp_api('POST', '/preapproval', [
+        'reason' => mb_substr('Acha Fácil - Plano ' . PLANOS_NOME[$plano] . ($comercio !== '' ? ' - ' . $comercio : ''), 0, 250),
+        'external_reference' => 'pedido:' . $pedido['id'],
+        'payer_email' => $email,
+        'card_token_id' => $token,
+        'auto_recurring' => ['frequency' => 1, 'frequency_type' => 'months', 'transaction_amount' => $valor, 'currency_id' => 'BRL'],
+        'back_url' => url_publica('assinatura.php?c=' . $pedido['codigo']),
+        'status' => 'authorized',
+    ], ['X-Idempotency-Key: achafacil-cartao-' . $pedido['id'] . '-' . hash('sha256', $token)]);
+    if (empty($a['id'])) throw new RuntimeException('O Mercado Pago não devolveu a assinatura.');
+    // esta passa a ser a assinatura do pedido (uma tentativa antiga pelo Mercado Pago fica de lado)
+    q('UPDATE pedidos SET mp_assinatura = ?, mp_status = ?, valor = ?, atualizado_em = NOW() WHERE id = ?',
+        [$a['id'], ($a['status'] ?? '') === 'authorized' ? 'pending' : ($a['status'] ?? 'pending'), $valor, $pedido['id']]);
+    return mp_conferir_assinatura((string)$a['id']) ?? $pedido;
+}
+
+/** Mensagem para o dono a partir de um erro do Mercado Pago no pagamento. */
+function mp_erro_para_dono(Throwable $e): string {
+    $m = $e->getMessage();
+    if (str_contains($m, 'real or test users')) return 'No modo de teste, use um cartão de teste e o e-mail de uma conta de teste do Mercado Pago.';
+    if (str_contains($m, 'Mercado Pago respondeu 4')) return 'O cartão não foi aceito. Confira os dados ou use outro cartão de crédito.';
+    return 'Não foi possível falar com o Mercado Pago agora. Tente de novo em alguns minutos.';
+}
+
 /** Cria a cobrança única (Checkout do Mercado Pago) do plano Básico e devolve o endereço para o dono pagar. */
 function mp_pagar_unico(array $pedido): string {
     if (!mp_pronto_unico()) throw new RuntimeException('Falta aplicar a mudança 011 do banco (bash servidor/instalar.sh).');
@@ -109,7 +153,8 @@ function mp_pagar_unico(array $pedido): string {
             'title' => mb_substr('Acha Fácil - Plano ' . PLANOS_NOME[$plano] . ($comercio !== '' ? ' - ' . $comercio : ''), 0, 250),
             'quantity' => 1, 'unit_price' => $valor, 'currency_id' => 'BRL',
         ]],
-        'payer' => ['email' => $pedido['email']],
+        // no teste, e-mail real + credencial de teste dá erro no Mercado Pago; sem conta, a pessoa digita o e-mail lá
+        ...(mp_modo() === 'sandbox' ? [] : ['payer' => ['email' => $pedido['email']]]),
         'external_reference' => 'pedido:' . $pedido['id'],
         'back_urls' => ['success' => $volta, 'pending' => $volta, 'failure' => $volta],
         'auto_return' => 'approved',
