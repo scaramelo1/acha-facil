@@ -156,15 +156,16 @@ function mp_pagar_unico(array $pedido): string {
             'title' => mb_substr('Acha Fácil - Plano ' . PLANOS_NOME[$plano] . ($comercio !== '' ? ' - ' . $comercio : ''), 0, 250),
             'quantity' => 1, 'unit_price' => $valor, 'currency_id' => 'BRL',
         ]],
-        // no teste, e-mail real + credencial de teste dá erro no Mercado Pago; sem conta, a pessoa digita o e-mail lá
-        ...(mp_modo() === 'sandbox' ? [] : ['payer' => ['email' => $pedido['email']]]),
+        // no teste, o Mercado Pago exige comprador de teste (mesmo e-mail usado na assinatura do Destaque)
+        'payer' => ['email' => mp_modo() === 'sandbox' ? 'test_user_123456789@testuser.com' : $pedido['email']],
         'external_reference' => 'pedido:' . $pedido['id'],
         'back_urls' => ['success' => $volta, 'pending' => $volta, 'failure' => $volta],
         'auto_return' => 'approved',
         'notification_url' => url_publica('mp-webhook.php?source_news=webhooks'),
         'statement_descriptor' => 'ACHAFACIL',
     ], ['X-Idempotency-Key: achafacil-unico-' . $pedido['id'] . '-' . time()]);
-    $endereco = (string)(mp_modo() === 'sandbox' ? ($pref['sandbox_init_point'] ?? $pref['init_point'] ?? '') : ($pref['init_point'] ?? ''));
+    // sandbox_init_point só serve para token TEST-; com o token de um vendedor de teste (APP_USR-) é o init_point normal
+    $endereco = (string)(str_starts_with(mp_token(), 'TEST-') ? ($pref['sandbox_init_point'] ?? $pref['init_point'] ?? '') : ($pref['init_point'] ?? ''));
     if ($endereco === '') throw new RuntimeException('O Mercado Pago não devolveu o endereço do pagamento.');
     q('UPDATE pedidos SET valor = ?, mp_status = IF(mp_status IS NULL, ?, mp_status), atualizado_em = NOW() WHERE id = ?', [$valor, 'pending', $pedido['id']]);
     return $endereco;
