@@ -120,5 +120,5 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    com antes x depois, pedidos novos, cidades pedidas) e recebe aviso quando alguém **paga um plano**, **pede uma cidade**
    ou **manda alterações**; tocar no aviso abre a tela. Servidor: inc/avisos.php (Expo Push), api/avisos.php,
    api/admin.php, tabela avisos_aparelhos (mudança 010). App: src/avisos.ts, src/app/admin.tsx, pacotes expo-notifications
-   e expo-device. Falta: Firebase do Android (google-services.json na raiz + chave FCM V1 no EAS) e testar no APK;
+   e expo-device. Firebase: google-services.json no projeto (08/11, projeto acha-facil-e7bfd). Falta: chave FCM V1 no EAS e testar no APK;
    no iPhone, depois da conta Apple
