@@ -59,9 +59,9 @@ section.verde .intro { color: #cfe6d9; }
 .hero h1 { font-size: clamp(2.4rem, 6.5vw, 4.2rem); letter-spacing: -1.5px; color: var(--verde); }
 .hero h1 mark { background: var(--amarelo); color: var(--verde); padding: 0 .15em; border-radius: 12px; }
 .hero .lead { font-size: 1.3rem; color: var(--texto2); max-width: 36ch; margin: 0 0 24px; }
-.contador { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 28px; padding: 0; list-style: none; }
-.contador li { background: var(--branco); border: 2px solid var(--borda); border-radius: 18px; padding: 10px 16px; font-size: .95rem; color: var(--texto2); }
-.contador b { display: block; font-size: 1.6rem; color: var(--verde); line-height: 1.1; }
+.numeros { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 28px; padding: 0; list-style: none; }
+.numeros li { background: var(--branco); border: 2px solid var(--borda); border-radius: 18px; padding: 10px 16px; font-size: .95rem; color: var(--texto2); }
+.numeros b { display: block; font-size: 1.6rem; color: var(--verde); line-height: 1.1; }
 
 /* celular de enfeite no topo */
 .celular {

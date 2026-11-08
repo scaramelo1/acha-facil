@@ -22,7 +22,7 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
       <div>
         <h1>Tudo o que tem na <mark>sua cidade</mark>, num toque.</h1>
         <p class="lead">São João da Boa Vista e Águas da Prata (SP) e Poços de Caldas (MG). Restaurante, mercado, oficina, clínica, loja ou quem faz aquele conserto. Procure no Acha Fácil e chame no WhatsApp, ligue ou veja como chegar.</p>
-        <ul class="contador">
+        <ul class="numeros">
           <li><b><?= $num($total) ?></b> comércios e serviços</li>
           <li><b><?= count(CIDADES) ?></b> cidades</li>
         </ul>
