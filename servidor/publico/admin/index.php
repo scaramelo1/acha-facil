@@ -3,6 +3,17 @@
 require __DIR__ . '/../../inc/admin.php';
 $admin = exigir_admin();
 
+// apagar uma cidade da lista do "Quero minha Cidade!" (todos os pedidos dela)
+if (e_post() && ($_POST['acao'] ?? '') === 'apagar_cidade') {
+    exigir_post();
+    $cid = (string)($_POST['cidade'] ?? '');
+    $uf = (string)($_POST['uf'] ?? '');
+    $n = q('DELETE FROM cidades_pedidas WHERE LOWER(cidade) = LOWER(?) AND uf <=> ?', [$cid, $uf === '' ? null : $uf])->rowCount();
+    registrar((int)$admin['id'], 'apagou_cidade', null, "$cid" . ($uf ? " ($uf)" : '') . ": $n pedido(s)");
+    flash("$cid saiu da lista.");
+    ir('admin/');
+}
+
 $alteracoes = linhas("SELECT a.id, a.criado_em, a.novos, p.id AS pid, p.nome, p.cidade, d.nome AS dono
     FROM alteracoes a JOIN profissionais p ON p.id = a.profissional_id LEFT JOIN acessos_dono d ON d.id = a.acesso_id
     WHERE a.status = 'pendente' ORDER BY a.criado_em");
@@ -72,9 +83,13 @@ admin_inicio('Pendências', $admin);
 <h2>"Quero minha Cidade!" (<?= array_sum(array_column($cidades, 'total')) ?> pedidos)</h2>
 <?php if (!$cidades): ?><p class="discreto">Ninguém pediu ainda.</p><?php else: ?>
 <div class="tabela"><table>
-  <tr><th>Cidade</th><th>Estado</th><th>Pedidos</th><th>Último</th></tr>
+  <tr><th>Cidade</th><th>Estado</th><th>Pedidos</th><th>Último</th><th></th></tr>
   <?php foreach ($cidades as $c): ?>
-  <tr><td><?= h($c['cidade']) ?></td><td><?= h($c['uf'] ?? '-') ?></td><td><strong><?= (int)$c['total'] ?></strong></td><td><?= h(datahora_br($c['ultimo'])) ?></td></tr>
+  <tr><td><?= h($c['cidade']) ?></td><td><?= h($c['uf'] ?? '-') ?></td><td><strong><?= (int)$c['total'] ?></strong></td><td><?= h(datahora_br($c['ultimo'])) ?></td>
+    <td><form method="post" onsubmit="return confirm('Tirar <?= h(addslashes($c['cidade'])) ?> da lista?')"><?= campo_csrf() ?>
+      <input type="hidden" name="acao" value="apagar_cidade"><input type="hidden" name="cidade" value="<?= h($c['cidade']) ?>">
+      <input type="hidden" name="uf" value="<?= h($c['uf'] ?? '') ?>">
+      <button class="botao contorno" style="padding:6px 12px;font-size:14px">Excluir</button></form></td></tr>
   <?php endforeach ?>
 </table></div>
 <?php endif ?>

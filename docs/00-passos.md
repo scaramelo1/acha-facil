@@ -64,6 +64,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    São João. Se não há nada da cidade a até 15 km, o app avisa "Você não está em …" e mostra os conhecidos de lá
 4k. ✅ "Quero minha Cidade!" na tela de escolher a cidade (07/11): a pessoa digita a cidade e a sigla do estado
    (api/quero-cidade.php, tabela cidades_pedidas, mudança 009); a lista com o total por cidade fica no /admin
+   (08/11) Estado primeiro (27 siglas) e cidade com autocompletar da lista do IBGE (servidor/dados/municipios.json,
+   api/municipios.php); o servidor só aceita cidade da lista e grava o nome oficial. Admin exclui cidades da lista (site e app)
 4j. ✅ Visual novo pelas 3 imagens do modelo (07/11, v1.1.0): cabeçalho verde com a paisagem da cidade (morros e igreja
    amarela, `assets/ilustracoes/cabecalho.png`, desenhada por `paisagem.py`), "Acha Fácil!" com traço amarelo, cidade
    em pílula branca e busca amarela; abas com tracinho verde. Telas: Início (categorias, destaque, recomendados, perto,

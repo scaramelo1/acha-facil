@@ -3,7 +3,7 @@ import { Image } from 'expo-image';
 import { useFocusEffect } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useCallback, useState } from 'react';
-import { Alert, Linking, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { chamar, type AlteracaoPendente, type Pendencias } from '../api/cliente';
 import { Cabecalho } from '../componentes/Cabecalho';
@@ -88,6 +88,30 @@ export default function TelaAdmin() {
                   <Text style={estilos.sub}>Último pedido: {c.ultimo}</Text>
                 </View>
                 <Text style={estilos.total}>{c.total}</Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Excluir ${c.cidade} da lista`}
+                  hitSlop={10}
+                  onPress={() =>
+                    Alert.alert('Excluir da lista?', `Tirar ${c.cidade} da lista do Quero minha Cidade?`, [
+                      { text: 'Cancelar', style: 'cancel' },
+                      {
+                        text: 'Excluir',
+                        style: 'destructive',
+                        onPress: async () => {
+                          try {
+                            await chamar('admin.php', 'POST', { acao: 'apagar_cidade', cidade: c.cidade, uf: c.uf ?? '' });
+                            recarregar();
+                          } catch (e) {
+                            Alert.alert('Não deu certo', e instanceof Error ? e.message : 'Tente de novo.');
+                          }
+                        },
+                      },
+                    ])
+                  }
+                >
+                  <MaterialCommunityIcons name="trash-can-outline" size={26} color={cores.erro} />
+                </Pressable>
               </View>
             ))}
 

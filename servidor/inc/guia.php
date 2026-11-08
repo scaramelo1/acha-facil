@@ -234,3 +234,21 @@ function contar_contato(int $profissional_id, string $tipo): void {
     q('INSERT INTO contatos (profissional_id, tipo, dia, total) VALUES (?,?,CURDATE(),1) ON DUPLICATE KEY UPDATE total = total + 1',
         [$profissional_id, $tipo]);
 }
+
+// Municípios do Brasil (IBGE, dados/municipios.json: {estados: {UF: nome}, cidades: {UF: [nomes]}}) para o
+// "Quero minha Cidade!": o app escolhe o estado e a cidade sai desta lista (nada de nome inventado).
+function municipios(): array {
+    static $m = null;
+    return $m ??= json_decode((string)file_get_contents(__DIR__ . '/../dados/municipios.json'), true) ?: ['estados' => [], 'cidades' => []];
+}
+function sem_acento(string $s): string {
+    return mb_strtolower(strtr($s, ['á'=>'a','à'=>'a','â'=>'a','ã'=>'a','ä'=>'a','é'=>'e','ê'=>'e','è'=>'e','í'=>'i','ì'=>'i','î'=>'i',
+        'ó'=>'o','ô'=>'o','õ'=>'o','ò'=>'o','ú'=>'u','ü'=>'u','ù'=>'u','ç'=>'c','Á'=>'a','À'=>'a','Â'=>'a','Ã'=>'a','É'=>'e','Ê'=>'e',
+        'Í'=>'i','Ó'=>'o','Ô'=>'o','Õ'=>'o','Ú'=>'u','Ç'=>'c']));
+}
+/** Nome oficial da cidade daquele estado (sem ligar para acento e maiúscula), ou null se não existe. */
+function municipio_oficial(string $uf, string $nome): ?string {
+    $alvo = sem_acento(trim(preg_replace('/\s+/', ' ', $nome)));
+    foreach (municipios()['cidades'][$uf] ?? [] as $c) if (sem_acento($c) === $alvo) return $c;
+    return null;
+}

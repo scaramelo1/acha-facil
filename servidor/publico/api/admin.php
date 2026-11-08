@@ -2,6 +2,7 @@
 // Administração pelo app (só contas cujo e-mail está em admins).
 // GET: pendências (alterações dos donos com antes x depois, pedidos novos, cidades pedidas).
 // POST {acao: 'aprovar' | 'recusar', id, motivo}: decide uma alteração (as mesmas regras do /admin do site).
+// POST {acao: 'apagar_cidade', cidade, uf}: tira a cidade da lista do "Quero minha Cidade!".
 require __DIR__ . '/../../inc/api.php';
 require_once __DIR__ . '/../../inc/moderacao.php';
 require_once __DIR__ . '/../../inc/avisos.php';
@@ -9,6 +10,14 @@ $m = metodo('GET', 'POST');
 $u = exigir_usuario();
 $admin_id = admin_do_usuario($u) ?? erro('Só para administradores.', 403);
 
+if ($m === 'POST' && campo('acao', 20) === 'apagar_cidade') {
+    // tira uma cidade da lista do "Quero minha Cidade!" (todos os pedidos dela)
+    $cid = campo('cidade', 80);
+    $uf = campo('uf', 2);
+    $n = q('DELETE FROM cidades_pedidas WHERE LOWER(cidade) = LOWER(?) AND uf <=> ?', [$cid, $uf === '' ? null : $uf])->rowCount();
+    registrar($admin_id, 'apagou_cidade', null, "$cid" . ($uf !== '' ? " ($uf)" : '') . ": $n pedido(s)");
+    responder(['ok' => true]);
+}
 if ($m === 'POST') {
     $id = (int)(corpo()['id'] ?? 0);
     try {

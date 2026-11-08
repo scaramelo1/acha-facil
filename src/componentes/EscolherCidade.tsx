@@ -14,6 +14,9 @@ function simples(t: string) {
   return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
+/** Estados do Brasil, para o "Quero minha Cidade!". */
+const UFS = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
+
 /** Até quantos km do centro conta como "estar na cidade". */
 const RAIO_CIDADE_KM = 25;
 
@@ -111,20 +114,48 @@ export function EscolherCidade({
     }
   };
 
-  // "Quero minha Cidade!": pede o Acha Fácil na cidade da pessoa (fica na lista da administração)
+  // "Quero minha Cidade!": pede o Acha Fácil na cidade da pessoa (fica na lista da administração).
+  // Primeiro o estado (lista fixa); depois a cidade, escolhida na lista do IBGE daquele estado (api/municipios.php).
   const [quero, setQuero] = useState<'fechado' | 'aberto' | 'enviando' | 'enviado'>('fechado');
-  const [queroCidade, setQueroCidade] = useState('');
   const [queroUf, setQueroUf] = useState('');
+  const [queroCidade, setQueroCidade] = useState('');
+  const [queroEscolhida, setQueroEscolhida] = useState<string | null>(null);
+  const [listaUf, setListaUf] = useState<string[] | null>(null);
   const [queroErro, setQueroErro] = useState('');
+  const listas = useRef<Record<string, string[]>>({});
+  const escolherUf = async (uf: string) => {
+    setQueroUf(uf);
+    setQueroCidade('');
+    setQueroEscolhida(null);
+    setQueroErro('');
+    if (listas.current[uf]) return setListaUf(listas.current[uf]);
+    setListaUf(null);
+    try {
+      const r = await chamar<{ cidades: string[] }>(`municipios.php?uf=${uf}`);
+      listas.current[uf] = r.cidades;
+      setListaUf(r.cidades);
+    } catch (e) {
+      setQueroErro(e instanceof Error ? e.message : 'Não foi possível carregar as cidades.');
+    }
+  };
+  const digitarCidade = (texto: string) => {
+    setQueroCidade(texto);
+    // digitou o nome inteiro (sem ligar para acento): já vale como escolhida
+    const igual = (listaUf ?? []).find((c) => simples(c) === simples(texto.trim()));
+    setQueroEscolhida(igual ?? null);
+  };
+  const tq = simples(queroCidade.trim());
+  const sugestoes =
+    listaUf && tq.length >= 1 && !queroEscolhida
+      ? [...listaUf.filter((c) => simples(c).startsWith(tq)), ...listaUf.filter((c) => !simples(c).startsWith(tq) && simples(c).includes(tq))].slice(0, 6)
+      : [];
   const enviarQuero = async () => {
-    const cidade = queroCidade.trim();
-    const uf = queroUf.trim().toUpperCase();
-    if (cidade.length < 2) return setQueroErro('Digite o nome da sua cidade.');
-    if (uf !== '' && !/^[A-Z]{2}$/.test(uf)) return setQueroErro('Estado: só a sigla, como SP ou MG.');
+    if (!queroUf) return setQueroErro('Escolha o estado.');
+    if (!queroEscolhida) return setQueroErro('Escolha a cidade na lista.');
     setQueroErro('');
     setQuero('enviando');
     try {
-      await chamar('quero-cidade.php', 'POST', { cidade, uf });
+      await chamar('quero-cidade.php', 'POST', { cidade: queroEscolhida, uf: queroUf });
       setQuero('enviado');
     } catch (e) {
       setQueroErro(e instanceof Error ? e.message : 'Não foi possível enviar. Tente de novo.');
@@ -236,15 +267,15 @@ export function EscolherCidade({
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 <MaterialCommunityIcons name="check-circle" size={30} color={cores.verde} />
                 <Text style={[estilos.avisoTexto, { flex: 1 }]}>
-                  Pedido anotado! Quanto mais gente pedir {queroCidade.trim()}, mais rápido o Acha Fácil chega aí.
+                  Pedido anotado! Quanto mais gente pedir {queroEscolhida}, mais rápido o Acha Fácil chega aí.
                 </Text>
               </View>
             ) : quero === 'fechado' ? (
               <>
                 <Text style={estilos.queroTitulo}>Sua cidade não está aqui?</Text>
                 <Botao titulo="Quero minha Cidade!" icone="map-marker-plus" tipo="principal" onPress={() => {
-                    if (queroCidade === '' && termo.trim() !== '') setQueroCidade(termo.trim());
                     setQuero('aberto');
+                    if (!queroUf) escolherUf(estado);   // começa no estado que a pessoa está olhando
                   }}
                   estilo={{ marginTop: 10 }}
                 />
@@ -253,14 +284,66 @@ export function EscolherCidade({
               <>
                 <Text style={estilos.queroTitulo}>Quero minha Cidade!</Text>
                 <Text style={[estilos.avisoTexto, { marginTop: 4, marginBottom: 10 }]}>Conte onde você mora. As cidades mais pedidas entram primeiro.</Text>
-                <Campo icone="city-variant-outline" placeholder="Nome da cidade" value={queroCidade} onChangeText={setQueroCidade} maxLength={80} autoCapitalize="words" />
-                <View style={{ height: 10 }} />
-                <Campo icone="map-outline" placeholder="Estado (ex.: SP)" value={queroUf} onChangeText={setQueroUf} maxLength={2} autoCapitalize="characters" autoCorrect={false} />
+                <Text style={estilos.queroRotulo}>1. Estado</Text>
+                <View style={estilos.ufs}>
+                  {UFS.map((uf) => (
+                    <Pressable
+                      key={uf}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: queroUf === uf }}
+                      onPress={() => escolherUf(uf)}
+                      style={[estilos.uf, queroUf === uf && estilos.ufMarcado]}
+                    >
+                      <Text style={[estilos.ufTexto, queroUf === uf && { color: '#fff' }]}>{uf}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+                {queroUf !== '' && (
+                  <>
+                    <Text style={estilos.queroRotulo}>2. Cidade</Text>
+                    {listaUf === null && queroErro === '' ? (
+                      <ActivityIndicator color={cores.verde} style={{ marginVertical: 10 }} />
+                    ) : (
+                      <Campo
+                        icone="city-variant-outline"
+                        placeholder={`Digite a cidade (${queroUf})`}
+                        value={queroCidade}
+                        onChangeText={digitarCidade}
+                        maxLength={80}
+                        autoCapitalize="words"
+                        autoCorrect={false}
+                      />
+                    )}
+                    {queroEscolhida && (
+                      <Text style={estilos.queroOk}>
+                        <MaterialCommunityIcons name="check-circle" size={18} color={cores.verde} /> {queroEscolhida} - {queroUf}
+                      </Text>
+                    )}
+                    {sugestoes.map((c) => (
+                      <Pressable
+                        key={c}
+                        accessibilityRole="button"
+                        onPress={() => {
+                          setQueroCidade(c);
+                          setQueroEscolhida(c);
+                          setQueroErro('');
+                        }}
+                        style={estilos.sugestao}
+                      >
+                        <MaterialCommunityIcons name="map-marker-outline" size={22} color={cores.verde} />
+                        <Text style={estilos.sugestaoTexto}>{c}</Text>
+                      </Pressable>
+                    ))}
+                    {listaUf && tq.length >= 2 && !queroEscolhida && sugestoes.length === 0 && (
+                      <Text style={estilos.avisoTexto}>Nenhuma cidade de {queroUf} com esse nome.</Text>
+                    )}
+                  </>
+                )}
                 {queroErro !== '' && <Text style={estilos.queroErro}>{queroErro}</Text>}
                 <Botao
                   titulo={quero === 'enviando' ? 'Enviando...' : 'Enviar pedido'}
                   icone="send"
-                  desativado={quero === 'enviando'}
+                  desativado={quero === 'enviando' || !queroEscolhida}
                   onPress={enviarQuero}
                   estilo={{ marginTop: 12 }}
                 />
@@ -289,6 +372,14 @@ const estilos = StyleSheet.create({
   quero: { ...cartao, padding: 16, marginTop: 18, borderWidth: 2, borderColor: cores.amarelo, backgroundColor: cores.cartao },
   queroTitulo: { fontSize: fonte.grande, fontWeight: '900', color: cores.verde },
   queroErro: { fontSize: fonte.pequena, color: cores.erro, marginTop: 8, fontWeight: '700' },
+  queroRotulo: { fontSize: fonte.pequena, fontWeight: '900', color: cores.texto, marginTop: 6, marginBottom: 8 },
+  queroOk: { fontSize: fonte.pequena, fontWeight: '800', color: cores.verde, marginTop: 8 },
+  ufs: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 },
+  uf: { minWidth: 46, paddingVertical: 8, paddingHorizontal: 6, borderRadius: 10, borderWidth: 1.5, borderColor: cores.borda, backgroundColor: cores.cartao, alignItems: 'center' },
+  ufMarcado: { backgroundColor: cores.verde, borderColor: cores.verde },
+  ufTexto: { fontSize: 15, fontWeight: '800', color: cores.texto },
+  sugestao: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 48, paddingHorizontal: 12, borderBottomWidth: 1, borderColor: cores.borda },
+  sugestaoTexto: { fontSize: fonte.normal - 1, color: cores.texto, flex: 1 },
   vazio: { fontSize: fonte.normal, color: cores.textoSuave, textAlign: 'center', marginTop: 16 },
   rodape: { paddingHorizontal: 16, paddingTop: 12, borderTopWidth: 1, borderColor: cores.borda, backgroundColor: cores.cartao },
 });
