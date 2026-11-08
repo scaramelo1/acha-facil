@@ -114,6 +114,8 @@ function mp_assinar_cartao(array $pedido, array $form): array {
     if (!preg_match('/^[A-Za-z0-9_-]{8,100}$/', $token)) throw new RuntimeException('Token do cartão inválido.');
     $email = email_valido((string)($form['payer']['email'] ?? '')) ?: email_valido((string)$pedido['email']);
     if (!$email) throw new RuntimeException('E-mail inválido.');
+    // no teste, o vendedor é uma conta de teste e o Mercado Pago exige comprador de teste: usa um e-mail @testuser.com
+    if (mp_modo() === 'sandbox') $email = 'test_user_' . (100000000 + (int)$pedido['id']) . '@testuser.com';
 
     $comercio = $pedido['profissional_id'] ? (string)valor('SELECT nome FROM profissionais WHERE id = ?', [$pedido['profissional_id']]) : '';
     $a = mp_api('POST', '/preapproval', [
@@ -135,7 +137,7 @@ function mp_assinar_cartao(array $pedido, array $form): array {
 /** Mensagem para o dono a partir de um erro do Mercado Pago no pagamento. */
 function mp_erro_para_dono(Throwable $e): string {
     $m = $e->getMessage();
-    if (str_contains($m, 'real or test users')) return 'No modo de teste, use um cartão de teste e o e-mail de uma conta de teste do Mercado Pago.';
+    if (str_contains($m, 'real or test users')) return 'Credencial de teste com comprador real (ou o contrário): confira o mp_modo e as chaves do Mercado Pago.';
     if (str_contains($m, 'Mercado Pago respondeu 4')) return 'O cartão não foi aceito. Confira os dados ou use outro cartão de crédito.';
     return 'Não foi possível falar com o Mercado Pago agora. Tente de novo em alguns minutos.';
 }
