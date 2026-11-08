@@ -286,9 +286,16 @@ function mp_aviso_valido(string $data_id): bool {
         [$k, $v] = array_pad(explode('=', trim($par), 2), 2, '');
         $partes[$k] = $v;
     }
-    if (empty($partes['ts']) || empty($partes['v1'])) return false;
+    if (empty($partes['ts']) || empty($partes['v1'])) {
+        error_log('acha-facil mp-webhook: aviso sem cabeçalho x-signature (ts/v1)');
+        return false;
+    }
     $manifesto = 'id:' . strtolower($data_id) . ';request-id:' . ($_SERVER['HTTP_X_REQUEST_ID'] ?? '') . ';ts:' . $partes['ts'] . ';';
-    return hash_equals(hash_hmac('sha256', $manifesto, $segredo), $partes['v1']);
+    if (hash_equals(hash_hmac('sha256', $manifesto, $segredo), $partes['v1'])) return true;
+    // diagnóstico sem expor o segredo: tamanho e as 4 primeiras letras do hash dele
+    error_log('acha-facil mp-webhook: assinatura não bate (request-id ' . (($_SERVER['HTTP_X_REQUEST_ID'] ?? '') !== '' ? 'presente' : 'AUSENTE')
+        . ', data.id ' . $data_id . ', segredo com ' . strlen($segredo) . ' caracteres, hash ' . substr(hash('sha256', $segredo), 0, 4) . ')');
+    return false;
 }
 
 function mp_status_nome(?string $s): string {
