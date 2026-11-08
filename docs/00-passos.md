@@ -114,7 +114,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 10c. 🟡 Sem conta no Mercado Pago (08/11, pedido do usuário): Básico pelo Checkout Pro (cartão, Pix ou boleto como
    convidado); Destaque com o cartão digitado na própria assinatura.php (Card Payment Brick; token -> /preapproval já
    autorizado, mp_assinar_cartao) e botão de cancelar na mesma página. Liga com `mp_public_key` no config (sem ela, volta
-   ao botão que abre o Mercado Pago). Falta: pôr a Public Key e testar com cartão de teste
+   ao botão que abre o Mercado Pago). Testado no sandbox (Destaque autorizado; Webhook com assinatura conferida).
+   **Produção ligada em 08/11** (conta AGNESAMARILIS); testes apagados (pedidos 6-11, Destaque da academia I9).
+   Falta: 1º pagamento real do Básico (Checkout sem conta) e devolver
 11. 🟡 Publicar nas lojas (Play Store e App Store): guia, textos e formulários em `docs/lojas.md`; app.json pronto
    para o iOS (07/11). Nome "Acha Fácil" não achado em nenhuma das duas. Faltam: contas de desenvolvedor, capturas de
    tela, builds de produção (.aab e iOS), teste fechado de 14 dias na Play (conta pessoal) e conta de demonstração (passo 7)
