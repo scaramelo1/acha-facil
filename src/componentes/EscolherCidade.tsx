@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { chamar, type Cidade, type Estado } from '../api/cliente';
@@ -15,7 +15,14 @@ function simples(t: string) {
 }
 
 /** Estados do Brasil, para o "Quero minha Cidade!". */
-const UFS = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
+const UFS: [string, string][] = [
+  ['AC', 'Acre'], ['AL', 'Alagoas'], ['AP', 'Amapá'], ['AM', 'Amazonas'], ['BA', 'Bahia'], ['CE', 'Ceará'],
+  ['DF', 'Distrito Federal'], ['ES', 'Espírito Santo'], ['GO', 'Goiás'], ['MA', 'Maranhão'], ['MT', 'Mato Grosso'],
+  ['MS', 'Mato Grosso do Sul'], ['MG', 'Minas Gerais'], ['PA', 'Pará'], ['PB', 'Paraíba'], ['PR', 'Paraná'],
+  ['PE', 'Pernambuco'], ['PI', 'Piauí'], ['RJ', 'Rio de Janeiro'], ['RN', 'Rio Grande do Norte'],
+  ['RS', 'Rio Grande do Sul'], ['RO', 'Rondônia'], ['RR', 'Roraima'], ['SC', 'Santa Catarina'], ['SP', 'São Paulo'],
+  ['SE', 'Sergipe'], ['TO', 'Tocantins'],
+];
 
 /** Até quantos km do centro conta como "estar na cidade". */
 const RAIO_CIDADE_KM = 25;
@@ -122,6 +129,7 @@ export function EscolherCidade({
   const [queroEscolhida, setQueroEscolhida] = useState<string | null>(null);
   const [listaUf, setListaUf] = useState<string[] | null>(null);
   const [queroErro, setQueroErro] = useState('');
+  const [listaEstados, setListaEstados] = useState(false);
   const listas = useRef<Record<string, string[]>>({});
   const escolherUf = async (uf: string) => {
     setQueroUf(uf);
@@ -285,19 +293,42 @@ export function EscolherCidade({
                 <Text style={estilos.queroTitulo}>Quero minha Cidade!</Text>
                 <Text style={[estilos.avisoTexto, { marginTop: 4, marginBottom: 10 }]}>Conte onde você mora. As cidades mais pedidas entram primeiro.</Text>
                 <Text style={estilos.queroRotulo}>1. Estado</Text>
-                <View style={estilos.ufs}>
-                  {UFS.map((uf) => (
-                    <Pressable
-                      key={uf}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: queroUf === uf }}
-                      onPress={() => escolherUf(uf)}
-                      style={[estilos.uf, queroUf === uf && estilos.ufMarcado]}
-                    >
-                      <Text style={[estilos.ufTexto, queroUf === uf && { color: '#fff' }]}>{uf}</Text>
-                    </Pressable>
-                  ))}
-                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Estado: ${queroUf ? (UFS.find((u) => u[0] === queroUf)?.[1] ?? queroUf) : 'escolha'}`}
+                  onPress={() => setListaEstados(true)}
+                  style={estilos.select}
+                >
+                  <MaterialCommunityIcons name="map-outline" size={24} color={cores.textoSuave} />
+                  <Text style={[estilos.selectTexto, !queroUf && { color: cores.textoSuave }]}>
+                    {queroUf ? `${UFS.find((u) => u[0] === queroUf)?.[1] ?? queroUf} (${queroUf})` : 'Escolha o estado'}
+                  </Text>
+                  <MaterialCommunityIcons name="chevron-down" size={28} color={cores.verde} />
+                </Pressable>
+                <Modal visible={listaEstados} transparent animationType="fade" onRequestClose={() => setListaEstados(false)} statusBarTranslucent>
+                  <Pressable style={estilos.modalFundo} onPress={() => setListaEstados(false)}>
+                    <View style={estilos.modalCaixa}>
+                      <Text style={estilos.modalTitulo}>Escolha o estado</Text>
+                      <ScrollView>
+                        {UFS.map(([uf, nome]) => (
+                          <Pressable
+                            key={uf}
+                            accessibilityRole="button"
+                            accessibilityState={{ selected: queroUf === uf }}
+                            onPress={() => {
+                              setListaEstados(false);
+                              escolherUf(uf);
+                            }}
+                            style={[estilos.opcao, queroUf === uf && { backgroundColor: cores.verdeClaro }]}
+                          >
+                            <Text style={[estilos.opcaoTexto, queroUf === uf && { color: cores.verde, fontWeight: '900' }]}>{nome}</Text>
+                            <Text style={estilos.opcaoUf}>{uf}</Text>
+                          </Pressable>
+                        ))}
+                      </ScrollView>
+                    </View>
+                  </Pressable>
+                </Modal>
                 {queroUf !== '' && (
                   <>
                     <Text style={estilos.queroRotulo}>2. Cidade</Text>
@@ -374,10 +405,14 @@ const estilos = StyleSheet.create({
   queroErro: { fontSize: fonte.pequena, color: cores.erro, marginTop: 8, fontWeight: '700' },
   queroRotulo: { fontSize: fonte.pequena, fontWeight: '900', color: cores.texto, marginTop: 6, marginBottom: 8 },
   queroOk: { fontSize: fonte.pequena, fontWeight: '800', color: cores.verde, marginTop: 8 },
-  ufs: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 },
-  uf: { minWidth: 46, paddingVertical: 8, paddingHorizontal: 6, borderRadius: 10, borderWidth: 1.5, borderColor: cores.borda, backgroundColor: cores.cartao, alignItems: 'center' },
-  ufMarcado: { backgroundColor: cores.verde, borderColor: cores.verde },
-  ufTexto: { fontSize: 15, fontWeight: '800', color: cores.texto },
+  select: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 56, paddingHorizontal: 14, borderRadius: 14, borderWidth: 1.5, borderColor: cores.borda, backgroundColor: cores.cartao, marginBottom: 8 },
+  selectTexto: { flex: 1, fontSize: fonte.normal, fontWeight: '700', color: cores.texto },
+  modalFundo: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', padding: 24 },
+  modalCaixa: { ...cartao, maxHeight: '80%', paddingVertical: 12 },
+  modalTitulo: { fontSize: fonte.grande, fontWeight: '900', color: cores.verde, paddingHorizontal: 18, paddingBottom: 8 },
+  opcao: { flexDirection: 'row', alignItems: 'center', minHeight: 52, paddingHorizontal: 18, borderTopWidth: 1, borderColor: cores.borda },
+  opcaoTexto: { flex: 1, fontSize: fonte.normal, color: cores.texto },
+  opcaoUf: { fontSize: 15, fontWeight: '800', color: cores.textoSuave },
   sugestao: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 48, paddingHorizontal: 12, borderBottomWidth: 1, borderColor: cores.borda },
   sugestaoTexto: { fontSize: fonte.normal - 1, color: cores.texto, flex: 1 },
   vazio: { fontSize: fonte.normal, color: cores.textoSuave, textAlign: 'center', marginTop: 16 },
