@@ -26,7 +26,12 @@ if (($volta !== '' || $volta_pg !== '') && mp_modo() !== 'desligado') {
 if (e_post()) {
     exigir_post();
     try { header('Location: ' . mp_assinar($pedido)); exit; }
-    catch (Throwable $e) { error_log('acha-facil assinar: ' . $e->getMessage()); $erro = 'Não foi possível abrir o Mercado Pago agora. Tente de novo em alguns minutos.'; }
+    catch (Throwable $e) {
+        error_log('acha-facil assinar: ' . $e->getMessage());
+        $erro = str_contains($e->getMessage(), 'real or test users')
+            ? 'No modo de teste, o e-mail do pedido precisa ser o de uma conta de teste (comprador) do Mercado Pago. Faça um pedido novo com esse e-mail.'
+            : 'Não foi possível abrir o Mercado Pago agora. Tente de novo em alguns minutos.';
+    }
 }
 
 $p = $pedido['profissional_id'] ? linha('SELECT nome, tipo, endereco, assinatura_ate FROM profissionais WHERE id = ?', [$pedido['profissional_id']]) : null;
@@ -47,7 +52,7 @@ pagina_inicio('Plano ' . PLANOS_NOME[$plano] . ' · Acha Fácil!', 'Pagamento do
   <?php else: ?>
     <p class="valor"><strong><?= h(preco_plano($plano)) ?> por mês</strong>, cobrado todo mês no cartão pelo Mercado Pago. Cancele quando quiser.</p>
   <?php endif ?>
-  <?php if ($modo === 'sandbox'): ?><div class="aviso erro">Modo de teste: nada é cobrado de verdade.</div><?php endif ?>
+  <?php if ($modo === 'sandbox'): ?><div class="aviso erro">Modo de teste: nada é cobrado de verdade. Use o e-mail e o login de uma conta de teste (comprador) do Mercado Pago.</div><?php endif ?>
   <?php if ($erro): ?><div class="aviso erro"><?= h($erro) ?></div><?php endif ?>
 
   <?php if ($pago && $unico): ?>
