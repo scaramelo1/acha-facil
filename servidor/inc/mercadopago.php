@@ -115,7 +115,8 @@ function mp_assinar_cartao(array $pedido, array $form): array {
     $email = email_valido((string)($form['payer']['email'] ?? '')) ?: email_valido((string)$pedido['email']);
     if (!$email) throw new RuntimeException('E-mail inválido.');
     // no teste, o vendedor é uma conta de teste e o Mercado Pago exige comprador de teste: usa um e-mail @testuser.com
-    if (mp_modo() === 'sandbox') $email = 'test_user_' . (100000000 + (int)$pedido['id']) . '@testuser.com';
+    // (alguns e-mails inventados o Mercado Pago recusa com "User bad request"; este foi conferido em 08/11)
+    if (mp_modo() === 'sandbox') $email = 'test_user_123456789@testuser.com';
 
     $comercio = $pedido['profissional_id'] ? (string)valor('SELECT nome FROM profissionais WHERE id = ?', [$pedido['profissional_id']]) : '';
     $a = mp_api('POST', '/preapproval', [
