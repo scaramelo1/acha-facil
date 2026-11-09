@@ -79,6 +79,9 @@ continua).
 
 - Ícone: `assets/icon.png` (1024×1024); o de 512×512 da Play já está em `assets/loja/icone-512.png`
 - Recurso gráfico (destaque) 1024×500: `assets/loja/destaque-1024x500.png`
+- Capturas prontas em `assets/loja/capturas/` (celular 1080×1920, tablet 7" 1080×1920, tablet 10" 1440×2560): Início,
+  Categorias, Perto de você e Comércio. Desenhadas por `assets/loja/telas.py` com as medidas do app e dados reais da API;
+  o comércio da 4ª (Pizzaria Bella Massa, avaliações) é ilustrativo. Quando o app mudar, refazer (ou trocar por prints do emulador)
 - Play Store: 2 a 8 capturas de celular (ex.: 1080×1920) + **imagem de destaque 1024×500**
 - App Store: capturas de **iPhone 6,9"** (1320×2868 ou 1290×2796); como `supportsTablet` está ligado, também **iPad 13"** (2064×2752). Se não quiser fazer as do iPad, desligar `supportsTablet` no app.json
 - Telas sugeridas: Início, Categorias, comércio com botão do WhatsApp, Perto de você, Busca com filtros
