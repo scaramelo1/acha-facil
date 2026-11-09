@@ -1,7 +1,7 @@
 <?php
 // Importa (ou atualiza) os comércios de uma lista de leads para o Acha Fácil. Rodar na VPS como root:
 //   php servidor/importar-leads.php [arquivo leads.html] [cidade]
-//   cidade: sao-joao (padrão), aguas-da-prata, pocos-de-caldas ou vargem-grande-do-sul. Ex.: php servidor/importar-leads.php /var/lib/acha-facil/leads/aguas-da-prata.html aguas-da-prata
+//   cidade: sao-joao (padrão), aguas-da-prata, pocos-de-caldas, vargem-grande-do-sul ou aguai. Ex.: php servidor/importar-leads.php /var/lib/acha-facil/leads/aguas-da-prata.html aguas-da-prata
 // Padrão: a lista de São João publicada em fsadesigners.com.br/leads/. Linhas cujo endereço é de outra cidade atendida
 // vão para aquela cidade. Listas sem área (data-seg) usam a área mais comum do mesmo tipo de negócio já cadastrado. Pode rodar de novo sempre que a lista mudar:
 // atualiza quem já veio dos leads (pelo nome) e não mexe em quem assumiu o perfil nem em quem foi removido.
@@ -56,11 +56,31 @@ const PALAVRAS_AREA = [
     '/animais|pet\b|veterin/iu' => 'pet',
     '/nutr|m[ée]dic|cl[íi]nica|odont|dentista|psic/iu' => 'saude',
     '/mercad|mercearia|hortifr|a[çc]ougue|bebidas/iu' => 'mercados',
+    // nomes longos do Google (listas como a de Aguaí)
+    '/gastropub|petiscaria|lanchon|\bbar\b|beer|tabacaria|lounge bar|panificadora|caf[ée]|torrefa|pra[çc]a de alimenta|churros|cachorro|padaria|doce|confeit/iu' => 'alimentacao',
+    '/atacadista|especiarias|distribuidora|empório|emporio/iu' => 'mercados',
+    '/cirurgi|hospital|pronto atendimento|primeiros socorros|psican|terapeut|pod[óo]log|depend[êe]ncia|sa[úu]de|farm[áa]cia|drogaria/iu' => 'saude',
+    '/depila|bronzeamento|piercing|tatua|tattoo|barber|make\b|sal[ãa]o/iu' => 'beleza',
+    '/yoga|nata[çc][ãa]o|artes marciais|personal trainer|academia|clube/iu' => 'esporte',
+    '/aulas|escola|col[ée]gio|preparat|curso/iu' => 'educacao',
+    '/f[áa]brica|fabricante|biotecnologia|finalista de metais|serraria|ferro-velho|ind[úu]stria/iu' => 'industria',
+    '/mec[âa]nic|automotiv|autom[óo]ve|troca de [óo]leo|radiador|caminh[ãa]o|motos|tratores|auto ?pe[çc]as|pneu/iu' => 'veiculos',
+    '/concreteira|terraplenagem|ca[çc]amba|entulho|tijolo|toldo|ar[- ]condicionado|constru[çc]|manuten[çc][ãa]o predial|instala[çc][ãa]o el[ée]trica|tape[çc]aria|decora|forro|energia solar|arquitet|engenh|topografia|viveiro|orquid|guindaste|im[óo]ve/iu' => 'casa',
+    '/fazenda|agr[íi]col|agro|ra[çc][ãa]o|coop|fertilizante|peixes|s[íi]tio|ch[áa]cara/iu' => 'pet',
+    '/pousada|casa de campo|temporada|cinema|hotel|eventos|festas/iu' => 'hospedagem',
+    '/igreja|templo|organiza[çc][ãa]o|ado[çc][ãa]o|associa[çc]|par[óo]quia/iu' => 'entidades',
+    '/advog|tabeli|gr[áa]fica|despachante|cart[óo]rio|fotogra|v[íi]deo|webdesign|computador|conserto|limpeza|fantasias|recursos humanos|empregos|empresarial|consultor|assistente social|toner|videogame/iu' => 'servicos',
+    '/loja|revistaria|fornecedor|com[ée]rcio|variedades|presentes|shopping|cell|celulares|embal/iu' => 'lojas',
 ];
+// lugares públicos que vêm nas listas do Google e não são comércio (não entram no app)
+const NAO_COMERCIO = '/^(ponto de [ôo]nibus|esta[çc][ãa]o de [ôo]nibus|esta[çc][ãa]o de (tratamento|pesagem).*|subesta[çc][ãa]o.*|esta[çc][ãa]o ferrovi[áa]ria.*|infraestrutura de transporte|companhia ferrovi[áa]ria|parque|parque (esportivo|rural)|playground|trilha.*|jardim|[áa]rea de (recrea[çc][ãa]o|escrit[óo]rios)|campo de futebol|est[áa]dio.*|gin[áa]sio poliesportivo|quadra de esportes|prefeitura|reparti[çc][ãa]o p[úu]blica|prestador de servi[çc]os p[úu]blicos|delegacia.*|pol[íi]cia.*|bombeiros|tribunal.*|departamento de tr[âa]nsito|centro m[ée]dico p[úu]blico|escola p[úu]blica|universidade p[úu]blica|cemit[ée]rio|complexo (habitacional|de condom[íi]nio|de apartamentos)|apartamentos|desenvolvimento de moradias|sociedade de servi[çc]os habitacionais)$/iu';
+// linha sem tipo cujo nome é só bairro ou endereço (vem nas buscas do Google por região)
+const SO_LUGAR = '/^(centro$|cidade nova$|santa maria$|vila \\S|jardim \\S|parque \\S|condom[íi]nio|r\\.\\s|rua\\s|av\\.?\\s|avenida\\s|esta[çc][ãa]o)/iu';
 // cidade pelo endereço ("..., Águas da Prata - SP")
 function cidade_do_endereco(string $e, string $padrao): string {
-    foreach (CIDADES as $slug => [$nome]) if (mb_stripos($e, $nome) !== false) return $slug;
-    return $padrao;
+    $achada = $padrao; $pos = -1;   // a que aparece por último ("..., Cidade - UF, CEP"); o começo pode citar outra cidade
+    foreach (CIDADES as $slug => [$nome]) if (($p = mb_strripos($e, $nome)) !== false && $p > $pos) { $achada = $slug; $pos = $p; }
+    return $achada;
 }
 
 function limpo(string $s): string { return trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags($s), ENT_QUOTES | ENT_HTML5, 'UTF-8'))); }
@@ -71,7 +91,7 @@ function chave(string $nome): string {
 }
 // "Rua X, 410 - Jardim São Paulo, São João da Boa Vista - SP, 13875-089, Brasil" → ["Rua X, 410", "Jardim São Paulo"]
 function endereco_e_bairro(string $e): array {
-    $e = preg_replace('/,?\s*(S[ãa]o Jo[ãa]o da Boa Vista|[ÁA]guas da Prata|Po[çc]os de Caldas|Vargem Grande do Sul)\b.*$/iu', '', $e);
+    $e = preg_replace('/,?\s*(S[ãa]o Jo[ãa]o da Boa Vista|[ÁA]guas da Prata|Po[çc]os de Caldas|Vargem Grande do Sul|Agua[íi])\b.*$/iu', '', $e);
     $e = trim(preg_replace('/,?\s*\d{5}-?\d{3}.*$/', '', $e), " ,-");
     $endereco = null; $bairro = null;
     foreach (array_map('trim', explode(' - ', $e)) as $parte) {
@@ -91,7 +111,7 @@ function normalizar_telefone(string $t): ?string {
 preg_match_all('#<tr data-status="([^"]*)" data-cat="([^"]*)"(?: data-seg="([^"]*)")?>(.*?)</tr>#s', $html, $linhas_html, PREG_SET_ORDER);
 if (!$linhas_html) exit("✘ Nenhum comércio encontrado em $arquivo (formato mudou?)\n");
 
-$novos = $atualizados = $pulados = 0;
+$novos = $atualizados = $pulados = $publicos = 0;
 $vistos = [];
 db()->beginTransaction();
 foreach ($linhas_html as [, $status, $tipo, $area, $tr]) {
@@ -120,11 +140,13 @@ foreach ($linhas_html as [, $status, $tipo, $area, $tr]) {
     $popularidade = preg_match('/\((\d+)\)/', limpo($td[7]), $p) ? (int)$p[1] : 0;
 
     $tipo = mb_substr(html_entity_decode($tipo, ENT_QUOTES | ENT_HTML5, 'UTF-8'), 0, 80);
+    if ($tipo !== '' && preg_match(NAO_COMERCIO, $tipo)) { $pulados++; $publicos++; continue; }
+    if ($tipo === '' && (preg_match(SO_LUGAR, $nome) || in_array(mb_strtolower($nome), array_map(fn($c) => mb_strtolower($c[0]), CIDADES), true))) { $pulados++; $publicos++; continue; }
     $area = html_entity_decode((string)$area, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     $categoria_id = isset($areas[$area]) ? ($cat[$areas[$area]] ?? $cat['outros']) : ($area_do_tipo[mb_strtolower($tipo)] ?? $cat['outros']);
     // "Outros" com tipo que claramente é de outra área (ex.: Pizzaria, Hamburgueria, Cabeleireiro)
     if ($categoria_id === $cat['outros']) {
-        foreach (PALAVRAS_AREA as $re => $slug) if (preg_match($re, $tipo) && isset($cat[$slug])) { $categoria_id = $cat[$slug]; break; }
+        foreach (PALAVRAS_AREA as $re => $slug) if (preg_match($re, $tipo ?: $nome) && isset($cat[$slug])) { $categoria_id = $cat[$slug]; break; }
     }
     $dados = [
         'categoria_id' => $categoria_id,
@@ -147,4 +169,4 @@ foreach ($linhas_html as [, $status, $tipo, $area, $tr]) {
 }
 db()->commit();
 $total = (int)valor('SELECT COUNT(*) FROM profissionais WHERE importado = 1 AND status = \'ativo\' AND cidade = ?', [$cidade_lista]);
-echo "✔ Leads de " . nome_cidade($cidade_lista) . ": $novos novos, $atualizados atualizados, $pulados pulados (repetidos ou mantidos). No app: $total comércios importados nesta cidade.\n";
+echo "✔ Leads de " . nome_cidade($cidade_lista) . ": $novos novos, $atualizados atualizados, $pulados pulados (repetidos, mantidos ou $publicos lugares públicos). No app: $total comércios importados nesta cidade.\n";

@@ -177,3 +177,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    pulados), todos com localização pelo link do Google. Cidade em servidor/inc/guia.php e src/cidade.tsx (o app precisa
    do APK novo para mostrar a cidade na escolha); textos do site, termos e lojas atualizados. Backup da tabela antes:
    /root/acha-facil-profissionais.antes-vargem.*.sql.gz
+17. ✅ Aguaí - SP (09/11, pedido do usuário): 5ª cidade (slug aguai). Lista em /var/lib/acha-facil/leads/aguai.html
+   (categorias com o nome completo do Google): 1.442 comércios importados; 85 lugares públicos ficaram de fora (ponto de
+   ônibus, parque, prefeitura, delegacia, bairros soltos: NAO_COMERCIO e SO_LUGAR em importar-leads.php) e o resto foi
+   para a área certa por palavras-chave (só 11 em "Outros"). A cidade de cada linha agora é a última citada no endereço.
+   Os links dessa lista não trazem coordenadas: localização pelo OpenStreetMap (geocodificar.php, ~30 min).
+   Backup antes: /root/acha-facil-profissionais.antes-aguai.*.sql.gz

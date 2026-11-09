@@ -57,7 +57,7 @@ function pagina_fim(): void {
   <p class="rodape-marca"><img src="<?= $base ?>/assets/logo.png" alt="" width="36" height="36"> <strong>Acha <b>Fácil!</b></strong></p>
   <p class="lema">O comércio da sua cidade, pertinho de você.</p>
   <p><a href="<?= $base ?>/busca.php">Procurar meu negócio</a> · <a href="<?= $base ?>/termos.php">Termos de uso</a> · <a href="<?= $base ?>/privacidade.php">Privacidade</a> · <a href="<?= $base ?>/privacidade.php#excluir-conta">Excluir minha conta</a></p>
-  <p class="discreto">São João da Boa Vista, Águas da Prata e Vargem Grande do Sul (SP) · Poços de Caldas (MG) · <?= date('Y') ?></p>
+  <p class="discreto">São João da Boa Vista, Águas da Prata, Vargem Grande do Sul e Aguaí (SP) · Poços de Caldas (MG) · <?= date('Y') ?></p>
 </footer>
 </body>
 </html>

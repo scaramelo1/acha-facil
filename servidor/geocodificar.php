@@ -21,7 +21,7 @@ foreach (linhas("SELECT id, mapa FROM profissionais WHERE lat IS NULL AND mapa L
 echo "✔ $n localizações tiradas dos links do Google\n";
 
 // caixa em volta das cidades atendidas (descarta resultados de outra cidade com rua de mesmo nome)
-const CAIXA = ['lat' => [-22.10, -21.65], 'lng' => [-47.00, -46.40]];   // São João, Águas da Prata, Vargem Grande do Sul e Poços de Caldas
+const CAIXA = ['lat' => [-22.20, -21.65], 'lng' => [-47.10, -46.40]];   // São João, Águas da Prata, Vargem Grande do Sul, Aguaí e Poços de Caldas
 
 function nominatim(string $consulta): ?array {
     usleep(1200000);

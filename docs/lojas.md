@@ -58,7 +58,7 @@ continua).
 
 > O comércio da sua cidade, pertinho de você.
 >
-> O Acha Fácil! reúne os comércios e serviços de São João da Boa Vista, Águas da Prata, Vargem Grande do Sul (SP) e Poços de Caldas (MG) em um só lugar. Procure por categoria ou pelo nome, veja quem está perto de você e fale direto no WhatsApp.
+> O Acha Fácil! reúne os comércios e serviços de São João da Boa Vista, Águas da Prata, Vargem Grande do Sul, Aguaí (SP) e Poços de Caldas (MG) em um só lugar. Procure por categoria ou pelo nome, veja quem está perto de você e fale direto no WhatsApp.
 >
 > • Mais de 4.500 comércios em 17 categorias: alimentação, mercados, farmácias, beleza, pet shops, oficinas, saúde e muito mais
 > • Perto de você: lista do mais perto ao mais longe, usando a localização só quando você pede
