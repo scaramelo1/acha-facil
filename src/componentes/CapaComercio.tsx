@@ -59,7 +59,8 @@ export function CapaComercio({ fotos, logo, icone, cor, nome }: { fotos: string[
 
       <View style={estilos.logo} accessibilityLabel={logo ? `Logo de ${nome}` : undefined}>
         {logo ? (
-          <Image source={logo} style={{ width: LOGO - 20, height: LOGO - 20 }} contentFit="contain" />
+          // o logo chega quadrado (o painel recorta e o servidor completa com branco), então preenche o círculo
+          <Image source={logo} style={{ width: LOGO - 8, height: LOGO - 8 }} contentFit="contain" />
         ) : (
           <View style={[estilos.semLogo, { backgroundColor: /^#[0-9a-f]{6}$/i.test(cor) ? cor : cores.verde }]}>
             <Icone nome={icone} tamanho={46} cor="#fff" />

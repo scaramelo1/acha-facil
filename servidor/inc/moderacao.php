@@ -115,8 +115,10 @@ function limpar_campos_dono(array $post): array {
 /**
  * Foto enviada pelo dono: confere se é imagem, tira os dados escondidos (GPS etc.) e reduz. Devolve o nome do arquivo.
  * $lado: maior lado em pixels (logo menor, fotos da galeria maiores). Fundo transparente (logo em PNG) vira branco.
+ * $quadrada (logo): completa com branco até ficar quadrada, com a imagem no meio (o painel já manda recortada, isto é
+ * para quem envia sem o recorte do navegador).
  */
-function salvar_foto_enviada(array $f, int $profissional_id, int $lado = 1200): string {
+function salvar_foto_enviada(array $f, int $profissional_id, int $lado = 1200, bool $quadrada = false): string {
     if (($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) throw new RuntimeException('Não deu para receber a foto. Tente de novo.');
     if ($f['size'] > 8 * 1024 * 1024) throw new RuntimeException('A foto passa de 8 MB.');
     $info = @getimagesize($f['tmp_name']);
@@ -127,8 +129,18 @@ function salvar_foto_enviada(array $f, int $profissional_id, int $lado = 1200): 
         . ' -quality 82 ' . escapeshellarg('jpg:' . $destino) . ' 2>&1';
     exec($cmd, $saida, $codigo);
     if ($codigo !== 0 || !is_file($destino)) throw new RuntimeException('Não deu para abrir essa foto. Tente outra.');
+    if ($quadrada) quadrar_imagem($destino);
     return $nome;
 }
+/** Completa a imagem com branco até ficar quadrada, centralizada e com margem (logo que chegou deitada ou em pé). */
+function quadrar_imagem(string $arq): void {
+    [$w, $h] = @getimagesize($arq) ?: [0, 0];
+    if (!$w || $w === $h) return;
+    $l = (int)ceil(max($w, $h) * 1.15);   // margem: as pontas do logo não encostam no círculo
+    exec('convert ' . escapeshellarg($arq) . ' -background white -gravity center -extent ' . escapeshellarg($l . 'x' . $l)
+        . ' -quality 88 ' . escapeshellarg('jpg:' . $arq) . ' 2>&1');
+}
+
 function apagar_foto(?string $nome): void {
     if ($nome && preg_match('/^[a-z0-9-]{8,80}\.(jpg|png|webp)$/', $nome)) @unlink(config()['dados_dir'] . '/fotos/' . $nome);
 }

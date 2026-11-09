@@ -238,3 +238,8 @@ details.cupom summary { cursor: pointer; font-weight: 800; color: #005C38; }
 button.link { background: none; border: 0; padding: 0; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; }
 .oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .valor s { color: #888; font-weight: 600; }
+/* recorte do logo no painel do dono */
+.recorte { margin: 8px 0 16px; }
+.recorte-area { max-width: 280px; }
+.recorte-area canvas { width: 100%; height: auto; display: block; border-radius: 12px; touch-action: none; cursor: grab; background: #eee; }
+.recorte input[type=range] { width: 100%; max-width: 280px; }

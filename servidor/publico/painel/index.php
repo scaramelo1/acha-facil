@@ -47,7 +47,7 @@ if ($p && $em_dia && e_post()) {
     $foto = null;      // logo novo
     $enviadas = [];    // fotos novas da galeria (apagadas se der erro)
     if (!$erro && ($_FILES['foto']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
-        try { $foto = salvar_foto_enviada($_FILES['foto'], (int)$p['id'], 600); } catch (RuntimeException $e) { $erro = 'Logo: ' . $e->getMessage(); }
+        try { $foto = salvar_foto_enviada($_FILES['foto'], (int)$p['id'], 600, true); } catch (RuntimeException $e) { $erro = 'Logo: ' . $e->getMessage(); }
     }
     // galeria: parte da lista que o formulário mostrou (pendente ou do app), tira as marcadas e põe as novas no fim
     $pend_antes = alteracao_pendente((int)$p['id']);
@@ -144,14 +144,25 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
       <input id="horario" name="horario" maxlength="200" placeholder="Seg a sex 8h às 18h · Sáb 8h às 12h" value="<?= $val('horario') ?>">
       <label class="marcar"><input type="checkbox" name="atende_em_casa" value="1"<?= ($f['atende_em_casa'] ?? '0') == '1' ? ' checked' : '' ?>> Atende em casa / faz entrega</label>
       <h2>Logo</h2>
-      <p class="dica">Aparece nas listas do app e no círculo da página do comércio. Melhor quadrada, com o logo no meio.</p>
+      <p class="dica">Aparece nas listas do app e no círculo da página do comércio (como a foto de perfil). Use uma imagem
+        <strong>quadrada, de pelo menos 500 x 500 pixels</strong>, com o logo no meio. Se a sua for de outro formato, depois de
+        escolher você arrasta e aproxima para enquadrar no círculo.</p>
       <?php if (!empty($f['foto'])): ?><p><img class="mini-logo" src="<?= h(foto_url($f['foto'])) ?>" alt="Logo atual"></p><?php endif ?>
       <label for="foto"><?= empty($f['foto']) ? 'Escolher o logo' : 'Trocar o logo' ?> (JPG, PNG ou WEBP)</label>
-      <input id="foto" name="foto" type="file" accept="image/jpeg,image/png,image/webp" data-lado="600">
+      <input id="foto" name="foto" type="file" accept="image/jpeg,image/png,image/webp">
+      <div id="recorte" class="recorte" hidden>
+        <p class="dica">Arraste a imagem para posicionar e use a barra para aproximar. O que fica dentro do círculo é o que aparece no app.</p>
+        <div class="recorte-area"><canvas id="recorte-tela" width="560" height="560"></canvas></div>
+        <label for="recorte-zoom">Aproximar</label>
+        <input id="recorte-zoom" type="range" min="0.5" max="4" step="0.01" value="0.85">
+        <p><button type="button" class="link" id="recorte-inteiro">Mostrar o logo inteiro</button> ·
+          <button type="button" class="link" id="recorte-preencher">Preencher o círculo</button></p>
+      </div>
 
       <h2>Fotos do comércio</h2>
       <p class="dica">Até <?= MAX_FOTOS ?> fotos: fachada, ambiente, produtos. Elas passam uma a uma no alto da página do
-        comércio no app; a primeira também aparece na faixa de destaque. Fotos deitadas ficam melhores.</p>
+        comércio no app; a primeira também aparece na faixa de destaque. Use fotos <strong>deitadas (horizontais), de pelo menos
+        1200 x 750 pixels</strong>: o app mostra nesse formato e corta um pouco das bordas se a foto for em pé.</p>
       <?php if ($galeria_form): ?>
         <div class="fotos-dono">
           <?php foreach ($galeria_form as $i => $arq): ?>
@@ -172,6 +183,66 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
       <p class="discreto">Nada muda no app até a equipe aprovar.</p>
     </form>
     <script>
+    // Logo: recorte quadrado no próprio navegador (arrastar e aproximar). Começa mostrando o logo inteiro, com branco em volta;
+    // ao enviar, troca o arquivo escolhido por um JPG 600 x 600 só com o que ficou no quadro.
+    (function () {
+      var inp = document.getElementById('foto'), caixa = document.getElementById('recorte'), tela = document.getElementById('recorte-tela');
+      var zoom = document.getElementById('recorte-zoom'), ctx = tela.getContext('2d'), L = tela.width;
+      var img = null, base = 1, esc = 1, x = 0, y = 0, arrasto = null, nomeArq = 'logo.jpg';
+      function limitar() {   // a imagem nunca sai toda do quadro
+        var w = img.width * esc, h = img.height * esc;
+        x = Math.min(Math.max(x, Math.min(0, L - w)), Math.max(0, L - w));
+        y = Math.min(Math.max(y, Math.min(0, L - h)), Math.max(0, L - h));
+      }
+      function desenhar(alvo, lado) {
+        var c = alvo.getContext('2d'), k = lado / L;
+        c.fillStyle = '#fff'; c.fillRect(0, 0, lado, lado);
+        c.drawImage(img, x * k, y * k, img.width * esc * k, img.height * esc * k);
+      }
+      function mostrar() {
+        desenhar(tela, L);
+        ctx.save(); ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.beginPath(); ctx.rect(0, 0, L, L);
+        ctx.arc(L / 2, L / 2, L / 2 - 2, 0, Math.PI * 2, true); ctx.fill('evenodd'); ctx.restore();
+        ctx.strokeStyle = '#F7C600'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(L / 2, L / 2, L / 2 - 2, 0, Math.PI * 2); ctx.stroke();
+      }
+      function escala(nova) {   // aproxima mantendo o centro do quadro no lugar
+        var cx = (L / 2 - x) / esc, cy = (L / 2 - y) / esc;
+        esc = nova; x = L / 2 - cx * esc; y = L / 2 - cy * esc; limitar(); mostrar();
+      }
+      function inteiro() { zoom.value = 0.85; esc = base * 0.85; x = (L - img.width * esc) / 2; y = (L - img.height * esc) / 2; mostrar(); }   // inteiro, com margem dentro do círculo
+      inp.addEventListener('change', function () {
+        var f = inp.files[0]; caixa.hidden = true; img = null;
+        if (!f || !window.createImageBitmap) return;
+        nomeArq = f.name.replace(/\.[^.]+$/, '') + '.jpg';
+        createImageBitmap(f, { imageOrientation: 'from-image' }).then(function (b) {
+          img = b; base = L / Math.max(b.width, b.height);
+          zoom.min = 0.5; zoom.max = Math.max(4, (L / Math.min(b.width, b.height)) / base * 1.5);
+          caixa.hidden = false; inteiro();
+        }).catch(function () {});
+      });
+      zoom.addEventListener('input', function () { if (img) escala(base * parseFloat(zoom.value)); });
+      document.getElementById('recorte-inteiro').addEventListener('click', function () { if (img) inteiro(); });
+      document.getElementById('recorte-preencher').addEventListener('click', function () {
+        if (!img) return; var z = (L / Math.min(img.width, img.height)) / base; zoom.value = z; escala(base * z);
+        x = (L - img.width * esc) / 2; y = (L - img.height * esc) / 2; mostrar();
+      });
+      function ponto(e) { var r = tela.getBoundingClientRect(); return { x: (e.clientX - r.left) * L / r.width, y: (e.clientY - r.top) * L / r.height }; }
+      tela.addEventListener('pointerdown', function (e) { if (!img) return; tela.setPointerCapture(e.pointerId); var p = ponto(e); arrasto = { x: p.x - x, y: p.y - y }; });
+      tela.addEventListener('pointermove', function (e) { if (!arrasto) return; var p = ponto(e); x = p.x - arrasto.x; y = p.y - arrasto.y; limitar(); mostrar(); });
+      tela.addEventListener('pointerup', function () { arrasto = null; });
+      tela.addEventListener('pointercancel', function () { arrasto = null; });
+      // ao enviar: troca o arquivo pelo recorte
+      inp.form.addEventListener('submit', function (e) {
+        if (!img || !window.DataTransfer || inp.dataset.recortado) return;
+        e.preventDefault();
+        var final = document.createElement('canvas'); final.width = final.height = 600; desenhar(final, 600);
+        final.toBlob(function (blob) {
+          var dt = new DataTransfer(); dt.items.add(new File([blob], nomeArq, { type: 'image/jpeg' }));
+          inp.files = dt.files; inp.dataset.recortado = '1'; inp.form.submit();
+        }, 'image/jpeg', 0.9);
+      });
+    })();
+
     // Reduz as fotos no próprio celular antes de enviar (foto de celular passa fácil de 5 MB e o envio falharia)
     document.querySelectorAll('input[type=file][data-lado]').forEach(function (inp) {
       inp.addEventListener('change', async function () {

@@ -153,6 +153,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (o navegador reduz antes de enviar; painel/.htaccess sobe o limite para 10 MB/64 MB). Tudo passa pela moderação
    (admin vê as miniaturas no site e no app) e arquivos que saem do app são apagados. Testado numa cópia isolada
    (12 testes + envio real pelo formulário). Falta: testar as telas no emulador e gerar o APK 1.3.0
+   09/11 (2): logo sempre quadrado: no painel o dono enquadra num círculo (arrastar + aproximar, sai 600x600) e o
+   servidor completa com branco + margem quem mandar sem o recorte; dicas de tamanho (logo 500x500, fotos deitadas
+   1200x750). O APK 1.2.0 instalado mostra o logo como capa inteira: o carrossel só aparece no app com este código.
 14. ✅ Cupons de desconto (09/11, pedido do usuário): desconto em % para Básico e/ou Destaque; o dono digita na página
    do pagamento (assinatura.php, "Tem cupom de desconto?") antes de pagar. No Destaque a assinatura do Mercado Pago já
    nasce com o valor com desconto, então vale **em todas as mensalidades**; a conferência dos avisos do Mercado Pago usa
