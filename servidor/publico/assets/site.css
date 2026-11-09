@@ -243,3 +243,13 @@ button.link { background: none; border: 0; padding: 0; color: inherit; text-deco
 .recorte-area { max-width: 280px; }
 .recorte-area canvas { width: 100%; height: auto; display: block; border-radius: 12px; touch-action: none; cursor: grab; background: #eee; }
 .recorte input[type=range] { width: 100%; max-width: 280px; }
+/* horário de funcionamento por campo (painel e incluir) */
+fieldset.horarios { border: 1px solid #DDE3DF; border-radius: 14px; padding: 12px 14px 4px; margin: 16px 0; }
+fieldset.horarios legend { font-weight: 800; padding: 0 6px; }
+.horario-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 8px 0; border-top: 1px solid #EEF1EF; }
+.horario-linha:first-of-type { border-top: 0; }
+.horario-linha > label { flex: 0 0 140px; margin: 0; font-weight: 700; }
+.horario-linha select { flex: 0 0 auto; width: auto; margin: 0; }
+.horario-linha .horas { display: inline-flex; align-items: center; gap: 6px; }
+.horario-linha .horas[hidden] { display: none; }
+.horario-linha input[type=time] { width: auto; margin: 0; }

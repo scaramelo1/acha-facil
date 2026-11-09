@@ -18,7 +18,8 @@ const CAMPOS_DONO = [
     'site' => ['Site', 200],
     'endereco' => ['Endereço', 200],
     'bairro' => ['Bairro', 80],
-    'horario' => ['Horário', 200],
+    'horario' => ['Horário (texto)', 400],   // pedidos antigos; hoje é gerado a partir de "horarios"
+    'horarios' => ['Horário de funcionamento', 1000],
     'atende_em_casa' => ['Atende em casa', 1],
     'foto' => ['Logo', 120],
     'fotos' => ['Fotos do comércio', 2000],   // lista JSON dos arquivos da galeria (carrossel da capa)
@@ -92,7 +93,7 @@ function dono_atual(): ?array {
 function limpar_campos_dono(array $post): array {
     $v = [];
     foreach (CAMPOS_DONO as $c => [, $max]) {
-        if ($c === 'foto' || $c === 'fotos') continue;
+        if (in_array($c, ['foto', 'fotos', 'horario', 'horarios'], true)) continue;   // vêm à parte
         if ($c === 'atende_em_casa') { $v[$c] = empty($post[$c]) ? '0' : '1'; continue; }
         $t = trim(preg_replace('/[ \t]+/', ' ', str_replace("\r", '', (string)($post[$c] ?? ''))));
         $v[$c] = $t === '' ? null : mb_substr($t, 0, $max);
@@ -207,6 +208,8 @@ function aprovar_alteracao(int $id, int $admin_id): void {
     if (array_key_exists('nome', $novos) && !$novos['nome']) unset($novos['nome']);   // nome nunca fica vazio
     $prof = linha('SELECT id, foto, fotos FROM profissionais WHERE id = ?', [$a['profissional_id']]);
     $dados = $novos;
+    // horário por campo: o texto (app antigo, páginas do site) acompanha
+    if (!empty($novos['horarios'])) $dados['horario'] = horarios_texto(horarios_ler($novos['horarios']));
     if (array_key_exists('endereco', $novos) || array_key_exists('bairro', $novos)) {
         // endereço novo: a localização antiga não vale mais; geocodificar.php acha de novo
         $dados += ['lat' => null, 'lng' => null, 'geo_origem' => null, 'geo_tentado' => null, 'mapa' => null];
@@ -244,6 +247,7 @@ function valor_campo_html(string $campo, ?string $v): string {
         return $l ? '<span class="galeria">' . implode('', array_map(fn($f, $i) => '<img class="mini-foto" src="' . h(foto_url($f)) . '" alt="Foto ' . ($i + 1) . '">', $l, array_keys($l))) . '</span>'
             : '<span class="discreto">(sem fotos)</span>';
     }
+    if ($campo === 'horarios') return implode('<br>', array_map('h', horarios_linhas(horarios_ler($v)))) ?: '<span class="discreto">(vazio)</span>';
     if ($campo === 'atende_em_casa') return $v === '1' ? 'Sim' : 'Não';
     if ($campo === 'telefone' || $campo === 'whatsapp') return h(telefone_formatado($v));
     return nl2br(h($v));

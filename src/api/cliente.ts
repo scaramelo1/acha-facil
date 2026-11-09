@@ -80,6 +80,17 @@ export interface Comentario {
   data: string;
 }
 
+/** Um campo do horário: Segunda a sexta, Sábado, Domingo ou Feriados. */
+export interface HorarioCampo {
+  campo: 'semana' | 'sab' | 'dom' | 'fer';
+  nome: string;
+  /** "08:00 às 18:00", "Fechado" ou "Aberto 24 horas". */
+  texto: string;
+  situacao: 'aberto' | 'fechado' | '24h';
+  abre: string | null;
+  fecha: string | null;
+}
+
 export interface Profissional extends ProfissionalResumo {
   responsavel: string | null;
   descricao: string | null;
@@ -93,6 +104,8 @@ export interface Profissional extends ProfissionalResumo {
   linkAssumir: string | null;
   linkRemover: string | null;
   horario: string | null;
+  /** Horário separado por campo (null = o dono ainda não preencheu; aí vale o texto de horario). */
+  horarios?: HorarioCampo[] | null;
   /** Fotos do comércio: o carrossel da capa do perfil. */
   fotos?: string[];
   favorito: boolean;

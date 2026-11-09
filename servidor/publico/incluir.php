@@ -19,11 +19,14 @@ if (e_post() && $pronto) {
         'nome' => txt('comercio', 120), 'tipo' => txt('tipo', 80), 'categoria_id' => (int)($_POST['area'] ?? 0),
         'cidade' => (string)($_POST['cidade'] ?? ''), 'endereco' => txt('endereco', 200), 'bairro' => txt('bairro', 80),
         'telefone' => telefone_normalizado(txt('telefone_comercio', 20)), 'whatsapp' => telefone_normalizado(txt('whatsapp', 20)),
-        'horario' => txt('horario', 200), 'instagram' => ltrim((string)txt('instagram', 60), '@') ?: null,
+        'instagram' => ltrim((string)txt('instagram', 60), '@') ?: null,
     ];
+    [$d['horarios'], $erro_hor] = horarios_do_post((array)($_POST['hor'] ?? []));
+    $d['horario'] = horarios_texto(horarios_ler($d['horarios']));
     $nome = txt('nome', 120);
     $contato = telefone_normalizado(txt('contato', 20));
-    if (!$d['nome'] || !$d['tipo'] || !$d['endereco']) $erro = 'Preencha o nome do negócio, o que ele é e o endereço.';
+    if ($erro_hor) $erro = $erro_hor;
+    elseif (!$d['nome'] || !$d['tipo'] || !$d['endereco']) $erro = 'Preencha o nome do negócio, o que ele é e o endereço.';
     elseif (!in_array($d['categoria_id'], array_map('intval', array_column($areas, 'id')), true)) $erro = 'Escolha a área do negócio.';
     elseif (!isset(CIDADES[$d['cidade']])) $erro = 'Escolha a cidade.';
     elseif (!$d['telefone'] && !$d['whatsapp']) $erro = 'Coloque o telefone ou o WhatsApp do negócio (com DDD).';
@@ -84,8 +87,7 @@ pagina_inicio('Incluir meu negócio · Acha Fácil!', 'Inclua o seu negócio no 
       <input id="telefone_comercio" name="telefone_comercio" inputmode="tel" maxlength="20" value="<?= h($f['telefone_comercio'] ?? '') ?>">
       <label for="whatsapp">WhatsApp do negócio (com DDD)</label>
       <input id="whatsapp" name="whatsapp" inputmode="tel" maxlength="20" value="<?= h($f['whatsapp'] ?? '') ?>">
-      <label for="horario">Horário (ex.: seg a sex 8h às 18h, sáb 8h às 12h)</label>
-      <input id="horario" name="horario" maxlength="200" value="<?= h($f['horario'] ?? '') ?>">
+      <?= horarios_form(horarios_ler(horarios_do_post((array)($f['hor'] ?? []))[0])) ?>
       <label for="instagram">Instagram (opcional)</label>
       <input id="instagram" name="instagram" maxlength="60" placeholder="@seunegocio" value="<?= h($f['instagram'] ?? '') ?>">
       <div hidden><label for="site_web">Não preencha</label><input id="site_web" name="site_web" tabindex="-1" autocomplete="off"></div>

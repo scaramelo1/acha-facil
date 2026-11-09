@@ -164,3 +164,10 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Admin em /admin/cupons.php (criar, ligar/desligar, quem usou). Mudança 014 aplicada. Cupom de cortesia criado:
    CORTESIA-MKS7 (100%, os dois planos, até 10 usos). Testado numa cópia isolada (16 testes + páginas). Falta: 1º uso
    real de cupom parcial no Mercado Pago (conferir o valor na assinatura)
+15. 🟡 Horário por campo + logo no Destaque (09/11, pedido do usuário, modelo do Google Maps): no painel do dono e no
+   /incluir.php o horário virou 4 linhas (Segunda a sexta, Sábado, Domingo, Feriados), cada uma Aberto (abre/fecha,
+   pode fechar depois da meia-noite), Fechado, 24 horas ou Não informar. Coluna `horarios` (JSON, mudança 015 aplicada);
+   o texto `horario` é gerado dela (app antigo, páginas do site). App: src/componentes/Horarios.tsx mostra cada campo
+   numa linha, o de hoje em negrito e "Aberto agora · fecha às ..." (feriado o app não sabe: usa o dia da semana).
+   Spani convertido para o formato novo. Faixa do Destaque: logo à esquerda + nome (não usa mais a 1a foto).
+   Testado numa cópia isolada. Falta: ver no emulador (junto do passo 13) e o APK 1.3.0

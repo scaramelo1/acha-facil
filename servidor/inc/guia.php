@@ -54,6 +54,8 @@ const CAMPOS_RESUMO = 'p.id, p.nome, p.tipo, p.cidade, p.importado, p.servicos, 
     ' . SQL_DESTAQUE . ' AS destaque_pago,
     p.nota_media, p.total_avaliacoes, p.whatsapp, p.telefone, c.id AS categoria_id, c.nome AS categoria, c.icone, c.cor';
 
+require_once __DIR__ . '/horarios.php';
+
 function foto_url(?string $foto): ?string { return $foto ? url_publica('foto.php?f=' . rawurlencode($foto)) : null; }
 
 /** Galeria do comércio (coluna fotos, lista JSON de arquivos) -> nomes dos arquivos, na ordem. */
@@ -208,6 +210,7 @@ function prof_completo(array $p, ?int $usuario_id): array {
         'linkAssumir' => $p['importado'] ? url_publica('planos.php?id=' . $p['id']) : null,
         'linkRemover' => $p['importado'] ? url_publica('perfil.php?id=' . $p['id'] . '&acao=remover') : null,
         'horario' => $p['horario'],
+        'horarios' => horarios_api(horarios_ler($p['horarios'] ?? null)),   // um campo por linha (Segunda a sexta, Sábado...)
         'fotos' => array_map('foto_url', lista_fotos($p['fotos'] ?? null)),   // carrossel da capa
         'favorito' => $usuario_id ? (bool)valor('SELECT 1 FROM favoritos WHERE usuario_id = ? AND profissional_id = ?', [$usuario_id, $p['id']]) : false,
         'minhaAvaliacao' => null,

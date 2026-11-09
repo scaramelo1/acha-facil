@@ -7,6 +7,7 @@ import { Alert, Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } 
 import { chamar, registrarContato, type Profissional } from '../../api/cliente';
 import { Cabecalho } from '../../componentes/Cabecalho';
 import { CapaComercio } from '../../componentes/CapaComercio';
+import { Horarios } from '../../componentes/Horarios';
 import { Botao, Estrelas, Falha, Carregando, SeloVerificado, estilos as ui, useCarregar } from '../../componentes/ui';
 import { useConta } from '../../conta';
 import { cartao, cores, fonte, RAIO } from '../../tema';
@@ -117,7 +118,11 @@ export default function TelaProfissional() {
           {p.instagram ? <Linha icone="instagram" texto="Ver Instagram" onPress={() => abrir('instagram', p.instagram!)} /> : null}
           {p.site ? <Linha icone="web" texto={siteCurto(p.site)} onPress={() => abrir('site', p.site!)} /> : null}
           {p.atendeEmCasa && <Linha icone="home-outline" texto="Vai até você" />}
-          <Linha icone="clock-outline" texto="Horário de funcionamento" detalhe={p.horario ?? 'Ainda não informado'} ultima />
+          {p.horarios?.length ? (
+            <Horarios lista={p.horarios} />
+          ) : (
+            <Linha icone="clock-outline" texto="Horário de funcionamento" detalhe={p.horario ?? 'Ainda não informado'} ultima />
+          )}
         </View>
 
         {p.linkAssumir && (

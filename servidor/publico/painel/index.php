@@ -44,6 +44,7 @@ $erro = null;
 if ($p && $em_dia && e_post()) {
     exigir_post();
     [$valores, $erro] = limpar_campos_dono($_POST);
+    if (!$erro) [$valores['horarios'], $erro] = horarios_do_post((array)($_POST['hor'] ?? []));
     $foto = null;      // logo novo
     $enviadas = [];    // fotos novas da galeria (apagadas se der erro)
     if (!$erro && ($_FILES['foto']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
@@ -140,8 +141,8 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
       <input id="endereco" name="endereco" maxlength="200" value="<?= $val('endereco') ?>">
       <label for="bairro">Bairro</label>
       <input id="bairro" name="bairro" maxlength="80" value="<?= $val('bairro') ?>">
-      <label for="horario">Horário de funcionamento</label>
-      <input id="horario" name="horario" maxlength="200" placeholder="Seg a sex 8h às 18h · Sáb 8h às 12h" value="<?= $val('horario') ?>">
+      <?= horarios_form(horarios_ler($f['horarios'] ?? null)) ?>
+      <?php if (empty($f['horarios']) && !empty($f['horario'])): ?><p class="dica">Hoje no app: <?= h($f['horario']) ?></p><?php endif ?>
       <label class="marcar"><input type="checkbox" name="atende_em_casa" value="1"<?= ($f['atende_em_casa'] ?? '0') == '1' ? ' checked' : '' ?>> Atende em casa / faz entrega</label>
       <h2>Logo</h2>
       <p class="dica">Aparece nas listas do app e no círculo da página do comércio (como a foto de perfil). Use uma imagem

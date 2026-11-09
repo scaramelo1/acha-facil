@@ -9,8 +9,8 @@ import { Foto } from './ui';
 const ALTURA = 150;
 
 /**
- * "Comércios em destaque": só quem paga o plano Destaque. Faixas largas que rolam para o lado, com a 1a foto
- * (ou a cor da área), o nome em branco e a setinha amarela, como no modelo.
+ * "Comércios em destaque": só quem paga o plano Destaque. Cartões largos que rolam para o lado, com o logo
+ * (ou a cor da área com o ícone) à esquerda, o nome ao lado e a setinha amarela.
  * No fim (ou sozinho, enquanto ninguém assinou), uma faixa amarela convida o dono a aparecer aqui.
  */
 export function Vitrine({ itens }: { itens: ProfissionalResumo[] }) {
@@ -34,26 +34,24 @@ export function Vitrine({ itens }: { itens: ProfissionalResumo[] }) {
           accessibilityRole="button"
           accessibilityLabel={`Destaque: ${p.nome}, ${p.tipo}`}
           onPress={() => router.push(`/profissional/${p.id}`)}
-          style={({ pressed }) => [{ width: largura, height: ALTURA }, pressed && { opacity: 0.9 }]}
+          style={({ pressed }) => [estilos.cartao, { width: largura, height: ALTURA }, pressed && { opacity: 0.9 }]}
         >
-          {/* 1a foto da galeria; sem fotos, o logo (inteiro, fundo branco) ou a cor da área */}
-          <Foto foto={p.capa ?? p.foto} cobrir={!!p.capa} icone={p.icone} cor={p.cor} largura={largura} altura={ALTURA} raio={RAIO} />
-          <View style={estilos.fita}>
-            <MaterialCommunityIcons name="star-four-points" size={14} color={cores.verde} />
-            <Text style={estilos.fitaTexto}>Destaque</Text>
+          {/* logo do comércio (sem logo, a cor da área com o ícone) e o nome ao lado */}
+          <Foto foto={p.foto} icone={p.icone} cor={p.cor} largura={ALTURA - 24} altura={ALTURA - 24} raio={16} />
+          <View style={{ flex: 1, gap: 4 }}>
+            <View style={estilos.fita}>
+              <MaterialCommunityIcons name="star-four-points" size={14} color={cores.verde} />
+              <Text style={estilos.fitaTexto}>Destaque</Text>
+            </View>
+            <Text style={estilos.nome} numberOfLines={2}>
+              {p.nome}
+            </Text>
+            <Text style={estilos.tipo} numberOfLines={1}>
+              {p.tipo}
+            </Text>
           </View>
-          <View style={estilos.rodape}>
-            <View style={{ flex: 1 }}>
-              <Text style={estilos.nome} numberOfLines={1}>
-                {p.nome}
-              </Text>
-              <Text style={estilos.tipo} numberOfLines={1}>
-                {p.tipo}
-              </Text>
-            </View>
-            <View style={estilos.seta}>
-              <MaterialCommunityIcons name="arrow-right" size={22} color={cores.verde} />
-            </View>
+          <View style={estilos.seta}>
+            <MaterialCommunityIcons name="arrow-right" size={22} color={cores.verde} />
           </View>
         </Pressable>
       ))}
@@ -81,10 +79,18 @@ export function Vitrine({ itens }: { itens: ProfissionalResumo[] }) {
 }
 
 const estilos = StyleSheet.create({
+  cartao: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
+    backgroundColor: cores.cartao,
+    borderRadius: RAIO,
+    borderWidth: 2,
+    borderColor: cores.amarelo,
+  },
   fita: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
+    alignSelf: 'flex-start',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -94,22 +100,8 @@ const estilos = StyleSheet.create({
     paddingVertical: 3,
   },
   fitaTexto: { color: cores.verde, fontSize: 14, fontWeight: '900' },
-  rodape: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-    borderBottomLeftRadius: RAIO,
-    borderBottomRightRadius: RAIO,
-  },
-  nome: { color: '#fff', fontSize: fonte.grande, fontWeight: '900' },
-  tipo: { color: '#fff', fontSize: 15, fontWeight: '600' },
+  nome: { color: cores.texto, fontSize: fonte.media, fontWeight: '900', lineHeight: 24 },
+  tipo: { color: cores.textoSuave, fontSize: 15, fontWeight: '600' },
   seta: { width: 40, height: 40, borderRadius: 20, backgroundColor: cores.amarelo, alignItems: 'center', justifyContent: 'center' },
   anuncie: { height: ALTURA, flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: cores.amarelo, borderRadius: RAIO, paddingHorizontal: 16 },
   anuncieIcone: { width: 68, height: 68, borderRadius: 34, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
