@@ -37,6 +37,7 @@ $texto = function (string $c, $v): ?string {
     if ($v === null || $v === '') return null;
     $v = (string)$v;
     if ($c === 'foto') return foto_url($v);
+    if ($c === 'fotos') return implode("\n", array_map('foto_url', lista_fotos($v))) ?: null;   // uma URL por linha
     if ($c === 'atende_em_casa') return $v === '1' ? 'Sim' : 'Não';
     if ($c === 'telefone' || $c === 'whatsapp') return telefone_formatado($v);
     return $v;

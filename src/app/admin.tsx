@@ -217,7 +217,15 @@ function CartaoAlteracao({ a, aoDecidir }: { a: AlteracaoPendente; aoDecidir: ()
 
 function Valor({ campo, texto }: { campo: string; texto: string | null }) {
   if (!texto) return <Text style={[estilos.texto, { color: cores.textoSuave }]}>(vazio)</Text>;
-  if (campo === 'foto') return <Image source={texto} style={estilos.foto} contentFit="cover" accessibilityLabel="Foto" />;
+  if (campo === 'foto') return <Image source={texto} style={[estilos.foto, { width: 120, backgroundColor: '#fff' }]} contentFit="contain" accessibilityLabel="Logo" />;
+  if (campo === 'fotos')
+    return (
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+        {texto.split('\n').map((u, i) => (
+          <Image key={u} source={u} style={estilos.miniatura} contentFit="cover" accessibilityLabel={`Foto ${i + 1}`} />
+        ))}
+      </View>
+    );
   return <Text style={estilos.texto}>{texto}</Text>;
 }
 
@@ -240,6 +248,7 @@ const estilos = StyleSheet.create({
   depois: { backgroundColor: cores.verdeClaro },
   legenda: { fontSize: 13, fontWeight: '800', color: cores.textoSuave, marginBottom: 2 },
   foto: { width: 180, height: 120, borderRadius: 10 },
+  miniatura: { width: 96, height: 72, borderRadius: 8 },
   motivo: {
     borderWidth: 1,
     borderColor: cores.borda,

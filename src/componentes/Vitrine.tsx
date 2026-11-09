@@ -9,7 +9,7 @@ import { Foto } from './ui';
 const ALTURA = 150;
 
 /**
- * "Comércios em destaque": só quem paga o plano Destaque. Faixas largas que rolam para o lado, com a foto
+ * "Comércios em destaque": só quem paga o plano Destaque. Faixas largas que rolam para o lado, com a 1a foto
  * (ou a cor da área), o nome em branco e a setinha amarela, como no modelo.
  * No fim (ou sozinho, enquanto ninguém assinou), uma faixa amarela convida o dono a aparecer aqui.
  */
@@ -36,7 +36,8 @@ export function Vitrine({ itens }: { itens: ProfissionalResumo[] }) {
           onPress={() => router.push(`/profissional/${p.id}`)}
           style={({ pressed }) => [{ width: largura, height: ALTURA }, pressed && { opacity: 0.9 }]}
         >
-          <Foto foto={p.foto} icone={p.icone} cor={p.cor} largura={largura} altura={ALTURA} raio={RAIO} />
+          {/* 1a foto da galeria; sem fotos, o logo (inteiro, fundo branco) ou a cor da área */}
+          <Foto foto={p.capa ?? p.foto} cobrir={!!p.capa} icone={p.icone} cor={p.cor} largura={largura} altura={ALTURA} raio={RAIO} />
           <View style={estilos.fita}>
             <MaterialCommunityIcons name="star-four-points" size={14} color={cores.verde} />
             <Text style={estilos.fitaTexto}>Destaque</Text>

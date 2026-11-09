@@ -20,8 +20,10 @@ const CAMPOS_DONO = [
     'bairro' => ['Bairro', 80],
     'horario' => ['Horário', 200],
     'atende_em_casa' => ['Atende em casa', 1],
-    'foto' => ['Foto', 120],
+    'foto' => ['Logo', 120],
+    'fotos' => ['Fotos do comércio', 2000],   // lista JSON dos arquivos da galeria (carrossel da capa)
 ];
+const MAX_FOTOS = 10;   // fotos na galeria de cada comércio
 
 // ---------- registro ----------
 function registrar(?int $admin_id, string $acao, ?int $profissional_id = null, ?string $detalhe = null): void {
@@ -90,7 +92,7 @@ function dono_atual(): ?array {
 function limpar_campos_dono(array $post): array {
     $v = [];
     foreach (CAMPOS_DONO as $c => [, $max]) {
-        if ($c === 'foto') continue;
+        if ($c === 'foto' || $c === 'fotos') continue;
         if ($c === 'atende_em_casa') { $v[$c] = empty($post[$c]) ? '0' : '1'; continue; }
         $t = trim(preg_replace('/[ \t]+/', ' ', str_replace("\r", '', (string)($post[$c] ?? ''))));
         $v[$c] = $t === '' ? null : mb_substr($t, 0, $max);
@@ -110,15 +112,18 @@ function limpar_campos_dono(array $post): array {
     return [$v, null];
 }
 
-/** Foto enviada pelo dono: confere se é imagem, tira os dados escondidos (GPS etc.) e reduz. Devolve o nome do arquivo. */
-function salvar_foto_enviada(array $f, int $profissional_id): string {
+/**
+ * Foto enviada pelo dono: confere se é imagem, tira os dados escondidos (GPS etc.) e reduz. Devolve o nome do arquivo.
+ * $lado: maior lado em pixels (logo menor, fotos da galeria maiores). Fundo transparente (logo em PNG) vira branco.
+ */
+function salvar_foto_enviada(array $f, int $profissional_id, int $lado = 1200): string {
     if (($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) throw new RuntimeException('Não deu para receber a foto. Tente de novo.');
     if ($f['size'] > 8 * 1024 * 1024) throw new RuntimeException('A foto passa de 8 MB.');
     $info = @getimagesize($f['tmp_name']);
     if (!$info || !in_array($info[2], [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_WEBP], true)) throw new RuntimeException('Envie uma foto JPG, PNG ou WEBP.');
     $nome = 'p' . $profissional_id . '-' . bin2hex(random_bytes(8)) . '.jpg';
     $destino = config()['dados_dir'] . '/fotos/' . $nome;
-    $cmd = 'convert ' . escapeshellarg($f['tmp_name'] . '[0]') . ' -auto-orient -strip -resize ' . escapeshellarg('1200x1200>')
+    $cmd = 'convert ' . escapeshellarg($f['tmp_name'] . '[0]') . ' -auto-orient -strip -background white -alpha remove -alpha off -resize ' . escapeshellarg($lado . 'x' . $lado . '>')
         . ' -quality 82 ' . escapeshellarg('jpg:' . $destino) . ' 2>&1';
     exec($cmd, $saida, $codigo);
     if ($codigo !== 0 || !is_file($destino)) throw new RuntimeException('Não deu para abrir essa foto. Tente outra.');
@@ -126,6 +131,23 @@ function salvar_foto_enviada(array $f, int $profissional_id): string {
 }
 function apagar_foto(?string $nome): void {
     if ($nome && preg_match('/^[a-z0-9-]{8,80}\.(jpg|png|webp)$/', $nome)) @unlink(config()['dados_dir'] . '/fotos/' . $nome);
+}
+
+/** Galeria como fica gravada (lista JSON) ou null se vazia. */
+function fotos_json(array $lista): ?string {
+    return $lista ? json_encode(array_values($lista), JSON_UNESCAPED_SLASHES) : null;
+}
+
+/** Arquivos de imagem que um conjunto de campos usa (logo + galeria). */
+function arquivos_dos_campos(array $campos): array {
+    $l = lista_fotos($campos['fotos'] ?? null);
+    if (!empty($campos['foto'])) $l[] = $campos['foto'];
+    return $l;
+}
+
+/** Apaga os arquivos de $velhos que não estão em $ficam (nada que ainda está no app ou pendente some). */
+function apagar_fotos_sobrando(array $velhos, array $ficam): void {
+    foreach (array_diff($velhos, $ficam) as $f) apagar_foto($f);
 }
 
 function alteracao_pendente(int $profissional_id): ?array {
@@ -139,10 +161,12 @@ function alteracao_pendente(int $profissional_id): ?array {
  * substitui o pendente anterior do mesmo comércio (a foto pendente antiga é mantida se não veio outra).
  * Devolve o id da alteração, ou null se nada mudou.
  */
-function propor_alteracao(array $prof, int $acesso_id, array $valores, ?string $foto_nova): ?int {
+function propor_alteracao(array $prof, int $acesso_id, array $valores, ?string $foto_nova, ?array $fotos = null): ?int {
     $anterior = alteracao_pendente((int)$prof['id']);
     if ($foto_nova === null && isset($anterior['novos']['foto'])) $foto_nova = $anterior['novos']['foto'];
     if ($foto_nova !== null) $valores['foto'] = $foto_nova;
+    // galeria: o painel manda a lista inteira (as que ficaram + as novas); null = não mexeu
+    if ($fotos !== null) $valores['fotos'] = fotos_json($fotos);
     $novos = $antes = [];
     foreach ($valores as $c => $v) {
         if (!isset(CAMPOS_DONO[$c])) continue;
@@ -152,8 +176,8 @@ function propor_alteracao(array $prof, int $acesso_id, array $valores, ?string $
     db()->beginTransaction();
     if ($anterior) {
         q("DELETE FROM alteracoes WHERE id = ? AND status = 'pendente'", [$anterior['id']]);
-        $foto_velha = $anterior['novos']['foto'] ?? null;
-        if ($foto_velha && $foto_velha !== ($novos['foto'] ?? null)) apagar_foto($foto_velha);
+        // arquivos do pedido antigo que não estão no novo nem no app
+        apagar_fotos_sobrando(arquivos_dos_campos($anterior['novos']), array_merge(arquivos_dos_campos($novos), arquivos_dos_campos($prof)));
     }
     $id = $novos ? inserir('alteracoes', ['profissional_id' => $prof['id'], 'acesso_id' => $acesso_id,
         'novos' => json_encode($novos, JSON_UNESCAPED_UNICODE), 'anteriores' => json_encode($antes, JSON_UNESCAPED_UNICODE), 'ip' => ip()]) : null;
@@ -169,7 +193,7 @@ function aprovar_alteracao(int $id, int $admin_id): void {
     $novos = array_intersect_key(json_decode($a['novos'], true) ?: [], CAMPOS_DONO);
     if (array_key_exists('atende_em_casa', $novos)) $novos['atende_em_casa'] = $novos['atende_em_casa'] ? 1 : 0;
     if (array_key_exists('nome', $novos) && !$novos['nome']) unset($novos['nome']);   // nome nunca fica vazio
-    $prof = linha('SELECT id, foto FROM profissionais WHERE id = ?', [$a['profissional_id']]);
+    $prof = linha('SELECT id, foto, fotos FROM profissionais WHERE id = ?', [$a['profissional_id']]);
     $dados = $novos;
     if (array_key_exists('endereco', $novos) || array_key_exists('bairro', $novos)) {
         // endereço novo: a localização antiga não vale mais; geocodificar.php acha de novo
@@ -185,21 +209,29 @@ function aprovar_alteracao(int $id, int $admin_id): void {
         error_log('acha-facil aprovar alteração ' . $id . ': ' . $e->getMessage());
         throw new RuntimeException('Não foi possível aplicar esta alteração. Confira os dados ou recuse.');
     }
-    if (array_key_exists('foto', $novos) && $prof['foto'] && $prof['foto'] !== $novos['foto']) apagar_foto($prof['foto']);
+    // logo ou fotos trocados: apaga os arquivos antigos que saíram do app
+    $agora = linha('SELECT foto, fotos FROM profissionais WHERE id = ?', [$a['profissional_id']]);
+    apagar_fotos_sobrando(arquivos_dos_campos($prof), arquivos_dos_campos($agora));
 }
 
 function recusar_alteracao(int $id, int $admin_id, string $motivo): void {
     $a = linha("SELECT * FROM alteracoes WHERE id = ? AND status = 'pendente'", [$id]);
     if (!$a) throw new RuntimeException('Esta alteração já foi decidida.');
     q("UPDATE alteracoes SET status = 'recusada', motivo = ?, admin_id = ?, decidido_em = NOW() WHERE id = ? AND status = 'pendente'", [$motivo, $admin_id, $id]);
-    apagar_foto((json_decode($a['novos'], true) ?: [])['foto'] ?? null);
+    $prof = linha('SELECT foto, fotos FROM profissionais WHERE id = ?', [$a['profissional_id']]);
+    apagar_fotos_sobrando(arquivos_dos_campos(json_decode($a['novos'], true) ?: []), arquivos_dos_campos($prof ?: []));
     registrar($admin_id, 'recusou_alteracao', (int)$a['profissional_id'], $motivo);
 }
 
 /** Valor para mostrar ao admin/dono (foto vira miniatura). */
 function valor_campo_html(string $campo, ?string $v): string {
     if ($v === null || $v === '') return '<span class="discreto">(vazio)</span>';
-    if ($campo === 'foto') return '<img class="mini-foto" src="' . h(foto_url($v)) . '" alt="Foto">';
+    if ($campo === 'foto') return '<img class="mini-foto" src="' . h(foto_url($v)) . '" alt="Logo">';
+    if ($campo === 'fotos') {
+        $l = lista_fotos($v);
+        return $l ? '<span class="galeria">' . implode('', array_map(fn($f, $i) => '<img class="mini-foto" src="' . h(foto_url($f)) . '" alt="Foto ' . ($i + 1) . '">', $l, array_keys($l))) . '</span>'
+            : '<span class="discreto">(sem fotos)</span>';
+    }
     if ($campo === 'atende_em_casa') return $v === '1' ? 'Sim' : 'Não';
     if ($campo === 'telefone' || $campo === 'whatsapp') return h(telefone_formatado($v));
     return nl2br(h($v));

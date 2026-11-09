@@ -52,7 +52,10 @@ export interface ProfissionalResumo {
   /** Nome curto da cidade do comércio. */
   cidade: string;
   atendeEmCasa: boolean;
+  /** Logo do comércio (listas e círculo do perfil). */
   foto: string | null;
+  /** Primeira foto da galeria (faixa do destaque). */
+  capa?: string | null;
   verificado: boolean;
   destaque: boolean;
   nota: number;
@@ -90,6 +93,8 @@ export interface Profissional extends ProfissionalResumo {
   linkAssumir: string | null;
   linkRemover: string | null;
   horario: string | null;
+  /** Fotos do comércio: o carrossel da capa do perfil. */
+  fotos?: string[];
   favorito: boolean;
   minhaAvaliacao: { estrelas: number; comentario: string | null } | null;
   comentarios: Comentario[];

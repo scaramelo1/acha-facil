@@ -1,5 +1,4 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useCallback, useRef } from 'react';
@@ -7,12 +6,12 @@ import { Alert, Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } 
 
 import { chamar, registrarContato, type Profissional } from '../../api/cliente';
 import { Cabecalho } from '../../componentes/Cabecalho';
-import { Botao, Estrelas, Falha, Carregando, Foto, SeloVerificado, estilos as ui, useCarregar } from '../../componentes/ui';
+import { CapaComercio } from '../../componentes/CapaComercio';
+import { Botao, Estrelas, Falha, Carregando, SeloVerificado, estilos as ui, useCarregar } from '../../componentes/ui';
 import { useConta } from '../../conta';
 import { cartao, cores, fonte, RAIO } from '../../tema';
 
 type NomeIcone = keyof typeof MaterialCommunityIcons.glyphMap;
-const CAPA = 200;
 
 export default function TelaProfissional() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -49,10 +48,8 @@ export default function TelaProfissional() {
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 48 }}>
       <Cabecalho voltar />
-      {/* capa: a foto que o dono colocar; sem foto, a cor da área com o ícone */}
-      <View style={estilos.capa}>
-        {p.foto ? <Image source={p.foto} style={StyleSheet.absoluteFill} contentFit="cover" /> : <Foto foto={null} icone={p.icone} cor={p.cor} largura="100%" altura={CAPA} raio={0} />}
-      </View>
+      {/* capa: carrossel com as fotos do comércio e o logo num círculo por cima (sem fotos, a cor da área) */}
+      <CapaComercio fotos={p.fotos ?? []} logo={p.foto} icone={p.icone} cor={p.cor} nome={p.nome} />
 
       <View style={{ paddingHorizontal: 16 }}>
         <View style={estilos.cabeca}>
@@ -232,8 +229,7 @@ function BotaoSalvar({ p, aoMudar }: { p: Profissional; aoMudar: (f: boolean) =>
 }
 
 const estilos = StyleSheet.create({
-  capa: { height: CAPA, marginHorizontal: 16, marginTop: 16, borderRadius: RAIO, overflow: 'hidden', backgroundColor: cores.verdeClaro },
-  cabeca: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingTop: 16 },
+  cabeca: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingTop: 10 },
   nome: { fontSize: 28, fontWeight: '900', color: cores.texto, lineHeight: 33 },
   tipo: { fontSize: fonte.normal, color: cores.textoSuave },
   sub: { fontSize: fonte.pequena - 1, color: cores.textoSuave },

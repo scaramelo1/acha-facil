@@ -1,0 +1,5 @@
+# Painel do dono: o logo e várias fotos vão no mesmo envio (o navegador já reduz, isto é a folga para celular antigo)
+<IfModule mod_php.c>
+  php_value upload_max_filesize 10M
+  php_value post_max_size 64M
+</IfModule>

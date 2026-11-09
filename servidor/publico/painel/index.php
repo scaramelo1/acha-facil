@@ -44,16 +44,32 @@ $erro = null;
 if ($p && $em_dia && e_post()) {
     exigir_post();
     [$valores, $erro] = limpar_campos_dono($_POST);
-    $foto = null;
+    $foto = null;      // logo novo
+    $enviadas = [];    // fotos novas da galeria (apagadas se der erro)
     if (!$erro && ($_FILES['foto']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
-        try { $foto = salvar_foto_enviada($_FILES['foto'], (int)$p['id']); } catch (RuntimeException $e) { $erro = $e->getMessage(); }
+        try { $foto = salvar_foto_enviada($_FILES['foto'], (int)$p['id'], 600); } catch (RuntimeException $e) { $erro = 'Logo: ' . $e->getMessage(); }
     }
+    // galeria: parte da lista que o formulário mostrou (pendente ou do app), tira as marcadas e põe as novas no fim
+    $pend_antes = alteracao_pendente((int)$p['id']);
+    $base = lista_fotos(array_key_exists('fotos', $pend_antes['novos'] ?? []) ? $pend_antes['novos']['fotos'] : $p['fotos']);
+    $tirar = array_map('strval', (array)($_POST['tirar'] ?? []));
+    $galeria = array_values(array_filter($base, fn($f) => !in_array($f, $tirar, true)));
+    $novas = $_FILES['fotos_novas'] ?? null;
+    if (!$erro && $novas && is_array($novas['error'])) {
+        foreach ($novas['error'] as $i => $e) {
+            if ($e === UPLOAD_ERR_NO_FILE) continue;
+            if (count($galeria) + count($enviadas) >= MAX_FOTOS) { $erro = 'São no máximo ' . MAX_FOTOS . ' fotos. Tire alguma antes de colocar outras.'; break; }
+            $um = ['error' => $e, 'size' => $novas['size'][$i], 'tmp_name' => $novas['tmp_name'][$i]];
+            try { $enviadas[] = salvar_foto_enviada($um, (int)$p['id'], 1600); } catch (RuntimeException $ex) { $erro = 'Foto ' . ($i + 1) . ': ' . $ex->getMessage(); break; }
+        }
+    }
+    $galeria = array_merge($galeria, $enviadas);
     if (!$erro && (int)valor('SELECT COUNT(*) FROM alteracoes WHERE profissional_id = ? AND criado_em > NOW() - INTERVAL 1 DAY', [$p['id']]) >= 20) {
         $erro = 'Muitos envios hoje. Tente amanhã.';
     }
-    if ($erro) apagar_foto($foto);
+    if ($erro) { apagar_foto($foto); array_map('apagar_foto', $enviadas); }
     else {
-        $id = propor_alteracao($p, (int)$p['acesso_id'], $valores, $foto);
+        $id = propor_alteracao($p, (int)$p['acesso_id'], $valores, $foto, $galeria);
         if ($id) {
             require_once __DIR__ . '/../../inc/avisos.php';
             $campos = array_map(fn($c) => mb_strtolower(CAMPOS_DONO[$c][0]), array_keys(alteracao_pendente((int)$p['id'])['novos'] ?? []));
@@ -73,6 +89,7 @@ $recusada = $p ? linha("SELECT motivo, decidido_em FROM alteracoes WHERE profiss
 $f = $p ? array_merge(array_intersect_key($p, CAMPOS_DONO), $pend['novos'] ?? []) : [];
 if ($erro) $f = array_merge($f, $valores);
 $val = fn(string $c) => h($f[$c] ?? '');
+$galeria_form = lista_fotos($f['fotos'] ?? null);
 
 pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comércio no Acha Fácil.');
 ?>
@@ -99,7 +116,7 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
   <?php endif ?>
 
   <?php if (!$em_dia): ?>
-    <p>Para corrigir os dados e colocar foto, o comércio precisa de um plano ativo.</p>
+    <p>Para corrigir os dados e colocar o logo e as fotos, o comércio precisa de um plano ativo.</p>
     <p><a class="botao amarelo" href="<?= h(config()['url']) ?>/planos.php?id=<?= (int)$p['id'] ?>">Conferir os planos</a></p>
   <?php else: ?>
     <?php if ($erro): ?><div class="aviso erro"><?= h($erro) ?></div><?php endif ?>
@@ -126,12 +143,58 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
       <label for="horario">Horário de funcionamento</label>
       <input id="horario" name="horario" maxlength="200" placeholder="Seg a sex 8h às 18h · Sáb 8h às 12h" value="<?= $val('horario') ?>">
       <label class="marcar"><input type="checkbox" name="atende_em_casa" value="1"<?= ($f['atende_em_casa'] ?? '0') == '1' ? ' checked' : '' ?>> Atende em casa / faz entrega</label>
-      <label for="foto">Foto do comércio (JPG ou PNG, até 8 MB)</label>
-      <?php if (!empty($f['foto'])): ?><p><img class="mini-foto" src="<?= h(foto_url($f['foto'])) ?>" alt="Foto atual"></p><?php endif ?>
-      <input id="foto" name="foto" type="file" accept="image/jpeg,image/png,image/webp">
+      <h2>Logo</h2>
+      <p class="dica">Aparece nas listas do app e no círculo da página do comércio. Melhor quadrada, com o logo no meio.</p>
+      <?php if (!empty($f['foto'])): ?><p><img class="mini-logo" src="<?= h(foto_url($f['foto'])) ?>" alt="Logo atual"></p><?php endif ?>
+      <label for="foto"><?= empty($f['foto']) ? 'Escolher o logo' : 'Trocar o logo' ?> (JPG, PNG ou WEBP)</label>
+      <input id="foto" name="foto" type="file" accept="image/jpeg,image/png,image/webp" data-lado="600">
+
+      <h2>Fotos do comércio</h2>
+      <p class="dica">Até <?= MAX_FOTOS ?> fotos: fachada, ambiente, produtos. Elas passam uma a uma no alto da página do
+        comércio no app; a primeira também aparece na faixa de destaque. Fotos deitadas ficam melhores.</p>
+      <?php if ($galeria_form): ?>
+        <div class="fotos-dono">
+          <?php foreach ($galeria_form as $i => $arq): ?>
+            <figure>
+              <img src="<?= h(foto_url($arq)) ?>" alt="Foto <?= $i + 1 ?>">
+              <label><input type="checkbox" name="tirar[]" value="<?= h($arq) ?>"> Tirar esta foto</label>
+            </figure>
+          <?php endforeach ?>
+        </div>
+      <?php endif ?>
+      <?php if (count($galeria_form) < MAX_FOTOS): ?>
+        <label for="fotos_novas">Colocar fotos (pode escolher várias de uma vez)</label>
+        <input id="fotos_novas" name="fotos_novas[]" type="file" multiple accept="image/jpeg,image/png,image/webp" data-lado="1600" data-max="<?= MAX_FOTOS - count($galeria_form) ?>">
+      <?php else: ?>
+        <p class="dica">A galeria está cheia. Marque "Tirar esta foto" nas que quiser trocar e envie; depois coloque as novas.</p>
+      <?php endif ?>
       <p><button class="botao">Enviar para conferência</button></p>
       <p class="discreto">Nada muda no app até a equipe aprovar.</p>
     </form>
+    <script>
+    // Reduz as fotos no próprio celular antes de enviar (foto de celular passa fácil de 5 MB e o envio falharia)
+    document.querySelectorAll('input[type=file][data-lado]').forEach(function (inp) {
+      inp.addEventListener('change', async function () {
+        var max = parseInt(inp.dataset.max || '99', 10);
+        if (inp.files.length > max) { alert('Escolha no máximo ' + max + ' foto(s).'); inp.value = ''; return; }
+        if (!window.DataTransfer || !window.createImageBitmap) return;
+        var lado = parseInt(inp.dataset.lado, 10), dt = new DataTransfer();
+        try {
+          for (var f of inp.files) {
+            var img = await createImageBitmap(f, { imageOrientation: 'from-image' });
+            var k = Math.min(1, lado / Math.max(img.width, img.height));
+            var c = document.createElement('canvas');
+            c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+            var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+            ctx.drawImage(img, 0, 0, c.width, c.height);
+            var blob = await new Promise(function (r) { c.toBlob(r, 'image/jpeg', 0.88); });
+            dt.items.add(new File([blob], f.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' }));
+          }
+          inp.files = dt.files;
+        } catch (e) { /* navegador antigo: manda o arquivo original */ }
+      });
+    });
+    </script>
   <?php endif ?>
 <?php endif ?>
 </main>

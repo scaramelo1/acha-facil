@@ -50,11 +50,17 @@ function visivel(?string $cidade = null): string {
 // Ordem do dia: muda uma vez por dia, para ninguém ficar sempre no topo nem sempre no fim
 function semente_dia(): int { return (int)date('Ymd'); }
 
-const CAMPOS_RESUMO = 'p.id, p.nome, p.tipo, p.cidade, p.importado, p.servicos, p.bairro, p.atende_em_casa, p.foto, p.verificado, p.plano,
+const CAMPOS_RESUMO = 'p.id, p.nome, p.tipo, p.cidade, p.importado, p.servicos, p.bairro, p.atende_em_casa, p.foto, p.fotos, p.verificado, p.plano,
     ' . SQL_DESTAQUE . ' AS destaque_pago,
     p.nota_media, p.total_avaliacoes, p.whatsapp, p.telefone, c.id AS categoria_id, c.nome AS categoria, c.icone, c.cor';
 
 function foto_url(?string $foto): ?string { return $foto ? url_publica('foto.php?f=' . rawurlencode($foto)) : null; }
+
+/** Galeria do comércio (coluna fotos, lista JSON de arquivos) -> nomes dos arquivos, na ordem. */
+function lista_fotos(?string $json): array {
+    $l = $json ? json_decode($json, true) : null;
+    return is_array($l) ? array_values(array_filter($l, fn($f) => is_string($f) && preg_match('/^[a-z0-9-]{8,80}\.(jpg|png|webp)$/', $f))) : [];
+}
 
 function prof_resumo(array $p): array {
     return [
@@ -69,7 +75,8 @@ function prof_resumo(array $p): array {
         'bairro' => $p['bairro'],
         'cidade' => nome_cidade($p['cidade'], true),
         'atendeEmCasa' => (bool)$p['atende_em_casa'],
-        'foto' => foto_url($p['foto']),
+        'foto' => foto_url($p['foto']),   // logo do comércio
+        'capa' => foto_url(lista_fotos($p['fotos'] ?? null)[0] ?? null),   // 1ª foto da galeria (faixa do destaque)
         'verificado' => (bool)$p['verificado'] && (bool)($p['destaque_pago'] ?? false),   // o selo é do plano Destaque
         'destaque' => (bool)($p['destaque_pago'] ?? false),   // plano Destaque com a assinatura em dia
         'nota' => round((float)$p['nota_media'], 1),
@@ -201,6 +208,7 @@ function prof_completo(array $p, ?int $usuario_id): array {
         'linkAssumir' => $p['importado'] ? url_publica('planos.php?id=' . $p['id']) : null,
         'linkRemover' => $p['importado'] ? url_publica('perfil.php?id=' . $p['id'] . '&acao=remover') : null,
         'horario' => $p['horario'],
+        'fotos' => array_map('foto_url', lista_fotos($p['fotos'] ?? null)),   // carrossel da capa
         'favorito' => $usuario_id ? (bool)valor('SELECT 1 FROM favoritos WHERE usuario_id = ? AND profissional_id = ?', [$usuario_id, $p['id']]) : false,
         'minhaAvaliacao' => null,
         'comentarios' => array_map(fn($a) => [

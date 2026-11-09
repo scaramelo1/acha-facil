@@ -146,3 +146,10 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    api/admin.php, tabela avisos_aparelhos (mudança 010). App: src/avisos.ts, src/app/admin.tsx, pacotes expo-notifications
    e expo-device. Firebase: google-services.json no projeto (08/11, projeto acha-facil-e7bfd). Chave FCM V1 no EAS ✅ (08/11). Falta: testar no APK;
    no iPhone, depois da conta Apple
+13. 🟡 Logo + carrossel de fotos (09/11, pedido do usuário, "igual o Facebook"): `foto` virou o **logo** (listas do app
+   e círculo por cima da capa) e a coluna nova `fotos` (mudança 013, lista JSON) guarda até 10 fotos que passam como
+   carrossel na capa do perfil (bolinhas, contador, toque abre em tela cheia: src/componentes/CapaComercio.tsx). A 1ª foto
+   também é a faixa do Destaque (`capa` na API). Painel do dono: trocar logo, tirar fotos e colocar várias de uma vez
+   (o navegador reduz antes de enviar; painel/.htaccess sobe o limite para 10 MB/64 MB). Tudo passa pela moderação
+   (admin vê as miniaturas no site e no app) e arquivos que saem do app são apagados. Testado numa cópia isolada
+   (12 testes + envio real pelo formulário). Falta: testar as telas no emulador e gerar o APK 1.3.0

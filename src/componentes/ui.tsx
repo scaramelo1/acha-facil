@@ -154,8 +154,9 @@ export function corClara(cor: string, alfa = '22') {
 }
 
 /**
- * Espaço da foto do comércio. Sem foto (o dono coloca depois, pelo plano), mostra a cor da área
- * com o ícone dela em branco e um círculo claro de enfeite.
+ * Espaço do logo do comércio. O logo aparece inteiro sobre fundo branco; com cobrir, a imagem é uma foto e
+ * preenche o espaço. Sem imagem (o dono coloca pelo plano), mostra a cor da área com o ícone dela em branco e
+ * um círculo claro de enfeite (semIcone: só a cor, como na capa do perfil sem fotos).
  */
 export function Foto({
   foto,
@@ -164,29 +165,39 @@ export function Foto({
   largura = 104,
   altura = 88,
   raio = 12,
+  cobrir,
+  semIcone,
 }: {
-  foto: string | null;
+  foto: string | null | undefined;
   icone: string;
   cor?: string;
   largura?: number | `${number}%`;
   altura?: number;
   raio?: number;
+  cobrir?: boolean;
+  semIcone?: boolean;
 }) {
   const forma = { width: largura, height: altura, borderRadius: raio, overflow: 'hidden' as const };
-  if (foto) return <Image source={foto} style={[forma, { backgroundColor: cores.fundoSuave }]} contentFit="cover" />;
+  if (foto && cobrir) return <Image source={foto} style={[forma, { backgroundColor: cores.fundoSuave }]} contentFit="cover" />;
+  if (foto)
+    return (
+      <View style={[forma, { backgroundColor: '#fff', padding: 6 }]}>
+        <Image source={foto} style={{ flex: 1 }} contentFit="contain" />
+      </View>
+    );
   const lado = typeof largura === 'number' ? Math.min(largura, altura) : altura;
   return (
     <View style={[forma, { backgroundColor: /^#[0-9a-f]{6}$/i.test(cor) ? cor : cores.verde, alignItems: 'center', justifyContent: 'center' }]}>
       <View style={[estilos.enfeite, { width: lado * 1.1, height: lado * 1.1, borderRadius: lado * 0.55, right: -lado * 0.35, top: -lado * 0.45 }]} />
-      <Icone nome={icone} tamanho={lado * 0.46} cor="rgba(255,255,255,0.95)" />
+      {!semIcone && <Icone nome={icone} tamanho={lado * 0.46} cor="rgba(255,255,255,0.95)" />}
     </View>
   );
 }
 
-/** Foto do comércio ou, sem foto, o ícone da área num quadrado arredondado com a cor da área. */
+/** Logo do comércio ou, sem foto, o ícone da área num quadrado arredondado com a cor da área. */
 export function Avatar({ foto, icone, cor = cores.verde, tamanho = 64 }: { foto: string | null; icone: string; cor?: string; tamanho?: number }) {
   const forma = { width: tamanho, height: tamanho, borderRadius: tamanho * 0.3 };
-  if (foto) return <Image source={foto} style={[forma, { backgroundColor: cores.fundoSuave }]} contentFit="cover" />;
+  if (foto) return <Image source={foto} style={[forma, { backgroundColor: '#fff' }]} contentFit="contain" />;
   return (
     <View style={[forma, { backgroundColor: corClara(cor), alignItems: 'center', justifyContent: 'center' }]}>
       <Icone nome={icone} tamanho={tamanho * 0.5} cor={cor} />
