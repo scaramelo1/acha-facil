@@ -129,7 +129,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    para o iOS (07/11). Nome "Acha Fácil" não achado em nenhuma das duas. Faltam: contas de desenvolvedor, capturas de
    tela, builds de produção (.aab e iOS), teste fechado de 14 dias na Play (conta pessoal) e conta de demonstração (passo 7).
    09/11: conta da Play ativa; passo a passo da Play no topo de `docs/lojas.md`; build "production" (Play) sem AD_ID (blockedPermissions; declaração "Não") e sem o aviso
-   de APK do site (APP_LOJA=play no eas.json); ícone 512 em assets/loja/
+   de APK do site (APP_LOJA=play no eas.json); ícone 512 em assets/loja/.
+   09/11: Play Console preenchido (ficha, capturas, declarações) e teste fechado (versão 4 / 1.3.0, Brasil, lista
+   "Testadores Acha Fácil") **enviado para revisão**. Falta: aprovação → 12+ testadores por 14 dias → pedir produção
 
 ## Decisões pendentes
 
