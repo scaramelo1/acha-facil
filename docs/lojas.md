@@ -67,7 +67,9 @@ continua).
 > • Favoritos para guardar os seus preferidos
 > • Não precisa de conta para procurar e chamar no WhatsApp
 >
-> Tem um comércio? Procure o seu negócio no app, assuma o perfil de graça ou conheça os planos para ganhar mais destaque.
+> Tem um comércio? Procure o seu negócio no app. Se ele ainda não estiver lá, você pode incluir de graça pelo site fsadesigners.com.br/acha-facil.
+>
+> Sua cidade ainda não está no Acha Fácil? Peça pelo site e avisamos quando chegar.
 
 **Palavras-chave (App Store, até 100):** comércio,guia,lojas,serviços,whatsapp,são joão da boa vista,poços de caldas,águas da prata
 
@@ -76,6 +78,7 @@ continua).
 ## 3. Imagens
 
 - Ícone: `assets/icon.png` (1024×1024); o de 512×512 da Play já está em `assets/loja/icone-512.png`
+- Recurso gráfico (destaque) 1024×500: `assets/loja/destaque-1024x500.png`
 - Play Store: 2 a 8 capturas de celular (ex.: 1080×1920) + **imagem de destaque 1024×500**
 - App Store: capturas de **iPhone 6,9"** (1320×2868 ou 1290×2796); como `supportsTablet` está ligado, também **iPad 13"** (2064×2752). Se não quiser fazer as do iPad, desligar `supportsTablet` no app.json
 - Telas sugeridas: Início, Categorias, comércio com botão do WhatsApp, Perto de você, Busca com filtros
