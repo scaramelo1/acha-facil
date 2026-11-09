@@ -6,8 +6,11 @@ import { chamar } from './api/cliente';
 
 // Aviso de versão nova (igual ao ReadyTAF): ao abrir o app, pergunta ao servidor qual é o APK publicado no site
 // (api/versao.php, gravado pelo publicar-apk.sh) e avisa quem está com uma versão mais velha. Uma vez por versão nova.
+// Na versão da Play Store (extra.loja = 'play', vindo do app.config.js) não avisa nada: a própria loja atualiza,
+// e a Play proíbe app instalado por ela mandar baixar atualização por fora.
 
 export const VERSAO_INSTALADA = Constants.expoConfig?.version ?? null;
+export const DA_PLAY_STORE = Constants.expoConfig?.extra?.loja === 'play';
 
 const partes = (v: string) => v.split('.').map((p) => Number.parseInt(p, 10) || 0);
 const valida = (v: unknown): v is string => typeof v === 'string' && /^\d{1,4}(\.\d{1,4}){0,2}$/.test(v);
@@ -31,6 +34,7 @@ export function useAvisoDeVersao() {
   const jaAvisou = useRef<string | null>(null);
 
   useEffect(() => {
+    if (DA_PLAY_STORE) return;
     const consultar = async () => {
       if (Date.now() - ultimaConsulta.current < INTERVALO_MS) return;
       ultimaConsulta.current = Date.now();

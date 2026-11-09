@@ -1,6 +1,36 @@
 # Acha Fácil! — publicar na Play Store e na App Store
 
-Pacote/bundle: `br.com.fsadesigner.achafacil` · Projeto EAS: `scaramelo/acha-facil` · versão 1.1.0
+Pacote/bundle: `br.com.fsadesigner.achafacil` · Projeto EAS: `scaramelo/acha-facil` · versão 1.2.0
+
+## Play Store: passo a passo
+
+1. **Gerar o .aab** (PC): `npx eas build -p android --profile production`. A Play não aceita APK. Esse perfil liga
+   `APP_LOJA=play` (eas.json → app.config.js → `extra.loja`): o app **não mostra o aviso "baixe o APK"**, porque a Play
+   proíbe atualizar por fora da loja e ela mesma já atualiza. O APK do site (`--profile preview`) continua avisando.
+   O EAS sobe o número interno da versão sozinho (`autoIncrement`). Ao terminar, baixar o .aab pelo link.
+2. **Criar o app** no Play Console: Criar app → nome `Acha Fácil!` · Português (Brasil) · App · Gratuito → aceitar as declarações.
+3. **Configurar o app** (lista no Painel), com as respostas da seção 4 abaixo:
+   - Política de privacidade: link da seção 1
+   - Acesso ao app: "todas as funções estão disponíveis sem restrições" (procurar não pede login; login é só Google)
+   - Anúncios: não · Público-alvo: 18+ · Classificação: questionário IARC (marcar que usuários interagem: comentários)
+   - Segurança dos dados: seção 4 · Excluir conta: link da seção 1
+   - Apps governamentais / financeiros / saúde / notícias: não
+   - Categoria: Estilo de vida · e-mail fsadesignerbr@gmail.com
+4. **Página da loja**: nome, descrição curta e completa (seção 2), ícone 512, imagem de destaque 1024×500 e 2 a 8 capturas
+   (seção 3).
+5. **Teste fechado** (obrigatório em conta pessoal nova): Testar → Teste fechado → criar faixa → enviar o .aab → lista
+   de testadores (e-mails Gmail) → mandar o link de participação. **12 testadores no mínimo, com o app instalado por 14
+   dias seguidos.** Conta de organização (CNPJ) pula este passo.
+6. **Pedir acesso à produção**: depois dos 14 dias, no Painel → "Solicitar acesso à produção" (perguntas sobre o teste;
+   resposta em até ~7 dias).
+7. **Produção** → Criar versão → o mesmo .aab (ou um novo) → países: Brasil → enviar para revisão (horas a alguns dias).
+8. **Login com Google**: Google Cloud → Tela de consentimento OAuth → "Em produção" (seção 5b).
+9. **Versões seguintes**: subir o `"version"` do app.json → build production → enviar no Console (ou
+   `npx eas submit -p android --latest`, depois de pôr no EAS a chave de conta de serviço do Google).
+
+**Atenção:** a Play assina o app com a chave dela (Play App Signing), diferente da chave do APK do site. Quem tem o APK
+do site precisa **desinstalar** antes de instalar pela Play (favoritos guardados só no celular se perdem; a conta Google
+continua).
 
 ## 0. Antes de tudo (contas e custos)
 
@@ -45,7 +75,7 @@ Pacote/bundle: `br.com.fsadesigner.achafacil` · Projeto EAS: `scaramelo/acha-fa
 
 ## 3. Imagens
 
-- Ícone: `assets/icon.png` (1024×1024; a Play pede 512×512, gerar com `convert assets/icon.png -resize 512x512 icone-512.png`)
+- Ícone: `assets/icon.png` (1024×1024); o de 512×512 da Play já está em `assets/loja/icone-512.png`
 - Play Store: 2 a 8 capturas de celular (ex.: 1080×1920) + **imagem de destaque 1024×500**
 - App Store: capturas de **iPhone 6,9"** (1320×2868 ou 1290×2796); como `supportsTablet` está ligado, também **iPad 13"** (2064×2752). Se não quiser fazer as do iPad, desligar `supportsTablet` no app.json
 - Telas sugeridas: Início, Categorias, comércio com botão do WhatsApp, Perto de você, Busca com filtros
