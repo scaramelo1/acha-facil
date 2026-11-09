@@ -137,24 +137,24 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 - Arquivo da logo em alta (PNG/SVG) para trocar o redesenho, se quiser fidelidade total à arte.
 - Quantos lugares no carrossel de destaque (preços desde 08/11: Básico R$ 5,99 uma vez só, Destaque R$ 29,90/mês).
 - Se volta a ter notícias no futuro.
-12. 🟡 Administrador no app com avisos no celular (07/11): fellipealexandre1@gmail.com é admin (tabela admins; também
+12. ✅ Administrador no app com avisos no celular (07/11): fellipealexandre1@gmail.com é admin (tabela admins; também
    entra no /admin do site). Conta do app com e-mail de admin vê "Administração" no Perfil (aprovar/recusar alterações
    com antes x depois, pedidos novos, cidades pedidas) e recebe aviso quando alguém **paga um plano**, **pede uma cidade**
    ou **manda alterações**; tocar no aviso abre a tela. Desde 08/11 também avisa **no momento do pedido** (plano escolhido,
    tirar do app, assumir/incluir), sem esperar o Mercado Pago. Servidor: inc/avisos.php (Expo Push), api/avisos.php,
    api/admin.php, tabela avisos_aparelhos (mudança 010). App: src/avisos.ts, src/app/admin.tsx, pacotes expo-notifications
-   e expo-device. Firebase: google-services.json no projeto (08/11, projeto acha-facil-e7bfd). Chave FCM V1 no EAS ✅ (08/11). Falta: testar no APK;
-   no iPhone, depois da conta Apple
-13. 🟡 Logo + carrossel de fotos (09/11, pedido do usuário, "igual o Facebook"): `foto` virou o **logo** (listas do app
+   e expo-device. Firebase: google-services.json no projeto (08/11, projeto acha-facil-e7bfd). Chave FCM V1 no EAS ✅ (08/11). Testado pelo usuário ✅ (09/11).
+   No iPhone, depois da conta Apple
+13. ✅ Logo + carrossel de fotos (09/11, pedido do usuário, "igual o Facebook"): `foto` virou o **logo** (listas do app
    e círculo por cima da capa) e a coluna nova `fotos` (mudança 013, lista JSON) guarda até 10 fotos que passam como
    carrossel na capa do perfil (bolinhas, contador, toque abre em tela cheia: src/componentes/CapaComercio.tsx). A 1ª foto
    também é a faixa do Destaque (`capa` na API). Painel do dono: trocar logo, tirar fotos e colocar várias de uma vez
    (o navegador reduz antes de enviar; painel/.htaccess sobe o limite para 10 MB/64 MB). Tudo passa pela moderação
    (admin vê as miniaturas no site e no app) e arquivos que saem do app são apagados. Testado numa cópia isolada
-   (12 testes + envio real pelo formulário). Falta: testar as telas no emulador e gerar o APK 1.3.0
+   (12 testes + envio real pelo formulário). Vai no APK 1.3.0
    09/11 (2): logo sempre quadrado: no painel o dono enquadra num círculo (arrastar + aproximar, sai 600x600) e o
    servidor completa com branco + margem quem mandar sem o recorte; dicas de tamanho (logo 500x500, fotos deitadas
-   1200x750). O APK 1.2.0 instalado mostra o logo como capa inteira: o carrossel só aparece no app com este código.
+   1200x750). Conferido pelo usuário ✅ (09/11).
 14. ✅ Cupons de desconto (09/11, pedido do usuário): desconto em % para Básico e/ou Destaque; o dono digita na página
    do pagamento (assinatura.php, "Tem cupom de desconto?") antes de pagar. No Destaque a assinatura do Mercado Pago já
    nasce com o valor com desconto, então vale **em todas as mensalidades**; a conferência dos avisos do Mercado Pago usa
@@ -163,10 +163,10 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Admin em /admin/cupons.php (criar, ligar/desligar, quem usou). Mudança 014 aplicada. Cupom de cortesia criado:
    CORTESIA-MKS7 (100%, os dois planos, até 10 usos). Testado numa cópia isolada (16 testes + páginas). Falta: 1º uso
    real de cupom parcial no Mercado Pago (conferir o valor na assinatura)
-15. 🟡 Horário por campo + logo no Destaque (09/11, pedido do usuário, modelo do Google Maps): no painel do dono e no
+15. ✅ Horário por campo + logo no Destaque (09/11, pedido do usuário, modelo do Google Maps): no painel do dono e no
    /incluir.php o horário virou 4 linhas (Segunda a sexta, Sábado, Domingo, Feriados), cada uma Aberto (abre/fecha,
    pode fechar depois da meia-noite), Fechado, 24 horas ou Não informar. Coluna `horarios` (JSON, mudança 015 aplicada);
    o texto `horario` é gerado dela (app antigo, páginas do site). App: src/componentes/Horarios.tsx mostra cada campo
    numa linha, o de hoje em negrito e "Aberto agora · fecha às ..." (feriado o app não sabe: usa o dia da semana).
    Spani convertido para o formato novo. Faixa do Destaque: logo à esquerda + nome (não usa mais a 1a foto).
-   Testado numa cópia isolada. Falta: ver no emulador (junto do passo 13) e o APK 1.3.0
+   Testado numa cópia isolada e conferido pelo usuário ✅ (09/11). Vai no APK 1.3.0
