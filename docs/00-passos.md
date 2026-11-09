@@ -102,13 +102,12 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    WhatsApp, telefone, Instagram, site, endereço, bairro, horário, atende em casa e foto (sem dados escondidos da foto,
    reduzida). Nada vai ao app sem aprovação; endereço novo zera a localização para o geocodificar.php achar de novo.
    Falta: responder avaliações e ver contatos recebidos
-10. 🟡 Assinatura recorrente no Mercado Pago (07/11): planos.php -> perfil.php (nome, telefone, e-mail) -> assinatura.php?c=
+10. ✅ Assinatura recorrente no Mercado Pago (07/11; em produção desde 08/11, ver 10c): planos.php -> perfil.php (nome, telefone, e-mail) -> assinatura.php?c=
    (página secreta do pedido) -> Mercado Pago (assinatura mensal no cartão, "preapproval"); avisos em mp-webhook.php,
    sempre conferidos na API (inc/mercadopago.php). Assinatura autorizada liga o plano (3 dias até a 1ª mensalidade);
    cada mensalidade paga estende 1 mês, uma vez só; cancelada vale até o fim do mês pago; vencida sai do destaque
-   (e do app, se não é importado). Testado numa cópia isolada (18 testes + páginas). Falta: (a) aplicar
-   sql/migracoes/007-mercado-pago.sql, (b) criar a aplicação no Mercado Pago e pôr mp_modo, mp_access_token e
-   mp_webhook_secret em /etc/acha-facil/config.php, (c) testar no modo sandbox e depois ligar em producao.
+   (e do app, se não é importado). Testado numa cópia isolada (18 testes + páginas). Mudança 007, aplicação do
+   Mercado Pago, sandbox e produção: feitos (08/11).
    O app não mostra preço nem botão de contratar (regra das lojas): "Este comércio é seu?" -> "Saiba mais no site"
 10b. ✅ Planos novos (08/11, pedido do usuário): **Básico R$ 5,99 pagamento único** (Checkout Pro, aviso `payment` no
    mp-webhook.php -> mp_conferir_pagamento; aprovado grava `profissionais.basico_pago_em` e o comércio fica no app para

@@ -1,6 +1,6 @@
 # Acha Fácil! — publicar na Play Store e na App Store
 
-Pacote/bundle: `br.com.fsadesigner.achafacil` · Projeto EAS: `scaramelo/acha-facil` · versão 1.2.0
+Pacote/bundle: `br.com.fsadesigner.achafacil` · Projeto EAS: `scaramelo/acha-facil` · versão 1.3.0
 
 ## Play Store: passo a passo
 
