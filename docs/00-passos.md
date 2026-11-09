@@ -131,7 +131,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    09/11: conta da Play ativa; passo a passo da Play no topo de `docs/lojas.md`; build "production" (Play) sem AD_ID (blockedPermissions; declaração "Não") e sem o aviso
    de APK do site (APP_LOJA=play no eas.json); ícone 512 em assets/loja/.
    09/11: Play Console preenchido (ficha, capturas, declarações) e teste fechado (versão 4 / 1.3.0, Brasil, lista
-   "Testadores Acha Fácil") **enviado para revisão**. Falta: aprovação → 12+ testadores por 14 dias → pedir produção
+   "Testadores Acha Fácil") **aprovado e publicado** (09/11). Falta: 12+ testadores inscritos por 14 dias → pedir produção
 
 ## Decisões pendentes
 
