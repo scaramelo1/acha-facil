@@ -172,3 +172,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    numa linha, o de hoje em negrito e "Aberto agora · fecha às ..." (feriado o app não sabe: usa o dia da semana).
    Spani convertido para o formato novo. Faixa do Destaque: logo à esquerda + nome (não usa mais a 1a foto).
    Testado numa cópia isolada e conferido pelo usuário ✅ (09/11). Vai no APK 1.3.0
+16. ✅ Vargem Grande do Sul - SP (09/11, pedido do usuário): 4ª cidade (slug vargem-grande-do-sul, curto "Vargem Grande").
+   Lista do robô em /var/lib/acha-facil/leads/vargem-grande-do-sul.html: 1.037 comércios importados (10 repetidos
+   pulados), todos com localização pelo link do Google. Cidade em servidor/inc/guia.php e src/cidade.tsx (o app precisa
+   do APK novo para mostrar a cidade na escolha); textos do site, termos e lojas atualizados. Backup da tabela antes:
+   /root/acha-facil-profissionais.antes-vargem.*.sql.gz

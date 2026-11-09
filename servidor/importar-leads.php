@@ -1,7 +1,7 @@
 <?php
 // Importa (ou atualiza) os comércios de uma lista de leads para o Acha Fácil. Rodar na VPS como root:
 //   php servidor/importar-leads.php [arquivo leads.html] [cidade]
-//   cidade: sao-joao (padrão), aguas-da-prata ou pocos-de-caldas. Ex.: php servidor/importar-leads.php /var/lib/acha-facil/leads/aguas-da-prata.html aguas-da-prata
+//   cidade: sao-joao (padrão), aguas-da-prata, pocos-de-caldas ou vargem-grande-do-sul. Ex.: php servidor/importar-leads.php /var/lib/acha-facil/leads/aguas-da-prata.html aguas-da-prata
 // Padrão: a lista de São João publicada em fsadesigners.com.br/leads/. Linhas cujo endereço é de outra cidade atendida
 // vão para aquela cidade. Listas sem área (data-seg) usam a área mais comum do mesmo tipo de negócio já cadastrado. Pode rodar de novo sempre que a lista mudar:
 // atualiza quem já veio dos leads (pelo nome) e não mexe em quem assumiu o perfil nem em quem foi removido.
@@ -46,6 +46,7 @@ $area_fixa = [
     'descartáveis' => 'lojas', 'embalagens' => 'lojas', 'ateliê de arte' => 'lojas',
     'loja de roupas' => 'moda', 'loja de calçados' => 'moda', 'sapataria' => 'moda', 'loja de acessórios' => 'moda',
     'cosméticos' => 'beleza', 'chocolateria' => 'alimentacao', 'artigos para festas' => 'lojas', 'suplementos' => 'saude',
+    'agropecuária' => 'pet', 'marcenaria' => 'casa',
     'escola infantil' => 'educacao', 'loja de queijos' => 'mercados', 'fondue' => 'alimentacao', 'equipamentos industriais' => 'industria',
 ];
 foreach ($area_fixa as $t => $slug) if (isset($cat[$slug])) $area_do_tipo[$t] = $cat[$slug];
@@ -70,7 +71,7 @@ function chave(string $nome): string {
 }
 // "Rua X, 410 - Jardim São Paulo, São João da Boa Vista - SP, 13875-089, Brasil" → ["Rua X, 410", "Jardim São Paulo"]
 function endereco_e_bairro(string $e): array {
-    $e = preg_replace('/,?\s*(S[ãa]o Jo[ãa]o da Boa Vista|[ÁA]guas da Prata|Po[çc]os de Caldas)\b.*$/iu', '', $e);
+    $e = preg_replace('/,?\s*(S[ãa]o Jo[ãa]o da Boa Vista|[ÁA]guas da Prata|Po[çc]os de Caldas|Vargem Grande do Sul)\b.*$/iu', '', $e);
     $e = trim(preg_replace('/,?\s*\d{5}-?\d{3}.*$/', '', $e), " ,-");
     $endereco = null; $bairro = null;
     foreach (array_map('trim', explode(' - ', $e)) as $parte) {

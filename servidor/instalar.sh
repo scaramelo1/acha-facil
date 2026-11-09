@@ -95,7 +95,7 @@ else
 fi
 if [ "${1:-}" = "--leads" ]; then
   php "$RAIZ/importar-leads.php"                                   # São João (lista de fsadesigners.com.br/leads)
-  for c in aguas-da-prata pocos-de-caldas; do                      # outras cidades: $DADOS/leads/<cidade>.html
+  for c in aguas-da-prata pocos-de-caldas vargem-grande-do-sul; do                      # outras cidades: $DADOS/leads/<cidade>.html
     [ -f "$DADOS/leads/$c.html" ] && php "$RAIZ/importar-leads.php" "$DADOS/leads/$c.html" "$c" || echo "• sem lista de $c em $DADOS/leads"
   done
 fi

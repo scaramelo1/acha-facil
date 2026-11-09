@@ -9,6 +9,7 @@ const CIDADES = [
     'sao-joao' => ['São João da Boa Vista', 'São João', 'SP'],
     'aguas-da-prata' => ['Águas da Prata', 'Águas da Prata', 'SP'],
     'pocos-de-caldas' => ['Poços de Caldas', 'Poços de Caldas', 'MG'],
+    'vargem-grande-do-sul' => ['Vargem Grande do Sul', 'Vargem Grande', 'SP'],
 ];
 const CIDADE_PADRAO = 'sao-joao';
 

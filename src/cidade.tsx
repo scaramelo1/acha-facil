@@ -14,6 +14,7 @@ export const CIDADES: Cidade[] = [
   { slug: 'sao-joao', nome: 'São João da Boa Vista', curto: 'São João', estado: 'SP', lat: -21.9696, lng: -46.7981 },
   { slug: 'aguas-da-prata', nome: 'Águas da Prata', curto: 'Águas da Prata', estado: 'SP', lat: -21.9371, lng: -46.7172 },
   { slug: 'pocos-de-caldas', nome: 'Poços de Caldas', curto: 'Poços de Caldas', estado: 'MG', lat: -21.7878, lng: -46.5614 },
+  { slug: 'vargem-grande-do-sul', nome: 'Vargem Grande do Sul', curto: 'Vargem Grande', estado: 'SP', lat: -21.8322, lng: -46.8936 },
 ];
 const CHAVE = 'cidade';
 
