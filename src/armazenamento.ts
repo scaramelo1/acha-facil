@@ -20,6 +20,7 @@ function abrir(): Guarda {
   if (!requireOptionalNativeModule('ExpoSQLite')) return naMemoria;
   try {
     // só carrega o expo-sqlite depois de saber que o módulo nativo existe (carregar antes derruba o app)
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- carregar sob demanda é de propósito (ver acima)
     return (require('expo-sqlite/kv-store') as { default: Guarda }).default;
   } catch {
     return naMemoria;

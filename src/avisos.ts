@@ -24,6 +24,8 @@ export async function ligarAvisosDeAdmin(): Promise<void> {
       await Notifications.setNotificationChannelAsync('admin', {
         name: 'Administração',
         description: 'Pagamentos, cidades pedidas e alterações para aprovar',
+        // o AndroidImportance existe (vem de outro arquivo do pacote); o eslint-plugin-import é que não o enxerga
+        // eslint-disable-next-line import/namespace
         importance: Notifications.AndroidImportance.HIGH,
         lightColor: '#F7C600',
       });

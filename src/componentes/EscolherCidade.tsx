@@ -210,17 +210,6 @@ export function EscolherCidade({
     );
   };
 
-  /** Caixa da seção "Cidade atual" quando a cidade ainda não foi achada pela localização. */
-  const aviso = (icone: keyof typeof MaterialCommunityIcons.glyphMap, texto: string, botao?: { titulo: string; onPress: () => void }) => (
-    <View style={estilos.aviso}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-        <MaterialCommunityIcons name={icone} size={28} color={cores.verde} />
-        <Text style={[estilos.avisoTexto, { flex: 1 }]}>{texto}</Text>
-      </View>
-      {botao && <Botao titulo={botao.titulo} tipo="contorno" onPress={botao.onPress} estilo={{ marginTop: 12 }} />}
-    </View>
-  );
-
   return (
     <View style={[StyleSheet.absoluteFill, estilos.fundo]}>
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
@@ -237,16 +226,17 @@ export function EscolherCidade({
                   <Text style={estilos.avisoTexto}>Procurando sua localização...</Text>
                 </View>
               ) : local.situacao === 'pedir' ? (
-                aviso('crosshairs-gps', 'Use a localização do celular para achar a cidade onde você está.', { titulo: 'Usar minha localização', onPress: pedir })
+                <Aviso icone="crosshairs-gps" texto="Use a localização do celular para achar a cidade onde você está." botao={{ titulo: 'Usar minha localização', onPress: pedir }} />
               ) : local.situacao === 'negado' ? (
-                aviso('map-marker-off-outline', 'A localização está desligada para o Acha Fácil. Ligue nas configurações ou escolha a cidade abaixo.', {
-                  titulo: 'Abrir configurações',
-                  onPress: () => Linking.openSettings(),
-                })
+                <Aviso
+                  icone="map-marker-off-outline"
+                  texto="A localização está desligada para o Acha Fácil. Ligue nas configurações ou escolha a cidade abaixo."
+                  botao={{ titulo: 'Abrir configurações', onPress: () => Linking.openSettings() }}
+                />
               ) : local.situacao === 'longe' ? (
-                aviso('map-marker-question-outline', 'Você não está em nenhuma cidade atendida pelo Acha Fácil. Escolha abaixo onde quer buscar.')
+                <Aviso icone="map-marker-question-outline" texto="Você não está em nenhuma cidade atendida pelo Acha Fácil. Escolha abaixo onde quer buscar." />
               ) : (
-                aviso('map-marker-alert-outline', 'Não foi possível achar sua localização agora.', { titulo: 'Tentar de novo', onPress: pedir })
+                <Aviso icone="map-marker-alert-outline" texto="Não foi possível achar sua localização agora." botao={{ titulo: 'Tentar de novo', onPress: pedir }} />
               )}
 
               {estados.length > 1 && (
@@ -386,6 +376,19 @@ export function EscolherCidade({
       <View style={[estilos.rodape, { paddingBottom: baixo + 16 }]}>
         <Botao titulo={`Confirmar: ${escolhida.curto}`} tipo="amarelo" onPress={() => aoEscolher(escolhida)} />
       </View>
+    </View>
+  );
+}
+
+/** Caixa da seção "Cidade atual" quando a cidade ainda não foi achada pela localização. */
+function Aviso({ icone, texto, botao }: { icone: keyof typeof MaterialCommunityIcons.glyphMap; texto: string; botao?: { titulo: string; onPress: () => void } }) {
+  return (
+    <View style={estilos.aviso}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <MaterialCommunityIcons name={icone} size={28} color={cores.verde} />
+        <Text style={[estilos.avisoTexto, { flex: 1 }]}>{texto}</Text>
+      </View>
+      {botao && <Botao titulo={botao.titulo} tipo="contorno" onPress={botao.onPress} estilo={{ marginTop: 12 }} />}
     </View>
   );
 }
