@@ -18,6 +18,7 @@
 declare(strict_types=1);
 require_once __DIR__ . '/base.php';
 require_once __DIR__ . '/guia.php';
+require_once __DIR__ . '/cupons.php';   // preco_pedido(): valor do plano com o cupom do pedido
 
 const MP_API = 'https://api.mercadopago.com';
 
@@ -77,12 +78,14 @@ function mp_assinar(array $pedido): string {
     if (!email_valido((string)$pedido['email'])) throw new RuntimeException('O pedido está sem um e-mail válido.');
     $plano = (string)$pedido['plano'];
     if (plano_unico($plano)) return mp_pagar_unico($pedido);
-    $valor = PLANOS_PRECO[$plano] ?? throw new RuntimeException('Plano inválido.');
+    $valor = preco_pedido($pedido);   // com cupom: o desconto vale em todas as mensalidades
 
     // já existe uma assinatura esperando o dono concluir: usa o mesmo endereço (não cria outra)
     if ($pedido['mp_assinatura'] && $pedido['mp_status'] === 'pending') {
         $a = mp_api('GET', '/preapproval/' . rawurlencode((string)$pedido['mp_assinatura']));
-        if (($a['status'] ?? '') === 'pending' && !empty($a['init_point'])) return (string)$a['init_point'];
+        // (só se o valor é o mesmo: com cupom novo, cria outra com o valor certo)
+        $mesmo = abs((float)($a['auto_recurring']['transaction_amount'] ?? 0) - $valor) < 0.009;
+        if ($mesmo && ($a['status'] ?? '') === 'pending' && !empty($a['init_point'])) return (string)$a['init_point'];
     }
 
     $comercio = $pedido['profissional_id'] ? (string)valor('SELECT nome FROM profissionais WHERE id = ?', [$pedido['profissional_id']]) : '';
@@ -109,7 +112,7 @@ function mp_assinar_cartao(array $pedido, array $form): array {
     if (mp_modo() === 'desligado' || mp_public_key() === '') throw new RuntimeException('Pagamento com cartão no site desligado.');
     $plano = (string)$pedido['plano'];
     if (plano_unico($plano)) throw new RuntimeException('O Básico é pago pelo Checkout, não por assinatura.');
-    $valor = PLANOS_PRECO[$plano] ?? throw new RuntimeException('Plano inválido.');
+    $valor = preco_pedido($pedido);
     $token = (string)($form['token'] ?? '');
     if (!preg_match('/^[A-Za-z0-9_-]{8,100}$/', $token)) throw new RuntimeException('Token do cartão inválido.');
     $email = email_valido((string)($form['payer']['email'] ?? '')) ?: email_valido((string)$pedido['email']);
@@ -147,7 +150,7 @@ function mp_erro_para_dono(Throwable $e): string {
 function mp_pagar_unico(array $pedido): string {
     if (!mp_pronto_unico()) throw new RuntimeException('Falta aplicar a mudança 011 do banco (bash servidor/instalar.sh).');
     $plano = (string)$pedido['plano'];
-    $valor = PLANOS_PRECO[$plano] ?? throw new RuntimeException('Plano inválido.');
+    $valor = preco_pedido($pedido);
     $comercio = $pedido['profissional_id'] ? (string)valor('SELECT nome FROM profissionais WHERE id = ?', [$pedido['profissional_id']]) : '';
     $volta = url_publica('assinatura.php?c=' . $pedido['codigo']);
     $pref = mp_api('POST', '/checkout/preferences', [
@@ -187,7 +190,7 @@ function mp_conferir_pagamento(string $mp_id): ?array {
     mp_evento((int)$pedido['id'], 'pagamento', $mp_id, $status, $valor);
     if (pedido_pago($pedido)) return $pedido;   // já pago antes (aviso repetido ou outro pagamento do mesmo pedido)
 
-    $certo = ($pg['currency_id'] ?? '') === 'BRL' && $valor + 0.009 >= (PLANOS_PRECO[$pedido['plano']] ?? INF);
+    $certo = ($pg['currency_id'] ?? '') === 'BRL' && $valor + 0.009 >= preco_pedido($pedido);
     if ($status !== 'approved') {
         q('UPDATE pedidos SET mp_pagamento = ?, mp_status = ?, atualizado_em = NOW() WHERE id = ?', [$mp_id, $status, $pedido['id']]);
     } elseif (!$certo) {
@@ -224,7 +227,7 @@ function mp_conferir_assinatura(string $mp_id): ?array {
 
     $status = (string)($a['status'] ?? '');
     $valor = (float)($a['auto_recurring']['transaction_amount'] ?? 0);
-    $certo = ($a['auto_recurring']['currency_id'] ?? '') === 'BRL' && $valor + 0.009 >= (PLANOS_PRECO[$pedido['plano']] ?? INF);
+    $certo = ($a['auto_recurring']['currency_id'] ?? '') === 'BRL' && $valor + 0.009 >= preco_pedido($pedido);
     q('UPDATE pedidos SET mp_assinatura = ?, mp_status = ?, atualizado_em = NOW() WHERE id = ?', [$mp_id, $status, $pedido['id']]);
     mp_evento((int)$pedido['id'], 'assinatura', $mp_id, $status, $valor);
 
@@ -264,7 +267,7 @@ function mp_conferir_mensalidade(string $mp_id): void {
     $status = $pago ? 'approved' : (string)($c['payment']['status'] ?? $c['status'] ?? 'desconhecido');
     mp_evento((int)$pedido['id'], 'mensalidade', $mp_id, $status, $valor);
     if (!$pago) return;
-    if ($valor + 0.009 < (PLANOS_PRECO[$pedido['plano']] ?? INF)) {
+    if ($valor + 0.009 < preco_pedido($pedido)) {
         error_log("acha-facil mp: mensalidade $mp_id paga com valor menor que o plano (pedido {$pedido['id']})");
         return;
     }

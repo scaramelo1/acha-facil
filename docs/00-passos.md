@@ -153,3 +153,11 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (o navegador reduz antes de enviar; painel/.htaccess sobe o limite para 10 MB/64 MB). Tudo passa pela moderação
    (admin vê as miniaturas no site e no app) e arquivos que saem do app são apagados. Testado numa cópia isolada
    (12 testes + envio real pelo formulário). Falta: testar as telas no emulador e gerar o APK 1.3.0
+14. ✅ Cupons de desconto (09/11, pedido do usuário): desconto em % para Básico e/ou Destaque; o dono digita na página
+   do pagamento (assinatura.php, "Tem cupom de desconto?") antes de pagar. No Destaque a assinatura do Mercado Pago já
+   nasce com o valor com desconto, então vale **em todas as mensalidades**; a conferência dos avisos do Mercado Pago usa
+   o valor do pedido (preco_pedido em inc/cupons.php). 100% = cortesia sem Mercado Pago (Básico para sempre; Destaque
+   com assinatura 'cortesia', que o admin pode encerrar). Cupom que daria menos de R$ 1,00 não vale (mínimo do MP).
+   Admin em /admin/cupons.php (criar, ligar/desligar, quem usou). Mudança 014 aplicada. Cupom de cortesia criado:
+   CORTESIA-MKS7 (100%, os dois planos, até 10 usos). Testado numa cópia isolada (16 testes + páginas). Falta: 1º uso
+   real de cupom parcial no Mercado Pago (conferir o valor na assinatura)

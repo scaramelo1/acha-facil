@@ -44,7 +44,18 @@ if (e_post() && isset($_GET['cartao'])) {
 }
 if (e_post()) {
     exigir_post();
-    if (($_POST['acao'] ?? '') === 'cancelar') {
+    if (in_array($_POST['acao'] ?? '', ['cupom', 'tirar_cupom'], true) && cupons_prontos()) {
+        // cupom de desconto: muda o valor do pedido antes de pagar (100% = cortesia, já liga o plano)
+        if ((int)valor('SELECT COUNT(*) FROM pedidos WHERE ip = ? AND atualizado_em > NOW() - INTERVAL 1 HOUR', [ip()]) >= 30) {
+            $erro = 'Muitas tentativas. Tente de novo daqui a pouco.';
+        } else {
+            try {
+                $pedido = aplicar_cupom($pedido, $_POST['acao'] === 'cupom' ? (string)txt('cupom', 30) : '');
+                flash(pedido_pago($pedido) ? 'Cupom aplicado: plano liberado de cortesia!' : ($pedido['desconto'] ? 'Cupom aplicado!' : 'Cupom retirado.'));
+                ir('assinatura.php?c=' . $codigo);
+            } catch (RuntimeException $e) { $erro = $e->getMessage(); }
+        }
+    } elseif (($_POST['acao'] ?? '') === 'cancelar') {
         try {
             if ($pedido['mp_assinatura'] && $pedido['mp_status'] === 'authorized') {
                 mp_api('PUT', '/preapproval/' . rawurlencode((string)$pedido['mp_assinatura']), ['status' => 'cancelled']);
@@ -64,6 +75,11 @@ $status = $pedido['mp_status'] ?: null;
 $pago = pedido_pago($pedido);
 $modo = mp_modo();
 $cartao_no_site = !$unico && $modo !== 'desligado' && mp_public_key() !== '';
+$valor = preco_pedido($pedido);           // com o desconto do cupom, se houver
+$desconto = (int)($pedido['desconto'] ?? 0);
+$cortesia = $desconto === 100;
+$cupom = $desconto ? (string)valor('SELECT codigo FROM cupons WHERE id = ?', [$pedido['cupom_id']]) : '';
+$preco_html = $desconto && !$cortesia ? '<s>' . h(preco_plano($plano)) . '</s> ' . h(reais($valor)) : h(reais($valor));
 pagina_inicio('Plano ' . PLANOS_NOME[$plano] . ' · Acha Fácil!', 'Pagamento do plano do seu comércio.');
 ?>
 <main class="documento">
@@ -71,16 +87,20 @@ pagina_inicio('Plano ' . PLANOS_NOME[$plano] . ' · Acha Fácil!', 'Pagamento do
   <?php if ($p): ?>
     <div class="quadro"><strong><?= h($p['nome']) ?></strong><br><?= h($p['tipo'] ?? '') ?><?= $p['endereco'] ? ' · ' . h($p['endereco']) : '' ?></div>
   <?php endif ?>
-  <?php if ($unico): ?>
-    <p class="valor"><strong><?= h(preco_plano($plano)) ?>, pagamento único</strong> pelo Mercado Pago (cartão, Pix ou boleto). Sem mensalidade.</p>
+  <?php foreach ($_SESSION['flash'] ?? [] as [$t, $m]) echo '<div class="aviso ' . h($t) . '">' . h($m) . '</div>'; unset($_SESSION['flash']); ?>
+  <?php if ($cortesia): ?>
+    <p class="valor"><strong>Cortesia</strong> (cupom <?= h($cupom) ?>): <?= $unico ? 'sem pagamento.' : 'sem mensalidade.' ?></p>
+  <?php elseif ($unico): ?>
+    <p class="valor"><strong><?= $preco_html ?>, pagamento único</strong> pelo Mercado Pago (cartão, Pix ou boleto). Sem mensalidade.</p>
   <?php else: ?>
-    <p class="valor"><strong><?= h(preco_plano($plano)) ?> por mês</strong>, cobrado todo mês no cartão pelo Mercado Pago. Cancele quando quiser.</p>
+    <p class="valor"><strong><?= $preco_html ?> por mês</strong>, cobrado todo mês no cartão pelo Mercado Pago. Cancele quando quiser.</p>
   <?php endif ?>
+  <?php if ($desconto && !$cortesia): ?><p class="discreto">Cupom <strong><?= h($cupom) ?></strong>: <?= $desconto ?>% de desconto<?= $unico ? '' : ' em todas as mensalidades' ?>.</p><?php endif ?>
   <?php if ($modo === 'sandbox'): ?><div class="aviso erro">Modo de teste: nada é cobrado de verdade. Use um cartão de teste do Mercado Pago.</div><?php endif ?>
   <?php if ($erro): ?><div class="aviso erro"><?= h($erro) ?></div><?php endif ?>
 
   <?php if ($pago && $unico): ?>
-    <div class="aviso ok">Pagamento confirmado! O plano Básico já está ligado, sem mensalidade.</div>
+    <div class="aviso ok"><?= $cortesia ? 'Cortesia liberada!' : 'Pagamento confirmado!' ?> O plano Básico já está ligado, sem mensalidade.</div>
     <?php if ($p): ?>
       <p><a class="botao" href="<?= h(config()['url']) ?>/painel/?c=<?= h($codigo) ?>">Editar os dados do meu comércio</a></p>
       <p class="discreto">Você já pode corrigir os dados e colocar fotos. Para evitar fraudes, cada mudança aparece no app
@@ -88,6 +108,12 @@ pagina_inicio('Plano ' . PLANOS_NOME[$plano] . ' · Acha Fácil!', 'Pagamento do
     <?php endif ?>
     <p class="discreto">Quer o selo de verificado, responder as avaliações, ver os números da sua página e aparecer no topo?
       <a href="<?= h(config()['url']) ?>/perfil.php?acao=assumir&amp;plano=destaque<?= $p ? '&amp;id=' . (int)$pedido['profissional_id'] : '' ?>">Conheça o Destaque</a>.</p>
+  <?php elseif ($pago && $cortesia): ?>
+    <div class="aviso ok">Cortesia liberada! O plano Destaque já está ligado, sem cobrança.</div>
+    <?php if ($p): ?>
+      <p><a class="botao" href="<?= h(config()['url']) ?>/painel/?c=<?= h($codigo) ?>">Editar os dados do meu comércio</a></p>
+      <p class="discreto">Para evitar fraudes, cada mudança aparece no app depois que a equipe do Acha Fácil confere (normalmente em até 1 dia útil).</p>
+    <?php endif ?>
   <?php elseif ($pago): ?>
     <div class="aviso ok">Assinatura ativa! O plano já está ligado<?= $p && $p['assinatura_ate'] ? ' até ' . h(data_br($p['assinatura_ate'])) . ' e renova sozinho a cada mês' : '' ?>.</div>
     <?php if ($p): ?>
@@ -99,7 +125,22 @@ pagina_inicio('Plano ' . PLANOS_NOME[$plano] . ' · Acha Fácil!', 'Pagamento do
       <?= campo_csrf() ?><input type="hidden" name="acao" value="cancelar">
       <p class="discreto">Não quer mais? <button style="background:none;border:0;padding:0;color:inherit;text-decoration:underline;cursor:pointer;font:inherit">Cancelar a assinatura</button>. O plano continua até o fim do mês já pago.</p>
     </form>
-  <?php elseif ($modo === 'desligado'): ?>
+  <?php else: ?>
+    <?php if (cupons_prontos()): ?>
+      <details class="cupom"<?= $desconto || $erro ? ' open' : '' ?>>
+        <summary>Tem cupom de desconto?</summary>
+        <?php if ($desconto): ?>
+          <form method="post"><?= campo_csrf() ?><input type="hidden" name="acao" value="tirar_cupom">
+            <p>Cupom <strong><?= h($cupom) ?></strong> aplicado (<?= $desconto ?>%). <button class="link">Tirar o cupom</button></p></form>
+        <?php else: ?>
+          <form method="post" class="linha-cupom"><?= campo_csrf() ?><input type="hidden" name="acao" value="cupom">
+            <label for="cupom" class="oculto">Cupom</label>
+            <input id="cupom" name="cupom" maxlength="30" autocapitalize="characters" autocomplete="off" placeholder="Digite o cupom" required>
+            <button class="botao contorno">Aplicar</button></form>
+        <?php endif ?>
+      </details>
+    <?php endif ?>
+  <?php if ($modo === 'desligado'): ?>
     <div class="aviso ok">Pedido recebido!</div>
     <p>O pagamento on-line está sendo configurado. Vamos chamar você no WhatsApp para confirmar que é o responsável e combinar o pagamento.</p>
   <?php else: ?>
@@ -108,7 +149,7 @@ pagina_inicio('Plano ' . PLANOS_NOME[$plano] . ' · Acha Fácil!', 'Pagamento do
       <?php if (in_array($status, ['rejected', 'cancelled'], true)): ?><div class="aviso erro">O pagamento foi <?= h(mp_status_nome($status)) ?>. Tente de novo.</div><?php endif ?>
       <form method="post">
         <?= campo_csrf() ?>
-        <p><button class="botao amarelo">Pagar <?= h(preco_plano($plano)) ?> com o Mercado Pago</button></p>
+        <p><button class="botao amarelo">Pagar <?= h(reais($valor)) ?> com o Mercado Pago</button></p>
       </form>
       <p class="discreto">Depois de pagar, você já pode editar os dados e as fotos; cada mudança aparece no app depois da conferência da equipe.</p>
     <?php elseif ($cartao_no_site): ?>
@@ -117,7 +158,7 @@ pagina_inicio('Plano ' . PLANOS_NOME[$plano] . ' · Acha Fácil!', 'Pagamento do
         com segurança, e não fica guardado no Acha Fácil.</p>
       <div id="erro-cartao" class="aviso erro" hidden></div>
       <div id="cartao"></div>
-      <p class="discreto">A cobrança de <?= h(preco_plano($plano)) ?> se repete todo mês no mesmo cartão. Você pode cancelar nesta página quando quiser.
+      <p class="discreto">A cobrança de <?= h(reais($valor)) ?> se repete todo mês no mesmo cartão. Você pode cancelar nesta página quando quiser.
         Depois de assinar, já pode editar os dados e as fotos; cada mudança aparece no app depois da conferência da equipe.</p>
       <script src="https://sdk.mercadopago.com/js/v2"></script>
       <script>
@@ -125,7 +166,7 @@ pagina_inicio('Plano ' . PLANOS_NOME[$plano] . ' · Acha Fácil!', 'Pagamento do
         var erro = document.getElementById('erro-cartao');
         var mp = new MercadoPago(<?= json_encode(mp_public_key()) ?>, { locale: 'pt-BR' });
         mp.bricks().create('cardPayment', 'cartao', {
-          initialization: { amount: <?= json_encode(PLANOS_PRECO[$plano]) ?>, payer: { email: <?= json_encode((string)$pedido['email']) ?> } },
+          initialization: { amount: <?= json_encode($valor) ?>, payer: { email: <?= json_encode((string)$pedido['email']) ?> } },
           customization: { paymentMethods: { maxInstallments: 1, types: { excluded: ['debit_card', 'prepaid_card'] } } },
           callbacks: {
             onReady: function () {},
@@ -158,6 +199,7 @@ pagina_inicio('Plano ' . PLANOS_NOME[$plano] . ' · Acha Fácil!', 'Pagamento do
       <p class="discreto">Use o e-mail <strong><?= h((string)$pedido['email']) ?></strong> na sua conta do Mercado Pago (o Mercado Pago pede o mesmo e-mail).
         Depois de assinar, você já pode editar os dados e as fotos; cada mudança aparece no app depois da conferência da equipe.</p>
     <?php endif ?>
+  <?php endif ?>
   <?php endif ?>
   <p class="discreto">Guarde o endereço desta página para acompanhar o seu plano.</p>
 </main>

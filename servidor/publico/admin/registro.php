@@ -7,7 +7,7 @@ $itens = linhas('SELECT r.*, a.nome AS admin_nome, p.nome AS comercio FROM regis
     ORDER BY r.id DESC LIMIT 200');
 const ACOES = ['entrou' => 'Entrou', 'trocou_senha' => 'Trocou a senha', 'incluiu' => 'Publicou negócio novo', 'apagou_cidade' => 'Tirou cidade da lista', 'acesso_pago' => 'Dono entrou pelo pagamento', 'liberou_acesso' => 'Liberou o painel', 'cortou_acesso' => 'Cortou o acesso',
     'aprovou_alteracao' => 'Aprovou alteração', 'recusou_alteracao' => 'Recusou alteração', 'tirou_do_app' => 'Tirou do app',
-    'pedido_feito' => 'Resolveu pedido', 'recusou_pedido' => 'Recusou pedido'];
+    'pedido_feito' => 'Resolveu pedido', 'criou_cupom' => 'Criou cupom', 'ligou_cupom' => 'Ligou cupom', 'desligou_cupom' => 'Desligou cupom', 'encerrou_cortesia' => 'Encerrou cortesia', 'recusou_pedido' => 'Recusou pedido'];
 admin_inicio('Registro', $admin);
 ?>
 <h1>Registro</h1>

@@ -229,3 +229,12 @@ details p { margin: 0 0 16px; color: var(--texto2); }
 .estreito { max-width: 420px; }
 label.marcar { display: flex; gap: 10px; align-items: center; font-weight: 700; }
 label.marcar input { width: auto; }
+/* cupom de desconto na página do pagamento */
+details.cupom { margin: 12px 0 16px; }
+details.cupom summary { cursor: pointer; font-weight: 800; color: #005C38; }
+.linha-cupom { display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+.linha-cupom input { flex: 1; min-width: 160px; text-transform: uppercase; margin: 0; }
+.linha-cupom .botao { margin: 0; }
+button.link { background: none; border: 0; padding: 0; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; }
+.oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.valor s { color: #888; font-weight: 600; }
