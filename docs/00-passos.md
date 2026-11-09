@@ -85,8 +85,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Não depende de o celular devolver um link para o app (no emulador o link caía no APK antigo). Sem senha:
    "Recuperar senha", entrar.php e criar-conta.php saíram. Termos e privacidade atualizados. Chaves do Google no
    config e migração 006 aplicadas; servidor testado de ponta a ponta. Emulador ✅ (07/11 19:30: entrou e recebeu a sessão).
-   Falta: (a) testar no APK novo (o do site é o 1.0.0, ainda com e-mail e senha); (b) no Google Cloud, tela de
-   consentimento em "Em produção" (em "Teste" só os e-mails cadastrados como testadores conseguem entrar);
+   Falta: (a) testar no APK novo (o do site é o 1.0.0, ainda com e-mail e senha); (b) ✅ tela de consentimento OAuth
+   "Em produção" (09/11, Branding preenchido sem logo; falta confirmar entrando com uma conta Google qualquer);
    (c) para a App Store: "Entrar com Apple" junto (regra 4.8 da Apple), precisa da conta de desenvolvedor Apple
 8. 🟡 Administração web em /admin (07/11): **toda mudança do dono passa por um admin** (contra fraude). Feito: entrar
    (admins; criar com `php servidor/criar-admin.php email "Nome"`, senha sorteada e mostrada uma vez), Pendências
