@@ -109,7 +109,7 @@ pagina_inicio('Plano ' . PLANOS_NOME[$plano] . ' · Acha Fácil!', 'Pagamento do
     <p class="discreto">Quer o selo de verificado, responder as avaliações, ver os números da sua página e aparecer no topo?
       <a href="<?= h(config()['url']) ?>/perfil.php?acao=assumir&amp;plano=destaque<?= $p ? '&amp;id=' . (int)$pedido['profissional_id'] : '' ?>">Conheça o Destaque</a>.</p>
   <?php elseif ($pago && $cortesia): ?>
-    <div class="aviso ok">Cortesia liberada! O plano Destaque já está ligado, sem cobrança.</div>
+    <div class="aviso ok">Cortesia liberada! O plano <?= h(PLANOS_NOME[$plano]) ?> já está ligado, sem cobrança.</div>
     <?php if ($p): ?>
       <p><a class="botao" href="<?= h(config()['url']) ?>/painel/?c=<?= h($codigo) ?>">Editar os dados do meu comércio</a></p>
       <p class="discreto">Para evitar fraudes, cada mudança aparece no app depois que a equipe do Acha Fácil confere (normalmente em até 1 dia útil).</p>
@@ -121,7 +121,8 @@ pagina_inicio('Plano ' . PLANOS_NOME[$plano] . ' · Acha Fácil!', 'Pagamento do
       <p class="discreto">Você já pode corrigir os dados e colocar foto. Para evitar fraudes, cada mudança aparece no app
         depois que a equipe do Acha Fácil confere (normalmente em até 1 dia útil).</p>
     <?php endif ?>
-    <form method="post" onsubmit="return confirm('Cancelar a assinatura do Destaque? Ele continua até o fim do mês já pago.')">
+    <?php if ($plano === 'site'): ?><p class="discreto">Site próprio: vamos chamar você no WhatsApp em até 2 dias úteis para montar o site e registrar o domínio.</p><?php endif ?>
+    <form method="post" onsubmit="return confirm('Cancelar a assinatura do <?= h(PLANOS_NOME[$plano]) ?>? Ele continua até o fim do mês já pago.')">
       <?= campo_csrf() ?><input type="hidden" name="acao" value="cancelar">
       <p class="discreto">Não quer mais? <button style="background:none;border:0;padding:0;color:inherit;text-decoration:underline;cursor:pointer;font:inherit">Cancelar a assinatura</button>. O plano continua até o fim do mês já pago.</p>
     </form>

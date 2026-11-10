@@ -8,7 +8,7 @@ Sanjoanenses e sem a aba Notícias.
 - **App:** Expo (TypeScript), na raiz do repositório (`src/`), pacote `br.com.fsadesigner.achafacil`.
 - **Servidor:** PHP 8.3 + MariaDB em `servidor/`, publicado em https://fsadesigners.com.br/acha-facil/
   (`bash servidor/instalar.sh` como root; config em `/etc/acha-facil/config.php`; banco `acha_facil`).
-- **Pagamento:** Mercado Pago (08/11): Básico R$ 5,99 pagamento único (Checkout: cartão, Pix ou boleto); Destaque R$ 29,90/mês, assinatura no cartão.
+- **Pagamento:** Mercado Pago (08/11): Básico R$ 9,90 pagamento único (era 5,99 até 10/11; Checkout: cartão, Pix ou boleto); Destaque R$ 29,90/mês e Destaque + Site R$ 89,90/mês (10/11), assinaturas no cartão.
 - **Marca:** verde `#005C38` e amarelo `#F7C600`; símbolo (pino + loja + lupa) em `assets/logo-simbolo.svg`.
 - **Visual (07/11, modelo do usuário):** fundo claro, cartões brancos com sombra suave, abas com pílula verde
   (Início, Categorias, Favoritos, Perfil), cidade em pílula amarela, cada área com a sua cor. Site com fonte Nunito e o mesmo estilo.
@@ -137,7 +137,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 
 - WhatsApp de contato (`contato_whatsapp` no config); vazio, não aparece no site.
 - Arquivo da logo em alta (PNG/SVG) para trocar o redesenho, se quiser fidelidade total à arte.
-- Quantos lugares no carrossel de destaque (preços desde 08/11: Básico R$ 5,99 uma vez só, Destaque R$ 29,90/mês).
+- Quantos lugares no carrossel de destaque (preços desde 10/11: Básico R$ 9,90 uma vez só, Destaque R$ 29,90/mês, Destaque + Site R$ 89,90/mês).
 - Se volta a ter notícias no futuro.
 12. ✅ Administrador no app com avisos no celular (07/11): fellipealexandre1@gmail.com é admin (tabela admins; também
    entra no /admin do site). Conta do app com e-mail de admin vê "Administração" no Perfil (aprovar/recusar alterações
@@ -242,3 +242,12 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Falta: registro A no Registro.br (achafacilapp.com.br e www → 177.153.68.212) e rodar o ativar.sh.
    Depois, opcional: apontar o app (src/api/cliente.ts) e `endereco_publico` para o domínio novo, cadastrando antes
    https://achafacilapp.com.br/google/retorno.php no Google Cloud (senão o login com Google quebra).
+26. 🟡 Plano **Destaque + Site** e Básico a R$ 9,90 (10/11, pedido do usuário): 3º plano, chave `site`, R$ 89,90/mês
+   (assinatura como o Destaque): tudo do Destaque + landing page própria feita pela FSA + domínio incluso, para o site virar
+   receita recorrente da FSA. Preços em PLANOS_PRECO (inc/guia.php); SQL_DESTAQUE conta `destaque` e `site`. Site: card em
+   /planos.php, na inicial, no relatório e nos termos; perfil.php pede o endereço desejado do site; aviso de pagamento aos
+   admins diz "Fazer o site e registrar o domínio"; cupons valem para ele. App: 3º cartão em src/app/planos.tsx (sem preço).
+   preco_pedido() agora usa o `valor` guardado no pedido: pedido antigo do Básico a 5,99 ainda sem pagar continua valendo.
+   O plano novo só aparece depois da **mudança 018** (`bash servidor/instalar.sh`, usuário); o Básico a 9,90 vale na hora.
+   Falta: aplicar a 018; APK 1.5.0 (já pendente do passo 20) leva o cartão novo; depois que alguém assinar, a FSA faz o site
+   e põe o endereço no campo Site da ficha

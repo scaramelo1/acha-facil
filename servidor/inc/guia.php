@@ -60,9 +60,21 @@ function texto_cidades(): string {
 //   Básico: pagamento único (corrigir os dados, fotos, descrição e o que vende; vale para sempre)
 //   Destaque: assinatura mensal no cartão (tudo do Básico + selo "Verificado", responder avaliações, números da página
 //             e o topo da tela inicial e da área)
-const PLANOS_PRECO = ['basico' => 5.99, 'destaque' => 29.90];
-const PLANOS_NOME = ['basico' => 'Básico', 'destaque' => 'Destaque'];
+//   Destaque + Site (10/11, mudança 018): assinatura mensal no cartão com tudo do Destaque + landing page própria feita
+//             pela FSA e domínio incluso (a FSA faz o site depois do pagamento; o endereço vai no campo `site` da ficha)
+const PLANOS_PRECO = ['basico' => 9.90, 'destaque' => 29.90, 'site' => 89.90];
+const PLANOS_NOME = ['basico' => 'Básico', 'destaque' => 'Destaque', 'site' => 'Destaque + Site'];
+const PLANOS_DESTAQUE = ['destaque', 'site'];   // planos que dão os recursos do Destaque
 function plano_unico(string $plano): bool { return $plano === 'basico'; }
+/** A mudança 018 (plano Destaque + Site no banco) já foi aplicada? Antes dela o plano não aparece no site. */
+function plano_site_pronto(): bool {
+    static $ok = null;
+    return $ok ??= (bool)valor("SELECT 1 FROM migracoes WHERE nome = '018-plano-site.sql'");
+}
+/** Planos que o dono pode escolher agora (o Destaque + Site só depois da mudança 018). */
+function planos_disponiveis(): array {
+    return array_values(array_filter(array_keys(PLANOS_PRECO), fn($k) => $k !== 'site' || plano_site_pronto()));
+}
 function preco_plano(string $plano): string { return 'R$ ' . number_format(PLANOS_PRECO[$plano] ?? 0, 2, ',', '.'); }
 /** "R$ 5,99 uma vez só" ou "R$ 29,90 por mês". */
 function preco_plano_texto(string $plano): string { return preco_plano($plano) . (plano_unico($plano) ? ' uma vez só' : ' por mês'); }
@@ -73,7 +85,7 @@ const SQL_ASSINATURA_EM_DIA = "(p.assinatura = 'cortesia' OR (p.assinatura IN ('
 // Em dia para aparecer no app: Básico pago (uma vez só, vale para sempre) ou assinatura em dia.
 // Destaque atrasado: sai do destaque e, se pagou o Básico, continua no app com o Básico.
 const SQL_EM_DIA = '(p.basico_pago_em IS NOT NULL OR ' . SQL_ASSINATURA_EM_DIA . ')';
-const SQL_DESTAQUE = "(p.plano = 'destaque' AND " . SQL_ASSINATURA_EM_DIA . ')';
+const SQL_DESTAQUE = "(p.plano IN ('destaque','site') AND " . SQL_ASSINATURA_EM_DIA . ')';
 
 // Aparece no app: aprovado e com assinatura em dia.
 // Comércios importados da lista de leads aparecem sem assinatura até o dono assumir o perfil.

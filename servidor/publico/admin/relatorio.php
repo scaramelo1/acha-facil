@@ -125,6 +125,7 @@ for ($i = 0; $i < 4; $i++) { $t = strtotime(date('Y-m-01') . " -$i month"); $mes
         <li>Logo, fotos, horário e dados corrigidos por você</li>
         <li>Responder às avaliações e acompanhar estes números todo mês</li>
       </ul>
+      <?php if (plano_site_pronto()): ?><p style="margin:.4em 0 0">Quer também um site próprio com domínio? <strong>Destaque + Site (<?= h(preco_plano_texto('site')) ?>)</strong>: tudo do Destaque e uma página do seu negócio feita pela FSA Designer.</p><?php endif ?>
     </div>
     <?php endif ?>
 

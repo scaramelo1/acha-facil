@@ -13,7 +13,7 @@ if (e_post()) {
     if ($acao === 'criar') {
         $codigo = normalizar_cupom((string)txt('codigo', 30));
         $pct = (int)($_POST['percentual'] ?? 0);
-        $planos = array_values(array_intersect(['basico', 'destaque'], (array)($_POST['planos'] ?? [])));
+        $planos = array_values(array_intersect(planos_disponiveis(), (array)($_POST['planos'] ?? [])));
         $ate = txt('valido_ate', 10);
         $max = trim((string)($_POST['max_usos'] ?? '')) === '' ? null : max(1, (int)$_POST['max_usos']);
         if (strlen($codigo) < 4) flash('O código precisa de pelo menos 4 letras ou números.', 'erro');
@@ -83,6 +83,7 @@ admin_inicio('Cupons', $admin);
   <p><strong>Vale para</strong></p>
   <label class="marcar"><input type="checkbox" name="planos[]" value="basico" checked> Básico (<?= h(preco_plano_texto('basico')) ?>)</label>
   <label class="marcar"><input type="checkbox" name="planos[]" value="destaque" checked> Destaque (<?= h(preco_plano_texto('destaque')) ?>)</label>
+  <?php if (plano_site_pronto()): ?><label class="marcar"><input type="checkbox" name="planos[]" value="site"> Destaque + Site (<?= h(preco_plano_texto('site')) ?>)</label><?php endif ?>
   <label for="valido_ate">Vale até (vazio = sem prazo)</label>
   <input id="valido_ate" name="valido_ate" type="date">
   <label for="max_usos">Máximo de usos (vazio = sem limite)</label>
@@ -99,7 +100,7 @@ admin_inicio('Cupons', $admin);
   <tr><td><?= h(datahora_br($u['atualizado_em'])) ?></td><td><?= h($u['codigo']) ?></td><td><?= h($u['comercio'] ?? '-') ?></td><td><?= h($u['nome']) ?></td>
     <td><?= h(PLANOS_NOME[$u['plano']] ?? '') ?></td>
     <td><?= (int)$u['desconto'] === 100 ? 'cortesia' : h(reais((float)$u['valor'])) . (plano_unico((string)$u['plano']) ? '' : '/mês') ?></td>
-    <td><?php if ($u['assinatura'] === 'cortesia' && (int)$u['desconto'] === 100 && $u['plano'] === 'destaque'): ?>
+    <td><?php if ($u['assinatura'] === 'cortesia' && (int)$u['desconto'] === 100 && !plano_unico((string)$u['plano'])): ?>
       <form method="post" onsubmit="return confirm('Encerrar o Destaque de cortesia deste comércio?')"><?= campo_csrf() ?>
         <input type="hidden" name="acao" value="encerrar"><input type="hidden" name="profissional_id" value="<?= (int)$u['pid'] ?>">
         <button class="botao contorno">Encerrar cortesia</button></form>

@@ -34,6 +34,19 @@ const PLANOS: { chave: string; nome: string; sub: string; icone: NomeIcone; iten
       'Na frente dos outros na área e na busca',
     ],
   },
+  {
+    chave: 'site',
+    nome: 'Destaque + Site',
+    sub: 'O Destaque e um site só seu, feito pela FSA.',
+    icone: 'web',
+    itens: [
+      'Tudo o que tem no Destaque',
+      'Site próprio do seu negócio feito pela FSA Designer',
+      'Domínio incluso (ex.: seunegocio.com.br)',
+      'Botões de WhatsApp, mapa e horário no site',
+      'Mudanças de texto e fotos do site quando precisar',
+    ],
+  },
 ];
 
 /** "Este comércio é seu?": o que o dono pode fazer, e "Saiba mais no site" (com ?id=, o site já abre naquele comércio). */
@@ -48,9 +61,9 @@ export default function TelaParaComercios() {
         <View style={{ padding: 16, gap: 14 }}>
           <Text style={estilos.intro}>Assuma o perfil do seu comércio no Acha Fácil para manter as informações certas e ser encontrado por mais clientes.</Text>
           {PLANOS.map((p) => (
-            <View key={p.chave} style={[estilos.plano, p.chave === 'destaque' && { borderColor: cores.amarelo, borderWidth: 2 }]}>
+            <View key={p.chave} style={[estilos.plano, p.chave !== 'basico' && { borderColor: cores.amarelo, borderWidth: 2 }]}>
               <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center' }}>
-                <View style={[estilos.icone, p.chave === 'destaque' && { backgroundColor: cores.fundoSuave }]}>
+                <View style={[estilos.icone, p.chave !== 'basico' && { backgroundColor: cores.fundoSuave }]}>
                   <MaterialCommunityIcons name={p.icone} size={36} color={cores.verde} />
                 </View>
                 <View style={{ flex: 1 }}>

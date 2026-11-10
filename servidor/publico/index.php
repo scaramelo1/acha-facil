@@ -85,6 +85,7 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
         <div class="planos">
           <div class="plano"><h3>Básico <span class="preco"><?= h(preco_plano('basico')) ?> uma vez só</span></h3><p>Corrija os dados, coloque fotos, a descrição e o que você vende ou faz. Sem mensalidade.</p></div>
           <div class="plano destaque"><h3>Destaque <span class="preco"><?= h(preco_plano('destaque')) ?>/mês</span></h3><p>Tudo do Básico, selo de verificado, responder as avaliações, ver os números da sua página e aparecer no topo da tela inicial e da sua área.</p></div>
+          <?php if (plano_site_pronto()): ?><div class="plano destaque"><h3>Destaque + Site <span class="preco"><?= h(preco_plano('site')) ?>/mês</span></h3><p>Tudo do Destaque e um site próprio do seu negócio, feito pela FSA Designer, com domínio incluso.</p></div><?php endif ?>
         </div>
         <p style="margin:16px 0 0"><a class="botao" href="<?= $base ?>/planos.php">Conferir os planos</a></p>
       </div>

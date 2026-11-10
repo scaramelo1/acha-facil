@@ -14,10 +14,17 @@ function cupons_prontos(): bool {
     return $ok ??= (bool)valor("SELECT 1 FROM migracoes WHERE nome = '014-cupons.sql'");
 }
 
-/** Valor do plano com o desconto do pedido (o que o Mercado Pago cobra, todo mês no Destaque). */
+/**
+ * Valor do plano com o desconto do pedido (o que o Mercado Pago cobra, todo mês no Destaque). É o `valor` guardado no
+ * pedido (preço do dia em que foi feito, já com o cupom): mudar o preço do plano não quebra pedido antigo ainda sem pagar.
+ */
 function preco_pedido(array $pedido): float {
-    $cheio = PLANOS_PRECO[$pedido['plano']] ?? throw new RuntimeException('Plano inválido.');
-    $d = (int)($pedido['desconto'] ?? 0);
+    if (isset($pedido['valor']) && $pedido['valor'] !== '') return (float)$pedido['valor'];
+    return preco_com_desconto((string)$pedido['plano'], (int)($pedido['desconto'] ?? 0));
+}
+/** Preço de hoje do plano com o desconto em %. */
+function preco_com_desconto(string $plano, int $d): float {
+    $cheio = PLANOS_PRECO[$plano] ?? throw new RuntimeException('Plano inválido.');
     return $d > 0 ? round($cheio * (100 - $d) / 100, 2) : $cheio;
 }
 function reais(float $v): string { return 'R$ ' . number_format($v, 2, ',', '.'); }
@@ -52,8 +59,7 @@ function aplicar_cupom(array $pedido, string $codigo): array {
         return linha('SELECT * FROM pedidos WHERE id = ?', [$pedido['id']]);
     }
     $c = cupom_valido($codigo, (string)$pedido['plano']);
-    $pedido['desconto'] = (int)$c['percentual'];
-    $valor = preco_pedido($pedido);
+    $valor = preco_com_desconto((string)$pedido['plano'], (int)$c['percentual']);
     q('UPDATE pedidos SET cupom_id = ?, desconto = ?, valor = ?, atualizado_em = NOW() WHERE id = ?', [$c['id'], $c['percentual'], $valor, $pedido['id']]);
     if ((int)$c['percentual'] === 100) ligar_cortesia((int)$pedido['id'], (string)$c['codigo']);
     return linha('SELECT * FROM pedidos WHERE id = ?', [$pedido['id']]);
@@ -70,7 +76,7 @@ function ligar_cortesia(int $pedido_id, string $codigo): void {
     if (plano_unico((string)$pedido['plano'])) {
         q('UPDATE profissionais SET basico_pago_em = COALESCE(basico_pago_em, NOW()) WHERE id = ?', [$pid]);
     } else {
-        q("UPDATE profissionais SET plano = 'destaque', assinatura = 'cortesia' WHERE id = ?", [$pid]);
+        q("UPDATE profissionais SET plano = ?, assinatura = 'cortesia' WHERE id = ?", [$pedido['plano'], $pid]);
     }
     require_once __DIR__ . '/avisos.php';
     avisar_admins('Cupom de cortesia usado', $pedido['nome'] . ' usou o cupom ' . $codigo . ' (100%) no plano ' . (PLANOS_NOME[$pedido['plano']] ?? '')

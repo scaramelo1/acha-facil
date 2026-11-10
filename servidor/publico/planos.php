@@ -25,9 +25,17 @@ $planos = [
         'Aparece em "Em destaque" no topo da tela inicial',
         'Aparece na frente dos outros na sua área e na busca',
     ]],
+    'site' => ['Destaque + Site', 'O Destaque e um site só seu, feito pela FSA', [
+        'Tudo o que tem no Destaque',
+        'Site próprio do seu negócio (landing page) feito pela FSA Designer',
+        'Domínio incluso (ex.: seunegocio.com.br), registro e renovação por nossa conta',
+        'Botões de WhatsApp, mapa e horário no site, ligado à sua página no app',
+        'Mudanças de texto e fotos do site quando você precisar',
+    ]],
 ];
+if (!plano_site_pronto()) unset($planos['site']);
 
-pagina_inicio('Planos para o seu negócio · Acha Fácil!', 'Corrija os dados, coloque fotos e apareça em destaque no Acha Fácil.');
+pagina_inicio('Planos para o seu negócio · Acha Fácil!', 'Corrija os dados, coloque fotos, apareça em destaque e tenha um site próprio com o Acha Fácil.');
 ?>
 <main class="documento" style="max-width:960px">
   <h1>Planos para o seu negócio</h1>
@@ -54,6 +62,8 @@ pagina_inicio('Planos para o seu negócio · Acha Fácil!', 'Corrija os dados, c
         <ul class="lista-check">
           <?php foreach ($itens as $i): ?><li><?= h($i) ?></li><?php endforeach ?>
         </ul>
+        <?php if ($chave === 'site'): ?><p class="discreto" style="margin:0 0 14px">Depois do pagamento, chamamos você no WhatsApp para montar o site.
+          O site e o domínio continuam enquanto a assinatura estiver em dia.</p><?php endif ?>
         <a class="botao<?= $chave === 'destaque' ? ' amarelo' : '' ?>" href="<?= h($pedir($chave)) ?>">Quero o <?= h($nome) ?></a>
       </div>
     <?php endforeach ?>

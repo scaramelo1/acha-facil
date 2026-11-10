@@ -49,7 +49,8 @@ pagina_inicio('Termos de uso · Acha Fácil', 'Regras de uso do app Acha Fácil,
     ilegais ou que recebam reclamações graves.</li>
     <li>O plano Básico é pago uma vez só, pelo Mercado Pago, e não tem mensalidade: a página fica no app enquanto seguir estes termos.
     O plano Destaque é uma assinatura mensal no cartão, pelo Mercado Pago, que pode ser cancelada a qualquer momento e vale até
-    o fim do mês já pago. Com o Destaque em atraso ou cancelado, a página perde os recursos do Destaque; se o Básico foi pago,
+    o fim do mês já pago. O plano Destaque + Site é uma assinatura mensal do mesmo jeito, com tudo do Destaque e um site
+    próprio (landing page) feito pela FSA Designer, com domínio incluso; o site e o domínio ficam no ar enquanto a assinatura estiver em dia. Com o Destaque em atraso ou cancelado, a página perde os recursos do Destaque; se o Básico foi pago,
     continua no app com o Básico, e se não foi, sai do ar até a regularização.</li>
     <li>A ordem em que os profissionais aparecem muda todos os dias. Quem assina o plano Destaque aparece também no carrossel
     do topo da tela inicial. Avaliações não podem ser compradas, trocadas nem apagadas a pedido.</li>

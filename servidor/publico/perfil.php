@@ -10,7 +10,7 @@ require __DIR__ . '/../inc/mercadopago.php';
 iniciar_sessao();
 
 $acao = ($_GET['acao'] ?? '') === 'remover' ? 'remover' : 'assumir';
-$plano = in_array($_GET['plano'] ?? '', ['basico', 'destaque'], true) ? $_GET['plano'] : null;
+$plano = in_array($_GET['plano'] ?? '', planos_disponiveis(), true) ? $_GET['plano'] : null;
 if ($acao === 'remover') $plano = null;
 $id = (int)($_GET['id'] ?? 0);
 $p = $id ? linha('SELECT p.id, p.nome, p.tipo, p.endereco FROM profissionais p WHERE p.id = ? AND p.importado = 1', [$id]) : null;
@@ -38,7 +38,8 @@ if (e_post()) {
         $comercio = $p['nome'] ?? 'um negócio novo';
         [$titulo_aviso, $texto_aviso] = match (true) {
             $acao === 'remover' => ['Pedido para tirar do app', "$nome pediu para tirar $comercio do app."],
-            $plano !== null => ['Novo pedido de plano', "$nome quer o plano " . PLANOS_NOME[$plano] . " ($comercio)."],
+            $plano !== null => ['Novo pedido de plano', "$nome quer o plano " . PLANOS_NOME[$plano] . " ($comercio)."
+                . ($plano === 'site' && $mensagem !== '' ? " Endereço do site: $mensagem" : '')],
             default => [$p ? 'Pedido para assumir' : 'Pedido para incluir', "$nome quer " . ($p ? 'assumir' : 'incluir') . " $comercio."],
         };
         avisar_admins($titulo_aviso, $texto_aviso, ['pedido' => (int)$pedido_id]);
@@ -47,7 +48,7 @@ if (e_post()) {
     }
 }
 
-$titulo = $acao === 'remover' ? 'Tirar do app' : ($plano ? 'Plano ' . ($plano === 'destaque' ? 'Destaque' : 'Básico') : ($p ? 'Assumir o perfil' : 'Incluir meu negócio'));
+$titulo = $acao === 'remover' ? 'Tirar do app' : ($plano ? 'Plano ' . PLANOS_NOME[$plano] : ($p ? 'Assumir o perfil' : 'Incluir meu negócio'));
 pagina_inicio("$titulo · Acha Fácil!", 'Pedido do dono do comércio para o Acha Fácil.');
 ?>
 <main class="documento">
@@ -84,7 +85,11 @@ pagina_inicio("$titulo · Acha Fácil!", 'Pedido do dono do comércio para o Ach
         <label for="email"><?= plano_unico($plano) || mp_public_key() !== '' ? 'Seu e-mail' : 'E-mail (o mesmo da sua conta do Mercado Pago)' ?></label>
         <input id="email" name="email" type="email" required maxlength="160" autocomplete="email" value="<?= h($_POST['email'] ?? '') ?>">
       <?php endif ?>
-      <label for="mensagem"><?= $p ? 'Algo a mais? (opcional)' : 'Nome, endereço e o que o seu negócio faz' ?></label>
+      <?php if ($plano === 'site'): ?>
+        <label for="mensagem">Que endereço você quer para o site? (opcional, ex.: padariadojoao.com.br)</label>
+      <?php else: ?>
+        <label for="mensagem"><?= $p ? 'Algo a mais? (opcional)' : 'Nome, endereço e o que o seu negócio faz' ?></label>
+      <?php endif ?>
       <textarea id="mensagem" name="mensagem" rows="4" maxlength="1000"<?= $p ? '' : ' required' ?>><?= h($_POST['mensagem'] ?? '') ?></textarea>
       <p><button class="botao<?= $acao === 'remover' ? ' contorno' : '' ?>"><?= $acao === 'remover' ? 'Pedir para tirar' : ($com_assinatura ? 'Continuar para o pagamento' : 'Enviar pedido') ?></button></p>
       <p class="discreto">Usamos seu nome, telefone<?= $com_assinatura ? ' e e-mail' : '' ?> só para este pedido<?= $com_assinatura ? ' e a assinatura' : '' ?>. Veja a <a href="<?= h(config()['url']) ?>/privacidade.php">privacidade</a>.</p>

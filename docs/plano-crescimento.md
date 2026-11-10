@@ -24,6 +24,7 @@ versão web; a prospecção usa os números das duas.
   Aguaí (1.442), Águas da Prata (101). Quase todos `importado = 1` (vindos da lista de leads).
 - Áreas maiores: Alimentação 1.426 · Serviços 1.043 · **Veículos 778** · **Saúde 717** · Lojas 657 · Casa 615 · Beleza 588.
 - Planos: Básico R$ 5,99 uma vez só; Destaque R$ 29,90/mês (Mercado Pago em produção desde 08/11).
+  Desde 10/11 (passo 26): Básico R$ 9,90; novo **Destaque + Site** R$ 89,90/mês (landing page + domínio pela FSA, receita recorrente).
 - O site só tem páginas para o **dono** (busca, assumir, planos, pagamento, painel). Não existe página pública
   da ficha, da cidade ou da categoria: quem procura no Google não encontra o Acha Fácil.
 
