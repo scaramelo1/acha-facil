@@ -92,14 +92,18 @@ no item 1.
 
 | Página | Endereço | Exemplo |
 |--------|----------|---------|
-| Cidade | `/acha-facil/<cidade>/` | `/acha-facil/sao-joao/` |
-| Área | `/acha-facil/<cidade>/<area>/` | `/acha-facil/sao-joao/saude/` |
-| Tipo | `/acha-facil/<cidade>/<area>/<tipo>/` | `/acha-facil/sao-joao/saude/dentista/` |
-| Ficha | `/acha-facil/<cidade>/c/<slug>` | `/acha-facil/sao-joao/c/oficina-do-ze` |
-| Busca | `/acha-facil/<cidade>/buscar?q=` | (não indexada) |
+| Cidade | `/<cidade>/` | `/sao-joao-da-boa-vista/` |
+| Área | `/<cidade>/<area>/` | `/sao-joao-da-boa-vista/saude/` |
+| Tipo | `/<cidade>/<area>/<tipo>/` | `/sao-joao-da-boa-vista/saude/dentista/` |
+| Ficha | `/<cidade>/c/<nome>-<id>` | `/sao-joao-da-boa-vista/c/oficina-do-ze-1234` |
+| Busca | `/<cidade>/buscar?q=` | (não indexada) |
+
+Atualizado em 10/11 (decisões do usuário): domínio próprio na raiz (achafacilapp.com.br), **nome completo da cidade**
+no endereço (o slug curto antigo `/sao-joao/` redireciona), fotos do Básico aparecem no site como no app e as
+**avaliações do app** aparecem na ficha. Feito: ver passo 21 em `00-passos.md`.
 
 As páginas atuais do dono (`busca.php`, `planos.php`, `perfil.php`…) continuam como estão.
-Rotas por `.htaccess` em `servidor/publico/` (RewriteRule para `web.php`), sem mexer no Apache geral.
+Rotas por `.htaccess` em `servidor/publico/` (RewriteRule para `web.php`, só no host achafacilapp.com.br), sem mexer no Apache geral.
 
 ### Conteúdo de cada página
 

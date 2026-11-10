@@ -9,3 +9,8 @@ RewriteRule ^(.*)$ https://achafacilapp.com.br/$1 [R=301,L,NE]
 # www.achafacilapp.com.br -> achafacilapp.com.br
 RewriteCond %{HTTP_HOST} ^www\.achafacilapp\.com\.br$ [NC]
 RewriteRule ^(.*)$ https://achafacilapp.com.br/$1 [R=301,L,NE]
+# Páginas públicas de cidade, área, tipo e ficha (passo 21): o que não é arquivo nem pasta vai para web.php
+RewriteCond %{HTTP_HOST} ^achafacilapp\.com\.br$ [NC]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ web.php [L,QSA]

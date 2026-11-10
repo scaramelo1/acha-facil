@@ -8,10 +8,9 @@ $areas = categorias_ativas();
 $total = (int)valor('SELECT COUNT(*) FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE ' . visivel());
 $base = config()['url'];
 $num = fn(int $n) => number_format($n, 0, ',', '.');
-// emoji de enfeite por ícone (o site não carrega a fonte de ícones do app)
-$emoji = ['silverware-fork-knife' => '🍽️', 'cart-outline' => '🛒', 'tools' => '🛠️', 'heart-pulse' => '🩺', 'lipstick' => '💄',
-    'tshirt-crew-outline' => '👕', 'home-roof' => '🏠', 'car-wrench' => '🚗', 'shopping-outline' => '🛍️', 'school-outline' => '🎓',
-    'dumbbell' => '🏋️', 'paw' => '🐾', 'bed-outline' => '🛏️', 'bank-outline' => '🏦', 'factory' => '🏭', 'hand-heart-outline' => '🤝'];
+// total por cidade, para os cartões "Escolha sua cidade" (páginas públicas, passo 21)
+$por_cidade = array_column(linhas('SELECT p.cidade, COUNT(*) AS total FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
+    WHERE ' . visivel() . ' GROUP BY p.cidade'), 'total', 'cidade');
 
 pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
     "App gratuito com $total comércios e serviços de " . texto_cidades() . ": restaurantes, mercados, oficinas, clínicas, lojas e muito mais. Chame no WhatsApp com um toque.");
@@ -39,13 +38,25 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
     <svg class="onda" viewBox="0 0 1200 48" preserveAspectRatio="none" aria-hidden="true"><path d="M0 24 C200 0 400 48 600 24 S1000 0 1200 24 V48 H0Z" fill="#fff"/></svg>
   </section>
 
-  <section class="branco" id="areas" style="padding-top:24px">
+  <section class="branco" id="cidades" style="padding-top:24px">
+    <div class="conteudo">
+      <h2>Escolha a sua cidade</h2>
+      <p class="intro">Veja os comércios e serviços de cada cidade, com endereço, horário e WhatsApp, direto no site.</p>
+      <div class="cidades-lista">
+        <?php foreach (CIDADES as $slug => [$nome, , $uf]): ?>
+          <a href="<?= h(url_cidade($slug)) ?>"><b><?= h($nome) ?></b><small><?= h(NOMES_ESTADOS[$uf] ?? $uf) ?> · <?= $num((int)($por_cidade[$slug] ?? 0)) ?> lugares</small></a>
+        <?php endforeach ?>
+      </div>
+    </div>
+  </section>
+
+  <section id="areas">
     <div class="conteudo">
       <h2>De padaria a oficina</h2>
       <p class="intro">Os comércios de cada cidade organizados por área. Dentro de cada uma, filtre pelo tipo: pizzaria, academia, pet shop…</p>
       <div class="areas">
         <?php foreach ($areas as $a): ?>
-          <div class="area"><i style="background:<?= h($a['cor']) ?>"><?= $emoji[$a['icone']] ?? '📍' ?></i><span><b><?= h($a['nome']) ?></b><small><?= $num($a['total']) ?> lugares</small></span></div>
+          <div class="area"><i style="background:<?= h($a['cor']) ?>"><?= emoji_area($a['icone']) ?></i><span><b><?= h($a['nome']) ?></b><small><?= $num($a['total']) ?> lugares</small></span></div>
         <?php endforeach ?>
       </div>
     </div>

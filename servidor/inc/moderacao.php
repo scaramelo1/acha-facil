@@ -227,6 +227,7 @@ function aprovar_alteracao(int $id, int $admin_id): void {
     // logo ou fotos trocados: apaga os arquivos antigos que saíram do app
     $agora = linha('SELECT foto, fotos FROM profissionais WHERE id = ?', [$a['profissional_id']]);
     apagar_fotos_sobrando(arquivos_dos_campos($prof), arquivos_dos_campos($agora));
+    web_cache_limpar();   // as páginas públicas mostram o dado novo na hora
 }
 
 function recusar_alteracao(int $id, int $admin_id, string $motivo): void {

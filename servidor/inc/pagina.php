@@ -18,9 +18,19 @@ function contatos_html(): string {
     return $itens ? implode(' · ', $itens) : 'pelo Instagram do Acha Fácil';
 }
 
-function pagina_inicio(string $titulo, string $descricao, string $classe = ''): void {
+// Emoji de enfeite por ícone da área (o site não carrega a fonte de ícones do app)
+const EMOJI_AREAS = ['silverware-fork-knife' => '🍽️', 'cart-outline' => '🛒', 'tools' => '🛠️', 'heart-pulse' => '🩺', 'lipstick' => '💄',
+    'tshirt-crew-outline' => '👕', 'home-roof' => '🏠', 'car-wrench' => '🚗', 'shopping-outline' => '🛍️', 'school-outline' => '🎓',
+    'dumbbell' => '🏋️', 'paw' => '🐾', 'bed-outline' => '🛏️', 'bank-outline' => '🏦', 'factory' => '🏭', 'hand-heart-outline' => '🤝'];
+function emoji_area(?string $icone): string { return EMOJI_AREAS[$icone] ?? '📍'; }
+
+/**
+ * Começo da página. $opc (páginas públicas da cidade, passo 21): 'canonica' (endereço completo), 'noindex' (true = o Google
+ * não guarda), 'imagem' (prévia do link), 'head' (HTML a mais no <head>, ex.: dados estruturados).
+ */
+function pagina_inicio(string $titulo, string $descricao, string $classe = '', array $opc = []): void {
     $base = config()['url'];
-    $canonica = url_publica(basename($_SERVER['SCRIPT_NAME']) === 'index.php' ? '' : basename($_SERVER['SCRIPT_NAME']));
+    $canonica = $opc['canonica'] ?? url_publica(basename($_SERVER['SCRIPT_NAME']) === 'index.php' ? '' : basename($_SERVER['SCRIPT_NAME']));
     ?><!doctype html>
 <html lang="pt-BR">
 <head>
@@ -29,9 +39,12 @@ function pagina_inicio(string $titulo, string $descricao, string $classe = ''): 
 <title><?= h($titulo) ?></title>
 <meta name="description" content="<?= h($descricao) ?>">
 <link rel="canonical" href="<?= h($canonica) ?>">
+<?php if (!empty($opc['noindex'])): ?><meta name="robots" content="noindex, follow">
+<?php endif ?>
+<meta property="og:url" content="<?= h($canonica) ?>">
 <meta property="og:title" content="<?= h($titulo) ?>">
 <meta property="og:description" content="<?= h($descricao) ?>">
-<meta property="og:image" content="<?= h(url_publica('assets/logo.png')) ?>">
+<meta property="og:image" content="<?= h($opc['imagem'] ?? url_publica('assets/logo.png')) ?>">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
 <link rel="icon" href="<?= $base ?>/assets/favicon.ico" sizes="any">
@@ -41,12 +54,13 @@ function pagina_inicio(string $titulo, string $descricao, string $classe = ''): 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=16">
+<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=17">
+<?= $opc['head'] ?? '' ?>
 </head>
 <body class="<?= h($classe) ?>">
 <header class="topo">
   <a class="marca" href="<?= $base ?>/"><img src="<?= $base ?>/assets/logo.png" alt="" width="40" height="40"><span>Acha <b>Fácil!</b></span></a>
-  <nav><a href="<?= $base ?>/#areas">O que tem</a><a href="<?= $base ?>/#seu-negocio">Seu negócio</a><a href="<?= $base ?>/#baixar" class="nav-botao">Baixar o app</a></nav>
+  <nav><a href="<?= $base ?>/#cidades">Cidades</a><a href="<?= $base ?>/#seu-negocio">Seu negócio</a><a href="<?= $base ?>/#baixar" class="nav-botao">Baixar o app</a></nav>
 </header>
 <?php
 }
@@ -57,6 +71,7 @@ function pagina_fim(): void {
 <footer class="rodape">
   <p class="rodape-marca"><img src="<?= $base ?>/assets/logo.png" alt="" width="36" height="36"> <strong>Acha <b>Fácil!</b></strong></p>
   <p class="lema">O comércio da sua cidade, pertinho de você.</p>
+  <p class="rodape-cidades"><?php foreach (CIDADES as $slug => [$nome, , $uf]): ?><a href="<?= h(url(cidade_web($slug) . '/')) ?>"><?= h("$nome - $uf") ?></a> <?php endforeach ?></p>
   <p><a href="<?= $base ?>/busca.php">Procurar meu negócio</a> · <a href="<?= $base ?>/termos.php">Termos de uso</a> · <a href="<?= $base ?>/privacidade.php">Privacidade</a> · <a href="<?= $base ?>/privacidade.php#excluir-conta">Excluir minha conta</a></p>
   <p class="discreto"><?= h(texto_cidades()) ?> · <?= date('Y') ?></p>
 </footer>

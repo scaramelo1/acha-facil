@@ -1,0 +1,12 @@
+# Acha Fácil! (achafacilapp.com.br)
+User-agent: *
+Disallow: /admin/
+Disallow: /painel/
+Disallow: /api/
+Disallow: /google/
+Disallow: /assinatura.php
+Disallow: /perfil.php
+Disallow: /baixar-apk.php
+Disallow: /*/buscar
+
+Sitemap: https://achafacilapp.com.br/sitemap.xml

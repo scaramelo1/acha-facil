@@ -50,6 +50,7 @@ if (e_post()) {
         if ($c && $c['ativa'] && (int)valor('SELECT COUNT(*) FROM cidades WHERE ativa = 1') <= 1) flash('O app precisa de pelo menos uma cidade ligada.', 'erro');
         elseif ($c) {
             q('UPDATE cidades SET ativa = 1 - ativa WHERE slug = ?', [$c['slug']]);
+            web_cache_limpar();
             registrar((int)$admin['id'], $c['ativa'] ? 'desligou_cidade' : 'ligou_cidade', null, $c['nome']);
             flash($c['nome'] . ($c['ativa'] ? ' desligada: some do app.' : ' ligada: já aparece no app.'));
         }

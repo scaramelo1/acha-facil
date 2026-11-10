@@ -275,3 +275,80 @@ fieldset.horarios legend { font-weight: 800; padding: 0 6px; }
 .barras-dias .vistas, .barra-legenda.vistas { background: var(--verde); }
 .barra-legenda { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: middle; }
 .colunas-numeros { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 18px; }
+
+/* ---------- páginas públicas de cidade, área, tipo e ficha (passo 21) ---------- */
+.web-topo { padding: 36px 0 32px; }
+.web-topo h1 { font-size: clamp(2rem, 5.5vw, 3.4rem); letter-spacing: -1px; color: var(--verde); margin-top: .3em; }
+.web-topo h1 mark, .cidades-lista mark { background: var(--amarelo); color: var(--verde); padding: 0 .15em; border-radius: 12px; }
+.web-topo .lead { color: var(--texto2); font-size: 1.15rem; max-width: 62ch; margin: 0 0 20px; }
+.busca-cidade input { flex: 1 1 260px; }
+.procurar input, .procurar select { min-height: 58px; padding: 0 16px; border: 2px solid var(--borda); border-radius: 16px; font: inherit; background: #fff; }
+.trilha { font-size: .95rem; color: var(--texto2); display: flex; flex-wrap: wrap; gap: 4px 6px; }
+.trilha a { color: var(--verde); font-weight: 700; }
+a.area { text-decoration: none; }
+a.area:hover { border-color: var(--verde); }
+.h-pequeno { font-size: 1.3rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; }
+.chips a, .chips span { background: var(--amarelo-claro); color: var(--verde); border-radius: 999px; padding: 6px 14px; font-weight: 800; font-size: .95rem; text-decoration: none; }
+.chips a:hover { background: var(--amarelo); }
+.chips small { font-weight: 700; opacity: .7; }
+.chips-texto span { background: var(--verde-claro); font-weight: 700; }
+.cartoes { list-style: none; padding: 0; margin: 0 0 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.cc a { display: flex; gap: 14px; align-items: center; height: 100%; background: var(--branco); border: 2px solid var(--borda); border-radius: 18px; padding: 12px 14px; text-decoration: none; }
+.cc a:hover { border-color: var(--verde); }
+.cc-destaque a { border-color: var(--amarelo); background: var(--amarelo-claro); }
+.cc-logo, .ficha-logo { flex: none; width: 56px; height: 56px; border-radius: 50%; object-fit: cover; background: #fff; display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 1.6rem; border: 1px solid var(--borda); }
+.cc-texto { min-width: 0; }
+.cc-texto b { display: block; line-height: 1.25; overflow-wrap: anywhere; }
+.cc-texto small { display: block; color: var(--texto2); font-size: .9rem; }
+.selo-destaque, .selo-verificado, .selo-aberto, .selo-fechado { display: inline-block; font-size: .8rem; font-weight: 900; border-radius: 999px; padding: 2px 10px; margin: 4px 6px 0 0; }
+.selo-destaque { background: var(--amarelo); color: var(--verde); }
+.selo-verificado { background: var(--verde-claro); color: var(--verde); }
+.selo-aberto { background: #dcf5e3; color: #11672c; }
+.selo-fechado { background: #fde2e1; color: #9b1c1c; }
+.nota { display: inline-block; font-size: .9rem; font-weight: 800; color: #9a6b00; margin-top: 4px; }
+.nota small { font-weight: 600; color: var(--texto2); }
+.filtro-bairro { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 18px; }
+.filtro-bairro select { min-height: 48px; padding: 0 12px; border: 2px solid var(--borda); border-radius: 14px; font: inherit; background: #fff; }
+.paginas { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 24px; }
+.paginas a, .paginas span { min-width: 46px; min-height: 46px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; font-weight: 800; text-decoration: none; }
+.paginas a { background: var(--branco); border: 2px solid var(--borda); color: var(--verde); }
+.paginas span[aria-current] { background: var(--verde); color: #fff; }
+.ficha { padding: 28px 0 0; }
+.ficha-caixa { background: var(--branco); border: 2px solid var(--borda); border-radius: var(--raio); padding: 24px; margin-top: 14px; box-shadow: var(--sombra); }
+.ficha-topo { display: flex; gap: 18px; align-items: center; }
+.ficha-logo { width: 96px; height: 96px; font-size: 2.6rem; }
+.ficha-topo h1 { font-size: clamp(1.7rem, 5vw, 2.6rem); color: var(--verde); margin: 0; overflow-wrap: anywhere; }
+.ficha-sub { margin: 4px 0 0; color: var(--texto2); }
+.ficha-selos { margin: 4px 0 0; }
+.ficha-botoes { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0; }
+.ficha-botoes .botao { min-height: 52px; padding: 0 20px; }
+.ficha-fotos { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; scroll-snap-type: x mandatory; }
+.ficha-fotos img { height: 200px; width: auto; border-radius: 16px; display: block; scroll-snap-align: start; }
+.ficha-colunas { display: grid; grid-template-columns: 1.3fr 1fr; gap: 8px 32px; }
+.ficha h2 { font-size: 1.3rem; margin-top: 1.2em; }
+.horarios-web { list-style: none; padding: 0; margin: 0; }
+.horarios-web li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid #EEF1EF; }
+.horarios-web li.hoje { font-weight: 900; color: var(--verde); }
+.avaliacoes { list-style: none; padding: 0; margin: 0 0 8px; display: grid; gap: 10px; }
+.avaliacoes li { background: var(--creme); border-radius: 16px; padding: 12px 16px; }
+.avaliacoes p { margin: 0 0 4px; }
+.estrelas { color: #d49b00; letter-spacing: 1px; }
+.resposta { font-size: .95rem; color: var(--texto2); border-left: 3px solid var(--amarelo); padding-left: 10px; }
+.ficha-dono { margin: 20px 0; }
+.ficha-dono .botao { margin-left: 8px; min-height: 48px; }
+.parecidos { padding: 20px 0 40px; }
+.baixe .lojas { margin-top: 8px; }
+.cidades-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+.cidades-lista a { display: block; background: var(--branco); border: 2px solid var(--borda); border-radius: 18px; padding: 18px; text-decoration: none; box-shadow: var(--sombra); }
+.cidades-lista a:hover { border-color: var(--verde); }
+.cidades-lista b { display: block; font-size: 1.2rem; color: var(--verde); }
+.cidades-lista small { color: var(--texto2); }
+.rodape-cidades a { margin: 0 6px; white-space: nowrap; }
+@media (max-width: 760px) {
+  .ficha-colunas { grid-template-columns: 1fr; }
+  .ficha-topo { align-items: flex-start; }
+  .ficha-logo { width: 72px; height: 72px; font-size: 2rem; }
+  .ficha-botoes .botao { flex: 1 1 140px; }
+  .cartoes { grid-template-columns: 1fr; }
+}

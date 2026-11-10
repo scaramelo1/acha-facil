@@ -41,9 +41,11 @@ pagina_inicio('Privacidade · Acha Fácil', 'Quais dados o Acha Fácil usa, para
   a qualquer momento nas configurações do celular. A localização aproximada dos comércios vem do endereço deles, com
   dados do OpenStreetMap (© colaboradores do OpenStreetMap, licença ODbL).</p>
 
-  <h3>Dados dos comércios mostrados no app</h3>
+  <h3>Dados dos comércios mostrados no app e no site</h3>
   <p>Parte dos comércios foi incluída a partir de informações que eles mesmos tornam públicas na internet (nome,
   endereço, telefone, WhatsApp, site e redes sociais do negócio), para que os moradores encontrem o comércio local.
+  Os mesmos dados aparecem no app e nas páginas de cada cidade neste site, que podem aparecer em buscadores como o Google;
+  o nome de quem avalia aparece só com o primeiro nome e a inicial do sobrenome.
   O responsável pode <a href="<?= h(config()['url']) ?>/busca.php">procurar o negócio</a> e assumir o perfil para corrigir os dados,
   ou pedir para tirar do app; o pedido é atendido em até 2 dias úteis. Quem faz o pedido informa nome e telefone,
   usados só para confirmar e responder.</p>

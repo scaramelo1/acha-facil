@@ -7,7 +7,7 @@ pagina_inicio('Termos de uso · Acha Fácil', 'Regras de uso do app Acha Fácil,
 ?>
 <main class="documento">
   <h1>Termos de uso</h1>
-  <p class="atualizado">Última atualização: 8 de novembro de 2026</p>
+  <p class="atualizado">Última atualização: 10 de novembro de 2026</p>
 
   <div class="quadro">
     <strong>Resumo:</strong> o Acha Fácil é uma vitrine de profissionais e comércios de <?= h(texto_cidades()) ?>.
@@ -44,6 +44,10 @@ pagina_inicio('Termos de uso · Acha Fácil', 'Regras de uso do app Acha Fácil,
 
   <h2>5. Para profissionais e comércios</h2>
   <ul>
+    <li>Os comércios que o dono ainda não assumiu aparecem com informações públicas do próprio negócio na internet
+    (nome, endereço, telefone, WhatsApp, site e redes sociais). Cada comércio tem uma página no app e no site
+    (por exemplo, achafacilapp.com.br/<?= h(cidade_web(CIDADE_PADRAO)) ?>/), que pode aparecer em buscadores como o Google.
+    O dono pode corrigir os dados pelos planos ou pedir para tirar, sem custo, pela <a href="<?= $base ?>/busca.php">busca do site</a>.</li>
     <li>Você é responsável pelas informações, fotos e textos da sua página, e garante que tem direito de usá-los.</li>
     <li>Todo cadastro passa pela aprovação da equipe do Acha Fácil, que pode recusar ou retirar cadastros falsos, enganosos,
     ilegais ou que recebam reclamações graves.</li>

@@ -323,3 +323,39 @@ function municipio_oficial(string $uf, string $nome): ?string {
     foreach (municipios()['cidades'][$uf] ?? [] as $c) if (sem_acento($c) === $alvo) return $c;
     return null;
 }
+
+// ---------- endereços das páginas públicas (passo 21: versão web com SEO) ----------
+// Cidade com o nome completo no endereço (pedido do usuário): achafacilapp.com.br/sao-joao-da-boa-vista/saude/dentista/
+/** "Clínica Odontológica São José" -> "clinica-odontologica-sao-jose". */
+function slug_web(string $s): string {
+    return trim(preg_replace('/[^a-z0-9]+/', '-', sem_acento($s)), '-');
+}
+/** Slug da cidade no endereço do site (nome completo), a partir do slug interno (sao-joao -> sao-joao-da-boa-vista). */
+function cidade_web(string $cidade): string { return slug_web(TODAS_CIDADES[$cidade][0] ?? $cidade); }
+/** Slug do endereço -> slug interno, só entre as cidades ativas. */
+function cidade_da_web(string $web): ?string {
+    foreach (CIDADES as $slug => $c) if (slug_web($c[0]) === $web) return $slug;
+    return null;
+}
+function url_cidade(string $cidade): string { return url(cidade_web($cidade) . '/'); }
+function url_area(string $cidade, string $area): string { return url(cidade_web($cidade) . "/$area/"); }
+function url_tipo(string $cidade, string $area, string $tipo): string { return url(cidade_web($cidade) . "/$area/" . slug_web($tipo) . '/'); }
+/** Ficha: /<cidade>/c/<nome>-<id> (o número no fim é o que vale; nome trocado redireciona para o certo). */
+function caminho_ficha(int $id, string $nome, string $cidade): string {
+    return cidade_web($cidade) . '/c/' . (rtrim(mb_substr(slug_web($nome), 0, 70), '-') ?: 'comercio') . '-' . $id;
+}
+function url_ficha(array $p): string { return url(caminho_ficha((int)$p['id'], (string)$p['nome'], (string)$p['cidade'])); }
+
+// Cache das páginas públicas (inc/web.php): /var/lib/acha-facil/cache/web. Fica aqui porque o admin também limpa
+// (aprovar alteração, ligar/desligar cidade).
+function web_cache_dir(): ?string {
+    $d = config()['dados_dir'] . '/cache/web';
+    if (!is_dir($d)) @mkdir($d, 0750, true);
+    return is_dir($d) && is_writable($d) ? $d : null;
+}
+/** Apaga as páginas guardadas (todas, ou só as mais velhas que $idade segundos). */
+function web_cache_limpar(int $idade = 0): void {
+    $dir = web_cache_dir();
+    if (!$dir) return;
+    foreach (glob("$dir/*.html") ?: [] as $f) if ($idade === 0 || filemtime($f) < time() - $idade) @unlink($f);
+}

@@ -215,8 +215,23 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    lista; recarga e tela de avaliar mandam `origem=nenhuma`. Privacidade atualizada. Enquanto a 017 não é aplicada, a API
    conta do jeito antigo e as páginas de números/painel ficam escondidas (nada quebra).
    Mudança 017 já aplicada (conferido em 10/11). Falta: gerar/publicar o APK 1.5.0 + versão na Play
-21. ⬜ Versão web com páginas de cidade, área, tipo e ficha (`/acha-facil/<cidade>/<area>/<tipo>/`), sitemap,
-   dados estruturados, Search Console, cache em arquivo; toques no site contam no passo 20
+21. 🟡 Versão web com páginas de cidade, área, tipo e ficha (10/11, decisões do usuário: nome completo da cidade no
+   endereço, fotos do Básico no site, avaliações do app na ficha). **No ar** em https://achafacilapp.com.br:
+   `/<cidade>/` (ex.: /sao-joao-da-boa-vista/; o slug curto /sao-joao/ redireciona), `/<cidade>/<area>/`,
+   `/<cidade>/<area>/<tipo>/` e a ficha `/<cidade>/c/<nome>-<id>` (nome trocado redireciona para o endereço certo);
+   busca `/<cidade>/buscar?q=` (não indexada). Código: servidor/inc/web.php (páginas, dados estruturados LocalBusiness,
+   BreadcrumbList e ItemList, sitemap) e servidor/publico/web.php (rotas); .htaccess manda para web.php o que não é
+   arquivo nem pasta, só no host achafacilapp.com.br (regra também em servidor/dominio/htaccess-redirecionar).
+   Listas: 30 por página (?pagina=N), mesma ordem do app (Destaque primeiro, sorteio do dia), filtro de bairro (não
+   indexado), tipos com 3+ comércios como atalhos; tipo com menos de 3 = noindex. Ficha: logo, fotos, botões WhatsApp/
+   ligar/mapa/Instagram/site (toques contam no passo 20 com origem "web" via api/contato.php), horário com "Aberto agora",
+   avaliações do app, "Este comércio é seu?" (só quem ainda não pagou plano) e "Outras opções de ...". A visita conta
+   como origem "web" (robôs não contam). /sitemap.xml (índice + sitemap-paginas.xml + sitemap-<cidade>.xml, guardado 6 h),
+   /robots.txt. Cache das listas em /var/lib/acha-facil/cache/web (1 h; apagado ao aprovar alteração e ao ligar/desligar
+   cidade). Inicial com "Escolha a sua cidade", menu "Cidades" e cidades no rodapé. Termos e privacidade atualizados.
+   Falta (usuário): **Google Search Console** — propriedade de domínio achafacilapp.com.br (registro TXT no Registro.br),
+   enviar https://achafacilapp.com.br/sitemap.xml e testar uma ficha no "Teste de pesquisa aprimorada" do Google;
+   acompanhar o log de acesso na 1ª semana (robôs) e, depois de 2 a 8 semanas, as buscas que trazem gente
 22. ⬜ Prospecção Saúde e Veículos: 2 semanas de dados do passo 20 → CSV → grupos A/B/C → WhatsApp manual
    (15–20/dia) com cupom por nicho → metas de 30 dias
 23. ⬜ "Recomendados" só com plano Básico e só perto (10/11, pedido do usuário): hoje a faixa "Recomendados em <cidade>"
