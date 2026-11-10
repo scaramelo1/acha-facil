@@ -136,7 +136,7 @@ admin_inicio('Números', $admin);
 </div>
 
 <?= $paginacao() ?>
-<div class="tabela rolar"><table>
+<div class="tabela"><table>
   <tr><th>Comércio</th><th>Plano</th>
     <?php foreach (COLUNAS as $k => $n): ?><th><a href="<?= h($link(['ordem' => $k, 'pag' => null])) ?>"><?= $n ?><?= $k === $ordem ? ' ▼' : '' ?></a></th><?php endforeach ?>
     <th>Taxa</th><th></th></tr>
