@@ -57,25 +57,26 @@ const PALAVRAS_AREA = [
     '/nutr|m[ée]dic|cl[íi]nica|odont|dentista|psic/iu' => 'saude',
     '/mercad|mercearia|hortifr|a[çc]ougue|bebidas/iu' => 'mercados',
     // nomes longos do Google (listas como a de Aguaí)
-    '/gastropub|petiscaria|lanchon|\bbar\b|beer|tabacaria|lounge bar|panificadora|caf[ée]|torrefa|pra[çc]a de alimenta|churros|cachorro|padaria|doce|confeit/iu' => 'alimentacao',
-    '/atacadista|especiarias|distribuidora|empório|emporio/iu' => 'mercados',
-    '/cirurgi|hospital|pronto atendimento|primeiros socorros|psican|terapeut|pod[óo]log|depend[êe]ncia|sa[úu]de|farm[áa]cia|drogaria/iu' => 'saude',
+    '/gastropub|petiscaria|lanchon|\bbar\b|beer|tabacaria|casa noturna|boate|\bclub\b|destilaria|lounge bar|panificadora|caf[ée]|torrefa|pra[çc]a de alimenta|churros|cachorro|padaria|doce|confeit/iu' => 'alimentacao',
+    '/atacadista|especiarias|distribuidora|conveni[êe]ncia|cesta b[áa]sica|\bg[áa]s\b|[áa]gua mineral|empório|emporio/iu' => 'mercados',
+    '/cirurgi|hospital|cl[íi]nico|pediatra|urologista|optometrista|massagista|pronto atendimento|primeiros socorros|psican|terapeut|pod[óo]log|depend[êe]ncia|sa[úu]de|farm[áa]cia|drogaria/iu' => 'saude',
     '/depila|bronzeamento|piercing|tatua|tattoo|barber|make\b|sal[ãa]o/iu' => 'beleza',
     '/yoga|nata[çc][ãa]o|artes marciais|personal trainer|academia|clube/iu' => 'esporte',
     '/aulas|escola|col[ée]gio|preparat|curso/iu' => 'educacao',
     '/f[áa]brica|fabricante|biotecnologia|finalista de metais|serraria|ferro-velho|ind[úu]stria/iu' => 'industria',
-    '/mec[âa]nic|automotiv|autom[óo]ve|troca de [óo]leo|radiador|caminh[ãa]o|motos|tratores|auto ?pe[çc]as|pneu/iu' => 'veiculos',
-    '/concreteira|terraplenagem|ca[çc]amba|entulho|tijolo|toldo|ar[- ]condicionado|constru[çc]|manuten[çc][ãa]o predial|instala[çc][ãa]o el[ée]trica|tape[çc]aria|decora|forro|energia solar|arquitet|engenh|topografia|viveiro|orquid|guindaste|im[óo]ve/iu' => 'casa',
+    '/mec[âa]nic|oficina|automotiv|autom[óo]ve|troca de [óo]leo|radiador|caminh|empilhadeira|lubrificante|motos|tratores|auto ?pe[çc]as|pneu/iu' => 'veiculos',
+    '/concreteira|terraplenagem|ca[çc]amba|entulho|tijolo|toldo|ar[- ]condicionado|constru[çc]|manuten[çc][ãa]o predial|instala[çc][ãa]o el[ée]trica|tape[çc]aria|decora|forro|energia solar|serralheri|gesso|impermeabiliz|calhas|pintor|pinturas|hidr[áa]ulic|interiores|arquitet|engenh|topografia|viveiro|orquid|guindaste|im[óo]ve/iu' => 'casa',
     '/fazenda|agr[íi]col|agro|ra[çc][ãa]o|coop|fertilizante|peixes|s[íi]tio|ch[áa]cara/iu' => 'pet',
-    '/pousada|casa de campo|temporada|cinema|hotel|eventos|festas/iu' => 'hospedagem',
-    '/igreja|templo|organiza[çc][ãa]o|ado[çc][ãa]o|associa[çc]|par[óo]quia/iu' => 'entidades',
-    '/advog|tabeli|gr[áa]fica|despachante|cart[óo]rio|fotogra|v[íi]deo|webdesign|computador|conserto|limpeza|fantasias|recursos humanos|empregos|empresarial|consultor|assistente social|toner|videogame/iu' => 'servicos',
-    '/loja|revistaria|fornecedor|com[ée]rcio|variedades|presentes|shopping|cell|celulares|embal/iu' => 'lojas',
+    '/pousada|casa de campo|temporada|cinema|hotel|eventos|festas|ch[áa]cara|chal[ée]|albergue|camping|hospedagem|parque de divers/iu' => 'hospedagem',
+    '/igreja|templo|organiza[çc][ãa]o|ado[çc][ãa]o|associa[çc]|par[óo]quia|caridade|escoteiro/iu' => 'entidades',
+    '/advog|tabeli|gr[áa]fica|despachante|rastreamento|sat[ée]lite|chaveiro|design|r[áa]dio|not[íi]cias|jornal|jornais|branding|certifica|loca[çc][õo]es|tecnologia|\btec\b|fretamento|[ôo]nibus|t[áa]xi|transporte|funer[áa]ria|reciclag|recicl[áa]veis|log[íi]stica|armaz[ée]ns|motorista|alfaiat|cart[óo]rio|fotogra|v[íi]deo|webdesign|computador|conserto|limpeza|fantasias|recursos humanos|empregos|empresarial|consultor|assistente social|toner|videogame/iu' => 'servicos',
+    '/tecidos|estilista|ateli[êe]/iu' => 'moda',
+    '/loja|revistaria|relojoaria|fornecedor|com[ée]rcio|variedades|presentes|shopping|cell|celulares|embal/iu' => 'lojas',
 ];
 // lugares públicos que vêm nas listas do Google e não são comércio (não entram no app)
-const NAO_COMERCIO = '/^(ponto de [ôo]nibus|esta[çc][ãa]o de [ôo]nibus|esta[çc][ãa]o de (tratamento|pesagem).*|subesta[çc][ãa]o.*|esta[çc][ãa]o ferrovi[áa]ria.*|infraestrutura de transporte|companhia ferrovi[áa]ria|parque|parque (esportivo|rural)|playground|trilha.*|jardim|[áa]rea de (recrea[çc][ãa]o|escrit[óo]rios)|campo de futebol|est[áa]dio.*|gin[áa]sio poliesportivo|quadra de esportes|prefeitura|reparti[çc][ãa]o p[úu]blica|prestador de servi[çc]os p[úu]blicos|delegacia.*|pol[íi]cia.*|bombeiros|tribunal.*|departamento de tr[âa]nsito|centro m[ée]dico p[úu]blico|escola p[úu]blica|universidade p[úu]blica|cemit[ée]rio|complexo (habitacional|de condom[íi]nio|de apartamentos)|apartamentos|desenvolvimento de moradias|sociedade de servi[çc]os habitacionais)$/iu';
+const NAO_COMERCIO = '/^(ponto de [ôo]nibus|esta[çc][ãa]o de [ôo]nibus|esta[çc][ãa]o de (tratamento|pesagem).*|subesta[çc][ãa]o.*|esta[çc][ãa]o ferrovi[áa]ria.*|infraestrutura de transporte|companhia ferrovi[áa]ria|parque|parque (esportivo|rural)|playground|trilha.*|jardim|[áa]rea de (recrea[çc][ãa]o|escrit[óo]rios)|campo de futebol|est[áa]dio.*|gin[áa]sio poliesportivo|quadra de esportes|prefeitura|reparti[çc][ãa]o p[úu]blica|prestador de servi[çc]os p[úu]blicos|delegacia.*|pol[íi]cia.*|bombeiros|tribunal.*|departamento de tr[âa]nsito|centro m[ée]dico p[úu]blico|escola p[úu]blica|universidade p[úu]blica|cemit[ée]rio|complexo (habitacional|de condom[íi]nio|de apartamentos)|apartamentos|desenvolvimento de moradias|sociedade de servi[çc]os habitacionais|pra[çc]a|represa|quartel.*|companhia de saneamento|escrit[óo]rio de recrutamento militar|departamento de ve[íi]culos automotores|servi[çc]o de ambul[âa]ncia|destino religioso|museu|usina solar fotovoltaica)$/iu';
 // linha sem tipo cujo nome é só bairro ou endereço (vem nas buscas do Google por região)
-const SO_LUGAR = '/^(centro$|cidade nova$|santa maria$|vila \\S|jardim \\S|parque \\S|condom[íi]nio|r\\.\\s|rua\\s|av\\.?\\s|avenida\\s|esta[çc][ãa]o)/iu';
+const SO_LUGAR = '/^(centro$|cidade nova$|santa maria$|vila \\S|jardim \\S|parque \\S|condom[íi]nio|pra[çc]a\\s|r\\.\\s|rua\\s|av\\.?\\s|avenida\\s|esta[çc][ãa]o)/iu';
 // cidade pelo endereço ("..., Águas da Prata - SP")
 function cidade_do_endereco(string $e, string $padrao): string {
     $achada = $padrao; $pos = -1;   // a que aparece por último ("..., Cidade - UF, CEP"); o começo pode citar outra cidade
@@ -156,11 +157,15 @@ foreach ($linhas_html as [, $status, $tipo, $area, $tr]) {
         'endereco' => $endereco, 'bairro' => $bairro, 'mapa' => $mapa && str_starts_with($mapa, 'https://www.google.com/maps') ? mb_substr($mapa, 0, 500) : null,
         'popularidade' => $popularidade,
     ];
-    $atual = linha('SELECT id, importado, status FROM profissionais WHERE chave_importacao = ?', [$k]);
+    $atual = linha('SELECT id, importado, status, categoria_id, tipo, mapa FROM profissionais WHERE chave_importacao = ?', [$k]);
     if (!$atual) {
         inserir('profissionais', $dados + ['chave_importacao' => $k, 'importado' => 1, 'status' => 'ativo', 'assinatura' => 'sem']);
         $novos++;
     } elseif ((int)$atual['importado'] === 1 && $atual['status'] === 'ativo') {
+        // lista nova mais pobre não estraga o que já estava bom: área/tipo sem informação e link do Maps sem coordenadas
+        if ($dados['categoria_id'] === $cat['outros'] && (int)$atual['categoria_id'] !== $cat['outros']) { unset($dados['categoria_id']); $dados['tipo'] = $dados['tipo'] ?? $atual['tipo']; }
+        if ($dados['tipo'] === null) unset($dados['tipo']);
+        if (str_contains((string)$atual['mapa'], '!3d') && !str_contains((string)$dados['mapa'], '!3d')) unset($dados['mapa']);
         atualizar('profissionais', (int)$atual['id'], $dados);
         $atualizados++;
     } else {

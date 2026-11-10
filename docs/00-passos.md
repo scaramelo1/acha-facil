@@ -183,3 +183,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    para a área certa por palavras-chave (só 11 em "Outros"). A cidade de cada linha agora é a última citada no endereço.
    Os links dessa lista não trazem coordenadas: localização pelo OpenStreetMap (geocodificar.php, ~30 min).
    Backup antes: /root/acha-facil-profissionais.antes-aguai.*.sql.gz
+18. ✅ Vargem Grande do Sul atualizada (09/11, pedido do usuário, lista nova com igrejas): 2.118 comércios (1.094 novos,
+   71 igrejas). Reimportar não piora quem já estava: linha nova sem área mantém a área/tipo antigos e link do Maps sem
+   coordenadas não troca o que tinha. Mais palavras-chave de área e mais lugares públicos (praça, represa, SAAE, Detran,
+   SAMU, Tiro de Guerra) fora. Lista anterior guardada em /var/lib/acha-facil/leads/vargem-grande-do-sul.antes-20261109.html.
+   Corrigido: geocodificar.php pedia ao OpenStreetMap só a área antiga (viewbox fixo) e Aguaí não era achada; agora usa a
+   CAIXA. Backup: /root/acha-facil-profissionais.antes-vargem2.*.sql.gz

@@ -27,7 +27,7 @@ function nominatim(string $consulta): ?array {
     usleep(1200000);
     $url = 'https://nominatim.openstreetmap.org/search?' . http_build_query([
         'q' => $consulta, 'format' => 'json', 'limit' => 1, 'countrycodes' => 'br',
-        'viewbox' => '-46.90,-21.65,-46.40,-22.10', 'bounded' => 1,
+        'viewbox' => CAIXA['lng'][0] . ',' . CAIXA['lat'][1] . ',' . CAIXA['lng'][1] . ',' . CAIXA['lat'][0], 'bounded' => 1,   // mesma área da CAIXA
     ]);
     $ctx = stream_context_create(['http' => ['timeout' => 20, 'header' => "User-Agent: AchaFacil/1.0 (guia de comercios locais; geocodificacao unica)\r\nAccept-Language: pt-BR\r\n"]]);
     $r = @file_get_contents($url, false, $ctx);
