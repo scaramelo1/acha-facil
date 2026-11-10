@@ -219,6 +219,13 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    dados estruturados, Search Console, cache em arquivo; toques no site contam no passo 20
 22. ⬜ Prospecção Saúde e Veículos: 2 semanas de dados do passo 20 → CSV → grupos A/B/C → WhatsApp manual
    (15–20/dia) com cupom por nicho → metas de 30 dias
+23. ⬜ "Recomendados" só com plano Básico e só perto (10/11, pedido do usuário): hoje a faixa "Recomendados em <cidade>"
+   da tela inicial sorteia entre os 80 mais procurados (populares() em inc/guia.php), com ou sem plano. Vai passar a mostrar
+   **só quem pagou o Básico** (`basico_pago_em`; quem tem Destaque já está na faixa dele) e **só os que estão perto da
+   pessoa** (localização do celular, como no "Perto de você"), não sempre, para a seção não ficar lotada. Sem localização
+   ou sem ninguém do Básico por perto, a faixa não aparece. "Comércios em destaque" continua **só com quem assina o Destaque**
+   (passo 4g). Decidir: raio (sugestão 2 km) e quantos no máximo (sugestão 10). Precisa de APK novo (a tela inicial passa a
+   mandar a posição)
 - Google Play: já em teste fechado (passo 11). Parceria com o @sanjoanenses: decidido não fazer (10/11)
 20. ✅ Poços de Caldas atualizada (10/11, pedido do usuário): lista nova com 8.449 linhas → 8.375 comércios no app
    (6.701 novos, 1.353 atualizados; os antigos que não vieram na lista continuam). 390 lugares públicos fora.
