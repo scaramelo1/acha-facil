@@ -117,7 +117,7 @@ Rotas por `.htaccess` em `servidor/publico/` (RewriteRule para `web.php`), sem m
 - `<title>` e `meta description` próprios em cada página; um `<h1>` por página; `canonical`.
 - Dados estruturados `schema.org/LocalBusiness` na ficha e `BreadcrumbList` nas listas.
 - `sitemap.xml` gerado (índice + um por cidade) e `robots.txt`; cadastrar no **Google Search Console**
-  (propriedade `fsadesigners.com.br`, prefixo `/acha-facil/`).
+  (propriedade `achafacilapp.com.br`).
 - **Não indexar** (`noindex`): busca, páginas de tipo com menos de 3 comércios, fichas pendentes/pausadas/
   tiradas, cidade desligada. Página que não existe → 404 de verdade.
 - Ligações internas: cidade → áreas → tipos → fichas; na ficha, "Outros dentistas em São João".
@@ -216,6 +216,6 @@ Decidido em 10/11 não fazer. A divulgação em São João fica com o item 2 (Go
 
 - Item 1: o painel do dono no Básico mostra o número do mês ou só o Destaque vê números? (sugestão: Básico vê o
   total, como isca para o Destaque).
-- Item 2: endereço final — continuar em `fsadesigners.com.br/acha-facil/` ou registrar domínio próprio
+- Item 2: endereço final — ✅ domínio próprio achafacilapp.com.br (10/11)
   (ex.: `achafacil.app.br`) antes de o Google indexar (trocar depois custa posições).
 - Item 4: valor e prazo do cupom de entrada; quem faz as abordagens; registro em planilha ou no admin.

@@ -18,4 +18,4 @@ bash servidor/instalar.sh              # cria/atualiza banco, tabelas e publica√
 bash servidor/instalar.sh --leads      # importa/atualiza os com√©rcios da lista de leads
 ```
 
-API: https://fsadesigners.com.br/acha-facil/api/inicio.php
+API: https://achafacilapp.com.br/api/inicio.php

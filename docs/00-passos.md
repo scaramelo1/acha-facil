@@ -6,7 +6,7 @@ Criado em 07/11/2026 a partir do **Guia Sanjoanense** (`/var/www/guia-sanjoanens
 Sanjoanenses e sem a aba Notícias.
 
 - **App:** Expo (TypeScript), na raiz do repositório (`src/`), pacote `br.com.fsadesigner.achafacil`.
-- **Servidor:** PHP 8.3 + MariaDB em `servidor/`, publicado em https://fsadesigners.com.br/acha-facil/
+- **Servidor:** PHP 8.3 + MariaDB em `servidor/`, publicado em https://achafacilapp.com.br/ (desde 10/11; antes fsadesigners.com.br/acha-facil/)
   (`bash servidor/instalar.sh` como root; config em `/etc/acha-facil/config.php`; banco `acha_facil`).
 - **Pagamento:** Mercado Pago (08/11): Básico R$ 9,90 pagamento único (era 5,99 até 10/11; Checkout: cartão, Pix ou boleto); Destaque R$ 29,90/mês e Destaque + Site R$ 89,90/mês (10/11), assinaturas no cartão.
 - **Marca:** verde `#005C38` e amarelo `#F7C600`; símbolo (pino + loja + lupa) em `assets/logo-simbolo.svg`.
@@ -240,8 +240,11 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    `mp-webhook.php` (cadastrado no Mercado Pago, POST). Arquivos em servidor/dominio/; ligar com `bash servidor/dominio/ativar.sh`
    (confere o DNS, instala o site no Apache, certbot, testa e só então cria publico/.htaccess).
    Ligado em 10/11: DNS A no Registro.br → 177.153.68.212, certificado Let's Encrypt (renova sozinho, vence 08/02/2027).
-   Depois, opcional: apontar o app (src/api/cliente.ts) e `endereco_publico` para o domínio novo, cadastrando antes
-   https://achafacilapp.com.br/google/retorno.php no Google Cloud (senão o login com Google quebra).
+   Tudo trocado para o domínio novo (10/11, pedido do usuário): `endereco_publico` em /etc/acha-facil/config.php (backup
+   /root/acha-facil-config.php.antes-dominio), links do app em src/api/cliente.ts (vale a partir do próximo APK), scripts,
+   textos e docs. Exceção: retorno do Google = `google_retorno()` em inc/google.php, que segue no endereço antigo (cadastrado
+   no Google; ele redireciona). Falta: cadastrar https://achafacilapp.com.br/google/retorno.php no Google Cloud e pôr
+   `'google_retorno' => 'https://achafacilapp.com.br/google/retorno.php',` no config.
 26. 🟡 Plano **Destaque + Site** e Básico a R$ 9,90 (10/11, pedido do usuário): 3º plano, chave `site`, R$ 89,90/mês
    (assinatura como o Destaque): tudo do Destaque + landing page própria feita pela FSA + domínio incluso, para o site virar
    receita recorrente da FSA. Preços em PLANOS_PRECO (inc/guia.php); SQL_DESTAQUE conta `destaque` e `site`. Site: card em

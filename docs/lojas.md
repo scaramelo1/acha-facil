@@ -41,10 +41,10 @@ continua).
 
 ## 1. Links que as lojas pedem
 
-- Política de privacidade: https://fsadesigners.com.br/acha-facil/privacidade.php
-- Excluir conta (Play Store): https://fsadesigners.com.br/acha-facil/privacidade.php#excluir-conta
-- Termos: https://fsadesigners.com.br/acha-facil/termos.php
-- Site / suporte: https://fsadesigners.com.br/acha-facil/ · e-mail fsadesignerbr@gmail.com
+- Política de privacidade: https://achafacilapp.com.br/privacidade.php
+- Excluir conta (Play Store): https://achafacilapp.com.br/privacidade.php#excluir-conta
+- Termos: https://achafacilapp.com.br/termos.php
+- Site / suporte: https://achafacilapp.com.br/ · e-mail fsadesignerbr@gmail.com
 
 ## 2. Textos da ficha
 
@@ -67,7 +67,7 @@ continua).
 > • Favoritos para guardar os seus preferidos
 > • Não precisa de conta para procurar e chamar no WhatsApp
 >
-> Tem um comércio? Procure o seu negócio no app. Se ele ainda não estiver lá, você pode incluir de graça pelo site fsadesigners.com.br/acha-facil.
+> Tem um comércio? Procure o seu negócio no app. Se ele ainda não estiver lá, você pode incluir de graça pelo site achafacilapp.com.br.
 >
 > Sua cidade ainda não está no Acha Fácil? Peça pelo site e avisamos quando chegar.
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Publica um APK novo do Acha Fácil no site (botão "Baixar APK" de https://fsadesigners.com.br/acha-facil/).
+# Publica um APK novo do Acha Fácil no site (botão "Baixar APK" de https://achafacilapp.com.br/).
 # Rodar como root na VPS. Aceita o arquivo .apk ou o link que o EAS mostra no fim do build:
 #   bash servidor/publicar-apk.sh https://expo.dev/artifacts/eas/XXXX.apk
 #   bash servidor/publicar-apk.sh /root/acha-facil.apk
@@ -56,7 +56,7 @@ chmod 750 "$DIR"
 
 echo "APK:        $(du -h "$DIR/acha-facil.apk" | cut -f1), versão ${VERSAO:-?}"
 echo "Downloads:  $(cat "$DIR/downloads.txt") até agora"
-echo "Página:     $(curl -s -o /dev/null -w '%{http_code}' -m 10 https://fsadesigners.com.br/acha-facil/)"
-echo "Baixar:     $(curl -s -I -o /dev/null -w '%{http_code} %{content_type}' -m 10 https://fsadesigners.com.br/acha-facil/baixar-apk.php)"
-echo "Link:       https://fsadesigners.com.br/acha-facil/baixar-apk.php"
-echo "Aviso app:  $(curl -s -m 10 https://fsadesigners.com.br/acha-facil/api/versao.php)   (quem tem versão mais velha recebe o aviso)"
+echo "Página:     $(curl -s -o /dev/null -w '%{http_code}' -m 10 https://achafacilapp.com.br/)"
+echo "Baixar:     $(curl -s -I -o /dev/null -w '%{http_code} %{content_type}' -m 10 https://achafacilapp.com.br/baixar-apk.php)"
+echo "Link:       https://achafacilapp.com.br/baixar-apk.php"
+echo "Aviso app:  $(curl -s -m 10 https://achafacilapp.com.br/api/versao.php)   (quem tem versão mais velha recebe o aviso)"

@@ -33,7 +33,7 @@ return [
     'db_senha' => '$SENHA',
     'url' => '/$NOME',
     'https' => true,
-    'endereco_publico' => 'https://fsadesigners.com.br/$NOME/',
+    'endereco_publico' => 'https://achafacilapp.com.br/',
     'dados_dir' => '$DADOS',
     // Mercado Pago (assinatura recorrente no cartão): 'desligado' | 'sandbox' | 'producao'
     'mp_modo' => 'desligado',
@@ -44,7 +44,7 @@ return [
     'link_play' => '',                 // link da Play Store quando publicar
     'link_app_store' => '',            // link da App Store quando publicar
     // Entrar com o Google (console.cloud.google.com > Credenciais > ID do cliente OAuth, tipo Aplicativo da Web;
-    // URI de redirecionamento: https://fsadesigners.com.br/acha-facil/google/retorno.php)
+    // URI de redirecionamento: https://achafacilapp.com.br/google/retorno.php)
     'google_client_id' => '',
     'google_client_secret' => '',
     'mp_access_token' => '',
@@ -76,7 +76,7 @@ mysql $BANCO < sql/categorias.sql   # depois das mudanças: usa colunas novas (c
 echo "✔ tabelas conferidas"
 mkdir -p $DADOS/fotos && chown -R www-data:www-data $DADOS && chmod 750 $DADOS $DADOS/fotos
 
-# 3. arquivos e publicação em https://fsadesigners.com.br/acha-facil/
+# 3. arquivos e publicação em https://achafacilapp.com.br/ (servidor/dominio/) e no endereço antigo, que só serve api/ e mp-webhook.php
 find "$RAIZ" -type d -exec chmod 755 {} +
 find "$RAIZ" -type f -exec chmod 644 {} +
 chmod 755 "$RAIZ/instalar.sh" "$RAIZ/publicar-apk.sh" "$RAIZ/importar-leads.php" "$RAIZ/geocodificar.php"
@@ -100,4 +100,4 @@ if [ "${1:-}" = "--leads" ]; then
     php "$RAIZ/importar-leads.php" "$f" "$c"
   done
 fi
-echo; echo "Pronto: https://fsadesigners.com.br/$NOME/api/inicio.php"
+echo; echo "Pronto: https://achafacilapp.com.br/api/inicio.php"

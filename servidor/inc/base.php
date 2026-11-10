@@ -18,7 +18,7 @@ function config(): array {
 }
 function url(string $caminho = ''): string { return config()['url'] . '/' . ltrim($caminho, '/'); }
 function url_publica(string $caminho = ''): string {
-    return rtrim((string)(config()['endereco_publico'] ?? 'https://fsadesigners.com.br/acha-facil/'), '/') . '/' . ltrim($caminho, '/');
+    return rtrim((string)(config()['endereco_publico'] ?? 'https://achafacilapp.com.br/'), '/') . '/' . ltrim($caminho, '/');
 }
 
 function db(): PDO {

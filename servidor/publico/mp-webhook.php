@@ -1,6 +1,6 @@
 <?php
 // Avisos do Mercado Pago (configurar em Suas integrações > a aplicação > Webhooks, eventos "Pagamentos" e "Planos e assinaturas":
-// https://fsadesigners.com.br/acha-facil/mp-webhook.php). Cada aviso é conferido direto na API (inc/mercadopago.php).
+// https://achafacilapp.com.br/mp-webhook.php; o endereço antigo em fsadesigners.com.br continua recebendo). Cada aviso é conferido direto na API (inc/mercadopago.php).
 require __DIR__ . '/../inc/base.php';
 require_once __DIR__ . '/../inc/guia.php';
 require __DIR__ . '/../inc/mercadopago.php';

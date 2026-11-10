@@ -1,13 +1,18 @@
 <?php
 // Entrar no app com o Google (OAuth do tipo "aplicativo da Web"). As chaves ficam em /etc/acha-facil/config.php:
-// google_client_id e google_client_secret. O endereço de retorno cadastrado no Google é url_publica('google/retorno.php').
+// google_client_id e google_client_secret. O endereço de retorno cadastrado no Google é google_retorno():
+// 'google_retorno' do config; sem ele, o endereço antigo (fsadesigners.com.br, que redireciona para o domínio novo).
+// Depois de cadastrar https://achafacilapp.com.br/google/retorno.php no Google, pôr no config:
+// 'google_retorno' => 'https://achafacilapp.com.br/google/retorno.php',
 declare(strict_types=1);
 require_once __DIR__ . '/base.php';
 
 function google_configurado(): bool {
     return (config()['google_client_id'] ?? '') !== '' && (config()['google_client_secret'] ?? '') !== '';
 }
-function google_retorno(): string { return url_publica('google/retorno.php'); }
+function google_retorno(): string {
+    return (string)(config()['google_retorno'] ?? 'https://fsadesigners.com.br/acha-facil/google/retorno.php');
+}
 
 /** Só volta para o próprio app: achafacil://... (APK) ou exp://... (Expo Go, nos testes). */
 function volta_valida(string $v): bool {
