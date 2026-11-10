@@ -11,6 +11,8 @@ function config(): array {
     $local = dirname(__DIR__) . '/config.local.php';
     $c = require (is_file($local) ? $local : '/etc/acha-facil/config.php');
     $c['url'] = rtrim($c['url'] ?? '/acha-facil', '/');
+    // Domínio próprio (achafacilapp.com.br): o site fica na raiz, sem /acha-facil
+    if (preg_match('/^(www\.)?achafacilapp\.com\.br$/i', (string)($_SERVER['HTTP_HOST'] ?? ''))) $c['url'] = '';
     $c['dados_dir'] = rtrim($c['dados_dir'] ?? '/var/lib/acha-facil', '/');
     return $c;
 }

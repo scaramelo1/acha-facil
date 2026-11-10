@@ -1,0 +1,11 @@
+# Copiado para servidor/publico/.htaccess por servidor/dominio/ativar.sh (só depois do HTTPS do domínio novo funcionar).
+# Quem abre fsadesigners.com.br/acha-facil/... vai para achafacilapp.com.br/...
+# Ficam no endereço antigo: api/ (os APKs já instalados chamam fsadesigners.com.br/acha-facil/api, com POST)
+# e mp-webhook.php (endereço cadastrado no Mercado Pago, chega por POST).
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^(www\.)?fsadesigners\.com\.br$ [NC]
+RewriteCond %{REQUEST_URI} !^/acha-facil/(api/|mp-webhook\.php)
+RewriteRule ^(.*)$ https://achafacilapp.com.br/$1 [R=301,L,NE]
+# www.achafacilapp.com.br -> achafacilapp.com.br
+RewriteCond %{HTTP_HOST} ^www\.achafacilapp\.com\.br$ [NC]
+RewriteRule ^(.*)$ https://achafacilapp.com.br/$1 [R=301,L,NE]
