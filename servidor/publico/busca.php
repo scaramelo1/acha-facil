@@ -4,8 +4,10 @@ require __DIR__ . '/../inc/base.php';
 require_once __DIR__ . '/../inc/guia.php';
 require __DIR__ . '/../inc/pagina.php';
 
+// Primeiro a cidade (pedido do usuário, 10/11): sem ela aparecem muitos comércios com o mesmo nome em cidades diferentes
+$cidade = isset(CIDADES[$_GET['cidade'] ?? '']) ? (string)$_GET['cidade'] : null;
 $termo = trim(mb_substr((string)($_GET['q'] ?? ''), 0, 60));
-$achados = mb_strlen($termo) >= 2 ? buscar($termo, null, 30) : [];
+$achados = $cidade && mb_strlen($termo) >= 2 ? buscar($termo, $cidade, 30) : [];
 $base = config()['url'];
 
 pagina_inicio('Procure seu negócio · Acha Fácil!', 'Ache o seu comércio no Acha Fácil e confira os planos para corrigir os dados e colocar fotos.');
@@ -14,11 +16,14 @@ pagina_inicio('Procure seu negócio · Acha Fácil!', 'Ache o seu comércio no A
   <h1>Procure seu negócio</h1>
   <p>Ache o seu comércio para <strong>conferir os planos</strong> (corrigir os dados e colocar fotos) ou pedir para <strong>tirar do app</strong>.</p>
   <form class="procurar" method="get">
-    <input name="q" value="<?= h($termo) ?>" placeholder="Nome do seu comércio" aria-label="Nome do seu comércio" required minlength="2" autofocus>
+    <select name="cidade" aria-label="Cidade do seu comércio" required<?= $cidade ? '' : ' autofocus' ?>><?= opcoes_cidades($cidade) ?></select>
+    <input name="q" value="<?= h($termo) ?>" placeholder="Nome do seu comércio" aria-label="Nome do seu comércio" required minlength="2"<?= $cidade ? ' autofocus' : '' ?>>
     <button class="botao">Procurar</button>
   </form>
-  <?php if ($termo !== '' && !$achados): ?>
-    <div class="aviso erro">Nada encontrado com "<?= h($termo) ?>". Tente uma parte do nome.</div>
+  <?php if ($termo !== '' && !$cidade): ?>
+    <div class="aviso erro">Escolha primeiro a cidade do seu comércio.</div>
+  <?php elseif ($termo !== '' && !$achados): ?>
+    <div class="aviso erro">Nada encontrado com "<?= h($termo) ?>" em <?= h(nome_cidade($cidade)) ?>. Tente uma parte do nome.</div>
     <p>Seu negócio não está no app? <a class="botao amarelo" href="<?= $base ?>/incluir.php">Incluir de graça</a></p>
   <?php elseif ($achados): ?>
     <ul class="resultados">

@@ -79,6 +79,7 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
       <div class="caixa">
         <h3>Procure seu negócio</h3>
         <form class="procurar" action="<?= $base ?>/busca.php" method="get">
+          <select name="cidade" aria-label="Cidade do seu comércio" required><?= opcoes_cidades() ?></select>
           <input name="q" placeholder="Nome do seu comércio" aria-label="Nome do seu comércio" required minlength="2">
           <button class="botao amarelo">Procurar</button>
         </form>

@@ -45,6 +45,21 @@ function cidade_pedida(): string {
     $c = (string)($_GET['cidade'] ?? '');
     return isset(CIDADES[$c]) ? $c : CIDADE_PADRAO;
 }
+
+/** <option> das cidades ativas, agrupadas por estado, para os formulários do site (a 1ª é "Escolha a cidade"). */
+function opcoes_cidades(?string $escolhida = null): string {
+    $por_uf = [];
+    foreach (CIDADES as $slug => [$nome, , $uf]) $por_uf[$uf][$slug] = $nome;
+    ksort($por_uf);
+    $html = '<option value="">Escolha a cidade</option>';
+    foreach ($por_uf as $uf => $cidades) {
+        uasort($cidades, fn($a, $b) => strcmp(sem_acento($a), sem_acento($b)));   // "Águas" antes de "Aguaí" e não no fim
+        $html .= '<optgroup label="' . h($uf) . '">';
+        foreach ($cidades as $slug => $nome) $html .= '<option value="' . h($slug) . '"' . ($slug === $escolhida ? ' selected' : '') . '>' . h("$nome ($uf)") . '</option>';
+        $html .= '</optgroup>';
+    }
+    return $html;
+}
 function nome_cidade(string $slug, bool $curto = false): string { return TODAS_CIDADES[$slug][$curto ? 1 : 0] ?? CIDADES[CIDADE_PADRAO][0]; }
 function uf_cidade(string $slug): string { return TODAS_CIDADES[$slug][2] ?? 'SP'; }
 /** "São João da Boa Vista, Águas da Prata (SP) e Poços de Caldas (MG)": cidades ativas agrupadas por estado, para os textos do site. */

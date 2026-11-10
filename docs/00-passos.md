@@ -254,3 +254,6 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    O plano novo só aparece depois da **mudança 018** (`bash servidor/instalar.sh`, usuário); o Básico a 9,90 vale na hora.
    Falta: aplicar a 018; APK 1.5.0 (já pendente do passo 20) leva o cartão novo; depois que alguém assinar, a FSA faz o site
    e põe o endereço no campo Site da ficha
+27. ✅ Busca do site pede a cidade primeiro (10/11, pedido do usuário): em /busca.php e no "Procure seu negócio" da
+   inicial, escolher a cidade (lista das ativas por estado, opcoes_cidades() em inc/guia.php) antes do nome; a busca só
+   traz comércios daquela cidade, para não aparecerem vários com o mesmo nome. Sem cidade, avisa e não busca
