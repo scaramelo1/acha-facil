@@ -2,25 +2,59 @@
 // Regras do guia: quem aparece, ordem da vitrine, formato dos dados enviados ao app, notas
 declare(strict_types=1);
 
-// Estados e cidades atendidas: slug => [nome completo, nome curto, UF]. O app manda ?cidade=<slug> em todas as chamadas.
-// Cidade nova: acrescentar aqui, em src/cidade.tsx (app) e, se for longe, na caixa de geocodificar.php.
-const ESTADOS = ['SP' => 'São Paulo', 'MG' => 'Minas Gerais'];
-const CIDADES = [
-    'sao-joao' => ['São João da Boa Vista', 'São João', 'SP'],
-    'aguas-da-prata' => ['Águas da Prata', 'Águas da Prata', 'SP'],
-    'pocos-de-caldas' => ['Poços de Caldas', 'Poços de Caldas', 'MG'],
-    'vargem-grande-do-sul' => ['Vargem Grande do Sul', 'Vargem Grande', 'SP'],
-    'aguai' => ['Aguaí', 'Aguaí', 'SP'],
+// Cidades atendidas: tabela cidades (mudança 016), editada em /admin/cidades.php. slug => [nome completo, nome curto, UF].
+// O app manda ?cidade=<slug> em todas as chamadas e baixa a lista em api/cidades.php: cidade nova NÃO precisa de APK novo.
+// CIDADES = só as ativas (as que aparecem no app); TODAS_CIDADES = também as preparadas (importação, geocodificação).
+const CIDADES_RESERVA = [   // usada só se a tabela ainda não existir (antes da mudança 016)
+    'sao-joao' => ['São João da Boa Vista', 'São João', 'SP', -21.9696, -46.7981],
+    'aguas-da-prata' => ['Águas da Prata', 'Águas da Prata', 'SP', -21.9371, -46.7172],
+    'pocos-de-caldas' => ['Poços de Caldas', 'Poços de Caldas', 'MG', -21.7878, -46.5614],
+    'vargem-grande-do-sul' => ['Vargem Grande do Sul', 'Vargem Grande', 'SP', -21.8322, -46.8936],
+    'aguai' => ['Aguaí', 'Aguaí', 'SP', -22.0597, -46.9803],
 ];
-const CIDADE_PADRAO = 'sao-joao';
+const NOMES_ESTADOS = [
+    'AC' => 'Acre', 'AL' => 'Alagoas', 'AP' => 'Amapá', 'AM' => 'Amazonas', 'BA' => 'Bahia', 'CE' => 'Ceará', 'DF' => 'Distrito Federal',
+    'ES' => 'Espírito Santo', 'GO' => 'Goiás', 'MA' => 'Maranhão', 'MT' => 'Mato Grosso', 'MS' => 'Mato Grosso do Sul', 'MG' => 'Minas Gerais',
+    'PA' => 'Pará', 'PB' => 'Paraíba', 'PR' => 'Paraná', 'PE' => 'Pernambuco', 'PI' => 'Piauí', 'RJ' => 'Rio de Janeiro',
+    'RN' => 'Rio Grande do Norte', 'RS' => 'Rio Grande do Sul', 'RO' => 'Rondônia', 'RR' => 'Roraima', 'SC' => 'Santa Catarina',
+    'SP' => 'São Paulo', 'SE' => 'Sergipe', 'TO' => 'Tocantins',
+];
+/** Cidades do banco: slug => [nome, curto, UF, lat, lng, ativa]. */
+function carregar_cidades(): array {
+    try {
+        $r = [];
+        foreach (db()->query('SELECT slug, nome, curto, uf, lat, lng, ativa FROM cidades ORDER BY ordem, nome')->fetchAll(PDO::FETCH_ASSOC) as $c)
+            if (preg_match('/^[a-z0-9-]{2,40}$/', $c['slug']))   // o slug vai direto no SQL (visivel), então só letras, números e hífen
+                $r[$c['slug']] = [$c['nome'], $c['curto'], $c['uf'], $c['lat'] === null ? null : (float)$c['lat'], $c['lng'] === null ? null : (float)$c['lng'], (bool)$c['ativa']];
+        if ($r) return $r;
+    } catch (Throwable) {
+        // tabela ainda não criada
+    }
+    return array_map(fn($c) => [...$c, true], CIDADES_RESERVA);
+}
+define('TODAS_CIDADES', carregar_cidades());
+define('CIDADES', array_filter(TODAS_CIDADES, fn($c) => $c[5]) ?: TODAS_CIDADES);
+// estados que têm cidade ativa, na ordem em que aparecem
+$ufs_ativas = array_values(array_unique(array_column(CIDADES, 2)));
+define('ESTADOS', array_combine($ufs_ativas, array_map(fn($uf) => NOMES_ESTADOS[$uf] ?? $uf, $ufs_ativas)));
+unset($ufs_ativas);
+define('CIDADE_PADRAO', isset(CIDADES['sao-joao']) ? 'sao-joao' : (string)array_key_first(CIDADES));
 
 /** Cidade pedida pelo app (?cidade=); desconhecida ou vazia vira a padrão. */
 function cidade_pedida(): string {
     $c = (string)($_GET['cidade'] ?? '');
     return isset(CIDADES[$c]) ? $c : CIDADE_PADRAO;
 }
-function nome_cidade(string $slug, bool $curto = false): string { return CIDADES[$slug][$curto ? 1 : 0] ?? CIDADES[CIDADE_PADRAO][0]; }
-function uf_cidade(string $slug): string { return CIDADES[$slug][2] ?? 'SP'; }
+function nome_cidade(string $slug, bool $curto = false): string { return TODAS_CIDADES[$slug][$curto ? 1 : 0] ?? CIDADES[CIDADE_PADRAO][0]; }
+function uf_cidade(string $slug): string { return TODAS_CIDADES[$slug][2] ?? 'SP'; }
+/** "São João da Boa Vista, Águas da Prata (SP) e Poços de Caldas (MG)": cidades ativas agrupadas por estado, para os textos do site. */
+function texto_cidades(): string {
+    $por_uf = [];
+    foreach (CIDADES as [$nome, , $uf]) $por_uf[$uf][] = $nome;
+    $partes = [];
+    foreach ($por_uf as $uf => $nomes) $partes[] = (count($nomes) > 1 ? implode(', ', array_slice($nomes, 0, -1)) . ' e ' . end($nomes) : $nomes[0]) . " ($uf)";
+    return count($partes) > 1 ? implode(', ', array_slice($partes, 0, -1)) . ' e ' . end($partes) : $partes[0];
+}
 
 // Planos do dono do comércio (ver inc/mercadopago.php):
 //   Básico: pagamento único (corrigir os dados, fotos, descrição e o que vende; vale para sempre)
@@ -43,7 +77,7 @@ const SQL_DESTAQUE = "(p.plano = 'destaque' AND " . SQL_ASSINATURA_EM_DIA . ')';
 
 // Aparece no app: aprovado e com assinatura em dia.
 // Comércios importados da lista de leads aparecem sem assinatura até o dono assumir o perfil.
-// Com $cidade, só os daquela cidade (o slug vem da lista fixa CIDADES, então pode ir direto no SQL).
+// Com $cidade, só os daquela cidade (o slug vem de CIDADES, validado em carregar_cidades, então pode ir direto no SQL).
 function visivel(?string $cidade = null): string {
     $sql = "p.status = 'ativo' AND (p.importado = 1 OR " . SQL_EM_DIA . ") AND c.ativa = 1";
     return $cidade !== null && isset(CIDADES[$cidade]) ? "$sql AND p.cidade = '$cidade'" : $sql;

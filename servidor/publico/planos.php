@@ -2,7 +2,7 @@
 // Planos para o dono do comércio: corrigir os dados, colocar fotos e aparecer em destaque.
 // Aberto pelo app ("É o dono deste lugar?") com ?id= do comércio, ou pelo site sem id.
 require __DIR__ . '/../inc/base.php';
-require __DIR__ . '/../inc/guia.php';
+require_once __DIR__ . '/../inc/guia.php';
 require __DIR__ . '/../inc/pagina.php';
 
 $id = (int)($_GET['id'] ?? 0);

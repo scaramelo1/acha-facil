@@ -8,7 +8,7 @@
 declare(strict_types=1);
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require __DIR__ . '/inc/base.php';
-require __DIR__ . '/inc/guia.php';
+require_once __DIR__ . '/inc/guia.php';
 
 // 1) coordenadas que já vêm no link do Google
 $n = 0;
@@ -21,7 +21,11 @@ foreach (linhas("SELECT id, mapa FROM profissionais WHERE lat IS NULL AND mapa L
 echo "✔ $n localizações tiradas dos links do Google\n";
 
 // caixa em volta das cidades atendidas (descarta resultados de outra cidade com rua de mesmo nome)
-const CAIXA = ['lat' => [-22.20, -21.65], 'lng' => [-47.10, -46.40]];   // São João, Águas da Prata, Vargem Grande do Sul, Aguaí e Poços de Caldas
+// caixa = centros das cidades cadastradas (tabela cidades) + 0,25° (~25 km) de folga
+$centros = array_filter(TODAS_CIDADES, fn($c) => $c[3] !== null && $c[4] !== null);
+define('CAIXA', $centros
+    ? ['lat' => [min(array_column($centros, 3)) - 0.25, max(array_column($centros, 3)) + 0.25], 'lng' => [min(array_column($centros, 4)) - 0.25, max(array_column($centros, 4)) + 0.25]]
+    : ['lat' => [-22.20, -21.65], 'lng' => [-47.10, -46.40]]);
 
 function nominatim(string $consulta): ?array {
     usleep(1200000);

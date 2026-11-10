@@ -2,7 +2,7 @@
 // Base dos endereços JSON usados pelo app. O app manda o token da conta no cabeçalho X-Token.
 declare(strict_types=1);
 require __DIR__ . '/base.php';
-require __DIR__ . '/guia.php';
+require_once __DIR__ . '/guia.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');

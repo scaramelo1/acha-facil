@@ -4,7 +4,7 @@
 // Com plano escolhido (e a mudança 007 do banco aplicada), pede também o e-mail e leva à página da assinatura
 // (assinatura.php), onde o dono assina pelo Mercado Pago.
 require __DIR__ . '/../inc/base.php';
-require __DIR__ . '/../inc/guia.php';
+require_once __DIR__ . '/../inc/guia.php';
 require __DIR__ . '/../inc/pagina.php';
 require __DIR__ . '/../inc/mercadopago.php';
 iniciar_sessao();

@@ -62,15 +62,17 @@ export function EscolherCidade({
   atual,
   estados,
   cidades,
+  totais,
   aoEscolher,
 }: {
   atual: Cidade;
   estados: Estado[];
   cidades: Cidade[];
+  /** Comércios por cidade (slug), vindos com a lista do servidor. */
+  totais: Record<string, number>;
   aoEscolher: (c: Cidade) => void;
 }) {
   const baixo = useSafeAreaInsets().bottom;
-  const [totais, setTotais] = useState<Record<string, number>>({});
   const [escolhida, setEscolhida] = useState<Cidade>(atual);
   const [termo, setTermo] = useState('');
   const [estado, setEstado] = useState(atual.estado);
@@ -78,11 +80,11 @@ export function EscolherCidade({
   // se a pessoa já tocou numa cidade, a localização que chegar depois não troca a escolha dela
   const mexeu = useRef(false);
 
+  // a lista nova do servidor chegou com a tela aberta: a cidade marcada saiu (desligada) ou mudou de nome
   useEffect(() => {
-    chamar<{ cidades: (Cidade & { total: number })[] }>('cidades.php')
-      .then((r) => setTotais(Object.fromEntries(r.cidades.map((c) => [c.slug, c.total]))))
-      .catch(() => {});
-  }, []);
+    setEscolhida((e) => cidades.find((c) => c.slug === e.slug) ?? cidades.find((c) => c.slug === atual.slug) ?? cidades[0]);
+    setEstado((uf) => (cidades.some((c) => c.estado === uf) ? uf : (cidades[0]?.estado ?? uf)));
+  }, [cidades, atual.slug]);
 
   const achar = useCallback(async () => {
     try {

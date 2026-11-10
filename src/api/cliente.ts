@@ -18,7 +18,7 @@ export interface Cidade {
   curto: string;
   /** Sigla do estado ("SP", "MG"). */
   estado: string;
-  /** Centro da cidade, para achar a cidade pela localização do celular (só na lista fixa do app). */
+  /** Centro da cidade, para achar a cidade pela localização do celular (vem do servidor; pode faltar). */
   lat?: number;
   lng?: number;
 }

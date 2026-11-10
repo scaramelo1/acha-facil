@@ -189,3 +189,14 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    SAMU, Tiro de Guerra) fora. Lista anterior guardada em /var/lib/acha-facil/leads/vargem-grande-do-sul.antes-20261109.html.
    Corrigido: geocodificar.php pedia ao OpenStreetMap só a área antiga (viewbox fixo) e Aguaí não era achada; agora usa a
    CAIXA. Backup: /root/acha-facil-profissionais.antes-vargem2.*.sql.gz
+19. ✅ Cidades pelo banco, sem APK novo (10/11, pedido do usuário): tabela `cidades` (mudança 016 aplicada) com nome,
+   nome curto, estado, centro (lat/lng) e liga/desliga. O app baixa a lista em api/cidades.php ao abrir e ao trocar de
+   cidade, guarda a última no celular (abre sem internet) e só usa a lista embutida na 1ª abertura sem internet. Cidade
+   desligada some do app (quem estava nela cai na primeira). Admin: /admin/cidades.php (cadastrar pelo nome do IBGE,
+   centro achado sozinho no OpenStreetMap, nasce desligada; ligar/desligar; nome curto e centro). Servidor inteiro lê
+   do banco: importador (aceita cidade ainda desligada), geocodificação (área = centros das cidades + 25 km), textos
+   do site/termos e instalar.sh --leads (todo arquivo /var/lib/acha-facil/leads/<slug>.html). Testado: cidade de teste
+   desligada não aparece, ligada aparece na API e no site, apagada some. Vai no APK 1.4.0 (o último que precisa sair
+   por causa de cidade).
+   Cidade nova daqui em diante: 1) /admin/cidades.php → Cadastrar (desligada); 2) mandar a lista do robô para a VPS e
+   rodar `php servidor/importar-leads.php <arquivo> <código>`; 3) `nohup php servidor/geocodificar.php ...`; 4) Ligar.

@@ -1,18 +1,19 @@
 <?php
 // Importa (ou atualiza) os comércios de uma lista de leads para o Acha Fácil. Rodar na VPS como root:
 //   php servidor/importar-leads.php [arquivo leads.html] [cidade]
-//   cidade: sao-joao (padrão), aguas-da-prata, pocos-de-caldas, vargem-grande-do-sul ou aguai. Ex.: php servidor/importar-leads.php /var/lib/acha-facil/leads/aguas-da-prata.html aguas-da-prata
+//   cidade: o slug cadastrado em /admin/cidades.php (sao-joao é o padrão). Ex.: php servidor/importar-leads.php /var/lib/acha-facil/leads/aguas-da-prata.html aguas-da-prata
 // Padrão: a lista de São João publicada em fsadesigners.com.br/leads/. Linhas cujo endereço é de outra cidade atendida
 // vão para aquela cidade. Listas sem área (data-seg) usam a área mais comum do mesmo tipo de negócio já cadastrado. Pode rodar de novo sempre que a lista mudar:
 // atualiza quem já veio dos leads (pelo nome) e não mexe em quem assumiu o perfil nem em quem foi removido.
 declare(strict_types=1);
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require __DIR__ . '/inc/base.php';
-require __DIR__ . '/inc/guia.php';
+require_once __DIR__ . '/inc/guia.php';
 
 $arquivo = $argv[1] ?? '/var/www/fsa-designer/leads/dados/leads.html';
 $cidade_lista = $argv[2] ?? 'sao-joao';
-if (!isset(CIDADES[$cidade_lista])) exit("✘ Cidade desconhecida: $cidade_lista (use " . implode(' ou ', array_keys(CIDADES)) . ")\n");
+// vale também cidade cadastrada e ainda desligada em /admin/cidades.php (prepara os comércios antes de ligar)
+if (!isset(TODAS_CIDADES[$cidade_lista])) exit("✘ Cidade desconhecida: $cidade_lista. Cadastre em /admin/cidades.php (use " . implode(', ', array_keys(TODAS_CIDADES)) . ")\n");
 $html = @file_get_contents($arquivo) ?: exit("✘ Não consegui ler $arquivo\n");
 
 // área da lista (data-seg) → slug da categoria no app
@@ -80,7 +81,7 @@ const SO_LUGAR = '/^(centro$|cidade nova$|santa maria$|vila \\S|jardim \\S|parqu
 // cidade pelo endereço ("..., Águas da Prata - SP")
 function cidade_do_endereco(string $e, string $padrao): string {
     $achada = $padrao; $pos = -1;   // a que aparece por último ("..., Cidade - UF, CEP"); o começo pode citar outra cidade
-    foreach (CIDADES as $slug => [$nome]) if (($p = mb_strripos($e, $nome)) !== false && $p > $pos) { $achada = $slug; $pos = $p; }
+    foreach (TODAS_CIDADES as $slug => [$nome]) if (($p = mb_strripos($e, $nome)) !== false && $p > $pos) { $achada = $slug; $pos = $p; }
     return $achada;
 }
 
@@ -90,9 +91,14 @@ function chave(string $nome): string {
     $s = strtr($s, ['á'=>'a','à'=>'a','â'=>'a','ã'=>'a','é'=>'e','ê'=>'e','í'=>'i','ó'=>'o','ô'=>'o','õ'=>'o','ú'=>'u','ü'=>'u','ç'=>'c']);
     return mb_substr(trim(preg_replace('/[^a-z0-9]+/', ' ', $s)), 0, 160);
 }
+// nomes das cidades (com ou sem acento) para cortar o fim do endereço
+define('NOMES_NO_ENDERECO', implode('|', array_map(function ($c) {
+    $t = preg_quote($c[0], '/');
+    return strtr($t, ['á' => '[áa]', 'à' => '[àa]', 'â' => '[âa]', 'ã' => '[ãa]', 'é' => '[ée]', 'ê' => '[êe]', 'í' => '[íi]', 'ó' => '[óo]', 'ô' => '[ôo]', 'õ' => '[õo]', 'ú' => '[úu]', 'ç' => '[çc]', 'Á' => '[ÁA]', 'É' => '[ÉE]', 'Í' => '[ÍI]', 'Ó' => '[ÓO]', 'Ú' => '[ÚU]']);
+}, TODAS_CIDADES)));
 // "Rua X, 410 - Jardim São Paulo, São João da Boa Vista - SP, 13875-089, Brasil" → ["Rua X, 410", "Jardim São Paulo"]
 function endereco_e_bairro(string $e): array {
-    $e = preg_replace('/,?\s*(S[ãa]o Jo[ãa]o da Boa Vista|[ÁA]guas da Prata|Po[çc]os de Caldas|Vargem Grande do Sul|Agua[íi])\b.*$/iu', '', $e);
+    $e = preg_replace('/,?\s*(' . NOMES_NO_ENDERECO . ')\b.*$/iu', '', $e);
     $e = trim(preg_replace('/,?\s*\d{5}-?\d{3}.*$/', '', $e), " ,-");
     $endereco = null; $bairro = null;
     foreach (array_map('trim', explode(' - ', $e)) as $parte) {
@@ -142,7 +148,7 @@ foreach ($linhas_html as [, $status, $tipo, $area, $tr]) {
 
     $tipo = mb_substr(html_entity_decode($tipo, ENT_QUOTES | ENT_HTML5, 'UTF-8'), 0, 80);
     if ($tipo !== '' && preg_match(NAO_COMERCIO, $tipo)) { $pulados++; $publicos++; continue; }
-    if ($tipo === '' && (preg_match(SO_LUGAR, $nome) || in_array(mb_strtolower($nome), array_map(fn($c) => mb_strtolower($c[0]), CIDADES), true))) { $pulados++; $publicos++; continue; }
+    if ($tipo === '' && (preg_match(SO_LUGAR, $nome) || in_array(mb_strtolower($nome), array_map(fn($c) => mb_strtolower($c[0]), TODAS_CIDADES), true))) { $pulados++; $publicos++; continue; }
     $area = html_entity_decode((string)$area, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     $categoria_id = isset($areas[$area]) ? ($cat[$areas[$area]] ?? $cat['outros']) : ($area_do_tipo[mb_strtolower($tipo)] ?? $cat['outros']);
     // "Outros" com tipo que claramente é de outra área (ex.: Pizzaria, Hamburgueria, Cabeleireiro)

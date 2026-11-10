@@ -5,7 +5,7 @@
 // Com a Public Key configurada, o Destaque é pago com o cartão digitado aqui mesmo (Card Payment Brick do Mercado Pago),
 // sem conta no Mercado Pago: o navegador manda o token do cartão para ?c=...&cartao=1 (JSON). Cancelar também é aqui.
 require __DIR__ . '/../inc/base.php';
-require __DIR__ . '/../inc/guia.php';
+require_once __DIR__ . '/../inc/guia.php';
 require __DIR__ . '/../inc/pagina.php';
 require __DIR__ . '/../inc/mercadopago.php';
 iniciar_sessao();

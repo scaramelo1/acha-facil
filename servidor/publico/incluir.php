@@ -3,7 +3,7 @@
 // O comércio entra como 'pendente' (fora do app) e importado = 1 (aparece sem plano, como os da lista); um pedido
 // tipo 'incluir' avisa os admins, que conferem e publicam em /admin/pedido.php. Fotos e descrição: pelos planos.
 require __DIR__ . '/../inc/base.php';
-require __DIR__ . '/../inc/guia.php';
+require_once __DIR__ . '/../inc/guia.php';
 require __DIR__ . '/../inc/pagina.php';
 iniciar_sessao();
 

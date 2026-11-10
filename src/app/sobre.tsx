@@ -4,14 +4,14 @@ import * as WebBrowser from 'expo-web-browser';
 import { Alert, Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { EMAIL_CONTATO, URL_INSTAGRAM, URL_PRIVACIDADE, URL_TERMOS } from '../api/cliente';
-import { CIDADES } from '../cidade';
+import { useCidade } from '../cidade';
 import { Cabecalho } from '../componentes/Cabecalho';
 import { LinhaMenu } from '../componentes/ui';
 import { cores, fonte, RAIO } from '../tema';
 
 // "Sobre o Acha Fácil!": o que é, as cidades atendidas, termos, privacidade e como falar com a FSA Designer
 export default function TelaSobre() {
-  const cidades = CIDADES.map((c) => c.nome);
+  const cidades = useCidade().cidades.map((c) => c.nome);
   const lista = cidades.length > 1 ? `${cidades.slice(0, -1).join(', ')} e ${cidades[cidades.length - 1]}` : cidades[0];
   const faleConosco = () =>
     Linking.openURL(`mailto:${EMAIL_CONTATO}?subject=${encodeURIComponent('Acha Fácil: contato')}`).catch(() =>

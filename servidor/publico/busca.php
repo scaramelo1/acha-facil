@@ -1,7 +1,7 @@
 <?php
 // Busca no site, para o dono achar o próprio negócio e assumir o perfil (ou pedir para tirar do app)
 require __DIR__ . '/../inc/base.php';
-require __DIR__ . '/../inc/guia.php';
+require_once __DIR__ . '/../inc/guia.php';
 require __DIR__ . '/../inc/pagina.php';
 
 $termo = trim(mb_substr((string)($_GET['q'] ?? ''), 0, 60));
