@@ -70,7 +70,29 @@ if ($cidade !== '') { $tp[] = 'p.cidade = ?'; $tparams[] = $cidade; }
 if ($cat) { $tp[] = 'p.categoria_id = ?'; $tparams[] = $cat; }
 $tipos = linhas('SELECT p.tipo, COUNT(*) AS n FROM profissionais p WHERE p.tipo IS NOT NULL AND ' . implode(' AND ', $tp) . ' GROUP BY p.tipo ORDER BY n DESC, p.tipo LIMIT 150', $tparams);
 $link = fn(array $mudar) => '?' . http_build_query(array_filter(array_merge($_GET, $mudar), fn($v) => $v !== '' && $v !== null && $v !== 0));
-$MOSTRAR = 300;
+// paginação (pedido do usuário, 10/11): 15, 50, 100 ou 500 por página
+const POR_PAGINA = [15, 50, 100, 500];
+$por = in_array((int)($_GET['por'] ?? 15), POR_PAGINA, true) ? (int)($_GET['por'] ?? 15) : 15;
+$total = count($lista);
+$paginas = max(1, (int)ceil($total / $por));
+$pag = min($paginas, max(1, (int)($_GET['pag'] ?? 1)));
+$link_pag = fn(int $n) => $link(['pag' => $n > 1 ? $n : null]);
+$paginacao = function () use ($pag, $paginas, $total, $por, $link_pag): string {
+    if ($paginas < 2) return '';
+    $html = '<nav class="paginacao" aria-label="Páginas">';
+    $html .= $pag > 1 ? '<a class="botao pequeno contorno" href="' . h($link_pag($pag - 1)) . '">‹ Anterior</a>' : '';
+    // primeira, última e 2 de cada lado da atual
+    $ultima = 0;
+    for ($n = 1; $n <= $paginas; $n++) {
+        if ($n !== 1 && $n !== $paginas && abs($n - $pag) > 2) continue;
+        if ($ultima && $n - $ultima > 1) $html .= '<span>…</span>';
+        $html .= $n === $pag ? '<strong>' . $n . '</strong>' : '<a href="' . h($link_pag($n)) . '">' . $n . '</a>';
+        $ultima = $n;
+    }
+    $html .= $pag < $paginas ? '<a class="botao pequeno contorno" href="' . h($link_pag($pag + 1)) . '">Próxima ›</a>' : '';
+    $de = ($pag - 1) * $por + 1;
+    return $html . '<span class="discreto">' . num($de) . '–' . num(min($total, $pag * $por)) . ' de ' . num($total) . '</span></nav>';
+};
 
 admin_inicio('Números', $admin);
 ?>
@@ -97,6 +119,9 @@ admin_inicio('Números', $admin);
     <?php foreach ($nome_plano as $k => $n): ?><option value="<?= $k ?>"<?= $k === $plano ? ' selected' : '' ?>><?= $n ?></option><?php endforeach ?>
   </select></label>
   <label class="caixa"><input type="checkbox" name="vistos" value="1"<?= $so_vistos ? ' checked' : '' ?>> Só quem foi visto</label>
+  <label>Por página <select name="por" onchange="this.form.submit()">
+    <?php foreach (POR_PAGINA as $n): ?><option value="<?= $n ?>"<?= $n === $por ? ' selected' : '' ?>><?= $n ?></option><?php endforeach ?>
+  </select></label>
   <input type="hidden" name="ordem" value="<?= h($ordem) ?>">
   <button class="botao pequeno">Filtrar</button>
   <a class="botao pequeno contorno" href="<?= h($link(['csv' => 1])) ?>">Baixar CSV</a>
@@ -110,11 +135,12 @@ admin_inicio('Números', $admin);
   <div><strong><?= num($soma['contatos']) ?></strong><span>contatos (<?= pct($soma['contatos'], $soma['visualizacoes']) ?>)</span></div>
 </div>
 
-<div class="tabela"><table>
+<?= $paginacao() ?>
+<div class="tabela rolar"><table>
   <tr><th>Comércio</th><th>Plano</th>
-    <?php foreach (COLUNAS as $k => $n): ?><th><a href="<?= h($link(['ordem' => $k])) ?>"><?= $n ?><?= $k === $ordem ? ' ▼' : '' ?></a></th><?php endforeach ?>
+    <?php foreach (COLUNAS as $k => $n): ?><th><a href="<?= h($link(['ordem' => $k, 'pag' => null])) ?>"><?= $n ?><?= $k === $ordem ? ' ▼' : '' ?></a></th><?php endforeach ?>
     <th>Taxa</th><th></th></tr>
-  <?php foreach (array_slice($lista, 0, $MOSTRAR) as $l): ?>
+  <?php foreach (array_slice($lista, ($pag - 1) * $por, $por) as $l): ?>
   <tr>
     <td><strong><?= h($l['nome']) ?></strong><br><span class="discreto"><?= h($l['tipo'] ?: $l['categoria']) ?> · <?= h(nome_cidade($l['cidade'], true)) ?><?= $l['bairro'] ? ' · ' . h($l['bairro']) : '' ?></span></td>
     <td><?= $nome_plano[$l['plano_atual']] ?></td>
@@ -124,5 +150,5 @@ admin_inicio('Números', $admin);
   </tr>
   <?php endforeach ?>
 </table></div>
-<?php if (count($lista) > $MOSTRAR): ?><p class="discreto">Mostrando as <?= $MOSTRAR ?> primeiras de <?= num(count($lista)) ?>. O CSV traz todas.</p><?php endif ?>
+<?= $paginacao() ?>
 <?php admin_fim();
