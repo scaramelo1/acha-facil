@@ -257,3 +257,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 27. ✅ Busca do site pede a cidade primeiro (10/11, pedido do usuário): em /busca.php e no "Procure seu negócio" da
    inicial, escolher a cidade (lista das ativas por estado, opcoes_cidades() em inc/guia.php) antes do nome; a busca só
    traz comércios daquela cidade, para não aparecerem vários com o mesmo nome. Sem cidade, avisa e não busca
+28. ⬜ Agente de IA que confere os dados e publica sozinho (10/11, pedido do usuário; só plano, sem código): depois do
+   pagamento aprovado, o agente compara os dados do dono com Google Maps, OpenStreetMap, CNPJ e a lista de leads; se tudo
+   confere, publica pelo mesmo caminho da moderação; com dúvida, avisa os admins (push + e-mail) dizendo qual é a dúvida.
+   Começa em **modo sombra** (só sugere, admin aprova como hoje). Custo estimado ~R$ 0,85 por verificação (Opus 5.5 com
+   fotos). Plano completo, custos e decisões pendentes em `docs/plano-agente-ia.md`
