@@ -137,7 +137,7 @@ foreach ($linhas_html as [, $status, $tipo, $area, $tr]) {
     $link = preg_match('#href="([^"]+)"#', $td[6], $l) ? html_entity_decode($l[1], ENT_QUOTES | ENT_HTML5, 'UTF-8') : null;
     $instagram = $site = null;
     if ($link && preg_match('#instagram\.com/([A-Za-z0-9_.]{2,30})#', $link, $ig)) $instagram = $ig[1];
-    elseif ($link && $status !== 'fora_do_ar' && preg_match('#^https?://#', $link)) $site = mb_substr($link, 0, 200);
+    elseif ($link && !in_array($status, ['fora_do_ar', 'site_fora'], true) && preg_match('#^https?://#', $link)) $site = mb_substr($link, 0, 200);
     $popularidade = preg_match('/\((\d+)\)/', limpo($td[7]), $p) ? (int)$p[1] : 0;
 
     $tipo = mb_substr(html_entity_decode($tipo, ENT_QUOTES | ENT_HTML5, 'UTF-8'), 0, 80);
@@ -154,7 +154,7 @@ foreach ($linhas_html as [, $status, $tipo, $area, $tr]) {
         'tipo' => $tipo ?: null,
         'cidade' => $cidade,
         'nome' => $nome, 'telefone' => $telefone, 'whatsapp' => $whatsapp, 'instagram' => $instagram, 'site' => $site,
-        'endereco' => $endereco, 'bairro' => $bairro, 'mapa' => $mapa && str_starts_with($mapa, 'https://www.google.com/maps') ? mb_substr($mapa, 0, 500) : null,
+        'endereco' => $endereco, 'bairro' => $bairro, 'mapa' => $mapa && preg_match('#^https://(www\.google\.com/maps|maps\.google\.com/)#', $mapa) ? mb_substr($mapa, 0, 500) : null,
         'popularidade' => $popularidade,
     ];
     $atual = linha('SELECT id, importado, status, categoria_id, tipo, mapa FROM profissionais WHERE chave_importacao = ?', [$k]);
