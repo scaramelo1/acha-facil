@@ -234,12 +234,12 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    nome sem letra ou igual ao de uma cidade fica fora; lista sem número de avaliações não zera a ordem.
    Localização dos novos pelo OpenStreetMap (~2h30). Lista anterior em
    /var/lib/acha-facil/leads/pocos-de-caldas.antes-20261110.html; backup /root/acha-facil-profissionais.antes-pocos2.*
-25. 🟡 Domínio próprio achafacilapp.com.br (10/11, pedido do usuário): o site passa a abrir em https://achafacilapp.com.br
+25. ✅ Domínio próprio achafacilapp.com.br (10/11, pedido do usuário): o site passa a abrir em https://achafacilapp.com.br
    (mesma pasta servidor/publico; na raiz, sem /acha-facil — inc/base.php zera `url` quando o endereço é o domínio novo).
    fsadesigners.com.br/acha-facil/... redireciona (301) para o domínio novo, **menos** `api/` (APKs instalados) e
    `mp-webhook.php` (cadastrado no Mercado Pago, POST). Arquivos em servidor/dominio/; ligar com `bash servidor/dominio/ativar.sh`
    (confere o DNS, instala o site no Apache, certbot, testa e só então cria publico/.htaccess).
-   Falta: registro A no Registro.br (achafacilapp.com.br e www → 177.153.68.212) e rodar o ativar.sh.
+   Ligado em 10/11: DNS A no Registro.br → 177.153.68.212, certificado Let's Encrypt (renova sozinho, vence 08/02/2027).
    Depois, opcional: apontar o app (src/api/cliente.ts) e `endereco_publico` para o domínio novo, cadastrando antes
    https://achafacilapp.com.br/google/retorno.php no Google Cloud (senão o login com Google quebra).
 26. 🟡 Plano **Destaque + Site** e Básico a R$ 9,90 (10/11, pedido do usuário): 3º plano, chave `site`, R$ 89,90/mês
