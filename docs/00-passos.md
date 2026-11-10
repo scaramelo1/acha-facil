@@ -200,3 +200,14 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    por causa de cidade).
    Cidade nova daqui em diante: 1) /admin/cidades.php → Cadastrar (desligada); 2) mandar a lista do robô para a VPS e
    rodar `php servidor/importar-leads.php <arquivo> <código>`; 3) `nohup php servidor/geocodificar.php ...`; 4) Ligar.
+
+## Plano de crescimento (10/11) — detalhes em `docs/plano-crescimento.md`
+
+20. ⬜ Contador de visualizações em todas as fichas: origem (app, web, busca, categoria, perto, destaque), pessoas
+   únicas por dia (código anônimo), aparições em listas/busca, relatório `/admin/numeros.php` com CSV, relatório de
+   1 folha por ficha para a abordagem e números no painel do dono. Mudança 017 e APK novo
+21. ⬜ Versão web com páginas de cidade, área, tipo e ficha (`/acha-facil/<cidade>/<area>/<tipo>/`), sitemap,
+   dados estruturados, Search Console, cache em arquivo; toques no site contam no passo 20
+22. ⬜ Prospecção Saúde e Veículos: 2 semanas de dados do passo 20 → CSV → grupos A/B/C → WhatsApp manual
+   (15–20/dia) com cupom por nicho → metas de 30 dias
+- Google Play: já em teste fechado (passo 11). Parceria com o @sanjoanenses: decidido não fazer (10/11)
