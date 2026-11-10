@@ -63,7 +63,7 @@ export default function TelaFavoritos() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${p.nome}, ${p.tipo}`}
-          onPress={() => router.push(`/profissional/${p.id}`)}
+          onPress={() => router.push(`/profissional/${p.id}?origem=favoritos`)}
           style={({ pressed }) => [estilos.cartao, pressed && { opacity: 0.85 }]}
         >
           <Foto foto={p.foto} icone={p.icone} cor={p.cor} largura={112} altura={88} raio={0} />

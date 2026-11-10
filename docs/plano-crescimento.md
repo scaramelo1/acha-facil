@@ -7,7 +7,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer · ❌ fora do plano
 
 | # | Prioridade | Situação |
 |---|------------|----------|
-| 1 | Contador de visualizações em todas as fichas | ⬜ passo 20 |
+| 1 | Contador de visualizações em todas as fichas | 🟡 passo 20: código pronto (10/11); falta aplicar a mudança 017 e o APK 1.5.0 |
 | 2 | Versão web com páginas de cidade e categoria | ⬜ passo 21 |
 | 3 | Publicar na Google Play | ✅ teste fechado aprovado (09/11); falta só pedir produção após os 14 dias com 12+ testadores (passo 11) |
 | 4 | Prospecção por nicho: Saúde e Veículos | ⬜ passo 22 (depende do passo 20 ter pelo menos 2 semanas de dados) |
@@ -53,7 +53,7 @@ versão web; a prospecção usa os números das duas.
 2. **Pessoas únicas por dia** — tabela `vistas_unicas (profissional_id, dia, visitante)` com `visitante` =
    hash (SHA-256 com sal do config) de um código anônimo gerado no app na 1ª abertura (sem dado pessoal; no
    site, hash de IP + navegador do dia). `contatos` continua com o total; o relatório mostra os dois.
-   Apagar `vistas_unicas` com mais de 90 dias (cron diário) — só os totais ficam.
+   Feito como tabela `vistas`, apagada depois de 2 dias (só o dia atual separa as pessoas) — só os totais ficam.
 3. **Aparições** — tabela `aparicoes (profissional_id, dia, onde, total)`: somar quando a ficha volta em
    `inicio.php`, `categoria.php`, `busca.php` e `perto.php` (uma gravação em lote por chamada, não uma por ficha,
    para não pesar na VPS de 1 GB).

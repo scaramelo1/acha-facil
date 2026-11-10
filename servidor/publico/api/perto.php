@@ -10,5 +10,6 @@ $atalho = isset($_GET['atalho']) && $_GET['atalho'] !== '' ? (string)$_GET['atal
 $cidade = cidade_pedida();
 $lista = perto($lat, $lng, $atalho, $cidade);
 // longe = nenhum comércio da cidade escolhida a até 15 km: a pessoa está em outra cidade (o app mostra os conhecidos dela)
+contar_aparicoes(array_slice($lista, 0, 10), 'perto');   // o app mostra os 10 primeiros
 $longe = !$lista && !($atalho !== null && perto($lat, $lng, null, $cidade, 15, 1));
 responder(['atalhos' => atalhos_perto(), 'profissionais' => $lista, 'longe' => $longe]);

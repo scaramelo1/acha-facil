@@ -83,7 +83,7 @@ export default function TelaInicio() {
                       key={p.id}
                       accessibilityRole="button"
                       accessibilityLabel={`${p.nome}, ${p.tipo}`}
-                      onPress={() => router.push(`/profissional/${p.id}`)}
+                      onPress={() => router.push(`/profissional/${p.id}?origem=inicio`)}
                       style={({ pressed }) => [estilos.mini, pressed && { opacity: 0.85 }]}
                     >
                       <Foto foto={p.foto} icone={p.icone} cor={p.cor} largura={140} altura={92} raio={0} />

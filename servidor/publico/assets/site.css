@@ -253,3 +253,20 @@ fieldset.horarios legend { font-weight: 800; padding: 0 6px; }
 .horario-linha .horas { display: inline-flex; align-items: center; gap: 6px; }
 .horario-linha .horas[hidden] { display: none; }
 .horario-linha input[type=time] { width: auto; margin: 0; }
+
+/* Números das fichas (admin e painel do dono, passo 20) */
+.filtros-numeros { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end; margin: 16px 0; }
+.filtros-numeros label { display: flex; flex-direction: column; gap: 4px; font-weight: 700; font-size: .9rem; margin: 0; }
+.filtros-numeros label.caixa { flex-direction: row; align-items: center; gap: 6px; padding-bottom: 8px; }
+.filtros-numeros select { min-width: 140px; max-width: 240px; }
+.numeros-resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 16px 0; }
+.numeros-resumo div { background: var(--branco); border-radius: 16px; padding: 14px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,.05); }
+.numeros-resumo strong { display: block; font-size: 1.8rem; font-weight: 900; color: var(--verde); line-height: 1.1; }
+.numeros-resumo span { color: var(--texto2); font-size: .88rem; }
+.barras-dias { display: flex; align-items: flex-end; gap: 2px; height: 140px; background: var(--branco); border-radius: 16px; padding: 12px; }
+.barras-dias .dia { flex: 1; height: 100%; display: flex; align-items: flex-end; gap: 1px; min-width: 3px; }
+.barras-dias .dia span { flex: 1; border-radius: 3px 3px 0 0; min-height: 1px; }
+.barras-dias .aparicoes, .barra-legenda.aparicoes { background: var(--amarelo); }
+.barras-dias .vistas, .barra-legenda.vistas { background: var(--verde); }
+.barra-legenda { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: middle; }
+.colunas-numeros { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 18px; }

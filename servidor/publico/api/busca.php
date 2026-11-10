@@ -1,4 +1,6 @@
 <?php
 require __DIR__ . '/../../inc/api.php';
 metodo('GET');
-responder(['profissionais' => buscar((string)($_GET['q'] ?? ''), cidade_pedida())]);
+$lista = buscar((string)($_GET['q'] ?? ''), cidade_pedida());
+contar_aparicoes($lista, 'busca');
+responder(['profissionais' => $lista]);

@@ -276,11 +276,8 @@ function recalcular_nota(int $profissional_id): void {
         WHERE id = ?", [$profissional_id, $profissional_id, $profissional_id]);
 }
 
-function contar_contato(int $profissional_id, string $tipo): void {
-    if (!in_array($tipo, ['perfil', 'whatsapp', 'ligar', 'instagram', 'mapa', 'site'], true)) return;
-    q('INSERT INTO contatos (profissional_id, tipo, dia, total) VALUES (?,?,CURDATE(),1) ON DUPLICATE KEY UPDATE total = total + 1',
-        [$profissional_id, $tipo]);
-}
+// contar_contato(), contar_visita() e contar_aparicoes() ficam em inc/numeros.php (passo 20)
+require_once __DIR__ . '/numeros.php';
 
 // Municípios do Brasil (IBGE, dados/municipios.json: {estados: {UF: nome}, cidades: {UF: [nomes]}}) para o
 // "Quero minha Cidade!": o app escolhe o estado e a cidade sai desta lista (nada de nome inventado).

@@ -65,7 +65,7 @@ export default function TelaCategoria() {
       }
       renderItem={({ item }) => (
         <View style={{ paddingHorizontal: 16 }}>
-          <CartaoProfissional p={item} />
+          <CartaoProfissional p={item} origem="categoria" />
         </View>
       )}
       ListEmptyComponent={

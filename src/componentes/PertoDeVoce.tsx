@@ -182,7 +182,7 @@ export function PertoDeVoce({ semLocalizacao }: { semLocalizacao?: React.ReactNo
       ) : (
         <>
           {lista.slice(0, 10).map((p) => (
-            <CartaoProfissional key={p.id} p={p} distancia={p.distancia} />
+            <CartaoProfissional key={p.id} p={p} distancia={p.distancia} origem="perto" />
           ))}
           <Pressable accessibilityRole="button" onPress={() => localizar(true)} style={estilos.atualizar} hitSlop={8}>
             <MaterialCommunityIcons name="refresh" size={18} color={cores.destaque} />

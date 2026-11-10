@@ -136,7 +136,7 @@ export default function TelaBusca() {
               <View style={{ height: 14 }} />
             )
           }
-          renderItem={({ item }) => <CartaoProfissional p={item} />}
+          renderItem={({ item }) => <CartaoProfissional p={item} origem="busca" />}
           ListEmptyComponent={<Vazio icone="store-search-outline" texto={nFiltros || tipo ? 'Nada encontrado com esses filtros.' : 'Nada encontrado. Tente outra palavra.'} />}
         />
       )}

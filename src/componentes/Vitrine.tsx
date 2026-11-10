@@ -33,7 +33,7 @@ export function Vitrine({ itens }: { itens: ProfissionalResumo[] }) {
           key={p.id}
           accessibilityRole="button"
           accessibilityLabel={`Destaque: ${p.nome}, ${p.tipo}`}
-          onPress={() => router.push(`/profissional/${p.id}`)}
+          onPress={() => router.push(`/profissional/${p.id}?origem=destaque`)}
           style={({ pressed }) => [estilos.cartao, { width: largura, height: ALTURA }, pressed && { opacity: 0.9 }]}
         >
           {/* logo do comércio (sem logo, a cor da área com o ícone) e o nome ao lado */}

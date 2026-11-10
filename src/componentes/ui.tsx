@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View, type StyleProp, type TextInputProps, type ViewStyle } from 'react-native';
 
-import type { ProfissionalResumo } from '../api/cliente';
+import type { Origem, ProfissionalResumo } from '../api/cliente';
 import { cartao, cores, fonte, TOQUE } from '../tema';
 
 export type NomeIcone = ComponentProps<typeof MaterialCommunityIcons>['name'];
@@ -221,13 +221,13 @@ export function textoDistancia(km: number) {
   return `${km < 10 ? km.toFixed(1).replace('.', ',') : Math.round(km)} km`;
 }
 
-export function CartaoProfissional({ p, distancia }: { p: ProfissionalResumo; distancia?: number }) {
+export function CartaoProfissional({ p, distancia, origem }: { p: ProfissionalResumo; distancia?: number; origem: Origem }) {
   const router = useRouter();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${p.nome}, ${p.tipo}`}
-      onPress={() => router.push(`/profissional/${p.id}`)}
+      onPress={() => router.push(`/profissional/${p.id}?origem=${origem}`)}
       style={({ pressed }) => [estilos.cartao, pressed && { opacity: 0.85 }]}
     >
       <Foto foto={p.foto} icone={p.icone} cor={p.cor} largura={108} altura={92} raio={0} />

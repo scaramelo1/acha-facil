@@ -39,6 +39,9 @@ if (isset($_GET['sair'])) { unset($_SESSION['dono_acesso']); session_regenerate_
 
 $p = dono_atual();
 $em_dia = $p && (int)valor('SELECT COUNT(*) FROM profissionais p WHERE p.id = ? AND ' . SQL_EM_DIA, [$p['id']]) > 0;
+$destaque = $p && (int)valor('SELECT COUNT(*) FROM profissionais p WHERE p.id = ? AND ' . SQL_DESTAQUE, [$p['id']]) > 0;
+// números da ficha (passo 20): Destaque vê os últimos 30 dias completos; os outros, o total do mês
+$numeros = $p && numeros_prontos() ? numeros_ficha((int)$p['id'], $destaque ? desde_dias(30) : date('Y-m-01')) : null;
 $erro = null;
 
 if ($p && $em_dia && e_post()) {
@@ -104,6 +107,28 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
 <?php else: ?>
   <h1><?= h($p['nome']) ?></h1>
   <p class="discreto">Olá, <?= h($p['dono_nome']) ?> · <a href="?sair=1">Sair</a></p>
+
+  <?php if ($numeros): ?>
+  <h2>Números do seu comércio</h2>
+  <?php if ($destaque): ?>
+    <p class="discreto">Últimos 30 dias.</p>
+    <div class="numeros-resumo">
+      <div><strong><?= num($numeros['aparicoes']) ?></strong><span>vezes em listas e buscas</span></div>
+      <div><strong><?= num($numeros['visualizacoes']) ?></strong><span>vezes que abriram a ficha</span></div>
+      <div><strong><?= num($numeros['pessoas']) ?></strong><span>pessoas diferentes</span></div>
+      <?php foreach ($numeros['por_tipo'] as $k => $t): if (!$t) continue; ?><div><strong><?= num($t) ?></strong><span>toques em <?= TIPOS_CONTATO[$k] ?></span></div><?php endforeach ?>
+    </div>
+    <?php if ($numeros['origens']): ?><p class="discreto">De onde abriram:
+      <?= h(implode(' · ', array_map(fn($o, $t) => (ORIGENS[$o] ?? $o) . ' ' . num($t), array_keys($numeros['origens']), $numeros['origens']))) ?></p><?php endif ?>
+  <?php else: ?>
+    <div class="numeros-resumo">
+      <div><strong><?= num($numeros['visualizacoes']) ?></strong><span>vezes que abriram a sua ficha neste mês</span></div>
+      <div><strong><?= num($numeros['pessoas']) ?></strong><span>pessoas diferentes</span></div>
+    </div>
+    <p class="discreto">No plano Destaque você vê também quantas vezes apareceu nas buscas, de onde as pessoas vieram e quantas
+      tocaram no WhatsApp, em ligar e no mapa. <a href="<?= h(config()['url']) ?>/planos.php?id=<?= (int)$p['id'] ?>">Conferir os planos</a></p>
+  <?php endif ?>
+  <?php endif ?>
 
   <div class="quadro"><strong>Como funciona:</strong> você pede as mudanças aqui e a equipe do Acha Fácil confere antes de
     publicar. Assim ninguém consegue mudar o telefone ou o endereço de um comércio para enganar clientes.</div>

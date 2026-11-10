@@ -17,7 +17,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
 <title><?= h($titulo) ?> · Admin Acha Fácil</title>
 <link rel="icon" type="image/png" href="<?= $base ?>/assets/favicon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=11">
+<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=12">
 </head>
 <body class="admin">
 <header class="topo">
@@ -25,6 +25,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
   <?php if ($admin): ?>
   <nav>
     <a href="<?= $base ?>/admin/">Pendências<?= $pend + $novos ? ' <span class="contador">' . ($pend + $novos) . '</span>' : '' ?></a>
+    <a href="<?= $base ?>/admin/numeros.php">Números</a>
     <a href="<?= $base ?>/admin/cupons.php">Cupons</a>
     <a href="<?= $base ?>/admin/cidades.php">Cidades</a>
     <a href="<?= $base ?>/admin/registro.php">Registro</a>

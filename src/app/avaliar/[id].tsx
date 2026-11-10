@@ -17,7 +17,7 @@ export default function TelaAvaliar() {
   const { usuario } = useConta();
   const router = useRouter();
   const { dados: p, erro, carregando, recarregar } = useCarregar(
-    () => chamar<{ profissional: Profissional }>(`profissional.php?id=${id}`).then((r) => r.profissional),
+    () => chamar<{ profissional: Profissional }>(`profissional.php?id=${id}&origem=nenhuma`).then((r) => r.profissional),
     `avaliar-${id}-${usuario?.id ?? 0}`,
   );
 

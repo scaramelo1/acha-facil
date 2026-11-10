@@ -8,7 +8,7 @@ pagina_inicio('Privacidade · Acha Fácil', 'Quais dados o Acha Fácil usa, para
 ?>
 <main class="documento">
   <h1>Política de privacidade</h1>
-  <p class="atualizado">Última atualização: 7 de novembro de 2026</p>
+  <p class="atualizado">Última atualização: 10 de novembro de 2026</p>
 
   <div class="quadro">
     <strong>Resumo:</strong> dá para usar o Acha Fácil sem dar nenhum dado pessoal. Se você entrar com a sua conta Google, guardamos só nome, e-mail,
@@ -50,7 +50,10 @@ pagina_inicio('Privacidade · Acha Fácil', 'Quais dados o Acha Fácil usa, para
 
   <h2>3. O que fica no seu celular</h2>
   <p>O app guarda no seu celular apenas a cidade escolhida e, se você entrar, a chave de acesso da sua conta e o seu nome, para você não precisar entrar toda vez.
-  Ao tocar em "Sair", a chave e o nome são apagados. Fora a localização (só quando você pede, veja acima), o app não pede acesso a contatos, fotos, câmera ou microfone,
+  Ao tocar em "Sair", a chave e o nome são apagados.
+  O app também guarda um <strong>código aleatório</strong>, criado no próprio celular, que serve só para contar quantas pessoas
+  diferentes viram cada comércio por dia (e não contar duas vezes quem abre a mesma página seguida). Ele não é ligado à sua conta,
+  ao seu nome nem à sua localização; o servidor guarda apenas uma versão embaralhada dele, por no máximo 2 dias, e depois só os totais. Fora a localização (só quando você pede, veja acima), o app não pede acesso a contatos, fotos, câmera ou microfone,
   e não usa ferramentas de propaganda ou rastreamento.</p>
 
   <h2>4. Com quem compartilhamos</h2>

@@ -1,3 +1,5 @@
+import { Armazenamento } from '../armazenamento';
+
 export const URL_API = 'https://fsadesigners.com.br/acha-facil/api';
 /** Página onde o profissional se cadastra e paga a assinatura. */
 export const URL_PAINEL = 'https://fsadesigners.com.br/acha-facil/painel/';
@@ -178,6 +180,24 @@ export function definirCidade(slug: string) {
   cidadeAtual = slug;
 }
 
+// Codigo aleatorio criado no celular na 1a vez, so para o servidor contar pessoas diferentes por dia em cada ficha
+// (nao tem ligacao com a conta). Vai no cabecalho X-Visitante; o servidor guarda so uma versao embaralhada por 2 dias.
+const CHAVE_VISITANTE = 'visitante';
+let visitante: string | null = null;
+function codigoVisitante(): string {
+  let c = Armazenamento.ler(CHAVE_VISITANTE);
+  if (!c || !/^[A-Za-z0-9-]{16,64}$/.test(c)) {
+    const parte = () => Math.random().toString(36).slice(2, 10).padEnd(8, '0');
+    c = `${Date.now().toString(36)}-${parte()}${parte()}${parte()}`;
+    Armazenamento.gravar(CHAVE_VISITANTE, c);
+  }
+  return c;
+}
+
+/** De onde a pessoa abriu a ficha (numeros do comercio). 'nenhuma' = recarga ou tela de avaliar: nao conta. */
+export type Origem = 'busca' | 'categoria' | 'perto' | 'destaque' | 'inicio' | 'favoritos' | 'link' | 'nenhuma';
+export const ORIGENS: readonly Origem[] = ['busca', 'categoria', 'perto', 'destaque', 'inicio', 'favoritos', 'link', 'nenhuma'];
+
 export async function chamar<T>(caminho: string, metodo: 'GET' | 'POST' | 'DELETE' = 'GET', corpo?: unknown): Promise<T> {
   let r: Response;
   try {
@@ -187,6 +207,7 @@ export async function chamar<T>(caminho: string, metodo: 'GET' | 'POST' | 'DELET
       headers: {
         'Content-Type': 'application/json',
         ...(tokenAtual ? { 'X-Token': tokenAtual } : {}),
+        'X-Visitante': (visitante ??= codigoVisitante()),
       },
       body: corpo === undefined ? undefined : JSON.stringify(corpo),
     });
@@ -200,5 +221,5 @@ export async function chamar<T>(caminho: string, metodo: 'GET' | 'POST' | 'DELET
 
 /** Conta toques em WhatsApp, ligar etc. (estatística para o profissional). Falha em silêncio. */
 export function registrarContato(id: number, tipo: 'whatsapp' | 'ligar' | 'instagram' | 'mapa' | 'site') {
-  chamar('contato.php', 'POST', { id, tipo }).catch(() => {});
+  chamar('contato.php', 'POST', { id, tipo, origem: 'app' }).catch(() => {});
 }

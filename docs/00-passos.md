@@ -203,9 +203,18 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 
 ## Plano de crescimento (10/11) — detalhes em `docs/plano-crescimento.md`
 
-20. ⬜ Contador de visualizações em todas as fichas: origem (app, web, busca, categoria, perto, destaque), pessoas
-   únicas por dia (código anônimo), aparições em listas/busca, relatório `/admin/numeros.php` com CSV, relatório de
-   1 folha por ficha para a abordagem e números no painel do dono. Mudança 017 e APK novo
+20. 🟡 Contador de visualizações em todas as fichas (10/11): código feito e testado numa cópia isolada.
+   Servidor: `servidor/inc/numeros.php` (contar_visita com origem e pessoas diferentes por dia; quem reabre em menos de
+   30 min não conta de novo; robôs não contam; contar_aparicoes nas listas: início, categoria e busca até 40, perto 10;
+   contar_contato com origem app/web). Mudança 017: `contatos.origem` e `contatos.pessoas`, tabelas `vistas` (código
+   anônimo embaralhado, apagado depois de 2 dias) e `aparicoes`. Admin: **Números** (`/admin/numeros.php`: filtros cidade,
+   área, tipo, 7/30/90 dias, plano, só vistos; ordenar por coluna; CSV com WhatsApp/telefone), `/admin/numeros-ficha.php`
+   (dia a dia, origem, onde apareceu, contatos, posição entre os do mesmo tipo) e `/admin/relatorio.php?id=&mes=AAAA-MM`
+   (1 folha para o comerciante: imprimir/salvar PDF ou print). Painel do dono: Destaque vê 30 dias completos; os outros,
+   visualizações e pessoas do mês + convite ao Destaque. App 1.5.0: código anônimo (`X-Visitante`) e `?origem=` em cada
+   lista; recarga e tela de avaliar mandam `origem=nenhuma`. Privacidade atualizada. Enquanto a 017 não é aplicada, a API
+   conta do jeito antigo e as páginas de números/painel ficam escondidas (nada quebra).
+   Falta: **aplicar a mudança 017** (`bash servidor/instalar.sh`, usuário) e gerar/publicar o APK 1.5.0 + versão na Play
 21. ⬜ Versão web com páginas de cidade, área, tipo e ficha (`/acha-facil/<cidade>/<area>/<tipo>/`), sitemap,
    dados estruturados, Search Console, cache em arquivo; toques no site contam no passo 20
 22. ⬜ Prospecção Saúde e Veículos: 2 semanas de dados do passo 20 → CSV → grupos A/B/C → WhatsApp manual

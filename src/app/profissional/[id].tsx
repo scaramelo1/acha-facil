@@ -1,10 +1,10 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 
-import { chamar, registrarContato, type Profissional } from '../../api/cliente';
+import { chamar, ORIGENS, registrarContato, type Origem, type Profissional } from '../../api/cliente';
 import { Cabecalho } from '../../componentes/Cabecalho';
 import { CapaComercio } from '../../componentes/CapaComercio';
 import { Horarios } from '../../componentes/Horarios';
@@ -14,12 +14,22 @@ import { cartao, cores, fonte, RAIO } from '../../tema';
 
 type NomeIcone = keyof typeof MaterialCommunityIcons.glyphMap;
 
+// Aberturas desta tela ja contadas: so a 1a carga conta como visualizacao; recargas (voltar de avaliar,
+// entrar na conta) vao com origem 'nenhuma'.
+const aberturasContadas = new Set<string>();
+
 export default function TelaProfissional() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, origem: origemParam } = useLocalSearchParams<{ id: string; origem?: string }>();
+  const origem: Origem = ORIGENS.includes(origemParam as Origem) ? (origemParam as Origem) : 'link';
+  const [abertura] = useState(() => `${Date.now()}-${Math.random()}`);
   const { usuario } = useConta();
   const router = useRouter();
   const { dados: p, setDados, erro, carregando, recarregar } = useCarregar(
-    () => chamar<{ profissional: Profissional }>(`profissional.php?id=${id}`).then((r) => r.profissional),
+    () => {
+      const contar = !aberturasContadas.has(abertura);
+      aberturasContadas.add(abertura);
+      return chamar<{ profissional: Profissional }>(`profissional.php?id=${id}&origem=${contar ? origem : 'nenhuma'}`).then((r) => r.profissional);
+    },
     `${id}-${usuario?.id ?? 0}`,
   );
   // volta da tela de avaliar: atualiza as avaliações (a primeira vez já carregou acima)
