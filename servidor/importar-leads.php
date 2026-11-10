@@ -10,8 +10,11 @@ if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require __DIR__ . '/inc/base.php';
 require_once __DIR__ . '/inc/guia.php';
 
-$arquivo = $argv[1] ?? '/var/www/fsa-designer/leads/dados/leads.html';
-$cidade_lista = $argv[2] ?? 'sao-joao';
+// --teste: faz tudo e mostra o resultado, mas desfaz no fim (nada muda no banco)
+$teste = in_array('--teste', $argv, true);
+$args = array_values(array_filter($argv, fn($a) => $a !== '--teste'));
+$arquivo = $args[1] ?? '/var/www/fsa-designer/leads/dados/leads.html';
+$cidade_lista = $args[2] ?? 'sao-joao';
 // vale também cidade cadastrada e ainda desligada em /admin/cidades.php (prepara os comércios antes de ligar)
 if (!isset(TODAS_CIDADES[$cidade_lista])) exit("✘ Cidade desconhecida: $cidade_lista. Cadastre em /admin/cidades.php (use " . implode(', ', array_keys(TODAS_CIDADES)) . ")\n");
 $html = @file_get_contents($arquivo) ?: exit("✘ Não consegui ler $arquivo\n");
@@ -72,12 +75,27 @@ const PALAVRAS_AREA = [
     '/igreja|templo|organiza[çc][ãa]o|ado[çc][ãa]o|associa[çc]|par[óo]quia|caridade|escoteiro/iu' => 'entidades',
     '/advog|tabeli|gr[áa]fica|despachante|rastreamento|sat[ée]lite|chaveiro|design|r[áa]dio|not[íi]cias|jornal|jornais|branding|certifica|loca[çc][õo]es|tecnologia|\btec\b|fretamento|[ôo]nibus|t[áa]xi|transporte|funer[áa]ria|reciclag|recicl[áa]veis|log[íi]stica|armaz[ée]ns|motorista|alfaiat|cart[óo]rio|fotogra|v[íi]deo|webdesign|computador|conserto|limpeza|fantasias|recursos humanos|empregos|empresarial|consultor|assistente social|toner|videogame/iu' => 'servicos',
     '/tecidos|estilista|ateli[êe]/iu' => 'moda',
+    // Poços de Caldas (lista de 10/11)
+    '/fonoaudi|ginecolog|casa de repouso|idosos|acupunt|c[âa]ncer|diagn[óo]stic|ortopt|sex[óo]log|aromaterapia|bioqu[íi]mica|pronto-socorro/iu' => 'saude',
+    '/c[íi]lios|\\bspa\\b|bem-estar/iu' => 'beleza',
+    '/cervejaria|sanduich|frango|batataria|produ[çc][ãa]o de comida/iu' => 'alimentacao',
+    '/sacol[ãa]o|adega/iu' => 'mercados',
+    '/pedreiro|jardin|reforma|construt|estucador|bancadas|caldeireiro|automa[çc][ãa]o de casas|estruturas met|antenas|ilumina|el[ée]tric/iu' => 'casa',
+    '/c[âa]mbio|auditoria|holding/iu' => 'financeiro',
+    '/motel|conven[çc][õo]es|parque aqu[áa]tico|termal|infl[áa]vel|cabine de fotos/iu' => 'hospedagem',
+    '/conservat[óo]rio|professor|universidade/iu' => 'educacao',
+    '/futebol|gin[áa]sio|motocross/iu' => 'esporte',
+    '/beneficente|casa lar|centro comunit|assist[êe]ncia familiar|banco de alimentos/iu' => 'entidades',
+    '/ve[íi]culos recreativos|concession[áa]ria|scooter|lava ?jato|inspe[çc][ãa]o de ve[íi]culos|seguran[çc]a para carros/iu' => 'veiculos',
+    '/bordado|impress|convites|faixas|placas|tradu[çc]|lavanderia|organizador|carga|telegrama|mala direta|funer|empresas|produtor musical|ensaio|seguran[çc]a/iu' => 'servicos',
+    '/costura|joalheir|kilts|brech[óo]/iu' => 'moda',
+    '/sex shop|bazar|smartshop|eletr[ôo]nicos|ferragens|\\bshop\\b|comercial|descartados|api[áa]rio|sitiante/iu' => 'lojas',
     '/loja|revistaria|relojoaria|fornecedor|com[ée]rcio|variedades|presentes|shopping|cell|celulares|embal/iu' => 'lojas',
 ];
 // lugares públicos que vêm nas listas do Google e não são comércio (não entram no app)
-const NAO_COMERCIO = '/^(ponto de [ôo]nibus|esta[çc][ãa]o de [ôo]nibus|esta[çc][ãa]o de (tratamento|pesagem).*|subesta[çc][ãa]o.*|esta[çc][ãa]o ferrovi[áa]ria.*|infraestrutura de transporte|companhia ferrovi[áa]ria|parque|parque (esportivo|rural)|playground|trilha.*|jardim|[áa]rea de (recrea[çc][ãa]o|escrit[óo]rios)|campo de futebol|est[áa]dio.*|gin[áa]sio poliesportivo|quadra de esportes|prefeitura|reparti[çc][ãa]o p[úu]blica|prestador de servi[çc]os p[úu]blicos|delegacia.*|pol[íi]cia.*|bombeiros|tribunal.*|departamento de tr[âa]nsito|centro m[ée]dico p[úu]blico|escola p[úu]blica|universidade p[úu]blica|cemit[ée]rio|complexo (habitacional|de condom[íi]nio|de apartamentos)|apartamentos|desenvolvimento de moradias|sociedade de servi[çc]os habitacionais|pra[çc]a|represa|quartel.*|companhia de saneamento|escrit[óo]rio de recrutamento militar|departamento de ve[íi]culos automotores|servi[çc]o de ambul[âa]ncia|destino religioso|museu|usina solar fotovoltaica)$/iu';
+const NAO_COMERCIO = '/^(ponto de [ôo]nibus|esta[çc][ãa]o de [ôo]nibus|esta[çc][ãa]o de (tratamento|pesagem).*|subesta[çc][ãa]o.*|esta[çc][ãa]o ferrovi[áa]ria.*|infraestrutura de transporte|companhia ferrovi[áa]ria|parque|parque (esportivo|rural)|playground|trilha.*|jardim|[áa]rea de (recrea[çc][ãa]o|escrit[óo]rios)|campo de futebol|est[áa]dio.*|gin[áa]sio poliesportivo|quadra de esportes|prefeitura|reparti[çc][ãa]o p[úu]blica|prestador de servi[çc]os p[úu]blicos|delegacia.*|pol[íi]cia.*|bombeiros|tribunal.*|departamento de tr[âa]nsito|centro m[ée]dico p[úu]blico|escola p[úu]blica|universidade p[úu]blica|cemit[ée]rio|complexo (habitacional|de condom[íi]nio|de apartamentos)|apartamentos|desenvolvimento de moradias|sociedade de servi[çc]os habitacionais|pra[çc]a|represa|apartamento|complexo residencial|reparti[çc][ãa]o p[úu]blica.*|fonte de [áa]gua pot[áa]vel|companhia el[ée]trica|central el[ée]trica|marco hist[óo]rico|departamento (de registro de domic[íi]lios|do meio ambiente|fiscal|municipal de turismo)|aeroporto|cachoeira|ponto panor[âa]mico|zool[óo]gico|minist[ée]rio p[úu]blico|palco|cal[çc]ad[ãa]o|centro de recrea[çc][ãa]o|ponto de coleta seletiva|casa|garagem|universidade aberta|secretaria d.*|previd[êe]ncia social|biblioteca|piscina p[úu]blica|estacionamento p[úu]blico|parque (ecol[óo]gico|municipal)|jardim comunit[áa]rio|marco cultural|centro de informa[çc][ãa]o ao turista|posto de abastecimento de ve[íi]culos el[ée]tricos|quartel.*|companhia de saneamento|escrit[óo]rio de recrutamento militar|departamento de ve[íi]culos automotores|servi[çc]o de ambul[âa]ncia|destino religioso|museu|usina solar fotovoltaica)$/iu';
 // linha sem tipo cujo nome é só bairro ou endereço (vem nas buscas do Google por região)
-const SO_LUGAR = '/^(centro$|cidade nova$|santa maria$|vila \\S|jardim \\S|parque \\S|condom[íi]nio|pra[çc]a\\s|r\\.\\s|rua\\s|av\\.?\\s|avenida\\s|esta[çc][ãa]o)/iu';
+const SO_LUGAR = '/^(centro$|cidade nova$|santa maria$|vila \\S|jardim \\S|parque \\S|condom[íi]nio|pra[çc]a\\s|s[ãa]o \\S+$|santa \\S+$|dom bosco$|real$|vale d|cascata|mirante|campo d|est[âa]ncia|psf\\b|regi[ãa]o urbana|conj\\.? hab|r\\.\\s|rua\\s|av\\.?\\s|avenida\\s|esta[çc][ãa]o)/iu';
 // cidade pelo endereço ("..., Águas da Prata - SP")
 function cidade_do_endereco(string $e, string $padrao): string {
     $achada = $padrao; $pos = -1;   // a que aparece por último ("..., Cidade - UF, CEP"); o começo pode citar outra cidade
@@ -133,8 +151,15 @@ foreach ($linhas_html as [, $status, $tipo, $area, $tr]) {
     $cidade = cidade_do_endereco($endereco_completo, $cidade_lista);
     // São João mantém a chave antiga (só o nome); outras cidades levam o slug na frente
     $k = mb_substr(($cidade === 'sao-joao' ? '' : $cidade . ' ') . chave($nome), 0, 160);
-    if ($nome === '' || $k === '' || isset($vistos[$k])) { $pulados++; continue; }
-    $vistos[$k] = true;
+    if ($nome === '' || $k === '' || !preg_match('/\pL/u', $nome)) { $pulados++; continue; }
+    // mesmo nome em outro endereço = filial (redes de farmácia, mercado): entra com o endereço na chave.
+    // A 1ª linha de cada nome continua com a chave antiga (acha quem já estava no app).
+    if (isset($vistos[$k])) {
+        if ($vistos[$k] === chave($endereco_completo)) { $pulados++; continue; }
+        $k = mb_substr($k . ' @ ' . chave($endereco_completo), 0, 160);
+        if (isset($vistos[$k])) { $pulados++; continue; }
+    }
+    $vistos[$k] = chave($endereco_completo);
     $mapa = html_entity_decode($m[1] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
     [$endereco, $bairro] = endereco_e_bairro($endereco_completo);
 
@@ -147,8 +172,9 @@ foreach ($linhas_html as [, $status, $tipo, $area, $tr]) {
     $popularidade = preg_match('/\((\d+)\)/', limpo($td[7]), $p) ? (int)$p[1] : 0;
 
     $tipo = mb_substr(html_entity_decode($tipo, ENT_QUOTES | ENT_HTML5, 'UTF-8'), 0, 80);
+    if (mb_strtolower($tipo) === 'sem categoria') $tipo = '';
     if ($tipo !== '' && preg_match(NAO_COMERCIO, $tipo)) { $pulados++; $publicos++; continue; }
-    if ($tipo === '' && (preg_match(SO_LUGAR, $nome) || in_array(mb_strtolower($nome), array_map(fn($c) => mb_strtolower($c[0]), TODAS_CIDADES), true))) { $pulados++; $publicos++; continue; }
+    if (($tipo === '' && preg_match(SO_LUGAR, $nome)) || in_array(mb_strtolower($nome), array_map(fn($c) => mb_strtolower($c[0]), TODAS_CIDADES), true)) { $pulados++; $publicos++; continue; }
     $area = html_entity_decode((string)$area, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     $categoria_id = isset($areas[$area]) ? ($cat[$areas[$area]] ?? $cat['outros']) : ($area_do_tipo[mb_strtolower($tipo)] ?? $cat['outros']);
     // "Outros" com tipo que claramente é de outra área (ex.: Pizzaria, Hamburgueria, Cabeleireiro)
@@ -171,6 +197,7 @@ foreach ($linhas_html as [, $status, $tipo, $area, $tr]) {
         // lista nova mais pobre não estraga o que já estava bom: área/tipo sem informação e link do Maps sem coordenadas
         if ($dados['categoria_id'] === $cat['outros'] && (int)$atual['categoria_id'] !== $cat['outros']) { unset($dados['categoria_id']); $dados['tipo'] = $dados['tipo'] ?? $atual['tipo']; }
         if ($dados['tipo'] === null) unset($dados['tipo']);
+        if ($dados['popularidade'] === 0) unset($dados['popularidade']);   // lista sem número de avaliações não zera a ordem
         if (str_contains((string)$atual['mapa'], '!3d') && !str_contains((string)$dados['mapa'], '!3d')) unset($dados['mapa']);
         atualizar('profissionais', (int)$atual['id'], $dados);
         $atualizados++;
@@ -178,6 +205,12 @@ foreach ($linhas_html as [, $status, $tipo, $area, $tr]) {
         $pulados++; // dono assumiu o perfil, ou foi removido/pausado pelo admin
     }
 }
-db()->commit();
+// resumo por área do que ficou nesta cidade (antes de confirmar ou desfazer)
+$por_area = linhas('SELECT c.slug, COUNT(*) n FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE p.cidade = ? AND p.status = \'ativo\' GROUP BY c.slug ORDER BY n DESC', [$cidade_lista]);
 $total = (int)valor('SELECT COUNT(*) FROM profissionais WHERE importado = 1 AND status = \'ativo\' AND cidade = ?', [$cidade_lista]);
-echo "✔ Leads de " . nome_cidade($cidade_lista) . ": $novos novos, $atualizados atualizados, $pulados pulados (repetidos, mantidos ou $publicos lugares públicos). No app: $total comércios importados nesta cidade.\n";
+$sem_area = $teste ? linhas("SELECT COALESCE(p.tipo, CONCAT('(sem tipo) ', p.nome)) t, COUNT(*) n FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
+    WHERE p.cidade = ? AND p.status = 'ativo' AND c.slug = 'outros' GROUP BY t ORDER BY n DESC LIMIT 150", [$cidade_lista]) : [];
+$teste ? db()->rollBack() : db()->commit();
+echo ($teste ? "🧪 TESTE (nada gravado) " : '') . "✔ Leads de " . nome_cidade($cidade_lista) . ": $novos novos, $atualizados atualizados, $pulados pulados (repetidos, mantidos ou $publicos lugares públicos). No app: $total comércios importados nesta cidade.\n";
+echo '  Por área: ' . implode(', ', array_map(fn($a) => "{$a['slug']} {$a['n']}", $por_area)) . "\n";
+if ($sem_area) echo '  Em "Outros": ' . implode(' | ', array_map(fn($a) => "{$a['t']} {$a['n']}", $sem_area)) . "\n";

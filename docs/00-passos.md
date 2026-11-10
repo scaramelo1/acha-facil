@@ -220,3 +220,10 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 22. ⬜ Prospecção Saúde e Veículos: 2 semanas de dados do passo 20 → CSV → grupos A/B/C → WhatsApp manual
    (15–20/dia) com cupom por nicho → metas de 30 dias
 - Google Play: já em teste fechado (passo 11). Parceria com o @sanjoanenses: decidido não fazer (10/11)
+20. ✅ Poços de Caldas atualizada (10/11, pedido do usuário): lista nova com 8.449 linhas → 8.375 comércios no app
+   (6.701 novos, 1.353 atualizados; os antigos que não vieram na lista continuam). 390 lugares públicos fora.
+   Importador: `--teste` (faz tudo e desfaz, mostra áreas e o que cai em "Outros"); filiais com o mesmo nome em outro
+   endereço entram separadas (chave "nome @ endereço"; a 1ª continua com a chave antiga); "Sem categoria" = sem tipo;
+   nome sem letra ou igual ao de uma cidade fica fora; lista sem número de avaliações não zera a ordem.
+   Localização dos novos pelo OpenStreetMap (~2h30). Lista anterior em
+   /var/lib/acha-facil/leads/pocos-de-caldas.antes-20261110.html; backup /root/acha-facil-profissionais.antes-pocos2.*
