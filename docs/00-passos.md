@@ -214,7 +214,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    visualizações e pessoas do mês + convite ao Destaque. App 1.5.0: código anônimo (`X-Visitante`) e `?origem=` em cada
    lista; recarga e tela de avaliar mandam `origem=nenhuma`. Privacidade atualizada. Enquanto a 017 não é aplicada, a API
    conta do jeito antigo e as páginas de números/painel ficam escondidas (nada quebra).
-   Falta: **aplicar a mudança 017** (`bash servidor/instalar.sh`, usuário) e gerar/publicar o APK 1.5.0 + versão na Play
+   Mudança 017 já aplicada (conferido em 10/11). Falta: gerar/publicar o APK 1.5.0 + versão na Play
 21. ⬜ Versão web com páginas de cidade, área, tipo e ficha (`/acha-facil/<cidade>/<area>/<tipo>/`), sitemap,
    dados estruturados, Search Console, cache em arquivo; toques no site contam no passo 20
 22. ⬜ Prospecção Saúde e Veículos: 2 semanas de dados do passo 20 → CSV → grupos A/B/C → WhatsApp manual
