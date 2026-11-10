@@ -227,7 +227,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (passo 4g). Decidir: raio (sugestão 2 km) e quantos no máximo (sugestão 10). Precisa de APK novo (a tela inicial passa a
    mandar a posição)
 - Google Play: já em teste fechado (passo 11). Parceria com o @sanjoanenses: decidido não fazer (10/11)
-20. ✅ Poços de Caldas atualizada (10/11, pedido do usuário): lista nova com 8.449 linhas → 8.375 comércios no app
+24. ✅ Poços de Caldas atualizada (10/11, pedido do usuário): lista nova com 8.449 linhas → 8.375 comércios no app
    (6.701 novos, 1.353 atualizados; os antigos que não vieram na lista continuam). 390 lugares públicos fora.
    Importador: `--teste` (faz tudo e desfaz, mostra áreas e o que cai em "Outros"); filiais com o mesmo nome em outro
    endereço entram separadas (chave "nome @ endereço"; a 1ª continua com a chave antiga); "Sem categoria" = sem tipo;
