@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 
 import { chamar, definirCidade, type Cidade, type Estado } from './api/cliente';
 import { Armazenamento } from './armazenamento';
+import { ligarAvisos } from './avisos';
 import { EscolherCidade } from './componentes/EscolherCidade';
 
 // As cidades atendidas vêm do servidor (api/cidades.php, tabela cidades editada em /admin/cidades.php): cidade nova
@@ -104,6 +105,8 @@ export function ProvedorCidade({ children }: { children: ReactNode }) {
     Armazenamento.gravar(CHAVE, c.slug);
     setCidade(c);
     setEscolhendo(false);
+    // notificacoes da cidade: pede a permissao na 1a vez e conta ao servidor a cidade escolhida
+    ligarAvisos();
   }, []);
 
   const valor = useMemo(

@@ -277,3 +277,16 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    confere, publica pelo mesmo caminho da moderação; com dúvida, avisa os admins (push + e-mail) dizendo qual é a dúvida.
    Começa em **modo sombra** (só sugere, admin aprova como hoje). Custo estimado ~R$ 0,85 por verificação (Opus 5.5 com
    fotos). Plano completo, custos e decisões pendentes em `docs/plano-agente-ia.md`
+29. 🟡 Notificações para os usuários (11/11, pedido do usuário): os administradores mandam uma notificação no celular de
+   quem tem o app, **pelo site** (/admin/notificacoes.php, menu "Notificações") e **pelo app** (Administração → "Enviar
+   notificação aos usuários", tela src/app/notificar.tsx). Escolhe: título (60) e texto (178), cidade (ou todas), quem
+   recebe (todos os aparelhos ou só quem entrou com o Google) e, se quiser, a ficha que o toque abre (número ou link da
+   ficha no site). Confirma com o número de aparelhos antes de mandar; a mesma notificação não sai 2x em 10 minutos;
+   histórico com quantos receberam; cada envio vai para o Registro.
+   Como funciona: desde o app **1.6.0** todo aparelho pede a permissão ao escolher a cidade e entrega o endereço de aviso
+   (Expo Push) com a cidade escolhida (api/avisos.php, agora sem precisar de conta); fica em `avisos_publico` (mudança
+   **019**, com `notificacoes` = histórico). Canal Android "Novidades" (o de admin continua "Administração"). Código em
+   servidor/inc/notificacoes.php; envio de 100 em 100 por expo_enviar() em inc/avisos.php (app desinstalado sai da lista
+   sozinho); api/notificar.php para o app. Privacidade atualizada. Testado no banco de teste (11/11).
+   Falta (usuário): aplicar a 019 (`bash servidor/instalar.sh`) e gerar/publicar o APK 1.6.0 (leva também o 1.5.0 pendente).
+   APKs antigos não recebem: só quem atualizar para a 1.6.0 entra na lista

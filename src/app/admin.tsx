@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useCallback, useState } from 'react';
 import { Alert, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -11,10 +11,11 @@ import { Botao, Carregando, Falha, useCarregar } from '../componentes/ui';
 import { useConta } from '../conta';
 import { cartao, cores, fonte } from '../tema';
 
-// Administração no app (só e-mails de admin): alterações dos donos para aprovar ou recusar, pedidos novos e cidades
-// pedidas. Os avisos no celular abrem esta tela. Pedidos de assumir/tirar do app abrem o /admin do site.
+// Administração no app (só e-mails de admin): enviar notificação aos usuários (tela notificar), alterações dos donos
+// para aprovar ou recusar, pedidos novos e cidades pedidas. Os avisos no celular abrem esta tela. Pedidos de assumir/tirar do app abrem o /admin do site.
 export default function TelaAdmin() {
   const { usuario } = useConta();
+  const router = useRouter();
   const { dados, erro, carregando, recarregar } = useCarregar(() => chamar<Pendencias>('admin.php'), 'admin');
 
   // voltando para a tela (ou tocando num aviso com ela aberta): recarrega
@@ -46,6 +47,8 @@ export default function TelaAdmin() {
           <Falha mensagem={erro} tentar={recarregar} />
         ) : dados ? (
           <>
+            <Botao titulo="Enviar notificação aos usuários" icone="bell-ring-outline" tipo="amarelo" onPress={() => router.push('/notificar')} />
+
             <Text style={estilos.secao}>Alterações para aprovar ({dados.alteracoes.length})</Text>
             {dados.alteracoes.length === 0 && <Text style={estilos.vazio}>Nada esperando. Tudo em dia!</Text>}
             {dados.alteracoes.map((a) => (

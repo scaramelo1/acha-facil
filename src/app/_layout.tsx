@@ -9,12 +9,20 @@ import { ProvedorConta } from '../conta';
 import { cores } from '../tema';
 import { useAvisoDeVersao } from '../versao';
 
-/** Tocar num aviso de administração abre a tela Administração (também quando o app estava fechado). */
+/**
+ * Tocar num aviso (também com o app fechado): o de administração abre a tela Administração; a notificação dos admins
+ * abre a ficha do comércio, quando tem um, ou só o app.
+ */
 function AbrirAvisos() {
   const router = useRouter();
   useEffect(() => {
+    let ultimo = '';
     const abrir = (r: Notifications.NotificationResponse | null) => {
-      if (r?.notification.request.content.data?.tela === 'admin') router.push('/admin');
+      if (!r || r.notification.request.identifier === ultimo) return;
+      ultimo = r.notification.request.identifier;
+      const dados = r.notification.request.content.data ?? {};
+      if (dados.tela === 'admin') router.push('/admin');
+      else if (dados.tela === 'profissional' && Number(dados.id) > 0) router.push(`/profissional/${Number(dados.id)}?origem=link`);
     };
     try {
       abrir(Notifications.getLastNotificationResponse());
@@ -48,6 +56,7 @@ export default function Raiz() {
             <Stack.Screen name="planos" />
             <Stack.Screen name="sobre" />
             <Stack.Screen name="admin" />
+            <Stack.Screen name="notificar" />
           </Stack>
         </ProvedorConta>
       </ProvedorCidade>

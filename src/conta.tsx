@@ -6,7 +6,7 @@ import { AppState } from 'react-native';
 
 import { chamar, definirToken, ErroApi, type Usuario } from './api/cliente';
 import { Armazenamento } from './armazenamento';
-import { desligarAvisos, ligarAvisosDeAdmin } from './avisos';
+import { desligarAvisos, ligarAvisos } from './avisos';
 
 // A conta só é necessária para avaliar, comentar e salvar profissionais. Navegar no app não pede login.
 // Entrar é só pelo Google, sem depender de o celular devolver um link para o app (isso varia entre Expo Go, APK e
@@ -97,11 +97,12 @@ export function ProvedorConta({ children }: { children: ReactNode }) {
       });
   }, [guardar]);
 
-  // administrador conectado: liga os avisos no celular (pagamentos, cidades pedidas, alterações para aprovar)
+  // entrou na conta: liga o aparelho a ela (administrador tambem passa a receber pagamentos, cidades pedidas e alteracoes)
+  const idConta = usuario?.id ?? null;
   const ehAdmin = !!usuario?.admin;
   useEffect(() => {
-    if (ehAdmin) ligarAvisosDeAdmin();
-  }, [ehAdmin]);
+    if (idConta) ligarAvisos();
+  }, [idConta, ehAdmin]);
 
   // voltou para o app com uma entrada pelo Google pendente: pergunta ao servidor se terminou
   useEffect(() => {
