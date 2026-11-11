@@ -73,18 +73,17 @@ export function EscolherCidade({
   aoEscolher: (c: Cidade) => void;
 }) {
   const baixo = useSafeAreaInsets().bottom;
-  const [escolhida, setEscolhida] = useState<Cidade>(atual);
+  const [cidadeMarcada, setEscolhida] = useState<Cidade>(atual);
   const [termo, setTermo] = useState('');
-  const [estado, setEstado] = useState(atual.estado);
+  const [estadoMarcado, setEstado] = useState(atual.estado);
   const [local, setLocal] = useState<Local>({ situacao: 'procurando' });
   // se a pessoa já tocou numa cidade, a localização que chegar depois não troca a escolha dela
   const mexeu = useRef(false);
 
-  // a lista nova do servidor chegou com a tela aberta: a cidade marcada saiu (desligada) ou mudou de nome
-  useEffect(() => {
-    setEscolhida((e) => cidades.find((c) => c.slug === e.slug) ?? cidades.find((c) => c.slug === atual.slug) ?? cidades[0]);
-    setEstado((uf) => (cidades.some((c) => c.estado === uf) ? uf : (cidades[0]?.estado ?? uf)));
-  }, [cidades, atual.slug]);
+  // a lista nova do servidor pode chegar com a tela aberta: se a cidade marcada saiu (desligada) ou mudou de nome,
+  // vale a da lista nova (calculado aqui, sem efeito, para nao desenhar a tela duas vezes)
+  const escolhida = cidades.find((c) => c.slug === cidadeMarcada.slug) ?? cidades.find((c) => c.slug === atual.slug) ?? cidades[0];
+  const estado = cidades.some((c) => c.estado === estadoMarcado) ? estadoMarcado : (cidades[0]?.estado ?? estadoMarcado);
 
   const achar = useCallback(async () => {
     try {
