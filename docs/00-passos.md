@@ -297,3 +297,14 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (1.943 linhas) → **1.919 comércios** importados, 24 lugares públicos pulados; todos com localização (link do Google).
    PALAVRAS_AREA ganhou tipos da lista (bistrô, delicatessen, móveis, teatro...): só 36 em "Outros". Sem APK novo (cidades
    vêm do banco). Backup da tabela antes: /root/acha-facil-profissionais.antes-santa-rita.20261111-0814.sql
+31. ✅ Importar a lista do robô pelo site, sem passar pelo Claude (11/11, pedido do usuário): /admin/importar.php (menu
+   "Importar lista"). Envia o `leads_<cidade>.html` (um ou vários da mesma cidade); a cidade sai do cabeçalho do arquivo
+   ("Cidade - UF ·") ou é escolhida na lista. 1º passo **só confere** (importar-leads.php --teste: novos, atualizados,
+   pulados, por área, "Em Outros"); 2º "Importar de verdade": backup dos comércios da cidade (mysqldump em
+   /var/lib/acha-facil/backups/profissionais-<slug>-<data>.sql), lista anterior vira leads/<slug>.antes-<data>.html, importa,
+   limpa o cache do site, registra e começa o geocodificar.php em segundo plano (log em /var/lib/acha-facil/geocodificar.log,
+   acompanhado na própria página). Limite de envio 30 MB (publico/admin/.htaccess). Importador aceita o formato novo do robô
+   (data-ativo="ativo|confirmar|inativo"): fechado no Google não entra, e quem fechou de vez e era importado sem dono sai do
+   app (pausado). instalar.sh --leads usa leads/sao-joao.html quando existe. Testado numa cópia com o banco de teste (lista
+   de São João de 11/11: 1.716 novos, 1.915 atualizados, 48 fechados). Cidade nova: cadastrar desligada em Cidades → importar
+   → ligar

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Acha Fácil — instalação/atualização na VPS (rodar como root). Pode rodar de novo sem estragar nada.
 #   bash instalar.sh              cria/atualiza banco, config e publicação
-#   bash instalar.sh --leads      também importa/atualiza os comércios das listas de leads (São João, Águas da Prata e Poços de Caldas)
+#   bash instalar.sh --leads      também importa/atualiza os comércios das listas de leads (as de $DADOS/leads, enviadas por /admin/importar.php)
 set -euo pipefail
 cd "$(dirname "$0")"
 RAIZ="$(pwd)"
@@ -94,7 +94,8 @@ else
   echo "• Apache já ajustado (ou padrão diferente; confira a LocationMatch em $APACHE_SSL)"
 fi
 if [ "${1:-}" = "--leads" ]; then
-  php "$RAIZ/importar-leads.php"                                   # São João (lista de fsadesigners.com.br/leads)
+  # São João: a lista enviada em /admin/importar.php ($DADOS/leads/sao-joao.html) ou, sem ela, a de fsadesigners.com.br/leads
+  [ -f "$DADOS/leads/sao-joao.html" ] || php "$RAIZ/importar-leads.php"
   for f in "$DADOS"/leads/*.html; do                               # outras cidades: $DADOS/leads/<slug>.html (slug de /admin/cidades.php)
     c=$(basename "$f" .html); case "$c" in *.antes-*) continue;; esac
     php "$RAIZ/importar-leads.php" "$f" "$c"

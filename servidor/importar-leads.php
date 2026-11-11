@@ -142,13 +142,16 @@ function normalizar_telefone(string $t): ?string {
     return telefone_normalizado($t);
 }
 
-preg_match_all('#<tr data-status="([^"]*)" data-cat="([^"]*)"(?: data-seg="([^"]*)")?>(.*?)</tr>#s', $html, $linhas_html, PREG_SET_ORDER);
+// atributos extras na ordem que vier (data-seg, data-cid, data-ativo: o robô de 11/11 traz data-ativo="ativo|confirmar|inativo")
+preg_match_all('#<tr data-status="([^"]*)" data-cat="([^"]*)"([^>]*)>(.*?)</tr>#s', $html, $linhas_html, PREG_SET_ORDER);
 if (!$linhas_html) exit("✘ Nenhum comércio encontrado em $arquivo (formato mudou?)\n");
 
-$novos = $atualizados = $pulados = $publicos = 0;
+$novos = $atualizados = $pulados = $publicos = $fechados = $pausados = 0;
 $vistos = [];
 db()->beginTransaction();
-foreach ($linhas_html as [, $status, $tipo, $area, $tr]) {
+foreach ($linhas_html as [, $status, $tipo, $attrs, $tr]) {
+    $area = preg_match('/data-seg="([^"]*)"/', $attrs, $x) ? $x[1] : '';
+    $ativo = preg_match('/data-ativo="([^"]*)"/', $attrs, $x) ? $x[1] : 'ativo';
     preg_match_all('#<td[^>]*>(.*?)</td>#s', $tr, $td);
     $td = $td[1];
     if (count($td) < 8) { $pulados++; continue; }
@@ -184,6 +187,15 @@ foreach ($linhas_html as [, $status, $tipo, $area, $tr]) {
     if (mb_strtolower($tipo) === 'sem categoria') $tipo = '';
     if ($tipo !== '' && preg_match(NAO_COMERCIO, $tipo)) { $pulados++; $publicos++; continue; }
     if (($tipo === '' && preg_match(SO_LUGAR, $nome)) || in_array(mb_strtolower($nome), array_map(fn($c) => mb_strtolower($c[0]), TODAS_CIDADES), true)) { $pulados++; $publicos++; continue; }
+    // fechado no Google: não entra; se fechou de vez e já estava no app (importado, sem dono), sai do app (pausado)
+    if ($ativo === 'inativo') {
+        $fechados++; $pulados++;
+        if (str_contains($tr, 'Fechado permanentemente')) {
+            $ja = linha('SELECT id, importado, status FROM profissionais WHERE chave_importacao = ?', [$k]);
+            if ($ja && (int)$ja['importado'] === 1 && $ja['status'] === 'ativo') { q("UPDATE profissionais SET status = 'pausado' WHERE id = ?", [$ja['id']]); $pausados++; }
+        }
+        continue;
+    }
     $area = html_entity_decode((string)$area, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     $categoria_id = isset($areas[$area]) ? ($cat[$areas[$area]] ?? $cat['outros']) : ($area_do_tipo[mb_strtolower($tipo)] ?? $cat['outros']);
     // "Outros" com tipo que claramente é de outra área (ex.: Pizzaria, Hamburgueria, Cabeleireiro)
@@ -220,6 +232,6 @@ $total = (int)valor('SELECT COUNT(*) FROM profissionais WHERE importado = 1 AND 
 $sem_area = $teste ? linhas("SELECT COALESCE(p.tipo, CONCAT('(sem tipo) ', p.nome)) t, COUNT(*) n FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
     WHERE p.cidade = ? AND p.status = 'ativo' AND c.slug = 'outros' GROUP BY t ORDER BY n DESC LIMIT 150", [$cidade_lista]) : [];
 $teste ? db()->rollBack() : db()->commit();
-echo ($teste ? "🧪 TESTE (nada gravado) " : '') . "✔ Leads de " . nome_cidade($cidade_lista) . ": $novos novos, $atualizados atualizados, $pulados pulados (repetidos, mantidos ou $publicos lugares públicos). No app: $total comércios importados nesta cidade.\n";
+echo ($teste ? "🧪 TESTE (nada gravado) " : '') . "✔ Leads de " . nome_cidade($cidade_lista) . ": $novos novos, $atualizados atualizados, $pulados pulados (repetidos, mantidos, $publicos lugares públicos, $fechados fechados no Google" . ($pausados ? ", $pausados que fecharam de vez saíram do app" : '') . "). No app: $total comércios importados nesta cidade.\n";
 echo '  Por área: ' . implode(', ', array_map(fn($a) => "{$a['slug']} {$a['n']}", $por_area)) . "\n";
 if ($sem_area) echo '  Em "Outros": ' . implode(' | ', array_map(fn($a) => "{$a['t']} {$a['n']}", $sem_area)) . "\n";

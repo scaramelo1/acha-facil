@@ -1,0 +1,6 @@
+# Admin: a lista do robô (Importar lista) tem vários MB; o php.ini global é 2M/8M
+<IfModule mod_php.c>
+  php_value upload_max_filesize 30M
+  php_value post_max_size 100M
+  php_value max_execution_time 900
+</IfModule>

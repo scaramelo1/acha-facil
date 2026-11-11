@@ -29,6 +29,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
     <a href="<?= $base ?>/admin/notificacoes.php">Notificações</a>
     <a href="<?= $base ?>/admin/cupons.php">Cupons</a>
     <a href="<?= $base ?>/admin/cidades.php">Cidades</a>
+    <a href="<?= $base ?>/admin/importar.php">Importar lista</a>
     <a href="<?= $base ?>/admin/registro.php">Registro</a>
     <a href="<?= $base ?>/admin/senha.php">Trocar senha</a>
     <a href="<?= $base ?>/admin/sair.php">Sair</a>
