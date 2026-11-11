@@ -290,3 +290,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    sozinho); api/notificar.php para o app. Privacidade atualizada. Testado no banco de teste (11/11).
    Falta (usuário): aplicar a 019 (`bash servidor/instalar.sh`) e gerar/publicar o APK 1.6.0 (leva também o 1.5.0 pendente).
    APKs antigos não recebem: só quem atualizar para a 1.6.0 entra na lista
+30. ✅ Santa Rita do Sapucaí - MG (11/11, pedido do usuário): 6ª cidade, slug `santa-rita-do-sapucai` (já estava cadastrada e
+   ligada em /admin/cidades.php, sem comércios). Lista do robô em /var/lib/acha-facil/leads/santa-rita-do-sapucai.html
+   (1.943 linhas) → **1.919 comércios** importados, 24 lugares públicos pulados; todos com localização (link do Google).
+   PALAVRAS_AREA ganhou tipos da lista (bistrô, delicatessen, móveis, teatro...): só 36 em "Outros". Sem APK novo (cidades
+   vêm do banco). Backup da tabela antes: /root/acha-facil-profissionais.antes-santa-rita.20261111-0814.sql

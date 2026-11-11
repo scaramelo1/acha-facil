@@ -90,6 +90,15 @@ const PALAVRAS_AREA = [
     '/bordado|impress|convites|faixas|placas|tradu[çc]|lavanderia|organizador|carga|telegrama|mala direta|funer|empresas|produtor musical|ensaio|seguran[çc]a/iu' => 'servicos',
     '/costura|joalheir|kilts|brech[óo]/iu' => 'moda',
     '/sex shop|bazar|smartshop|eletr[ôo]nicos|ferragens|\\bshop\\b|comercial|descartados|api[áa]rio|sitiante/iu' => 'lojas',
+    // Santa Rita do Sapucaí (lista de 11/11)
+    '/delicatessen|bistr[ôo]|latic[íi]nio/iu' => 'alimentacao',
+    '/cabelereir/iu' => 'beleza',
+    '/m[óo]veis|aqu[áa]rio|livraria|distribuidor de papel|dep[óo]sito/iu' => 'lojas',
+    '/aluguel de roupa/iu' => 'moda',
+    '/publicidade|tv a cabo|entretenimento|artista/iu' => 'servicos',
+    '/investimento/iu' => 'financeiro',
+    '/pista de skate|centro aqu[áa]tico/iu' => 'esporte',
+    '/teatro|centro de arte/iu' => 'hospedagem',
     '/loja|revistaria|relojoaria|fornecedor|com[ée]rcio|variedades|presentes|shopping|cell|celulares|embal/iu' => 'lojas',
 ];
 // lugares públicos que vêm nas listas do Google e não são comércio (não entram no app)
