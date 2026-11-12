@@ -35,6 +35,20 @@ if (-not $env:ANDROID_HOME) {
 Write-Host "Java: $env:JAVA_HOME"
 Write-Host "SDK:  $env:ANDROID_HOME"
 
+# caminhos longos: o C++ de algumas bibliotecas (gesture-handler) passa de 260 letras no caminho do arquivo.
+# Precisa do Windows com caminhos longos ligados E de um CMake novo (3.31 ou mais), cujo ninja aceita caminho longo.
+$longos = (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' -Name LongPathsEnabled -ErrorAction SilentlyContinue).LongPathsEnabled
+if ($longos -ne 1) {
+  Parar "O Windows esta com caminhos longos desligados. Abra o PowerShell COMO ADMINISTRADOR, rode:  New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' -Name LongPathsEnabled -Value 1 -PropertyType DWORD -Force  , reinicie o PC e rode este script de novo."
+}
+$cmake = Get-ChildItem "$env:ANDROID_HOME\cmake" -Directory -ErrorAction SilentlyContinue |
+  Where-Object { $_.Name -match '^\d+\.\d+(\.\d+)?$' -and (Test-Path "$($_.FullName)\bin\ninja.exe") } |
+  Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1
+if (-not $cmake -or [version]$cmake.Name -lt [version]'3.31') {
+  Parar "Falta um CMake novo (3.31 ou mais). No Android Studio: Settings > Languages & Frameworks > Android SDK > aba SDK Tools > marque 'Show Package Details' > em CMake marque a versao mais nova (3.31.x ou 4.x) > Apply. Depois rode este script de novo."
+}
+Write-Host "CMake: $($cmake.Name)"
+
 # 3. numero da versao (versionCode): a Play so aceita numero maior que o do ultimo envio
 if ($VersionCode -le 0) {
   Write-Host 'Perguntando ao EAS o ultimo numero de versao (nao gasta build)...'
@@ -71,6 +85,9 @@ npx expo prebuild -p android --clean --no-install
 $codigoPrebuild = $LASTEXITCODE
 foreach ($a in $guardados.Keys) { [System.IO.File]::WriteAllText((Join-Path $raiz $a), $guardados[$a]) }
 if ($codigoPrebuild -ne 0) { Parar 'expo prebuild falhou (veja a mensagem acima).' }
+
+# usa o CMake novo (o padrao do Android, 3.22.1, tem o ninja que nao aceita caminho longo)
+Add-Content 'android\local.properties' ("`ncmake.dir=" + ($cmake.FullName -replace '\\', '/'))
 
 # 6. ajustes para PC comum: so os processadores de celular (sem x86 de emulador, que a Play nao usa), memoria
 #    maior para o Gradle e o Kotlin, menos tarefas ao mesmo tempo (evita "Internal compiler error" por falta de memoria)

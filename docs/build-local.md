@@ -21,6 +21,15 @@ Projeto no PC em `D:\acha-facil` (desde 12/11; antes em C:\Users\Fellipe\acha-fa
    na pasta do projeto. Os dois ficam **fora do git** (.gitignore) — guarde uma cópia em lugar seguro e nunca mande para
    ninguém.
 
+3. **Caminhos longos** (o C++ do react-native-gesture-handler passa de 260 letras no caminho; com o padrão do Windows
+   e o CMake 3.22.1 do SDK dá "Filename longer than 260 characters"):
+   - PowerShell **como administrador**:
+     `New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' -Name LongPathsEnabled -Value 1 -PropertyType DWORD -Force`
+     e reiniciar o PC;
+   - Android Studio → Settings → Languages & Frameworks → Android SDK → aba SDK Tools → "Show Package Details" →
+     em **CMake** marcar a versão mais nova (3.31.x ou 4.x) → Apply. O script usa sozinho o CMake mais novo instalado
+     (`cmake.dir` no android\local.properties) e para com a explicação se faltar alguma das duas coisas.
+
 ## Cada versão nova
 
 ```
