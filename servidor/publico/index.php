@@ -57,11 +57,14 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
     </div>
   </section>
 
-  <?php if ($eventos): ?>
+  <?php if (eventos_prontos()): ?>
   <section id="eventos">
     <div class="conteudo">
       <h2>Próximos eventos na região</h2>
       <p class="intro">Shows, festas e feiras das cidades do Acha Fácil, em ordem de data.</p>
+      <?php if (!$eventos): ?>
+        <p class="aviso ok">Nenhum evento marcado por enquanto. Organiza um show, festa ou feira em uma das cidades? Mande para a gente: <?= contatos_html() ?>.</p>
+      <?php else: ?>
       <ol class="agenda-lista agenda-inicio">
         <?php foreach ($eventos as $e): ?>
           <li><a class="evento-cartao" href="<?= h(url_evento($e)) ?>">
@@ -74,6 +77,7 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
           </a></li>
         <?php endforeach ?>
       </ol>
+      <?php endif ?>
       <form class="agenda-escolher" onsubmit="if(this.c.value)location.href=this.c.value;return false">
         <label for="agenda-cidade">Agenda completa da cidade</label>
         <select id="agenda-cidade" name="c">

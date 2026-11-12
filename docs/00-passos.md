@@ -352,4 +352,4 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Gerais 3). Rodapé: "Atendemos 11 cidades de SP e MG · Ver as cidades" no lugar das 11 cidades e da linha da agenda de
    eventos; última linha "Acha Fácil · FSA Designer · ano". Eventos ganharam a seção **Próximos eventos na região** na
    inicial (6 próximos de todas as cidades, eventos_proximos_todas(), e um seletor "Agenda completa da cidade" por
-   estado); só aparece quando há eventos. A aba Comércios | Eventos da página da cidade continua
+   estado); sem eventos, mostra o aviso "Nenhum evento marcado por enquanto" (antes sumia e o usuário não achou a seção). A aba Comércios | Eventos da página da cidade continua

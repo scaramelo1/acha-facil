@@ -129,7 +129,7 @@ function web_pagina_eventos(string $cidade): void {
   </div></section>
   <section class="branco"><div class="conteudo">
     <?php if (!$eventos): ?>
-      <p class="aviso">Nenhum evento marcado em <?= h($nome) ?> por enquanto. Organiza um evento na cidade? Mande para a gente: <?= contatos_html() ?>.</p>
+      <p class="aviso ok">Nenhum evento marcado em <?= h($nome) ?> por enquanto. Organiza um evento na cidade? Mande para a gente: <?= contatos_html() ?>.</p>
     <?php else: $mes = null; ?>
       <div class="agenda">
       <?php foreach ($eventos as $e):
