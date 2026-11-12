@@ -44,3 +44,8 @@ servidor/dados/
 /android
 servidor/config.local.php
 servidor/publico/assets/icone-previa.png
+
+# build no PC (scripts/gerar-local.ps1): chave do EAS e arquivos gerados
+credentials.json
+credentials/
+saida/

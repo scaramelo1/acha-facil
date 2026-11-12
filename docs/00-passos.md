@@ -366,3 +366,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (autorizar_evento / recusar_evento; dois admins ao mesmo tempo: o segundo recebe "já foi decidido"). O aviso com
    e-mail e Instagram saiu da inicial e da agenda: no lugar, "Vai ter um evento? Divulgar um evento". Testado no
    banco de teste (12/11). App **1.7.1**. Falta (usuário): aplicar a 021 e gerar o app novo
+37. 🟡 Gerar o app no PC, sem a cota do EAS (12/11: a cota grátis de builds Android acabou, volta em 01/12; usuário
+   escolheu gerar no PC). `scripts/gerar-local.ps1 -Tipo play|apk` (prebuild + Gradle do Android Studio, saída em
+   saida\), assinado com a chave do EAS pelo plugin `plugins/assinatura-local.js` (credentials.json baixado com
+   `npx eas credentials`, fora do git); versionCode = último do EAS + 1 (`ACHAFACIL_VERSION_CODE` no app.config.js).
+   Passo a passo em docs/build-local.md. Plugin testado na VPS com o build.gradle do modelo do Expo 58; o script
+   PowerShell só roda no PC (não testado aqui). Falta (usuário): baixar a chave e gerar a 1.7.1
