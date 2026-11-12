@@ -3,24 +3,28 @@
 require __DIR__ . '/../inc/base.php';
 require_once __DIR__ . '/../inc/guia.php';
 require __DIR__ . '/../inc/pagina.php';
+require_once __DIR__ . '/../inc/eventos.php';
 
 $areas = categorias_ativas();
 $total = (int)valor('SELECT COUNT(*) FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE ' . visivel());
 $base = config()['url'];
 $num = fn(int $n) => number_format($n, 0, ',', '.');
 // total por cidade, para os cartões "Escolha sua cidade" (páginas públicas, passo 21)
+$eventos = eventos_proximos_todas(6);
+$por_uf = [];   // cidades separadas por estado, na ordem da tabela cidades
+foreach (CIDADES as $slug => $c) $por_uf[$c[2]][$slug] = $c;
 $por_cidade = array_column(linhas('SELECT p.cidade, COUNT(*) AS total FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
     WHERE ' . visivel() . ' GROUP BY p.cidade'), 'total', 'cidade');
 
 pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
-    "App gratuito com $total comércios e serviços de " . texto_cidades() . ": restaurantes, mercados, oficinas, clínicas, lojas e muito mais. Chame no WhatsApp com um toque.");
+    "App gratuito com $total comércios e serviços em " . resumo_cidades() . ": restaurantes, mercados, oficinas, clínicas, lojas e muito mais. Chame no WhatsApp com um toque.");
 ?>
 <main>
   <section class="hero">
     <div class="conteudo">
       <div>
         <h1>Tudo o que tem na <mark>sua cidade</mark>, num toque.</h1>
-        <p class="lead"><?= h(texto_cidades()) ?>. Restaurante, mercado, oficina, clínica, loja ou quem faz aquele conserto. Procure no Acha Fácil e chame no WhatsApp, ligue ou veja como chegar.</p>
+        <p class="lead">Em <a href="#cidades"><?= h(resumo_cidades()) ?></a>. Restaurante, mercado, oficina, clínica, loja ou quem faz aquele conserto. Procure no Acha Fácil e chame no WhatsApp, ligue ou veja como chegar.</p>
         <ul class="numeros">
           <li><b><?= $num($total) ?></b> comércios e serviços</li>
           <li><b><?= count(CIDADES) ?></b> cidades</li>
@@ -42,13 +46,46 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
     <div class="conteudo">
       <h2>Escolha a sua cidade</h2>
       <p class="intro">Veja os comércios e serviços de cada cidade, com endereço, horário e WhatsApp, direto no site.</p>
-      <div class="cidades-lista">
-        <?php foreach (CIDADES as $slug => [$nome, , $uf]): ?>
-          <a href="<?= h(url_cidade($slug)) ?>"><b><?= h($nome) ?></b><small><?= h(NOMES_ESTADOS[$uf] ?? $uf) ?> · <?= $num((int)($por_cidade[$slug] ?? 0)) ?> lugares</small></a>
-        <?php endforeach ?>
-      </div>
+      <?php foreach ($por_uf as $uf => $cidades_uf): ?>
+        <?php if (count($por_uf) > 1): ?><h3 class="cidades-uf"><?= h(NOMES_ESTADOS[$uf] ?? $uf) ?> <small><?= count($cidades_uf) ?> <?= count($cidades_uf) === 1 ? 'cidade' : 'cidades' ?></small></h3><?php endif ?>
+        <div class="cidades-lista">
+          <?php foreach ($cidades_uf as $slug => [$nome]): ?>
+            <a href="<?= h(url_cidade($slug)) ?>"><b><?= h($nome) ?></b><small><?= $num((int)($por_cidade[$slug] ?? 0)) ?> lugares</small></a>
+          <?php endforeach ?>
+        </div>
+      <?php endforeach ?>
     </div>
   </section>
+
+  <?php if ($eventos): ?>
+  <section id="eventos">
+    <div class="conteudo">
+      <h2>Próximos eventos na região</h2>
+      <p class="intro">Shows, festas e feiras das cidades do Acha Fácil, em ordem de data.</p>
+      <ol class="agenda-lista agenda-inicio">
+        <?php foreach ($eventos as $e): ?>
+          <li><a class="evento-cartao" href="<?= h(url_evento($e)) ?>">
+            <?= evento_folhinha($e) ?>
+            <span class="evento-info">
+              <b><?= h($e['titulo']) ?></b>
+              <span><?= h(evento_quando($e)) ?><?= ($hr = evento_horario($e)) ? ' · ' . h($hr) : '' ?></span>
+              <span>📍 <?= h(($e['local_nome'] ? $e['local_nome'] . ', ' : '') . nome_cidade($e['cidade'])) ?></span>
+            </span>
+          </a></li>
+        <?php endforeach ?>
+      </ol>
+      <form class="agenda-escolher" onsubmit="if(this.c.value)location.href=this.c.value;return false">
+        <label for="agenda-cidade">Agenda completa da cidade</label>
+        <select id="agenda-cidade" name="c">
+          <?php foreach ($por_uf as $uf => $cidades_uf): ?><optgroup label="<?= h(NOMES_ESTADOS[$uf] ?? $uf) ?>">
+            <?php foreach ($cidades_uf as $slug => [$nome]): ?><option value="<?= h(url_eventos($slug)) ?>"><?= h($nome) ?></option><?php endforeach ?>
+          </optgroup><?php endforeach ?>
+        </select>
+        <button class="botao">Ver agenda</button>
+      </form>
+    </div>
+  </section>
+  <?php endif ?>
 
   <section id="areas">
     <div class="conteudo">

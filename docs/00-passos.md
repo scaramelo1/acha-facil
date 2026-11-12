@@ -346,3 +346,10 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    src/versao.ts), então o modo de desenvolvimento não precisa dele. O campo de /admin/app.php virou reserva (só quando a
    Play não responde). Falta (usuário, no PC): `npx expo install expo-in-app-updates` e enviar package.json +
    package-lock.json; teste real só com o app instalado pela Play (vale o teste interno/fechado)
+35. ✅ Página inicial e rodapé mais enxutos (12/11, pedido do usuário: "muito grande com todos esses nomes de cidades").
+   Topo: "Em 11 cidades de São Paulo e Minas Gerais" com link para #cidades (resumo_cidades() em inc/guia.php; a lista
+   completa texto_cidades() ficou só nos termos). "Escolha a sua cidade" separada por estado (São Paulo 8 cidades, Minas
+   Gerais 3). Rodapé: "Atendemos 11 cidades de SP e MG · Ver as cidades" no lugar das 11 cidades e da linha da agenda de
+   eventos; última linha "Acha Fácil · FSA Designer · ano". Eventos ganharam a seção **Próximos eventos na região** na
+   inicial (6 próximos de todas as cidades, eventos_proximos_todas(), e um seletor "Agenda completa da cidade" por
+   estado); só aparece quando há eventos. A aba Comércios | Eventos da página da cidade continua

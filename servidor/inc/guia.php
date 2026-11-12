@@ -63,6 +63,13 @@ function opcoes_cidades(?string $escolhida = null): string {
 function nome_cidade(string $slug, bool $curto = false): string { return TODAS_CIDADES[$slug][$curto ? 1 : 0] ?? CIDADES[CIDADE_PADRAO][0]; }
 function uf_cidade(string $slug): string { return TODAS_CIDADES[$slug][2] ?? 'SP'; }
 /** "São João da Boa Vista, Águas da Prata (SP) e Poços de Caldas (MG)": cidades ativas agrupadas por estado, para os textos do site. */
+/** "11 cidades de São Paulo e Minas Gerais" (curto, para o topo do site e o rodapé; a lista toda fica em texto_cidades()). */
+function resumo_cidades(bool $siglas = false): string {
+    $ufs = array_values(array_unique(array_map(fn($c) => $c[2], CIDADES)));
+    $nomes = array_map(fn($uf) => $siglas ? $uf : (NOMES_ESTADOS[$uf] ?? $uf), $ufs);
+    $estados = count($nomes) > 1 ? implode(', ', array_slice($nomes, 0, -1)) . ' e ' . end($nomes) : ($nomes[0] ?? '');
+    return count(CIDADES) === 1 ? nome_cidade((string)array_key_first(CIDADES)) . " ($estados)" : count(CIDADES) . " cidades de $estados";
+}
 function texto_cidades(): string {
     $por_uf = [];
     foreach (CIDADES as [$nome, , $uf]) $por_uf[$uf][] = $nome;

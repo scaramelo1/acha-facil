@@ -393,10 +393,20 @@ a.area:hover { border-color: var(--verde); }
 .evento-mini { flex: none; width: 96px; height: 96px; object-fit: cover; border-radius: 12px; }
 .evento-capa { width: 100%; max-height: 420px; object-fit: cover; border-radius: 16px; display: block; margin-bottom: 18px; }
 .evento-pagina .ficha-topo { align-items: center; }
-.rodape-eventos { margin-top: -6px; }
 @media (max-width: 560px) {
   .evento-cartao { gap: 12px; padding: 12px; align-items: flex-start; }
   .folhinha { width: 60px; }
   .folhinha b { font-size: 1.5rem; }
   .evento-mini { display: none; }
 }
+/* página inicial: cidades por estado e próximos eventos (12/11) */
+.cidades-uf { margin: 22px 0 10px; color: var(--verde); font-size: 1.15rem; }
+.cidades-uf:first-of-type { margin-top: 4px; }
+.cidades-uf small { font-weight: 700; color: var(--texto2); font-size: .9rem; }
+.cidades-lista + .cidades-uf { margin-top: 26px; }
+.hero .lead a { color: var(--verde); font-weight: 800; }
+.agenda-inicio { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+.agenda-escolher { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 20px; }
+.agenda-escolher label { font-weight: 800; color: var(--verde); }
+.agenda-escolher select { font: inherit; padding: 10px 14px; border-radius: 12px; border: 2px solid var(--borda); background: var(--branco); color: var(--texto); max-width: 100%; }
+@media (max-width: 560px) { .agenda-inicio { grid-template-columns: 1fr; } }

@@ -24,6 +24,13 @@ function eventos_proximos(string $cidade, int $limite = 300): array {
     return linhas("SELECT * FROM eventos WHERE cidade = ? AND visivel = 1 AND COALESCE(data_fim, data_inicio) >= CURDATE()
         ORDER BY data_inicio, hora_inicio IS NULL, hora_inicio, id LIMIT $limite", [$cidade]);
 }
+/** Próximos eventos de todas as cidades ligadas (seção da página inicial). */
+function eventos_proximos_todas(int $limite = 6): array {
+    if (!eventos_prontos() || !CIDADES) return [];
+    $marcas = implode(',', array_fill(0, count(CIDADES), '?'));
+    return linhas("SELECT * FROM eventos WHERE visivel = 1 AND cidade IN ($marcas) AND COALESCE(data_fim, data_inicio) >= CURDATE()
+        ORDER BY data_inicio, hora_inicio IS NULL, hora_inicio, id LIMIT $limite", array_keys(CIDADES));
+}
 function eventos_contar(string $cidade): int {
     if (!eventos_prontos()) return 0;
     return (int)valor('SELECT COUNT(*) FROM eventos WHERE cidade = ? AND visivel = 1 AND COALESCE(data_fim, data_inicio) >= CURDATE()', [$cidade]);
