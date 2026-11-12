@@ -209,6 +209,18 @@ details p { margin: 0 0 16px; color: var(--texto2); }
 /* Administração e painel do dono (moderação) */
 .documento.largo { max-width: 1100px; }
 .admin .topo nav a { font-weight: 800; }
+/* menu do admin: muitos links, então quebra em linhas sem apertar as palavras */
+.admin .topo { max-width: 1240px; flex-wrap: wrap; border-radius: 28px; padding: 10px 12px 10px 16px; row-gap: 6px; }
+.admin .marca { flex-shrink: 0; }
+.admin .marca span { white-space: nowrap; }
+.admin .topo nav { flex: 1 1 auto; flex-wrap: wrap; justify-content: flex-end; gap: 2px; }
+.admin .topo nav a { white-space: nowrap; font-size: .95rem; padding: 8px 12px; }
+@media (max-width: 1272px) { .admin .topo { margin-left: 16px; margin-right: 16px; } }
+@media (max-width: 760px) {
+  .admin .topo { position: static; }
+  .admin .topo nav { flex-basis: 100%; justify-content: flex-start; }
+  .admin .topo nav a:not(.nav-botao) { display: inline-block; padding: 7px 10px; font-size: .9rem; }
+}
 .contador { display: inline-block; min-width: 24px; padding: 0 7px; border-radius: 12px; background: var(--amarelo); color: var(--verde); text-align: center; }
 .tabela { overflow-x: auto; margin: 12px 0 24px; }
 .tabela table { width: 100%; border-collapse: collapse; background: var(--branco); border-radius: 16px; overflow: hidden; }
