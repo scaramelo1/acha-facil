@@ -54,15 +54,38 @@ $env:EXPO_NO_GIT_STATUS = '1'
 npx expo prebuild -p android --clean --no-install
 if ($LASTEXITCODE -ne 0) { Parar 'expo prebuild falhou (veja a mensagem acima).' }
 
-# 5. compila (a primeira vez demora: o Gradle baixa muita coisa)
+# 5. ajustes para PC comum: so os processadores de celular (sem x86 de emulador, que a Play nao usa), memoria
+#    maior para o Gradle e o Kotlin, menos tarefas ao mesmo tempo (evita "Internal compiler error" por falta de memoria)
+Add-Content 'android\gradle.properties' @"
+
+# gerar-local.ps1
+reactNativeArchitectures=armeabi-v7a,arm64-v8a
+org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m -Dfile.encoding=UTF-8
+kotlin.daemon.jvmargs=-Xmx2048m
+org.gradle.parallel=false
+org.gradle.caching=false
+"@
+$livre = [math]::Round((Get-PSDrive ((Get-Location).Path.Substring(0, 1))).Free / 1GB)
+Write-Host "Espaco livre no disco: $livre GB"
+if ($livre -lt 15) { Write-Host 'ATENCAO: pouco espaco. O build precisa de uns 15 GB livres (apague arquivos ou esvazie a lixeira).' -ForegroundColor Yellow }
+
+# 6. compila (a primeira vez demora: o Gradle baixa muita coisa). O registro completo fica em saida\build-log.txt
+New-Item -ItemType Directory -Force -Path 'saida' | Out-Null
+$log = Join-Path $raiz 'saida\build-log.txt'
+$tarefa = if ($Tipo -eq 'play') { 'bundleRelease' } else { 'assembleRelease' }
 Push-Location android
-if ($Tipo -eq 'play') { .\gradlew.bat bundleRelease } else { .\gradlew.bat assembleRelease }
+cmd /c "gradlew.bat --stop >nul 2>&1"
+cmd /c "gradlew.bat $tarefa --max-workers=2 2>&1" | Tee-Object -FilePath $log
 $codigo = $LASTEXITCODE
 Pop-Location
-if ($codigo -ne 0) { Parar 'O Gradle falhou (veja a mensagem acima).' }
+if ($codigo -ne 0) {
+  Write-Host ''
+  Write-Host '----- primeiros erros do registro (mande estas linhas) -----' -ForegroundColor Yellow
+  Select-String -Path $log -Pattern 'error:|FAILED|What went wrong|^e: |OutOfMemory|Java heap|No space|too long|denied' | Select-Object -First 25 | ForEach-Object { $_.Line }
+  Parar "O Gradle falhou. Registro completo em $log"
+}
 
-# 6. copia para saida\
-New-Item -ItemType Directory -Force -Path 'saida' | Out-Null
+# 7. copia para saida\
 if ($Tipo -eq 'play') {
   $origem = 'android\app\build\outputs\bundle\release\app-release.aab'
   $destino = "saida\acha-facil-$versao-$VersionCode.aab"

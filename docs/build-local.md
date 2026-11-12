@@ -43,3 +43,12 @@ Se o PowerShell bloquear o script ("execução de scripts foi desabilitada"), ro
 em `android.versionCode`. O plugin `plugins/assinatura-local.js` troca a chave de teste do release pela do
 credentials.json. Depois `gradlew bundleRelease` (.aab) ou `assembleRelease` (.apk). Sem o credentials.json (build na
 nuvem do EAS), o plugin não muda nada.
+
+## Se o Gradle falhar
+
+O script já compila só para celulares de verdade (armeabi-v7a e arm64-v8a; sem x86 de emulador), com mais memória
+para o Gradle/Kotlin e 2 tarefas por vez, e guarda tudo em `saida\build-log.txt` (no erro, mostra as primeiras linhas).
+"Internal compiler error" do Kotlin + C++ (ninja) + "Could not add entry ... executionHistory" ao mesmo tempo = quase
+sempre falta de memória/espaço ou antivírus: feche o emulador, o Android Studio e o navegador durante o build, deixe
+uns 15 GB livres no disco e, se continuar, ponha as pastas `C:\Users\Fellipe\acha-facil` e `C:\Users\Fellipe\.gradle`
+nas exclusões do Windows Defender.
