@@ -209,6 +209,18 @@ details p { margin: 0 0 16px; color: var(--texto2); }
 /* Administração e painel do dono (moderação) */
 .documento.largo { max-width: 1100px; }
 .admin .topo nav a { font-weight: 800; }
+.admin .marca span { white-space: nowrap; }
+.admin .topo nav a { white-space: nowrap; }
+/* menu suspenso do admin ("Mais") */
+.menu-suspenso { position: relative; }
+.menu-suspenso summary { list-style: none; cursor: pointer; font-weight: 800; padding: 10px 14px; border-radius: 999px; white-space: nowrap; user-select: none; }
+.menu-suspenso summary::-webkit-details-marker { display: none; }
+.menu-suspenso summary:hover, .menu-suspenso[open] summary { background: rgba(255,255,255,.12); }
+.menu-lista { position: absolute; right: 0; top: calc(100% + 8px); min-width: 210px; display: flex; flex-direction: column; padding: 8px; background: var(--branco); border-radius: 18px; box-shadow: 0 12px 32px rgba(0,0,0,.18); z-index: 20; }
+.topo nav .menu-lista a { display: block; color: var(--verde); padding: 10px 14px; border-radius: 12px; }
+.topo nav .menu-lista a:hover { background: rgba(0,92,56,.08); }
+.menu-lista .so-celular { display: none !important; }
+@media (max-width: 760px) { .menu-lista .so-celular { display: block !important; } }
 .contador { display: inline-block; min-width: 24px; padding: 0 7px; border-radius: 12px; background: var(--amarelo); color: var(--verde); text-align: center; }
 .tabela { overflow-x: auto; margin: 12px 0 24px; }
 .tabela table { width: 100%; border-collapse: collapse; background: var(--branco); border-radius: 16px; overflow: hidden; }

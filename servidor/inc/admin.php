@@ -17,7 +17,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
 <title><?= h($titulo) ?> · Admin Acha Fácil</title>
 <link rel="icon" type="image/png" href="<?= $base ?>/assets/favicon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=16">
+<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=19">
 </head>
 <body class="admin">
 <header class="topo">
@@ -26,16 +26,31 @@ function admin_inicio(string $titulo, ?array $admin): void {
   <nav>
     <a href="<?= $base ?>/admin/">Pendências<?= $pend + $novos ? ' <span class="contador">' . ($pend + $novos) . '</span>' : '' ?></a>
     <a href="<?= $base ?>/admin/numeros.php">Números</a>
-    <a href="<?= $base ?>/admin/notificacoes.php">Notificações</a>
-    <a href="<?= $base ?>/admin/cupons.php">Cupons</a>
     <a href="<?= $base ?>/admin/cidades.php">Cidades</a>
-    <a href="<?= $base ?>/admin/eventos.php">Eventos</a>
     <a href="<?= $base ?>/admin/importar.php">Importar lista</a>
-    <a href="<?= $base ?>/admin/app.php">App</a>
-    <a href="<?= $base ?>/admin/registro.php">Registro</a>
-    <a href="<?= $base ?>/admin/senha.php">Trocar senha</a>
-    <a href="<?= $base ?>/admin/sair.php">Sair</a>
+    <details class="menu-suspenso">
+      <summary>Mais <span aria-hidden="true">▾</span></summary>
+      <div class="menu-lista">
+        <a class="so-celular" href="<?= $base ?>/admin/">Pendências<?= $pend + $novos ? ' <span class="contador">' . ($pend + $novos) . '</span>' : '' ?></a>
+        <a class="so-celular" href="<?= $base ?>/admin/numeros.php">Números</a>
+        <a class="so-celular" href="<?= $base ?>/admin/cidades.php">Cidades</a>
+        <a class="so-celular" href="<?= $base ?>/admin/importar.php">Importar lista</a>
+        <a href="<?= $base ?>/admin/notificacoes.php">Notificações</a>
+        <a href="<?= $base ?>/admin/cupons.php">Cupons</a>
+        <a href="<?= $base ?>/admin/eventos.php">Eventos</a>
+        <a href="<?= $base ?>/admin/app.php">App</a>
+        <a href="<?= $base ?>/admin/registro.php">Registro</a>
+        <a href="<?= $base ?>/admin/senha.php">Trocar senha</a>
+        <a href="<?= $base ?>/admin/sair.php">Sair</a>
+      </div>
+    </details>
   </nav>
+  <script>
+  // fecha o menu suspenso ao clicar fora dele
+  document.addEventListener('click', function (e) {
+    document.querySelectorAll('details.menu-suspenso[open]').forEach(function (d) { if (!d.contains(e.target)) d.removeAttribute('open'); });
+  });
+  </script>
   <?php endif ?>
 </header>
 <main class="documento largo">
