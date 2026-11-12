@@ -47,14 +47,26 @@ if ($VersionCode -le 0) {
 $versao = (Get-Content 'app.json' -Raw | ConvertFrom-Json).expo.version
 Write-Host "Versao $versao, numero $VersionCode, tipo $Tipo"
 
-# 4. projeto Android do zero, assinado com a chave do EAS (plugins/assinatura-local.js)
+# 4. para o Gradle e o Kotlin que ficaram rodando de um build anterior (seguram arquivos da pasta android e o
+#    prebuild nao consegue apagar: "EBUSY: resource busy or locked")
+if (Test-Path 'android\gradlew.bat') { Push-Location android; cmd /c "gradlew.bat --stop >nul 2>&1"; Pop-Location }
+Get-CimInstance Win32_Process -Filter "Name = 'java.exe'" -ErrorAction SilentlyContinue |
+  Where-Object { $_.CommandLine -match 'GradleDaemon|KotlinCompileDaemon|GradleWorkerMain' } |
+  ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+Start-Sleep -Seconds 2
+if (Test-Path 'android') {
+  Remove-Item 'android' -Recurse -Force -ErrorAction SilentlyContinue
+  if (Test-Path 'android') { Parar 'Nao consegui apagar a pasta android (algum programa esta usando: feche o Android Studio e o emulador, ou reinicie o PC) e rode de novo.' }
+}
+
+# 5. projeto Android do zero, assinado com a chave do EAS (plugins/assinatura-local.js)
 if ($Tipo -eq 'play') { $env:APP_LOJA = 'play' } else { Remove-Item Env:APP_LOJA -ErrorAction SilentlyContinue }
 $env:ACHAFACIL_VERSION_CODE = "$VersionCode"
 $env:EXPO_NO_GIT_STATUS = '1'
 npx expo prebuild -p android --clean --no-install
 if ($LASTEXITCODE -ne 0) { Parar 'expo prebuild falhou (veja a mensagem acima).' }
 
-# 5. ajustes para PC comum: so os processadores de celular (sem x86 de emulador, que a Play nao usa), memoria
+# 6. ajustes para PC comum: so os processadores de celular (sem x86 de emulador, que a Play nao usa), memoria
 #    maior para o Gradle e o Kotlin, menos tarefas ao mesmo tempo (evita "Internal compiler error" por falta de memoria)
 Add-Content 'android\gradle.properties' @"
 
@@ -69,7 +81,7 @@ $livre = [math]::Round((Get-PSDrive ((Get-Location).Path.Substring(0, 1))).Free 
 Write-Host "Espaco livre no disco: $livre GB"
 if ($livre -lt 15) { Write-Host 'ATENCAO: pouco espaco. O build precisa de uns 15 GB livres (apague arquivos ou esvazie a lixeira).' -ForegroundColor Yellow }
 
-# 6. compila (a primeira vez demora: o Gradle baixa muita coisa). O registro completo fica em saida\build-log.txt
+# 7. compila (a primeira vez demora: o Gradle baixa muita coisa). O registro completo fica em saida\build-log.txt
 New-Item -ItemType Directory -Force -Path 'saida' | Out-Null
 $log = Join-Path $raiz 'saida\build-log.txt'
 $tarefa = if ($Tipo -eq 'play') { 'bundleRelease' } else { 'assembleRelease' }
@@ -85,7 +97,7 @@ if ($codigo -ne 0) {
   Parar "O Gradle falhou. Registro completo em $log"
 }
 
-# 7. copia para saida\
+# 8. copia para saida\
 if ($Tipo -eq 'play') {
   $origem = 'android\app\build\outputs\bundle\release\app-release.aab'
   $destino = "saida\acha-facil-$versao-$VersionCode.aab"
