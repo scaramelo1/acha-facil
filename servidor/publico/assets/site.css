@@ -212,7 +212,9 @@ details p { margin: 0 0 16px; color: var(--texto2); }
 .admin .marca span { white-space: nowrap; }
 .admin .topo nav a { white-space: nowrap; }
 /* menu suspenso do admin ("Mais") */
-.menu-suspenso { position: relative; }
+.menu-suspenso { position: relative; background: none; border: 0; border-radius: 0; padding: 0; margin: 0; }
+.menu-suspenso summary { display: block; font-size: 1rem; color: #fff; }
+.menu-suspenso summary::after { content: none; display: none; }
 .menu-suspenso summary { list-style: none; cursor: pointer; font-weight: 800; padding: 10px 14px; border-radius: 999px; white-space: nowrap; user-select: none; }
 .menu-suspenso summary::-webkit-details-marker { display: none; }
 .menu-suspenso summary:hover, .menu-suspenso[open] summary { background: rgba(255,255,255,.12); }
