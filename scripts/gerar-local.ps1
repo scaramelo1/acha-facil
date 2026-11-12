@@ -63,11 +63,13 @@ if (Test-Path 'android') {
 if ($Tipo -eq 'play') { $env:APP_LOJA = 'play' } else { Remove-Item Env:APP_LOJA -ErrorAction SilentlyContinue }
 $env:ACHAFACIL_VERSION_CODE = "$VersionCode"
 $env:EXPO_NO_GIT_STATUS = '1'
-# o prebuild troca os comandos "android"/"ios" do package.json para "expo run:..."; guarda e devolve como estava
-$pacoteAntes = [System.IO.File]::ReadAllText((Join-Path $raiz 'package.json'))
+# o prebuild troca os comandos "android"/"ios" do package.json para "expo run:..." e reescreve o tsconfig.json;
+# guarda os dois e devolve como estavam (nao devem ir para o git)
+$guardados = @{}
+foreach ($a in @('package.json', 'tsconfig.json')) { $guardados[$a] = [System.IO.File]::ReadAllText((Join-Path $raiz $a)) }
 npx expo prebuild -p android --clean --no-install
 $codigoPrebuild = $LASTEXITCODE
-[System.IO.File]::WriteAllText((Join-Path $raiz 'package.json'), $pacoteAntes)
+foreach ($a in $guardados.Keys) { [System.IO.File]::WriteAllText((Join-Path $raiz $a), $guardados[$a]) }
 if ($codigoPrebuild -ne 0) { Parar 'expo prebuild falhou (veja a mensagem acima).' }
 
 # 6. ajustes para PC comum: so os processadores de celular (sem x86 de emulador, que a Play nao usa), memoria
