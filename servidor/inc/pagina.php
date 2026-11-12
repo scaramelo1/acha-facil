@@ -99,7 +99,7 @@ function botao_apk(): string {
 /** Botões das lojas: link quando existe, "em breve" quando ainda não. */
 function botoes_lojas(): string {
     $lojas = [
-        ['link_play', 'Google Play', 'Android', '<path d="M4 3.3v17.4c0 .5.5.8 1 .6l10-8.7a.8.8 0 0 0 0-1.2L5 2.7c-.5-.2-1 .1-1 .6Zm12.4 6.2-2.6 2.5 2.6 2.5 3.5-2a.6.6 0 0 0 0-1Z"/>'],
+        ['link_play', 'Google Play', 'Android', '<g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"><path d="M3.9 2.6c-.6-.3-1.3.1-1.3.8v17.2c0 .7.7 1.1 1.3.8l16.6-8.6c.7-.4.7-1.3 0-1.7Z"/><path d="M3.2 2.5 16.2 15M3.2 21.5 16.2 9"/></g>'],
         ['link_app_store', 'App Store', 'iPhone', '<path d="M16.4 12.6c0-2.4 2-3.5 2-3.6a4.3 4.3 0 0 0-3.4-1.8c-1.4-.2-2.8.8-3.5.8s-1.9-.8-3-.8a4.6 4.6 0 0 0-3.9 2.4c-1.7 2.9-.4 7.2 1.2 9.6.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8s1.9.8 3.1.8 2.1-1.2 2.9-2.4a10 10 0 0 0 1.3-2.7 4.1 4.1 0 0 1-2.8-3.9ZM14 5.5A4.1 4.1 0 0 0 15 2.5a4.2 4.2 0 0 0-2.8 1.4 4 4 0 0 0-1 2.9A3.5 3.5 0 0 0 14 5.5Z"/>'],
     ];
     $html = botao_apk();
