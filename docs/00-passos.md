@@ -308,3 +308,15 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    app (pausado). instalar.sh --leads usa leads/sao-joao.html quando existe. Testado numa cópia com o banco de teste (lista
    de São João de 11/11: 1.716 novos, 1.915 atualizados, 48 fechados). Cidade nova: cadastrar desligada em Cidades → importar
    → ligar
+32. 🟡 Agenda de eventos por cidade (12/11, pedido do usuário): no site, aba **📅 Eventos** ao lado de "🏪 Comércios" no
+   topo da página da cidade e linha "Agenda de eventos" com todas as cidades no rodapé. `/<cidade>/eventos/` mostra os
+   eventos que ainda não terminaram em ordem de data, agrupados por mês ("Acontecendo agora" no topo), cada um num cartão
+   com a folhinha do calendário (dia da semana, dia, mês), nome, data/horário, local, entrada e miniatura do cartaz.
+   Tocar abre `/<cidade>/eventos/<nome>-<id>`: cartaz, quando, onde, entrada, descrição e os botões **Página oficial do
+   evento**, Salvar na minha agenda (Google Agenda) e Como chegar; dados estruturados Event para o Google; evento que já
+   passou continua abrindo com o aviso "já aconteceu" (noindex). Eventos entram no sitemap da cidade.
+   Cadastro em **/admin/eventos.php** (menu "Eventos"): cidade, nome, data e hora (início/fim, fim opcional), local,
+   endereço, entrada, link oficial, descrição, cartaz (reduzido como as fotos), mostrar/esconder, editar e apagar; salvar
+   limpa o cache do site. Código em inc/eventos.php, tabela `eventos` (**mudança 020**). Testado numa cópia com o banco de
+   teste (12/11). Falta (usuário): aplicar a 020 (`bash servidor/instalar.sh`) — até lá a aba e o rodapé não aparecem
+   e /eventos/ dá 404. Ideia para depois: mostrar os eventos também no app

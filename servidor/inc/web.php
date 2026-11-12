@@ -7,6 +7,7 @@
 //   /<cidade>/<area>/<tipo>/      tipo de negócio (indexado só com 3+ comércios)
 //   /<cidade>/c/<nome>-<id>       ficha do comércio
 //   /<cidade>/buscar?q=           busca (não indexada)
+//   /<cidade>/eventos/ e /<cidade>/eventos/<nome>-<id>   agenda de eventos (inc/eventos.php, passo 32)
 //   /sitemap.xml e /sitemap-<cidade>.xml
 // Rotas: publico/.htaccess manda o que não é arquivo para publico/web.php.
 declare(strict_types=1);
@@ -227,6 +228,7 @@ function web_pagina_cidade(string $cidade): void {
     <h1>Comércios e serviços em <mark><?= h($nome) ?></mark></h1>
     <p class="lead"><?= web_qtd($total, 'lugar', 'lugares') ?> em <?= h("$nome ($uf)") ?>: endereço, horário e WhatsApp de quem atende na cidade.</p>
     <?= web_form_busca($cidade) ?>
+    <?= function_exists('web_abas_cidade') ? web_abas_cidade($cidade, 'comercios') : '' ?>
   </div></section>
 
   <section class="branco"><div class="conteudo">
@@ -547,5 +549,9 @@ function web_sitemap_cidade(string $cidade): string {
     }
     foreach (q('SELECT p.id, p.nome, p.cidade, DATE(p.atualizado_em) AS mod_em FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
         WHERE ' . visivel($cidade) . ' ORDER BY p.id') as $p) $urls[] = [web_absoluta(url_ficha($p)), $p['mod_em']];
+    if (function_exists('eventos_prontos') && eventos_prontos()) {
+        $urls[] = [web_absoluta(url_eventos($cidade)), null];
+        foreach (eventos_proximos($cidade) as $e) $urls[] = [web_absoluta(url_evento($e)), substr((string)$e['atualizado_em'], 0, 10)];
+    }
     return web_sitemap_urls($urls);
 }

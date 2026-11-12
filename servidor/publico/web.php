@@ -3,6 +3,7 @@
 // Páginas e regras em inc/web.php.
 require __DIR__ . '/../inc/base.php';
 require __DIR__ . '/../inc/web.php';
+require __DIR__ . '/../inc/eventos.php';
 
 $caminho = (string)parse_url((string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH);
 $base = config()['url'];
@@ -60,6 +61,21 @@ if ($n === 3 && $partes[1] === 'c') {
 if ($n === 2 && $partes[1] === 'buscar') {
     header('X-Robots-Tag: noindex');
     web_pagina_busca($cidade, (string)$get('q'));
+    exit;
+}
+
+// eventos (passo 32): /<cidade>/eventos/ e /<cidade>/eventos/<nome>-<id>
+if ($n >= 2 && $partes[1] === 'eventos' && eventos_prontos()) {
+    if ($n === 2) {
+        if (!$barra) redirecionar(url(implode('/', $partes) . '/'));
+        echo web_cache('eventos|' . $cidade, fn() => web_pagina_eventos($cidade));
+        exit;
+    }
+    $e = $n === 3 && preg_match('/-(\d{1,9})$/', $partes[2], $m) ? evento((int)$m[1]) : null;
+    if (!$e || $e['cidade'] !== $cidade) { web_pagina_404(); exit; }
+    $certo = url_evento($e);
+    if ($certo !== url(implode('/', $partes))) redirecionar($certo);
+    echo web_cache('evento|' . $e['id'], fn() => web_pagina_evento($e));
     exit;
 }
 

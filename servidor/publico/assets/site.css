@@ -352,3 +352,37 @@ a.area:hover { border-color: var(--verde); }
   .ficha-botoes .botao { flex: 1 1 140px; }
   .cartoes { grid-template-columns: 1fr; }
 }
+
+/* ---------- eventos (passo 32) ---------- */
+.abas-cidade { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+.abas-cidade a { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 999px; font-weight: 800; text-decoration: none;
+  background: var(--branco); color: var(--verde); border: 2px solid var(--borda); }
+.abas-cidade a:hover { border-color: var(--verde); }
+.abas-cidade a[aria-current="page"] { background: var(--verde); color: #fff; border-color: var(--verde); }
+.abas-cidade small { background: var(--amarelo); color: var(--verde); border-radius: 999px; padding: 0 8px; font-size: .8rem; line-height: 1.5; }
+.agenda-mes { margin: 28px 0 12px; color: var(--verde); text-transform: none; }
+.agenda-mes:first-child { margin-top: 0; }
+.agenda-lista { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.evento-cartao { display: flex; gap: 16px; align-items: center; background: var(--branco); border: 2px solid var(--borda); border-radius: 18px;
+  padding: 14px 16px; text-decoration: none; color: var(--texto); }
+.evento-cartao:hover { border-color: var(--verde); }
+.folhinha { flex: none; width: 74px; display: flex; flex-direction: column; align-items: center; border-radius: 14px; overflow: hidden;
+  background: var(--branco); border: 2px solid var(--verde); text-align: center; line-height: 1.1; }
+.folhinha small:first-child { width: 100%; background: var(--verde); color: #fff; font-weight: 800; font-size: .75rem; text-transform: uppercase; padding: 4px 0; }
+.folhinha b { font-size: 1.9rem; font-weight: 900; color: var(--verde); padding: 4px 0 0; }
+.folhinha b i { font-style: normal; font-size: 1rem; }
+.folhinha small:last-child { font-weight: 800; font-size: .8rem; text-transform: uppercase; color: var(--texto2); padding-bottom: 6px; }
+.evento-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.evento-info b { font-size: 1.15rem; color: var(--verde); overflow-wrap: anywhere; }
+.evento-info span { color: var(--texto2); font-size: .95rem; }
+.evento-info .evento-preco { align-self: flex-start; margin-top: 4px; background: var(--amarelo-claro); color: var(--verde); border-radius: 999px; padding: 1px 10px; font-weight: 800; font-size: .85rem; }
+.evento-mini { flex: none; width: 96px; height: 96px; object-fit: cover; border-radius: 12px; }
+.evento-capa { width: 100%; max-height: 420px; object-fit: cover; border-radius: 16px; display: block; margin-bottom: 18px; }
+.evento-pagina .ficha-topo { align-items: center; }
+.rodape-eventos { margin-top: -6px; }
+@media (max-width: 560px) {
+  .evento-cartao { gap: 12px; padding: 12px; align-items: flex-start; }
+  .folhinha { width: 60px; }
+  .folhinha b { font-size: 1.5rem; }
+  .evento-mini { display: none; }
+}

@@ -54,7 +54,7 @@ function pagina_inicio(string $titulo, string $descricao, string $classe = '', a
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=17">
+<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=18">
 <?= $opc['head'] ?? '' ?>
 </head>
 <body class="<?= h($classe) ?>">
@@ -72,6 +72,9 @@ function pagina_fim(): void {
   <p class="rodape-marca"><img src="<?= $base ?>/assets/logo.png" alt="" width="36" height="36"> <strong>Acha <b>Fácil!</b></strong></p>
   <p class="lema">O comércio da sua cidade, pertinho de você.</p>
   <p class="rodape-cidades"><?php foreach (CIDADES as $slug => [$nome, , $uf]): ?><a href="<?= h(url(cidade_web($slug) . '/')) ?>"><?= h("$nome - $uf") ?></a> <?php endforeach ?></p>
+  <?php require_once __DIR__ . '/eventos.php'; if (eventos_prontos()): ?>
+  <p class="rodape-cidades rodape-eventos">📅 Agenda de eventos: <?php foreach (CIDADES as $slug => [$nome]): ?><a href="<?= h(url_eventos($slug)) ?>"><?= h($nome) ?></a> <?php endforeach ?></p>
+  <?php endif ?>
   <p><a href="<?= $base ?>/busca.php">Procurar meu negócio</a> · <a href="<?= $base ?>/termos.php">Termos de uso</a> · <a href="<?= $base ?>/privacidade.php">Privacidade</a> · <a href="<?= $base ?>/privacidade.php#excluir-conta">Excluir minha conta</a></p>
   <p class="discreto"><?= h(texto_cidades()) ?> · <?= date('Y') ?></p>
 </footer>
