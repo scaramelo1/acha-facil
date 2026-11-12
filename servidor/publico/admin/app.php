@@ -1,6 +1,6 @@
 <?php
 // Versões do app (passo 34): o APK do site (publicado por publicar-apk.sh) e a versão disponível na Play Store.
-// Quem instalou pela Play e está numa versão mais velha que a daqui recebe o aviso "Atualizar" que abre a loja.
+// Quem instalou pela Play é avisado sozinho (o app pergunta à Play, expo-in-app-updates); a versão daqui é só reserva.
 require __DIR__ . '/../../inc/admin.php';
 require_once __DIR__ . '/../../inc/apk.php';
 $admin = exigir_admin();
@@ -26,8 +26,11 @@ admin_inicio('App', $admin);
 
 <div class="quadro">
   <h2>Play Store</h2>
-  <p>Depois que a versão nova for <strong>aprovada e estiver disponível</strong> na Play Store, escreva aqui o número dela
-    (o "version" do app.json, ex.: 1.7.0). O botão Atualizar abre a página do app na loja.</p>
+  <p><strong>Automático:</strong> a partir da 1.7.0, o app instalado pela Play pergunta direto para a Play Store se há
+    versão nova liberada para aquele celular e mostra o aviso sozinho, com a tela de atualização da própria loja.
+    Não precisa preencher nada aqui.</p>
+  <p class="discreto">Reserva (opcional): só é usado quando a Play não responde (ex.: app instalado por fora da loja).
+    Se for usar, preencha depois que a versão estiver disponível na loja.</p>
   <form method="post"><?= campo_csrf() ?>
     <label for="v">Versão disponível na Play Store</label>
     <input id="v" name="versao_play" value="<?= h(versao_play() ?? '') ?>" placeholder="1.7.0" style="max-width:10em">

@@ -339,3 +339,10 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    br.com.fsadesigner.achafacil (sem a loja, a página no navegador). O APK do site continua igual (botão Baixar).
    Limite: só apps a partir da **1.7.0** sabem avisar pela Play (as versões antigas já instaladas não têm esse código).
    Falta (usuário): APK/AAB 1.7.0 e, quando ela estiver disponível na Play, preencher 1.7.0 em /admin/app.php
+   **Automático (12/11, pedido do usuário "não dá para ser automático?"):** o app da Play pergunta direto à Play Store
+   (atualização no app do Google, biblioteca **expo-in-app-updates 0.13**, compatível com o SDK 58) e só avisa quando a
+   versão nova já está liberada para aquele celular; "Atualizar" abre a tela de atualização da própria Play (tela
+   cheia), e se falhar abre a página do app na loja. O módulo é carregado só na versão da Play (import dinâmico em
+   src/versao.ts), então o modo de desenvolvimento não precisa dele. O campo de /admin/app.php virou reserva (só quando a
+   Play não responde). Falta (usuário, no PC): `npx expo install expo-in-app-updates` e enviar package.json +
+   package-lock.json; teste real só com o app instalado pela Play (vale o teste interno/fechado)
