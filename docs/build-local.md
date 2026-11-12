@@ -6,6 +6,10 @@ instala por cima do anterior.
 
 ## Uma vez só
 
+Projeto no PC em `D:\acha-facil` (desde 12/11; antes em C:\Users\Fellipe\acha-facil) e cache do Gradle em
+`D:\gradle` (variável `GRADLE_USER_HOME`), para não lotar o C:.
+
+
 1. Android Studio instalado (o mesmo do emulador). O script acha sozinho o Java (`jbr`) e o SDK
    (`%LOCALAPPDATA%\Android\Sdk`).
 2. Baixar a chave do EAS (não gasta build):
@@ -50,5 +54,5 @@ O script já compila só para celulares de verdade (armeabi-v7a e arm64-v8a; sem
 para o Gradle/Kotlin e 2 tarefas por vez, e guarda tudo em `saida\build-log.txt` (no erro, mostra as primeiras linhas).
 "Internal compiler error" do Kotlin + C++ (ninja) + "Could not add entry ... executionHistory" ao mesmo tempo = quase
 sempre falta de memória/espaço ou antivírus: feche o emulador, o Android Studio e o navegador durante o build, deixe
-uns 15 GB livres no disco e, se continuar, ponha as pastas `C:\Users\Fellipe\acha-facil` e `C:\Users\Fellipe\.gradle`
+uns 15 GB livres no disco e, se continuar, ponha a pasta do projeto (`D:\acha-facil`) e a do cache do Gradle (`D:\gradle`, ou `C:\Users\Fellipe\.gradle`)
 nas exclusões do Windows Defender.
