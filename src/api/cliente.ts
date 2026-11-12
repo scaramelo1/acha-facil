@@ -188,7 +188,27 @@ export interface PedidoNovo {
   telefone: string;
   quando: string;
 }
+/** Evento enviado pelo publico em /incluir-evento.php, esperando autorizacao. */
+export interface EventoPendente {
+  id: number;
+  titulo: string;
+  cidade: string;
+  quando: string;
+  horario: string | null;
+  local: string | null;
+  preco: string | null;
+  descricao: string | null;
+  linkOficial: string | null;
+  imagem: string | null;
+  enviadoPor: string | null;
+  telefone: string;
+  whatsapp: string | null;
+  recado: string | null;
+  enviadoEm: string;
+}
 export interface Pendencias {
+  /** Eventos para autorizar (servidor com a mudanca 021; antes vem sem o campo). */
+  eventos?: EventoPendente[];
   alteracoes: AlteracaoPendente[];
   pedidos: PedidoNovo[];
   cidades: { cidade: string; uf: string | null; total: number; ultimo: string }[];

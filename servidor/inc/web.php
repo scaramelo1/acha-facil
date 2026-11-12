@@ -538,7 +538,7 @@ function web_sitemap_urls(array $urls): string {
 }
 /** Páginas fixas do site (inicial, planos, incluir, termos, privacidade). */
 function web_sitemap_paginas(): string {
-    return web_sitemap_urls(array_map(fn($c) => [url_publica($c), null], ['', 'planos.php', 'incluir.php', 'termos.php', 'privacidade.php']));
+    return web_sitemap_urls(array_map(fn($c) => [url_publica($c), null], ['', 'planos.php', 'incluir.php', 'incluir-evento.php', 'termos.php', 'privacidade.php']));
 }
 /** Cidade, áreas, tipos com 3+ e todas as fichas visíveis da cidade. */
 function web_sitemap_cidade(string $cidade): string {

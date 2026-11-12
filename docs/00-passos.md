@@ -353,3 +353,16 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    eventos; última linha "Acha Fácil · FSA Designer · ano". Eventos ganharam a seção **Próximos eventos na região** na
    inicial (6 próximos de todas as cidades, eventos_proximos_todas(), e um seletor "Agenda completa da cidade" por
    estado); sem eventos, mostra o aviso "Nenhum evento marcado por enquanto" (antes sumia e o usuário não achou a seção). A aba Comércios | Eventos da página da cidade continua
+36. 🟡 Divulgar um evento pelo público, com autorização dos admins (12/11, pedido do usuário: "uma página igual ao
+   incluir.php" e "os administradores recebem a solicitação no site e notificação via app para autorizar").
+   **/incluir-evento.php** (mesmo modelo do incluir.php): cidade (vem marcada com ?cidade=), nome, data/hora de início e
+   fim, local, endereço, entrada, link oficial, descrição, cartaz (até 8 MB; <Files> no .htaccess sobe o limite) e
+   nome/telefone de quem envia + recado; campo escondido contra robô, 5 envios por IP por dia, recusa data passada e
+   repetido. Entra com visivel = 0 e status 'pendente' (**mudança 021**: status, enviado_nome/contato/recado/ip) e
+   avisa os admins no celular ("Evento para autorizar", abre a Administração do app). Site: /admin/eventos.php mostra
+   "Esperando autorização" com tudo, quem enviou (link do WhatsApp), Autorizar e publicar / Corrigir antes / Recusar;
+   contador no menu (Mais, Eventos e Pendências) e aviso em Pendências. App: seção **Eventos para autorizar** na
+   Administração (cartaz, dados, quem enviou, Autorizar / Falar no WhatsApp / Recusar), api/admin.php
+   (autorizar_evento / recusar_evento; dois admins ao mesmo tempo: o segundo recebe "já foi decidido"). O aviso com
+   e-mail e Instagram saiu da inicial e da agenda: no lugar, "Vai ter um evento? Divulgar um evento". Testado no
+   banco de teste (12/11). App **1.7.1**. Falta (usuário): aplicar a 021 e gerar o app novo

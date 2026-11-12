@@ -3,13 +3,22 @@
 // GET: pendências (alterações dos donos com antes x depois, pedidos novos, cidades pedidas).
 // POST {acao: 'aprovar' | 'recusar', id, motivo}: decide uma alteração (as mesmas regras do /admin do site).
 // POST {acao: 'apagar_cidade', cidade, uf}: tira a cidade da lista do "Quero minha Cidade!".
+// POST {acao: 'autorizar_evento' | 'recusar_evento', id}: evento enviado pelo público em /incluir-evento.php.
 require __DIR__ . '/../../inc/api.php';
 require_once __DIR__ . '/../../inc/moderacao.php';
 require_once __DIR__ . '/../../inc/avisos.php';
+require_once __DIR__ . '/../../inc/eventos.php';
 $m = metodo('GET', 'POST');
 $u = exigir_usuario();
 $admin_id = admin_do_usuario($u) ?? erro('Só para administradores.', 403);
 
+// eventos enviados pelo público (passo 36): autorizar ou recusar
+if ($m === 'POST' && in_array(campo('acao', 20), ['autorizar_evento', 'recusar_evento'], true)) {
+    $id = (int)(corpo()['id'] ?? 0);
+    $e = campo('acao', 20) === 'autorizar_evento' ? autorizar_evento($id, $admin_id) : recusar_evento($id, $admin_id);
+    if (!$e) erro('Esse evento já foi decidido por outro administrador.', 409);
+    responder(['ok' => true]);
+}
 if ($m === 'POST' && campo('acao', 20) === 'apagar_cidade') {
     // tira uma cidade da lista do "Quero minha Cidade!" (todos os pedidos dela)
     $cid = campo('cidade', 80);
@@ -78,4 +87,14 @@ $cidades = array_map(fn($c) => ['cidade' => $c['cidade'], 'uf' => $c['uf'], 'tot
     linhas('SELECT MIN(cidade) AS cidade, uf, COUNT(*) AS total, MAX(criado_em) AS ultimo FROM cidades_pedidas
         GROUP BY LOWER(cidade), uf ORDER BY ultimo DESC LIMIT 30'));
 
-responder(['alteracoes' => $alteracoes, 'pedidos' => $pedidos, 'cidades' => $cidades, 'site' => url_publica('admin/')]);
+$eventos = array_map(fn($e) => [
+    'id' => (int)$e['id'], 'titulo' => $e['titulo'], 'cidade' => nome_cidade($e['cidade'], true),
+    'quando' => ucfirst(evento_quando($e)), 'horario' => evento_horario($e),
+    'local' => implode(', ', array_filter([$e['local_nome'], $e['endereco']])) ?: null, 'preco' => $e['preco'],
+    'descricao' => $e['descricao'], 'linkOficial' => evento_link_oficial($e), 'imagem' => $e['imagem'] ? foto_url($e['imagem']) : null,
+    'enviadoPor' => $e['enviado_nome'], 'telefone' => telefone_formatado($e['enviado_contato']), 'whatsapp' => link_whatsapp((string)$e['enviado_contato'],
+        'Olá! Aqui é do Acha Fácil, sobre o evento ' . $e['titulo'] . ' que você enviou.'),
+    'recado' => $e['enviado_recado'], 'enviadoEm' => datahora_br($e['criado_em']),
+], eventos_pendentes());
+
+responder(['alteracoes' => $alteracoes, 'pedidos' => $pedidos, 'cidades' => $cidades, 'eventos' => $eventos, 'site' => url_publica('admin/')]);

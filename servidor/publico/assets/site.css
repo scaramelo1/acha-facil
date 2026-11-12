@@ -410,3 +410,8 @@ a.area:hover { border-color: var(--verde); }
 .agenda-escolher label { font-weight: 800; color: var(--verde); }
 .agenda-escolher select { font: inherit; padding: 10px 14px; border-radius: 12px; border: 2px solid var(--borda); background: var(--branco); color: var(--texto); max-width: 100%; }
 @media (max-width: 560px) { .agenda-inicio { grid-template-columns: 1fr; } }
+/* convite "Vai ter um evento? Divulgar um evento" (passo 36) */
+.convite-evento { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 20px;
+  background: var(--amarelo-claro); border: 2px solid var(--amarelo); border-radius: 18px; padding: 16px 18px; }
+.convite-evento p { margin: 0; flex: 1 1 260px; }
+.convite-evento b { color: var(--verde); }

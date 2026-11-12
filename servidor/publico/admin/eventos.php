@@ -45,12 +45,21 @@ if (e_post()) {
             if ($atual) apagar_foto($atual['imagem']);
         } elseif ($atual && isset($_POST['tirar_imagem'])) { apagar_foto($atual['imagem']); $d['imagem'] = null; }
 
+        if (eventos_envio_pronto() && $d['visivel']) $d['status'] = 'publicado';
         if ($atual) { atualizar('eventos', $id, $d); registrar((int)$admin['id'], 'editou_evento', null, $d['titulo'] . ' (' . nome_cidade($d['cidade']) . ')'); }
         else { $id = inserir('eventos', $d + ['admin_id' => (int)$admin['id']]); registrar((int)$admin['id'], 'criou_evento', null, $d['titulo'] . ' (' . nome_cidade($d['cidade']) . ')'); }
         web_cache_limpar();
         $e = linha('SELECT * FROM eventos WHERE id = ?', [$id]);
         flash('Evento salvo.' . ($e['visivel'] && isset(CIDADES[$e['cidade']]) ? ' Já está no site: ' . url_publica(ltrim(url_evento($e), '/')) : ' (escondido: não aparece no site)'));
         ir('admin/eventos.php?cidade=' . urlencode($d['cidade']));
+    }
+    if ($acao === 'autorizar' && $atual) {
+        flash(autorizar_evento($id, (int)$admin['id']) ? $atual['titulo'] . ' autorizado: já está na agenda do site e do app.' : 'Esse evento já tinha sido decidido.');
+        ir('admin/eventos.php');
+    }
+    if ($acao === 'recusar' && $atual) {
+        flash(recusar_evento($id, (int)$admin['id']) ? $atual['titulo'] . ' recusado: não vai aparecer.' : 'Esse evento já tinha sido decidido.');
+        ir('admin/eventos.php');
     }
     if ($acao === 'visivel' && $atual) {
         q('UPDATE eventos SET visivel = 1 - visivel WHERE id = ?', [$id]);
@@ -75,11 +84,14 @@ $passados = isset($_GET['passados']);
 $editar = isset($_GET['editar']) ? linha('SELECT * FROM eventos WHERE id = ?', [(int)$_GET['editar']]) : null;
 $form = $_SESSION['evento_form'] ?? null; unset($_SESSION['evento_form']);
 $v = $form ?? $editar ?? ['cidade' => $cidade, 'visivel' => 1];
+if ($editar && !$form && ($editar['status'] ?? '') === 'pendente') $v['visivel'] = 1;   // corrigir e salvar = autorizar
 $val = fn(string $k) => h(substr((string)($v[$k] ?? ''), 0, $k === 'hora_inicio' || $k === 'hora_fim' ? 5 : 5000));
 $mostrar_form = $editar || $form || isset($_GET['novo']);
+$pendentes = eventos_pendentes();
 
 $where = ['1 = 1']; $par = [];
 if ($cidade !== '') { $where[] = 'cidade = ?'; $par[] = $cidade; }
+if (eventos_envio_pronto()) $where[] = "status = 'publicado'";
 $where[] = $passados ? 'COALESCE(data_fim, data_inicio) < CURDATE()' : 'COALESCE(data_fim, data_inicio) >= CURDATE()';
 $lista = linhas('SELECT * FROM eventos WHERE ' . implode(' AND ', $where) . ' ORDER BY data_inicio ' . ($passados ? 'DESC' : 'ASC') . ', hora_inicio LIMIT 300', $par);
 
@@ -88,10 +100,33 @@ admin_inicio('Eventos', $admin);
 <h1>Eventos</h1>
 <p class="discreto">A agenda de cada cidade no site (<code>/cidade/eventos/</code>), em ordem de data. Evento que já passou some da agenda sozinho.</p>
 
+<?php if ($pendentes && !$mostrar_form): ?>
+<h2>Esperando autorização (<?= count($pendentes) ?>)</h2>
+<p class="discreto">Enviados pelo público em <a href="<?= h(url('incluir-evento.php')) ?>" target="_blank">Divulgar um evento</a>. Só aparecem no site e no app depois de autorizados.</p>
+<?php foreach ($pendentes as $e): ?>
+<div class="quadro">
+  <h3 style="margin-top:0"><?= h($e['titulo']) ?></h3>
+  <p><strong><?= h(ucfirst(evento_quando($e))) ?></strong><?= ($hr = evento_horario($e)) ? ' · ' . h($hr) : '' ?> · <?= h(nome_cidade($e['cidade'])) ?><br>
+    <?= h(implode(', ', array_filter([$e['local_nome'], $e['endereco']]))) ?><?= $e['preco'] ? '<br>Entrada: ' . h($e['preco']) : '' ?>
+    <?php if ($l = evento_link_oficial($e)): ?><br>Página oficial: <a href="<?= h($l) ?>" target="_blank" rel="noopener nofollow"><?= h($l) ?></a><?php endif ?></p>
+  <?php if ($e['imagem']): ?><p><a href="<?= h(foto_url($e['imagem'])) ?>" target="_blank"><img src="<?= h(foto_url($e['imagem'])) ?>" alt="Cartaz" style="max-width:260px;border-radius:12px;display:block"></a></p><?php endif ?>
+  <?php if ($e['descricao']): ?><p style="white-space:pre-line"><?= h($e['descricao']) ?></p><?php endif ?>
+  <p class="discreto">Enviado por <strong><?= h($e['enviado_nome'] ?? '?') ?></strong> · <a href="<?= h(link_whatsapp((string)$e['enviado_contato'], 'Olá! Aqui é do Acha Fácil, sobre o evento ' . $e['titulo'] . ' que você enviou.')) ?>" target="_blank"><?= h(telefone_formatado($e['enviado_contato'])) ?></a>
+    · <?= h(datahora_br($e['criado_em'])) ?><?= $e['enviado_recado'] ? '<br>Recado: ' . h($e['enviado_recado']) : '' ?></p>
+  <form method="post" style="display:inline"><?= campo_csrf() ?><input type="hidden" name="acao" value="autorizar"><input type="hidden" name="id" value="<?= (int)$e['id'] ?>">
+    <button class="botao">Autorizar e publicar</button></form>
+  <a class="botao contorno" href="?editar=<?= (int)$e['id'] ?>">Corrigir antes</a>
+  <form method="post" style="display:inline" onsubmit="return confirm('Recusar este evento? Ele não vai aparecer.')"><?= campo_csrf() ?><input type="hidden" name="acao" value="recusar"><input type="hidden" name="id" value="<?= (int)$e['id'] ?>">
+    <button class="botao contorno">Recusar</button></form>
+</div>
+<?php endforeach ?>
+<?php endif ?>
+
 <?php if ($mostrar_form): ?>
 <form method="post" enctype="multipart/form-data" class="quadro">
   <?= campo_csrf() ?><input type="hidden" name="acao" value="salvar"><input type="hidden" name="id" value="<?= (int)($editar['id'] ?? ($form['id'] ?? 0)) ?>">
   <h2><?= $editar ? 'Editar evento' : 'Novo evento' ?></h2>
+  <?php if (($editar['status'] ?? '') === 'pendente'): ?><p class="aviso erro">Enviado por <?= h($editar['enviado_nome'] ?? '?') ?> (<?= h(telefone_formatado($editar['enviado_contato'])) ?>) e ainda não autorizado. Salvar com "Mostrar no site" marcado autoriza e publica.</p><?php endif ?>
   <label for="cidade">Cidade</label>
   <select id="cidade" name="cidade" required>
     <option value="">Escolha</option>

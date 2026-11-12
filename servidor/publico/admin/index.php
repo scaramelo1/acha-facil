@@ -29,6 +29,10 @@ admin_inicio('Pendências', $admin);
 <h1>Pendências</h1>
 <p class="discreto">Olá, <?= h($admin['nome']) ?>. Tudo o que um dono muda fica aqui até alguém aprovar.</p>
 
+<?php require_once __DIR__ . '/../../inc/eventos.php'; if ($ev_pend = eventos_pendentes_contar()): ?>
+<div class="aviso ok"><strong><?= $ev_pend ?> <?= $ev_pend === 1 ? 'evento enviado' : 'eventos enviados' ?> pelo público esperando autorização.</strong>
+  <a class="botao" href="eventos.php" style="margin-left:8px">Ver e autorizar</a></div>
+<?php endif ?>
 <h2>Alterações dos donos (<?= count($alteracoes) ?>)</h2>
 <?php if (!$alteracoes): ?><p class="discreto">Nenhuma alteração esperando.</p><?php else: ?>
 <div class="tabela"><table>

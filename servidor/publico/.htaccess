@@ -14,3 +14,10 @@ RewriteCond %{HTTP_HOST} ^achafacilapp\.com\.br$ [NC]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ web.php [L,QSA]
+# Divulgar um evento (passo 36): o cartaz pode ter até 8 MB (o php.ini global é 2M/8M)
+<Files "incluir-evento.php">
+  <IfModule mod_php.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 12M
+  </IfModule>
+</Files>

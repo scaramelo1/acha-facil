@@ -24,6 +24,40 @@ function eventos_proximos(string $cidade, int $limite = 300): array {
     return linhas("SELECT * FROM eventos WHERE cidade = ? AND visivel = 1 AND COALESCE(data_fim, data_inicio) >= CURDATE()
         ORDER BY data_inicio, hora_inicio IS NULL, hora_inicio, id LIMIT $limite", [$cidade]);
 }
+// ---------- eventos enviados pelo público (passo 36, mudança 021) ----------
+// /incluir-evento.php grava com visivel = 0 e status 'pendente'; os admins recebem aviso no celular e autorizam no
+// /admin/eventos.php ou na Administração do app (api/admin.php). Recusado fica 'recusado' (fora do site).
+function eventos_envio_pronto(): bool {
+    static $ok = null;
+    if ($ok === null) {
+        try { $ok = eventos_prontos() && (bool)valor("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'eventos' AND column_name = 'status'"); }
+        catch (Throwable) { $ok = false; }
+    }
+    return $ok;
+}
+function eventos_pendentes(): array {
+    return eventos_envio_pronto() ? linhas("SELECT * FROM eventos WHERE status = 'pendente' ORDER BY criado_em") : [];
+}
+function eventos_pendentes_contar(): int {
+    return eventos_envio_pronto() ? (int)valor("SELECT COUNT(*) FROM eventos WHERE status = 'pendente'") : 0;
+}
+/** Autoriza um evento enviado: aparece no site e no app na hora. Devolve o evento ou null se não estava pendente. */
+function autorizar_evento(int $id, int $admin_id): ?array {
+    $e = linha("SELECT * FROM eventos WHERE id = ? AND status = 'pendente'", [$id]);
+    if (!$e) return null;
+    q("UPDATE eventos SET status = 'publicado', visivel = 1, admin_id = ? WHERE id = ?", [$admin_id, $id]);
+    web_cache_limpar();
+    registrar($admin_id, 'autorizou_evento', null, $e['titulo'] . ' (' . nome_cidade($e['cidade']) . ')');
+    return $e;
+}
+function recusar_evento(int $id, int $admin_id): ?array {
+    $e = linha("SELECT * FROM eventos WHERE id = ? AND status = 'pendente'", [$id]);
+    if (!$e) return null;
+    q("UPDATE eventos SET status = 'recusado', visivel = 0, admin_id = ? WHERE id = ?", [$admin_id, $id]);
+    registrar($admin_id, 'recusou_evento', null, $e['titulo'] . ' (' . nome_cidade($e['cidade']) . ')');
+    return $e;
+}
+
 /** Próximos eventos de todas as cidades ligadas (seção da página inicial). */
 function eventos_proximos_todas(int $limite = 6): array {
     if (!eventos_prontos() || !CIDADES) return [];
@@ -100,6 +134,12 @@ function web_abas_cidade(string $cidade, string $ativa): string {
         . '<a href="' . h(url_eventos($cidade)) . '"' . ($ativa === 'eventos' ? ' aria-current="page"' : '') . '>📅 Eventos' . ($n ? ' <small>' . $n . '</small>' : '') . '</a>'
         . '</nav>';
 }
+/** Chamada "Vai ter um evento? Divulgue de graça" com o botão para /incluir-evento.php. */
+function evento_convite_divulgar(?string $cidade = null): string {
+    return '<div class="convite-evento"><p><b>Vai ter um evento?</b> Show, festa, feira ou encontro: divulgue de graça no Acha Fácil.</p>'
+        . '<a class="botao amarelo" href="' . h(url('incluir-evento.php' . ($cidade ? '?cidade=' . rawurlencode($cidade) : ''))) . '">Divulgar um evento</a></div>';
+}
+
 /** Folhinha do calendário (dia da semana, número, mês). */
 function evento_folhinha(array $e): string {
     $i = strtotime($e['data_inicio']);
@@ -129,7 +169,7 @@ function web_pagina_eventos(string $cidade): void {
   </div></section>
   <section class="branco"><div class="conteudo">
     <?php if (!$eventos): ?>
-      <p class="aviso ok">Nenhum evento marcado em <?= h($nome) ?> por enquanto. Organiza um evento na cidade? Mande para a gente: <?= contatos_html() ?>.</p>
+      <p class="aviso ok">Nenhum evento marcado em <?= h($nome) ?> por enquanto.</p>
     <?php else: $mes = null; ?>
       <div class="agenda">
       <?php foreach ($eventos as $e):
@@ -152,6 +192,7 @@ function web_pagina_eventos(string $cidade): void {
       <?php endforeach ?>
       </ol></div>
     <?php endif ?>
+    <?= evento_convite_divulgar($cidade) ?>
   </div></section>
   <?= web_baixe_app($cidade) ?>
 </main>

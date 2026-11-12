@@ -5,13 +5,14 @@ import * as WebBrowser from 'expo-web-browser';
 import { useCallback, useState } from 'react';
 import { Alert, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { chamar, type AlteracaoPendente, type Pendencias } from '../api/cliente';
+import { chamar, type AlteracaoPendente, type EventoPendente, type Pendencias } from '../api/cliente';
 import { Cabecalho } from '../componentes/Cabecalho';
 import { Botao, Carregando, Falha, useCarregar } from '../componentes/ui';
 import { useConta } from '../conta';
 import { cartao, cores, fonte } from '../tema';
 
-// Administração no app (só e-mails de admin): enviar notificação aos usuários (tela notificar), alterações dos donos
+// Administração no app (só e-mails de admin): enviar notificação aos usuários (tela notificar), eventos enviados pelo
+// público para autorizar, alterações dos donos
 // para aprovar ou recusar, pedidos novos e cidades pedidas. Os avisos no celular abrem esta tela. Pedidos de assumir/tirar do app abrem o /admin do site.
 export default function TelaAdmin() {
   const { usuario } = useConta();
@@ -48,6 +49,15 @@ export default function TelaAdmin() {
         ) : dados ? (
           <>
             <Botao titulo="Enviar notificação aos usuários" icone="bell-ring-outline" tipo="amarelo" onPress={() => router.push('/notificar')} />
+
+            {(dados.eventos?.length ?? 0) > 0 && (
+              <>
+                <Text style={estilos.secao}>Eventos para autorizar ({dados.eventos?.length})</Text>
+                {dados.eventos?.map((e) => (
+                  <CartaoEvento key={e.id} e={e} aoDecidir={recarregar} />
+                ))}
+              </>
+            )}
 
             <Text style={estilos.secao}>Alterações para aprovar ({dados.alteracoes.length})</Text>
             {dados.alteracoes.length === 0 && <Text style={estilos.vazio}>Nada esperando. Tudo em dia!</Text>}
@@ -123,6 +133,65 @@ export default function TelaAdmin() {
         ) : null}
       </View>
     </ScrollView>
+  );
+}
+
+/** Evento enviado pelo publico: tudo o que vai aparecer na agenda, quem enviou, e Autorizar ou Recusar. */
+function CartaoEvento({ e, aoDecidir }: { e: EventoPendente; aoDecidir: () => void }) {
+  const [enviando, setEnviando] = useState(false);
+  const decidir = (acao: 'autorizar_evento' | 'recusar_evento') =>
+    Alert.alert(
+      acao === 'autorizar_evento' ? 'Autorizar e publicar?' : 'Recusar o evento?',
+      acao === 'autorizar_evento' ? `${e.titulo} vai para a agenda do site e do app agora.` : `${e.titulo} não vai aparecer na agenda.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: acao === 'autorizar_evento' ? 'Autorizar' : 'Recusar',
+          style: acao === 'autorizar_evento' ? 'default' : 'destructive',
+          onPress: async () => {
+            setEnviando(true);
+            try {
+              await chamar('admin.php', 'POST', { acao, id: e.id });
+              aoDecidir();
+            } catch (err) {
+              Alert.alert('Não deu certo', err instanceof Error ? err.message : 'Tente de novo.');
+              setEnviando(false);
+            }
+          },
+        },
+      ],
+    );
+
+  return (
+    <View style={estilos.cartao}>
+      {e.imagem && <Image source={e.imagem} style={[estilos.foto, { width: '100%', height: 180 }]} contentFit="cover" accessibilityLabel="Cartaz do evento" />}
+      <Text style={[estilos.titulo, { marginTop: e.imagem ? 10 : 0 }]}>{e.titulo}</Text>
+      <Text style={estilos.texto}>
+        {e.quando}
+        {e.horario ? ` - ${e.horario}` : ''} · {e.cidade}
+      </Text>
+      {e.local && <Text style={estilos.texto}>{e.local}</Text>}
+      {e.preco && <Text style={estilos.texto}>Entrada: {e.preco}</Text>}
+      {e.linkOficial && (
+        <Text style={[estilos.texto, estilos.link]} onPress={() => WebBrowser.openBrowserAsync(e.linkOficial!)}>
+          {e.linkOficial}
+        </Text>
+      )}
+      {e.descricao && (
+        <Text style={[estilos.texto, { marginTop: 8 }]} numberOfLines={8}>
+          {e.descricao}
+        </Text>
+      )}
+      <Text style={[estilos.sub, { marginTop: 8 }]}>
+        Enviado por {e.enviadoPor ?? '?'} · {e.telefone} · {e.enviadoEm}
+      </Text>
+      {e.recado && <Text style={estilos.sub}>Recado: {e.recado}</Text>}
+      <View style={{ gap: 8, marginTop: 12 }}>
+        <Botao titulo="Autorizar e publicar" icone="check" desativado={enviando} onPress={() => decidir('autorizar_evento')} />
+        {e.whatsapp && <Botao titulo="Falar no WhatsApp" icone="whatsapp" tipo="whatsapp" desativado={enviando} onPress={() => Linking.openURL(e.whatsapp!)} />}
+        <Botao titulo="Recusar" icone="close" tipo="perigo" desativado={enviando} onPress={() => decidir('recusar_evento')} />
+      </View>
+    </View>
   );
 }
 

@@ -8,6 +8,9 @@ function admin_inicio(string $titulo, ?array $admin): void {
     header('Cache-Control: no-store');
     $pend = $admin ? (int)valor("SELECT COUNT(*) FROM alteracoes WHERE status = 'pendente'") : 0;
     $novos = $admin ? (int)valor("SELECT COUNT(*) FROM pedidos WHERE status = 'novo'") : 0;
+    require_once __DIR__ . '/eventos.php';
+    $ev = $admin ? eventos_pendentes_contar() : 0;   // eventos enviados pelo público esperando autorização
+    $novos += $ev;
     ?><!doctype html>
 <html lang="pt-BR">
 <head>
@@ -17,7 +20,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
 <title><?= h($titulo) ?> · Admin Acha Fácil</title>
 <link rel="icon" type="image/png" href="<?= $base ?>/assets/favicon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=20">
+<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=21">
 </head>
 <body class="admin">
 <header class="topo">
@@ -29,7 +32,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
     <a href="<?= $base ?>/admin/cidades.php">Cidades</a>
     <a href="<?= $base ?>/admin/importar.php">Importar lista</a>
     <details class="menu-suspenso">
-      <summary>Mais <span aria-hidden="true">▾</span></summary>
+      <summary>Mais<?= $ev ? ' <span class="contador">' . $ev . '</span>' : '' ?> <span aria-hidden="true">▾</span></summary>
       <div class="menu-lista">
         <a class="so-celular" href="<?= $base ?>/admin/">Pendências<?= $pend + $novos ? ' <span class="contador">' . ($pend + $novos) . '</span>' : '' ?></a>
         <a class="so-celular" href="<?= $base ?>/admin/numeros.php">Números</a>
@@ -37,7 +40,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
         <a class="so-celular" href="<?= $base ?>/admin/importar.php">Importar lista</a>
         <a href="<?= $base ?>/admin/notificacoes.php">Notificações</a>
         <a href="<?= $base ?>/admin/cupons.php">Cupons</a>
-        <a href="<?= $base ?>/admin/eventos.php">Eventos</a>
+        <a href="<?= $base ?>/admin/eventos.php">Eventos<?= $ev ? ' <span class="contador">' . $ev . '</span>' : '' ?></a>
         <a href="<?= $base ?>/admin/app.php">App</a>
         <a href="<?= $base ?>/admin/registro.php">Registro</a>
         <a href="<?= $base ?>/admin/senha.php">Trocar senha</a>
