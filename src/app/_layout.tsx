@@ -49,6 +49,7 @@ export default function Raiz() {
             <Stack.Screen name="categoria/[id]" />
             <Stack.Screen name="busca" />
             <Stack.Screen name="profissional/[id]" />
+            <Stack.Screen name="evento/[id]" />
             <Stack.Screen name="avaliar/[id]" />
             <Stack.Screen name="entrar" />
             <Stack.Screen name="google" options={{ animation: 'none' }} />

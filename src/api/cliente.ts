@@ -115,6 +115,40 @@ export interface Profissional extends ProfissionalResumo {
   comentarios: Comentario[];
 }
 
+/** Evento da agenda da cidade (api/eventos.php). As datas ja vem escritas pelo servidor. */
+export interface EventoResumo {
+  id: number;
+  titulo: string;
+  /** Data de inicio (AAAA-MM-DD). */
+  data: string;
+  /** Grupo da lista: "Acontecendo agora", "Novembro", "Fevereiro de 2027". */
+  grupo: string;
+  /** Folhinha do calendario: "SAB", "15" ou "20 a 23", "NOV". */
+  semana: string;
+  dia: string;
+  mes: string;
+  /** "Sábado, 15 de novembro" ou "20 a 23 de novembro". */
+  quando: string;
+  /** "A partir das 19h", "9h às 14h" ou null. */
+  horario: string | null;
+  local: string | null;
+  endereco: string | null;
+  /** Entrada: "Gratuito", "R$ 40 (meia R$ 20)"... */
+  preco: string | null;
+  imagem: string | null;
+  terminou: boolean;
+}
+export interface Evento extends EventoResumo {
+  cidade: string;
+  descricao: string | null;
+  linkOficial: string | null;
+  /** Link do Google Agenda com o evento preenchido. */
+  agenda: string;
+  mapa: string | null;
+  /** Pagina do evento no site (para compartilhar). */
+  site: string;
+}
+
 export interface Usuario {
   id: number;
   nome: string;

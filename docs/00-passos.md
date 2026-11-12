@@ -320,3 +320,13 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    limpa o cache do site. Código em inc/eventos.php, tabela `eventos` (**mudança 020**). Testado numa cópia com o banco de
    teste (12/11). Falta (usuário): aplicar a 020 (`bash servidor/instalar.sh`) — até lá a aba e o rodapé não aparecem
    e /eventos/ dá 404. Ideia para depois: mostrar os eventos também no app
+33. 🟡 Eventos no app (12/11, pedido do usuário): aba **Eventos** na barra de baixo (entre Categorias e Favoritos; com 5
+   abas os nomes ficaram em 13 px e encolhem se não couberem). `src/app/(abas)/eventos.tsx`: agenda da cidade escolhida
+   em ordem de data, separada por mês ("Acontecendo agora" primeiro), cartões com a folhinha (src/componentes/Folhinha.tsx),
+   nome, data/horário, local, entrada e miniatura do cartaz; puxar para baixo atualiza. Tocar abre `src/app/evento/[id].tsx`:
+   cartaz, folhinha, botões **Página oficial do evento**, Salvar na minha agenda (Google Agenda), Como chegar e
+   Compartilhar (link da página do evento no site), quadro Quando/Onde/Entrada e a descrição. Dados de
+   `api/eventos.php` (mesma tabela do passo 32; datas já escritas em português pelo servidor). Eventos são cadastrados
+   só no /admin/eventos.php do site. Versão **1.7.0** (app.json). Testado: endereço do app no banco de teste e sintaxe
+   das telas (transpile do TypeScript); telas ainda não abertas no emulador. Falta (usuário): aplicar a 020, testar no
+   emulador e gerar/publicar o APK 1.7.0
