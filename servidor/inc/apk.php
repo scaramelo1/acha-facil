@@ -45,3 +45,21 @@ function apk_contar(): void {
 function apk_downloads_texto(int $n): string {
     return number_format($n, 0, ',', '.') . ($n === 1 ? ' download' : ' downloads');
 }
+
+// ---------- versão da Play Store (passo 34) ----------
+// A Play não tem como o servidor perguntar a versão publicada: o admin informa em /admin/app.php quando a versão nova
+// fica disponível na loja (depois da revisão). O app instalado pela Play compara com ela e oferece abrir a loja.
+const PACOTE_ANDROID = 'br.com.fsadesigner.achafacil';
+function versao_play(): ?string {
+    $v = trim((string)@file_get_contents(apk_dir() . '/versao-play.txt'));
+    return preg_match('/^\d{1,4}(\.\d{1,4}){0,2}$/', $v) ? $v : null;
+}
+function salvar_versao_play(?string $v): bool {
+    if (!is_dir(apk_dir())) @mkdir(apk_dir(), 0750, true);
+    return @file_put_contents(apk_dir() . '/versao-play.txt', (string)$v) !== false;
+}
+/** Página do app na Play Store (o link do config, ou o endereço padrão pelo pacote). */
+function link_play(): string {
+    $l = trim((string)(config()['link_play'] ?? ''));
+    return $l !== '' ? $l : 'https://play.google.com/store/apps/details?id=' . PACOTE_ANDROID;
+}

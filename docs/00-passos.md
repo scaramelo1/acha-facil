@@ -330,3 +330,12 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    só no /admin/eventos.php do site. Versão **1.7.0** (app.json). Testado: endereço do app no banco de teste e sintaxe
    das telas (transpile do TypeScript); telas ainda não abertas no emulador. Falta (usuário): aplicar a 020, testar no
    emulador e gerar/publicar o APK 1.7.0
+34. 🟡 Aviso de atualização para quem instalou pela Play Store (12/11, problema relatado pelo usuário: "não está sendo
+   avisado nem levado para a Play Store"). Causa: src/versao.ts saía logo no começo quando o app vinha da Play
+   (extra.loja = 'play'), e o servidor só conhecia a versão do APK do site (versao.txt = 1.1.0). Agora: /admin/app.php
+   (menu "App") guarda a **versão disponível na Play Store** (dados_dir/apk/versao-play.txt, informar depois da
+   aprovação da loja) e mostra a do APK do site; api/versao.php devolve também `play: {versao, link, pacote}`; o app da
+   Play compara e mostra "Nova versão do Acha Fácil" com **Depois / Atualizar**, que abre market://details?id=
+   br.com.fsadesigner.achafacil (sem a loja, a página no navegador). O APK do site continua igual (botão Baixar).
+   Limite: só apps a partir da **1.7.0** sabem avisar pela Play (as versões antigas já instaladas não têm esse código).
+   Falta (usuário): APK/AAB 1.7.0 e, quando ela estiver disponível na Play, preencher 1.7.0 em /admin/app.php

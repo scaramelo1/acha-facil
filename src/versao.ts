@@ -4,10 +4,12 @@ import { Alert, AppState, Linking } from 'react-native';
 
 import { chamar } from './api/cliente';
 
-// Aviso de versão nova (igual ao ReadyTAF): ao abrir o app, pergunta ao servidor qual é o APK publicado no site
-// (api/versao.php, gravado pelo publicar-apk.sh) e avisa quem está com uma versão mais velha. Uma vez por versão nova.
-// Na versão da Play Store (extra.loja = 'play', vindo do app.config.js) não avisa nada: a própria loja atualiza,
-// e a Play proíbe app instalado por ela mandar baixar atualização por fora.
+// Aviso de versão nova (igual ao ReadyTAF): ao abrir o app (e ao voltar para ele), pergunta ao servidor a versão nova
+// (api/versao.php) e avisa quem está numa versão mais velha, com "Depois" ou o botão para atualizar.
+// - Instalado pelo site: compara com o APK publicado (publicar-apk.sh) e o botão baixa o APK.
+// - Instalado pela Play Store (extra.loja = 'play', vindo do app.config.js): compara com a versão informada em
+//   /admin/app.php e o botão abre a página do app na Play Store (a Play proíbe mandar baixar APK por fora, mas
+//   abrir a própria loja pode). Até a 1.6.0 a versão da Play não avisava nada.
 
 export const VERSAO_INSTALADA = Constants.expoConfig?.version ?? null;
 export const DA_PLAY_STORE = Constants.expoConfig?.extra?.loja === 'play';
@@ -26,6 +28,24 @@ export function precisaAtualizar(instalada: string | null, publicada: string | n
   return false;
 }
 
+interface RespostaVersao {
+  versao: string | null;
+  link: string | null;
+  /** Versão disponível na Play Store (informada no /admin/app.php) e a página do app na loja. */
+  play?: { versao: string | null; link: string | null; pacote?: string };
+}
+
+const PACOTE = 'br.com.fsadesigner.achafacil';
+
+/** Abre o app da Play Store direto na página do Acha Fácil; sem o app da loja, abre a página no navegador. */
+async function abrirPlayStore(pacote: string, pagina: string) {
+  try {
+    await Linking.openURL(`market://details?id=${pacote}`);
+  } catch {
+    Linking.openURL(pagina).catch(() => {});
+  }
+}
+
 /** Mínimo entre duas consultas, para não perguntar toda vez que o app volta para a frente. */
 const INTERVALO_MS = 6 * 3600 * 1000;
 
@@ -34,13 +54,28 @@ export function useAvisoDeVersao() {
   const jaAvisou = useRef<string | null>(null);
 
   useEffect(() => {
-    if (DA_PLAY_STORE) return;
     const consultar = async () => {
       if (Date.now() - ultimaConsulta.current < INTERVALO_MS) return;
       ultimaConsulta.current = Date.now();
       try {
-        const { versao, link } = await chamar<{ versao: string | null; link: string | null }>('versao.php');
-        if (!versao || !link || !precisaAtualizar(VERSAO_INSTALADA, versao) || jaAvisou.current === versao) return;
+        const r = await chamar<RespostaVersao>('versao.php');
+        const versao = DA_PLAY_STORE ? (r.play?.versao ?? null) : r.versao;
+        if (!versao || !precisaAtualizar(VERSAO_INSTALADA, versao) || jaAvisou.current === versao) return;
+        if (DA_PLAY_STORE) {
+          const pagina = r.play?.link || `https://play.google.com/store/apps/details?id=${PACOTE}`;
+          jaAvisou.current = versao;
+          Alert.alert(
+            'Nova versão do Acha Fácil',
+            `Saiu a versão ${versao} (a sua é a ${VERSAO_INSTALADA}). Atualize pela Play Store: seus favoritos e sua conta continuam.`,
+            [
+              { text: 'Depois', style: 'cancel' },
+              { text: 'Atualizar', onPress: () => void abrirPlayStore(r.play?.pacote || PACOTE, pagina) },
+            ],
+          );
+          return;
+        }
+        const link = r.link;
+        if (!link) return;
         jaAvisou.current = versao;
         Alert.alert(
           'Nova versão do Acha Fácil',
