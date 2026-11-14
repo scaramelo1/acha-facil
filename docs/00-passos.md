@@ -392,3 +392,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    downloads"): total desde o início (downloads.txt, 12 em 14/11), hoje, começaram x terminaram no período, gráfico por
    dia e tabela por versão. Histórico novo em dados_dir/apk/downloads.log (data;versão;inicio|fim, sem IP), só desde
    14/11; robôs não contam mais (e_robo()). Sem mudança no banco. Testado com APK falso no banco de teste (14/11)
+41. ✅ O que cada pessoa salvou e avaliou (14/11, pedido do usuário: "link no número... só para controle e
+   estatística"). Em /admin/pessoas.php o nome e os números de Favoritos/Avaliações abrem /admin/pessoa.php?id=
+   (favoritos com data e área; avaliações com estrelas, comentário, resposta do comércio, oculta/editada; botões
+   Números e Abrir). Pessoas ganhou "Estatística dos itens": mais salvos, favoritos por área, mais avaliados com
+   média, e totais de favoritos/avaliações no topo. Foto do Google que não carrega vira a inicial. Só leitura

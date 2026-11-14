@@ -1,0 +1,73 @@
+<?php
+// Uma pessoa do app (passo 41): o que salvou como favorito e o que avaliou. Só leitura, para controle e estatística.
+require __DIR__ . '/../../inc/admin.php';
+$admin = exigir_admin();
+
+$u = linha('SELECT u.*, (SELECT MAX(s.usado_em) FROM sessoes_app s WHERE s.usuario_id = u.id) AS ultimo_uso FROM usuarios u WHERE u.id = ?', [(int)($_GET['id'] ?? 0)]);
+if (!$u) { flash('Pessoa não encontrada.', 'erro'); ir('admin/pessoas.php'); }
+
+$favoritos = linhas('SELECT f.criado_em, p.id, p.nome, p.tipo, p.cidade, p.bairro, p.status, c.nome AS categoria
+    FROM favoritos f JOIN profissionais p ON p.id = f.profissional_id JOIN categorias c ON c.id = p.categoria_id
+    WHERE f.usuario_id = ? ORDER BY f.criado_em DESC', [$u['id']]);
+$avaliacoes = linhas('SELECT a.estrelas, a.comentario, a.status, a.resposta, a.criado_em, a.atualizado_em,
+        p.id, p.nome, p.tipo, p.cidade, p.bairro, p.status AS status_ficha, c.nome AS categoria
+    FROM avaliacoes a JOIN profissionais p ON p.id = a.profissional_id JOIN categorias c ON c.id = p.categoria_id
+    WHERE a.usuario_id = ? ORDER BY a.criado_em DESC', [$u['id']]);
+$media = $avaliacoes ? array_sum(array_column($avaliacoes, 'estrelas')) / count($avaliacoes) : 0;
+$por_area = [];
+foreach ($favoritos as $f) $por_area[$f['categoria']] = ($por_area[$f['categoria']] ?? 0) + 1;
+arsort($por_area);
+
+$comercio = fn(array $l) => '<strong>' . h($l['nome']) . '</strong><br><span class="discreto">' . h($l['tipo'] ?: $l['categoria'])
+    . ' · ' . h(nome_cidade($l['cidade'], true)) . ($l['bairro'] ? ' · ' . h($l['bairro']) : '') . '</span>';
+$botoes = fn(array $l) => '<a class="botao pequeno contorno" href="numeros-ficha.php?id=' . (int)$l['id'] . '">Números</a>'
+    . (($l['status_ficha'] ?? $l['status']) === 'ativo' ? ' <a class="botao pequeno contorno" href="' . h(url_ficha($l)) . '" target="_blank" rel="noopener">Abrir</a>' : '');
+$estrelas = fn(int $n) => '<span title="' . $n . ' de 5" style="color:var(--amarelo);white-space:nowrap">' . str_repeat('★', $n) . '</span><span style="color:#ccc">' . str_repeat('★', 5 - $n) . '</span>';
+
+admin_inicio($u['nome'], $admin);
+?>
+<p><a href="pessoas.php">‹ Pessoas</a></p>
+<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+  <?php if ($u['foto'] && str_starts_with($u['foto'], 'https://')): ?>
+  <img src="<?= h($u['foto']) ?>" alt="" width="64" height="64" style="border-radius:50%;object-fit:cover" referrerpolicy="no-referrer" onerror="this.remove()">
+  <?php endif ?>
+  <div>
+    <h1 style="margin:0"><?= h($u['nome']) ?></h1>
+    <p class="discreto" style="margin:4px 0 0"><a href="mailto:<?= h($u['email']) ?>"><?= h($u['email']) ?></a> · cadastro <?= h(data_br($u['criado_em'])) ?>
+      · último uso <?= h(data_br($u['ultimo_uso'])) ?><?= $u['ativo'] ? '' : ' · <strong>conta desativada</strong>' ?></p>
+  </div>
+</div>
+
+<div class="numeros-resumo">
+  <div><strong><?= num(count($favoritos)) ?></strong><span>favoritos</span></div>
+  <div><strong><?= num(count($avaliacoes)) ?></strong><span>avaliações</span></div>
+  <div><strong><?= $avaliacoes ? number_format($media, 1, ',', '.') : '—' ?></strong><span>média de estrelas</span></div>
+</div>
+
+<h2 id="favoritos">Favoritos</h2>
+<?php if (!$favoritos): ?><p class="discreto">Não salvou nenhum comércio.</p><?php else: ?>
+<?php if (count($por_area) > 1): ?><p class="discreto">Por área: <?= h(implode(' · ', array_map(fn($a, $n) => "$a $n", array_keys($por_area), $por_area))) ?></p><?php endif ?>
+<div class="tabela"><table>
+  <tr><th>Comércio</th><th>Salvo em</th><th></th></tr>
+  <?php foreach ($favoritos as $f): ?><tr>
+    <td><?= $comercio($f) ?><?= $f['status'] === 'ativo' ? '' : ' <span class="discreto">(fora do app)</span>' ?></td>
+    <td><?= h(data_br($f['criado_em'])) ?></td><td><?= $botoes($f) ?></td>
+  </tr><?php endforeach ?>
+</table></div>
+<?php endif ?>
+
+<h2 id="avaliacoes">Avaliações</h2>
+<?php if (!$avaliacoes): ?><p class="discreto">Não avaliou nenhum comércio.</p><?php else: ?>
+<div class="tabela"><table>
+  <tr><th>Comércio</th><th>Nota</th><th>Comentário</th><th>Data</th><th></th></tr>
+  <?php foreach ($avaliacoes as $a): ?><tr>
+    <td><?= $comercio($a) ?></td>
+    <td><?= $estrelas((int)$a['estrelas']) ?><?= $a['status'] === 'oculta' ? '<br><span class="discreto">(oculta)</span>' : '' ?></td>
+    <td><?= $a['comentario'] !== null && $a['comentario'] !== '' ? nl2br(h($a['comentario'])) : '<span class="discreto">sem comentário</span>' ?>
+      <?php if ($a['resposta']): ?><br><span class="discreto"><strong>Resposta do comércio:</strong> <?= h($a['resposta']) ?></span><?php endif ?></td>
+    <td><?= h(data_br($a['criado_em'])) ?><?= $a['atualizado_em'] && substr($a['atualizado_em'], 0, 10) !== substr($a['criado_em'], 0, 10) ? '<br><span class="discreto">editada ' . h(data_br($a['atualizado_em'])) . '</span>' : '' ?></td>
+    <td><?= $botoes($a) ?></td>
+  </tr><?php endforeach ?>
+</table></div>
+<?php endif ?>
+<?php admin_fim();

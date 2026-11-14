@@ -30,6 +30,16 @@ if (!empty($_GET['csv'])) {
 $total = (int)valor('SELECT COUNT(*) FROM usuarios');
 $semana = (int)valor('SELECT COUNT(*) FROM usuarios WHERE criado_em >= CURDATE() - INTERVAL 6 DAY');
 $ativos = (int)valor('SELECT COUNT(DISTINCT usuario_id) FROM sessoes_app WHERE usado_em >= CURDATE() - INTERVAL 29 DAY');
+// estatística dos itens (passo 41): comércios mais salvos e mais avaliados por todas as pessoas
+$mais_salvos = linhas('SELECT p.id, p.nome, p.tipo, p.cidade, c.nome AS categoria, COUNT(*) AS n FROM favoritos f
+    JOIN profissionais p ON p.id = f.profissional_id JOIN categorias c ON c.id = p.categoria_id GROUP BY p.id ORDER BY n DESC, p.nome LIMIT 10');
+$mais_avaliados = linhas('SELECT p.id, p.nome, p.tipo, p.cidade, c.nome AS categoria, COUNT(*) AS n, AVG(a.estrelas) AS media FROM avaliacoes a
+    JOIN profissionais p ON p.id = a.profissional_id JOIN categorias c ON c.id = p.categoria_id GROUP BY p.id ORDER BY n DESC, media DESC, p.nome LIMIT 10');
+$areas_salvas = linhas('SELECT c.nome, COUNT(*) AS n FROM favoritos f JOIN profissionais p ON p.id = f.profissional_id
+    JOIN categorias c ON c.id = p.categoria_id GROUP BY c.id ORDER BY n DESC LIMIT 10');
+$tot_fav = (int)valor('SELECT COUNT(*) FROM favoritos');
+$tot_aval = (int)valor('SELECT COUNT(*) FROM avaliacoes');
+$media_geral = $tot_aval ? (float)valor('SELECT AVG(estrelas) FROM avaliacoes') : 0;
 $iniciais = fn(string $n) => mb_strtoupper(mb_substr(trim($n) ?: '?', 0, 1));
 
 admin_inicio('Pessoas', $admin);
@@ -42,6 +52,8 @@ admin_inicio('Pessoas', $admin);
   <div><strong><?= num($total) ?></strong><span>pessoas</span></div>
   <div><strong><?= num($semana) ?></strong><span>novas em 7 dias</span></div>
   <div><strong><?= num($ativos) ?></strong><span>usaram o app em 30 dias</span></div>
+  <div><strong><?= num($tot_fav) ?></strong><span>favoritos salvos</span></div>
+  <div><strong><?= num($tot_aval) ?></strong><span>avaliações (média <?= $tot_aval ? number_format($media_geral, 1, ',', '.') : '—' ?>)</span></div>
 </div>
 
 <form method="get" class="filtros-numeros">
@@ -60,17 +72,37 @@ admin_inicio('Pessoas', $admin);
   <?php foreach ($lista as $u): ?>
   <tr<?= $u['ativo'] ? '' : ' class="discreto"' ?>>
     <td><?php if ($u['foto'] && str_starts_with($u['foto'], 'https://')): ?>
-      <img class="pessoa-foto" src="<?= h($u['foto']) ?>" alt="" width="44" height="44" loading="lazy" referrerpolicy="no-referrer">
+      <img class="pessoa-foto" src="<?= h($u['foto']) ?>" alt="" width="44" height="44" loading="lazy" referrerpolicy="no-referrer"
+        onerror="this.replaceWith(Object.assign(document.createElement('span'), {className: 'pessoa-foto pessoa-inicial', textContent: <?= h(json_encode($iniciais($u['nome']))) ?>}))">
     <?php else: ?><span class="pessoa-foto pessoa-inicial"><?= h($iniciais($u['nome'])) ?></span><?php endif ?></td>
-    <td><strong><?= h($u['nome']) ?></strong><?= $u['e_admin'] ? ' <span class="discreto">(admin)</span>' : '' ?><?= $u['ativo'] ? '' : ' <span class="discreto">(desativada)</span>' ?></td>
+    <td><a href="pessoa.php?id=<?= (int)$u['id'] ?>"><strong><?= h($u['nome']) ?></strong></a><?= $u['e_admin'] ? ' <span class="discreto">(admin)</span>' : '' ?><?= $u['ativo'] ? '' : ' <span class="discreto">(desativada)</span>' ?></td>
     <td><a href="mailto:<?= h($u['email']) ?>"><?= h($u['email']) ?></a></td>
     <td><?= h(data_br($u['criado_em'])) ?></td>
     <td><?= h(data_br($u['ultimo_uso'])) ?></td>
-    <td><?= num((int)$u['favoritos']) ?></td>
-    <td><?= num((int)$u['avaliacoes']) ?></td>
+    <td><?= $u['favoritos'] ? '<a href="pessoa.php?id=' . (int)$u['id'] . '#favoritos">' . num((int)$u['favoritos']) . '</a>' : '0' ?></td>
+    <td><?= $u['avaliacoes'] ? '<a href="pessoa.php?id=' . (int)$u['id'] . '#avaliacoes">' . num((int)$u['avaliacoes']) . '</a>' : '0' ?></td>
   </tr>
   <?php endforeach ?>
 </table></div>
+<?php endif ?>
+
+<?php if ($mais_salvos || $mais_avaliados): ?>
+<h2>Estatística dos itens</h2>
+<?php if ($mais_salvos): ?>
+<div class="tabela"><table>
+  <tr><th>Mais salvos como favorito</th><th>Pessoas</th><th></th></tr>
+  <?php foreach ($mais_salvos as $l): ?><tr><td><strong><?= h($l['nome']) ?></strong><br><span class="discreto"><?= h($l['tipo'] ?: $l['categoria']) ?> · <?= h(nome_cidade($l['cidade'], true)) ?></span></td>
+    <td><?= num((int)$l['n']) ?></td><td><a class="botao pequeno contorno" href="numeros-ficha.php?id=<?= (int)$l['id'] ?>">Números</a></td></tr><?php endforeach ?>
+</table></div>
+<?php endif ?>
+<?php if ($areas_salvas): ?><p class="discreto">Favoritos por área: <?= h(implode(' · ', array_map(fn($l) => $l['nome'] . ' ' . $l['n'], $areas_salvas))) ?></p><?php endif ?>
+<?php if ($mais_avaliados): ?>
+<div class="tabela"><table>
+  <tr><th>Mais avaliados</th><th>Avaliações</th><th>Média</th><th></th></tr>
+  <?php foreach ($mais_avaliados as $l): ?><tr><td><strong><?= h($l['nome']) ?></strong><br><span class="discreto"><?= h($l['tipo'] ?: $l['categoria']) ?> · <?= h(nome_cidade($l['cidade'], true)) ?></span></td>
+    <td><?= num((int)$l['n']) ?></td><td><?= number_format((float)$l['media'], 1, ',', '.') ?> ★</td><td><a class="botao pequeno contorno" href="numeros-ficha.php?id=<?= (int)$l['id'] ?>">Números</a></td></tr><?php endforeach ?>
+</table></div>
+<?php endif ?>
 <?php endif ?>
 <style>
 .pessoa-foto { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; }
