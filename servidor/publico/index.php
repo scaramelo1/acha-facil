@@ -4,6 +4,8 @@ require __DIR__ . '/../inc/base.php';
 require_once __DIR__ . '/../inc/guia.php';
 require __DIR__ . '/../inc/pagina.php';
 require_once __DIR__ . '/../inc/eventos.php';
+require_once __DIR__ . '/../inc/numeros.php';
+registrar_entrada_site('inicio');   // passo 38: quem chega pela página inicial
 
 $areas = categorias_ativas();
 $total = (int)valor('SELECT COUNT(*) FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE ' . visivel());

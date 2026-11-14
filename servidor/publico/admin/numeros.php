@@ -94,6 +94,24 @@ $paginacao = function () use ($pag, $paginas, $total, $por, $link_pag): string {
     return $html . '<span class="discreto">' . num($de) . '–' . num(min($total, $pag * $por)) . ' de ' . num($total) . '</span></nav>';
 };
 
+// de onde vêm as pessoas (passo 38): visualizações das fichas por origem e entradas no site
+$cw = $cidade !== '' ? ' AND p.cidade = ?' : '';
+$cp = $cidade !== '' ? [$desde, $cidade] : [$desde];
+$por_origem = array_column(linhas("SELECT k.origem, SUM(k.total) AS total FROM contatos k JOIN profissionais p ON p.id = k.profissional_id
+    WHERE k.tipo = 'perfil' AND k.dia >= ?$cw GROUP BY k.origem ORDER BY total DESC", $cp), 'total', 'origem');
+$vis_site = array_sum(array_intersect_key($por_origem, array_flip(ORIGENS_SITE)));
+$vis_todas = array_sum($por_origem);
+$entradas = $entradas_pag = $entradas_google = [];
+if (entradas_prontas()) {
+    $ew = $cidade !== '' ? ' AND cidade = ?' : '';
+    $entradas = array_column(linhas("SELECT origem, SUM(total) AS total FROM entradas WHERE dia >= ?$ew GROUP BY origem ORDER BY total DESC", $cp), 'total', 'origem');
+    $entradas_pag = linhas("SELECT pagina, SUM(total) AS total, SUM(IF(origem = 'google', total, 0)) AS google FROM entradas
+        WHERE dia >= ?$ew GROUP BY pagina ORDER BY total DESC", $cp);
+    $entradas_google = linhas("SELECT caminho, SUM(total) AS total FROM entradas WHERE origem = 'google' AND dia >= ?$ew
+        GROUP BY caminho ORDER BY total DESC LIMIT 15", $cp);
+}
+$entradas_total = array_sum($entradas);
+
 admin_inicio('Números', $admin);
 ?>
 <h1>Números das fichas</h1>
@@ -135,6 +153,41 @@ admin_inicio('Números', $admin);
   <div><strong><?= num($soma['contatos']) ?></strong><span>contatos (<?= pct($soma['contatos'], $soma['visualizacoes']) ?>)</span></div>
 </div>
 
+<h2>De onde vêm as pessoas</h2>
+<p class="discreto">As palavras que a pessoa pesquisou no Google não chegam ao site (o Google não manda):
+  veja em <a href="https://search.google.com/search-console" target="_blank" rel="noopener">Search Console → Desempenho → Consultas</a>.
+  Aqui aparece de onde a pessoa chegou. Separado desde 14/11/2026; antes disso tudo do site aparece como "Site (sem origem)".</p>
+<div class="tabela"><table>
+  <tr><th>Visualizações das fichas por origem</th><th>Vezes</th><th>%</th></tr>
+  <?php foreach ($por_origem as $o => $t): ?><tr><td><?= h(ORIGENS[$o] ?? $o) ?></td><td><?= num((int)$t) ?></td><td><?= pct((int)$t, $vis_todas) ?></td></tr><?php endforeach ?>
+  <tr><td><strong>Total pelo site</strong> / pelo app</td><td><strong><?= num($vis_site) ?></strong> / <?= num($vis_todas - $vis_site) ?></td><td><?= pct($vis_site, $vis_todas) ?></td></tr>
+</table></div>
+<?php if (!entradas_prontas()): ?>
+<p class="aviso">As <strong>entradas no site</strong> (por qual página a pessoa chega, inclusive cidade, área e eventos) começam a contar
+  depois de aplicar a mudança 022 (bash servidor/instalar.sh, como root).</p>
+<?php else: ?>
+<div class="numeros-resumo">
+  <div><strong><?= num($entradas_total) ?></strong><span>entradas no site</span></div>
+  <div><strong><?= num((int)($entradas['google'] ?? 0)) ?></strong><span>pelo Google (<?= pct((int)($entradas['google'] ?? 0), $entradas_total) ?>)</span></div>
+</div>
+<p class="discreto"><strong>Entrada</strong> = pessoa que chegou ao site vindo de fora; quem continua navegando (até 30 min) não conta de novo.</p>
+<div class="tabela"><table>
+  <tr><th>Entradas por origem</th><th>Vezes</th><th>%</th></tr>
+  <?php foreach ($entradas as $o => $t): ?><tr><td><?= h(ORIGENS[$o] ?? $o) ?></td><td><?= num((int)$t) ?></td><td><?= pct((int)$t, $entradas_total) ?></td></tr><?php endforeach ?>
+</table></div>
+<div class="tabela"><table>
+  <tr><th>Página onde entrou</th><th>Entradas</th><th>Pelo Google</th></tr>
+  <?php foreach ($entradas_pag as $l): ?><tr><td><?= h(PAGINAS_ENTRADA[$l['pagina']] ?? $l['pagina']) ?></td><td><?= num((int)$l['total']) ?></td><td><?= num((int)$l['google']) ?></td></tr><?php endforeach ?>
+</table></div>
+<?php if ($entradas_google): ?>
+<div class="tabela"><table>
+  <tr><th>Páginas por onde mais entram pelo Google</th><th>Entradas</th></tr>
+  <?php foreach ($entradas_google as $l): ?><tr><td><a href="<?= h(url_publica(ltrim($l['caminho'], '/'))) ?>" target="_blank" rel="noopener"><?= h($l['caminho']) ?></a></td><td><?= num((int)$l['total']) ?></td></tr><?php endforeach ?>
+</table></div>
+<?php endif ?>
+<?php endif ?>
+
+<h2>Fichas</h2>
 <?= $paginacao() ?>
 <div class="tabela"><table>
   <tr><th>Comércio</th><th>Plano</th>

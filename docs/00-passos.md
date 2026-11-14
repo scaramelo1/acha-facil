@@ -372,3 +372,12 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    `npx eas credentials`, fora do git); versionCode = último do EAS + 1 (`ACHAFACIL_VERSION_CODE` no app.config.js).
    Passo a passo em docs/build-local.md. Plugin testado na VPS com o build.gradle do modelo do Expo 58; o script
    PowerShell só roda no PC (não testado aqui). Falta (usuário): baixar a chave e gerar a 1.7.1
+38. 🟡 De onde vêm as pessoas do site (14/11, pedido do usuário: "as pesquisas que vêm pelo Google aparecem em
+   numeros.php?"). A origem "Site" foi separada em Google, outro buscador, redes sociais e WhatsApp, link de outro
+   site e endereço digitado (origem_do_referer() em inc/numeros.php, pelo Referer; cookie af_origem de 30 min, sem dado
+   pessoal, guarda a origem para a ficha e os toques em WhatsApp/ligar). **Entradas no site** (mudança 022, tabela
+   `entradas`): conta quem chega de fora por qualquer página (inicial, cidade, área, ficha, eventos), sem recarga nem
+   navegação interna, só páginas 200 e sem robôs (registrar_entrada_site()). /admin/numeros.php ganhou "De onde vêm
+   as pessoas": visualizações por origem, entradas por origem e por página, páginas por onde mais entram pelo Google.
+   Os termos pesquisados no Google não chegam ao site: ficam no Search Console (Desempenho → Consultas). Testado no
+   banco de teste (14/11). A origem nas fichas já vale no site; falta (usuário): aplicar a 022 para as entradas

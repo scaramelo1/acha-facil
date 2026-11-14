@@ -46,13 +46,22 @@ if (!$cidade && isset(CIDADES[$partes[0]]) && cidade_web($partes[0]) !== $partes
 if (!$cidade) { web_pagina_404(); exit; }
 $n = count($partes);
 
+// de onde a pessoa chegou ao site (passo 38): conta a entrada e guarda a origem para a ficha
+$origem_site = registrar_entrada_site(match (true) {
+    $n >= 3 && $partes[1] === 'c' => 'ficha',
+    $n >= 2 && $partes[1] === 'eventos' => $n === 2 ? 'eventos' : 'evento',
+    $n >= 2 && $partes[1] === 'buscar' => 'busca',
+    $n === 1 => 'cidade',
+    default => 'lista',
+}, $cidade);
+
 // ficha: /<cidade>/c/<nome>-<id>
 if ($n === 3 && $partes[1] === 'c') {
     $p = preg_match('/-(\d{1,9})$/', $partes[2], $m) || preg_match('/^(\d{1,9})$/', $partes[2], $m) ? web_ficha((int)$m[1]) : null;
     if (!$p) { web_pagina_404(); exit; }
     $certo = url_ficha($p);
     if ($certo !== url(implode('/', $partes))) redirecionar($certo);   // nome ou cidade mudou: endereço certo
-    contar_visita((int)$p['id'], 'web');
+    contar_visita((int)$p['id'], $origem_site);
     web_pagina_ficha($p);
     exit;
 }

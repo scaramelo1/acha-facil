@@ -7,9 +7,18 @@ declare(strict_types=1);
 /** De onde a pessoa abriu a ficha (o app manda ?origem=; o site manda 'web'). */
 const ORIGENS = [
     'busca' => 'Busca', 'categoria' => 'Categoria', 'perto' => 'Perto de você', 'destaque' => 'Destaque da tela inicial',
-    'inicio' => 'Recomendados da tela inicial', 'favoritos' => 'Favoritos', 'link' => 'Link ou aviso', 'web' => 'Site',
+    'inicio' => 'Recomendados da tela inicial', 'favoritos' => 'Favoritos', 'link' => 'Link ou aviso',
+    // site (passo 38, 14/11): de onde a pessoa chegou ao site; antes de 14/11 tudo do site era 'web'
+    'google' => 'Site: veio do Google', 'buscadores' => 'Site: outro buscador (Bing...)', 'redes' => 'Site: redes sociais e WhatsApp',
+    'outros_sites' => 'Site: link de outro site', 'direto' => 'Site: endereço digitado ou favorito',
+    'web' => 'Site (sem origem, antes de 14/11)',
     'app' => 'App (versão antiga, sem origem)',
 ];
+/** Origens que são do site (para somar "Site" e separar do app). */
+const ORIGENS_SITE = ['google', 'buscadores', 'redes', 'outros_sites', 'direto', 'web'];
+/** Tipos de página por onde se entra no site. */
+const PAGINAS_ENTRADA = ['inicio' => 'Página inicial', 'cidade' => 'Cidade', 'lista' => 'Área ou tipo', 'ficha' => 'Ficha de comércio',
+    'eventos' => 'Agenda de eventos', 'evento' => 'Evento', 'busca' => 'Busca', 'outra' => 'Outra página'];
 /** Onde a ficha foi mostrada numa lista. */
 const ONDE_APARICAO = ['inicio' => 'Tela inicial', 'categoria' => 'Categoria', 'busca' => 'Busca', 'perto' => 'Perto de você'];
 const TIPOS_CONTATO = ['whatsapp' => 'WhatsApp', 'ligar' => 'Ligar', 'mapa' => 'Mapa', 'instagram' => 'Instagram', 'site' => 'Site'];
@@ -24,6 +33,59 @@ function origem_valida(?string $o, string $padrao = 'app'): string {
 function e_robo(): bool {
     $ua = (string)($_SERVER['HTTP_USER_AGENT'] ?? '');
     return $ua === '' || (bool)preg_match('/bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp\/|curl|wget|python|httpclient|headless|lighthouse/i', $ua);
+}
+
+// ---------- de onde a pessoa chegou ao site (passo 38) ----------
+
+/** Origem pelo endereço de onde veio (Referer). null = veio do próprio site ou sem Referer. */
+function origem_do_referer(?string $ref = null): ?string {
+    $ref ??= (string)($_SERVER['HTTP_REFERER'] ?? '');
+    if ($ref === '') return null;
+    $host = strtolower((string)parse_url($ref, PHP_URL_HOST));
+    if ($host === '') return null;
+    $proprio = strtolower((string)preg_replace('/:\d+$/', '', (string)($_SERVER['HTTP_HOST'] ?? '')));
+    if ($host === $proprio || preg_match('/(^|\.)(achafacilapp\.com\.br|fsadesigners\.com\.br)$/', $host)) return null;
+    // o app do Google no Android manda android-app://com.google.android.googlequicksearchbox
+    if (preg_match('/(^|\.)google\.|googlequicksearchbox|^com\.google\./', $host)) return 'google';
+    if (preg_match('/(^|\.)(bing|yahoo|duckduckgo|yandex|ecosia|baidu|qwant)\.|search\.brave\.com$|(^|\.)msn\.com$/', $host)) return 'buscadores';
+    if (preg_match('/(^|\.)(facebook|fb|instagram|whatsapp|wa|t|twitter|x|tiktok|linkedin|youtube|pinterest|kwai|threads|telegram|messenger)\.(com|me|net|co|org)$|^com\.(instagram|facebook|whatsapp|zhiliaoapp|twitter|linkedin|google\.android\.youtube)/', $host)) return 'redes';
+    return 'outros_sites';
+}
+
+/**
+ * Chamada no começo de cada página pública (antes de qualquer saída). Se a pessoa acabou de CHEGAR ao site,
+ * guarda a origem num cookie de 30 min (renovado a cada página) e conta 1 entrada no fim, se a página existir (200).
+ * Devolve a origem da visita atual: a do Referer de fora, a do cookie ou 'direto'.
+ */
+function registrar_entrada_site(string $pagina, ?string $cidade = null): string {
+    static $origem = null;
+    if ($origem !== null) return $origem;
+    $de_fora = origem_do_referer();
+    $cookie = (string)($_COOKIE['af_origem'] ?? '');
+    $cookie = isset(ORIGENS[$cookie]) && in_array($cookie, ORIGENS_SITE, true) ? $cookie : '';
+    $origem = $de_fora ?? ($cookie ?: 'direto');
+    if (e_robo()) return $origem;
+    // entrada nova = veio de fora (e não é recarga da mesma entrada) ou chegou sem Referer e sem cookie
+    $entrada = $de_fora !== null ? $de_fora !== $cookie : $cookie === '';
+    if (!headers_sent()) setcookie('af_origem', $origem, ['expires' => time() + 1800, 'path' => '/', 'samesite' => 'Lax',
+        'secure' => !empty($_SERVER['HTTPS']), 'httponly' => true]);
+    if ($entrada) {
+        $caminho = mb_substr((string)parse_url((string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH), 0, 190);
+        register_shutdown_function(function () use ($origem, $caminho, $pagina, $cidade) {
+            if (http_response_code() !== 200) return;   // 404 e redirecionamento não contam
+            try {
+                q('INSERT INTO entradas (dia, origem, caminho, pagina, cidade, total) VALUES (CURDATE(), ?, ?, ?, ?, 1)
+                    ON DUPLICATE KEY UPDATE total = total + 1', [$origem, rawurldecode($caminho), $pagina, $cidade]);
+            } catch (PDOException) {}   // mudança 022 ainda não aplicada: só não conta
+        });
+    }
+    return $origem;
+}
+
+/** A mudança 022 (entradas no site) já foi aplicada? */
+function entradas_prontas(): bool {
+    static $ok = null;
+    try { return $ok ??= (bool)valor("SELECT 1 FROM migracoes WHERE nome = '022-entradas-site.sql'"); } catch (PDOException) { return $ok = false; }
 }
 
 /** Sal do embaralhamento: 'sal_visitas' no config ou, se não houver, derivado da senha do banco (nunca sai do servidor). */
@@ -67,7 +129,7 @@ function contar_contato(int $profissional_id, string $tipo, string $origem = 'ap
     if (!isset(TIPOS_CONTATO[$tipo]) || e_robo()) return;
     try {
         q('INSERT INTO contatos (profissional_id, tipo, dia, origem, total) VALUES (?, ?, CURDATE(), ?, 1) ON DUPLICATE KEY UPDATE total = total + 1',
-            [$profissional_id, $tipo, $origem === 'web' ? 'web' : 'app']);
+            [$profissional_id, $tipo, in_array($origem, ORIGENS_SITE, true) ? $origem : 'app']);
     } catch (PDOException $e) { contar_sem_017($profissional_id, $tipo, $e); }
 }
 
