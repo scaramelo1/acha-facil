@@ -111,6 +111,10 @@ if (entradas_prontas()) {
         GROUP BY caminho ORDER BY total DESC LIMIT 15", $cp);
 }
 $entradas_total = array_sum($entradas);
+// detalhe de uma origem do site (passo 39)
+$link_origem = fn(string $o) => in_array($o, ORIGENS_SITE, true)
+    ? '<a href="entradas.php?' . h(http_build_query(array_filter(['origem' => $o, 'cidade' => $cidade, 'dias' => $dias]))) . '">' . h(ORIGENS[$o] ?? $o) . '</a>'
+    : h(ORIGENS[$o] ?? $o);
 
 admin_inicio('Números', $admin);
 ?>
@@ -156,10 +160,10 @@ admin_inicio('Números', $admin);
 <h2>De onde vêm as pessoas</h2>
 <p class="discreto">As palavras que a pessoa pesquisou no Google não chegam ao site (o Google não manda):
   veja em <a href="https://search.google.com/search-console" target="_blank" rel="noopener">Search Console → Desempenho → Consultas</a>.
-  Aqui aparece de onde a pessoa chegou. Separado desde 14/11/2026; antes disso tudo do site aparece como "Site (sem origem)".</p>
+  Aqui aparece de onde a pessoa chegou; clique numa origem do site para ver as páginas, fichas abertas e toques. Separado desde 14/11/2026; antes disso tudo do site aparece como "Site (sem origem)".</p>
 <div class="tabela"><table>
   <tr><th>Visualizações das fichas por origem</th><th>Vezes</th><th>%</th></tr>
-  <?php foreach ($por_origem as $o => $t): ?><tr><td><?= h(ORIGENS[$o] ?? $o) ?></td><td><?= num((int)$t) ?></td><td><?= pct((int)$t, $vis_todas) ?></td></tr><?php endforeach ?>
+  <?php foreach ($por_origem as $o => $t): ?><tr><td><?= $link_origem((string)$o) ?></td><td><?= num((int)$t) ?></td><td><?= pct((int)$t, $vis_todas) ?></td></tr><?php endforeach ?>
   <tr><td><strong>Total pelo site</strong> / pelo app</td><td><strong><?= num($vis_site) ?></strong> / <?= num($vis_todas - $vis_site) ?></td><td><?= pct($vis_site, $vis_todas) ?></td></tr>
 </table></div>
 <?php if (!entradas_prontas()): ?>
@@ -168,12 +172,12 @@ admin_inicio('Números', $admin);
 <?php else: ?>
 <div class="numeros-resumo">
   <div><strong><?= num($entradas_total) ?></strong><span>entradas no site</span></div>
-  <div><strong><?= num((int)($entradas['google'] ?? 0)) ?></strong><span>pelo Google (<?= pct((int)($entradas['google'] ?? 0), $entradas_total) ?>)</span></div>
+  <div><strong><?= num((int)($entradas['google'] ?? 0)) ?></strong><span><a href="entradas.php?<?= h(http_build_query(array_filter(['origem' => 'google', 'cidade' => $cidade, 'dias' => $dias]))) ?>">pelo Google</a> (<?= pct((int)($entradas['google'] ?? 0), $entradas_total) ?>)</span></div>
 </div>
 <p class="discreto"><strong>Entrada</strong> = pessoa que chegou ao site vindo de fora; quem continua navegando (até 30 min) não conta de novo.</p>
 <div class="tabela"><table>
   <tr><th>Entradas por origem</th><th>Vezes</th><th>%</th></tr>
-  <?php foreach ($entradas as $o => $t): ?><tr><td><?= h(ORIGENS[$o] ?? $o) ?></td><td><?= num((int)$t) ?></td><td><?= pct((int)$t, $entradas_total) ?></td></tr><?php endforeach ?>
+  <?php foreach ($entradas as $o => $t): ?><tr><td><?= $link_origem((string)$o) ?></td><td><?= num((int)$t) ?></td><td><?= pct((int)$t, $entradas_total) ?></td></tr><?php endforeach ?>
 </table></div>
 <div class="tabela"><table>
   <tr><th>Página onde entrou</th><th>Entradas</th><th>Pelo Google</th></tr>
@@ -181,7 +185,7 @@ admin_inicio('Números', $admin);
 </table></div>
 <?php if ($entradas_google): ?>
 <div class="tabela"><table>
-  <tr><th>Páginas por onde mais entram pelo Google</th><th>Entradas</th></tr>
+  <tr><th>Páginas por onde mais entram pelo Google (<a href="entradas.php?<?= h(http_build_query(array_filter(['origem' => 'google', 'cidade' => $cidade, 'dias' => $dias]))) ?>">ver todas, fichas abertas e toques</a>)</th><th>Entradas</th></tr>
   <?php foreach ($entradas_google as $l): ?><tr><td><a href="<?= h(url_publica(ltrim($l['caminho'], '/'))) ?>" target="_blank" rel="noopener"><?= h($l['caminho']) ?></a></td><td><?= num((int)$l['total']) ?></td></tr><?php endforeach ?>
 </table></div>
 <?php endif ?>

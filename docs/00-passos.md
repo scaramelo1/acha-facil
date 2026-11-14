@@ -381,3 +381,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    as pessoas": visualizações por origem, entradas por origem e por página, páginas por onde mais entram pelo Google.
    Os termos pesquisados no Google não chegam ao site: ficam no Search Console (Desempenho → Consultas). Testado no
    banco de teste (14/11). A origem nas fichas já vale no site; falta (usuário): aplicar a 022 para as entradas
+39. ✅ Detalhe por origem do site (14/11, pedido do usuário: "ao clicar em entradas do Google ver para onde a pessoa
+   foi"). /admin/entradas.php?origem=google (ou outra origem do site, com cidade e período): 1) todas as páginas onde
+   entraram (precisa da 022), 2) fichas abertas por quem veio dessa origem, 3) toques em WhatsApp/Ligar/Mapa/Site/
+   Instagram por comércio. Links nas origens e no "pelo Google" de /admin/numeros.php. Só totais por dia (não segue
+   pessoa). Sem mudança no banco. Testado no banco de teste (14/11)
