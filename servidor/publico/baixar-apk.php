@@ -2,6 +2,7 @@
 // Entrega o APK e conta o download. Pedidos que só continuam um download (Range a partir do meio) não contam de novo.
 require __DIR__ . '/../inc/base.php';
 require __DIR__ . '/../inc/apk.php';
+require_once __DIR__ . '/../inc/numeros.php';   // e_robo(): robôs e ferramentas não contam (desde 14/11)
 
 $f = apk_arquivo();
 if (!is_file($f)) {
@@ -18,7 +19,8 @@ if (preg_match('/^bytes=(\d*)-(\d*)$/', $_SERVER['HTTP_RANGE'] ?? '', $r) && ($r
     http_response_code(206);
     header("Content-Range: bytes $inicio-$fim/$tamanho");
 }
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && $inicio === 0) apk_contar();
+$conta = $_SERVER['REQUEST_METHOD'] === 'GET' && !e_robo();
+if ($conta && $inicio === 0) apk_contar();
 
 header('Content-Type: application/vnd.android.package-archive');
 header('Content-Disposition: attachment; filename="acha-facil.apk"');
@@ -40,3 +42,4 @@ while ($falta > 0 && !feof($h) && !connection_aborted()) {
     $falta -= strlen($bloco);
 }
 fclose($h);
+if ($conta && $falta <= 0 && $fim === $tamanho - 1) apk_log('fim');   // chegou até o fim (também vale o fim de um download retomado)

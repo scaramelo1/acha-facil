@@ -39,6 +39,34 @@ function apk_contar(): void {
         flock($h, LOCK_UN);
     }
     fclose($h);
+    apk_log('inicio');
+}
+
+// ---------- histórico dos downloads (passo 40, 14/11) ----------
+// downloads.log: uma linha por evento, "AAAA-MM-DD HH:MM:SS;versão;inicio|fim" (sem IP nem nada da pessoa).
+// inicio = começou a baixar (é o que soma no downloads.txt); fim = o arquivo chegou até o último byte.
+function apk_log(string $evento): void {
+    $v = trim((string)@file_get_contents(apk_dir() . '/versao.txt')) ?: '?';
+    @file_put_contents(apk_dir() . '/downloads.log', date('Y-m-d H:i:s') . ";$v;$evento\n", FILE_APPEND | LOCK_EX);
+}
+
+/** Downloads por dia e por versão desde $desde (AAAA-MM-DD): ['dias' => [dia => [inicio, fim]], 'versoes' => [v => [inicio, fim]]]. */
+function apk_historico(string $desde): array {
+    $r = ['dias' => [], 'versoes' => [], 'inicio' => 0, 'fim' => 0, 'desde_log' => null];
+    $linhas = @file(apk_dir() . '/downloads.log', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+    if ($linhas) $r['desde_log'] = substr($linhas[0], 0, 10);
+    for ($d = $desde; $d <= hoje(); $d = date('Y-m-d', strtotime("$d +1 day"))) $r['dias'][$d] = ['inicio' => 0, 'fim' => 0];
+    foreach ($linhas as $l) {
+        [$quando, $v, $ev] = array_pad(explode(';', $l), 3, '');
+        $dia = substr($quando, 0, 10);
+        if ($dia < $desde || !isset($r['dias'][$dia]) || !in_array($ev, ['inicio', 'fim'], true)) continue;
+        $r['dias'][$dia][$ev]++;
+        $r['versoes'][$v] ??= ['inicio' => 0, 'fim' => 0];
+        $r['versoes'][$v][$ev]++;
+        $r[$ev]++;
+    }
+    uksort($r['versoes'], fn($a, $b) => version_compare((string)$b, (string)$a));
+    return $r;
 }
 
 /** "1.234 downloads" / "1 download" */

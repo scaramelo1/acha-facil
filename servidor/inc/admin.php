@@ -31,6 +31,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
     <a href="<?= $base ?>/admin/numeros.php">Números</a>
     <a href="<?= $base ?>/admin/cidades.php">Cidades</a>
     <a href="<?= $base ?>/admin/importar.php">Importar lista</a>
+    <a href="<?= $base ?>/admin/pessoas.php">Pessoas</a>
     <details class="menu-suspenso">
       <summary>Mais<?= $ev ? ' <span class="contador">' . $ev . '</span>' : '' ?> <span aria-hidden="true">▾</span></summary>
       <div class="menu-lista">
@@ -38,10 +39,11 @@ function admin_inicio(string $titulo, ?array $admin): void {
         <a class="so-celular" href="<?= $base ?>/admin/numeros.php">Números</a>
         <a class="so-celular" href="<?= $base ?>/admin/cidades.php">Cidades</a>
         <a class="so-celular" href="<?= $base ?>/admin/importar.php">Importar lista</a>
+        <a class="so-celular" href="<?= $base ?>/admin/pessoas.php">Pessoas</a>
         <a href="<?= $base ?>/admin/notificacoes.php">Notificações</a>
         <a href="<?= $base ?>/admin/cupons.php">Cupons</a>
         <a href="<?= $base ?>/admin/eventos.php">Eventos<?= $ev ? ' <span class="contador">' . $ev . '</span>' : '' ?></a>
-        <a href="<?= $base ?>/admin/app.php">App</a>
+        <a href="<?= $base ?>/admin/app.php">App e downloads</a>
         <a href="<?= $base ?>/admin/registro.php">Registro</a>
         <a href="<?= $base ?>/admin/senha.php">Trocar senha</a>
         <a href="<?= $base ?>/admin/sair.php">Sair</a>

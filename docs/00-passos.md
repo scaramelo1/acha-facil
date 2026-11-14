@@ -386,3 +386,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    entraram (precisa da 022), 2) fichas abertas por quem veio dessa origem, 3) toques em WhatsApp/Ligar/Mapa/Site/
    Instagram por comércio. Links nas origens e no "pelo Google" de /admin/numeros.php. Só totais por dia (não segue
    pessoa). Sem mudança no banco. Testado no banco de teste (14/11)
+40. ✅ Pessoas cadastradas e contador de downloads do APK (14/11, pedido do usuário). /admin/pessoas.php (menu
+   "Pessoas"): todas as contas do app com foto do Google, nome, e-mail, cadastro, último uso do app (sessoes_app),
+   favoritos e avaliações; busca por nome/e-mail, ordem por cadastro ou uso, CSV. /admin/app.php (menu "App e
+   downloads"): total desde o início (downloads.txt, 12 em 14/11), hoje, começaram x terminaram no período, gráfico por
+   dia e tabela por versão. Histórico novo em dados_dir/apk/downloads.log (data;versão;inicio|fim, sem IP), só desde
+   14/11; robôs não contam mais (e_robo()). Sem mudança no banco. Testado com APK falso no banco de teste (14/11)
