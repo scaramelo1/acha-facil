@@ -77,6 +77,10 @@ function registrar_entrada_site(string $pagina, ?string $cidade = null): string 
                 q('INSERT INTO entradas (dia, origem, caminho, pagina, cidade, total) VALUES (CURDATE(), ?, ?, ?, ?, 1)
                     ON DUPLICATE KEY UPDATE total = total + 1', [$origem, rawurldecode($caminho), $pagina, $cidade]);
             } catch (PDOException) {}   // mudança 022 ainda não aplicada: só não conta
+            try {   // data e hora de cada entrada (mudança 023, passo 42)
+                q('INSERT INTO entradas_hora (quando, origem, caminho, pagina, cidade) VALUES (NOW(), ?, ?, ?, ?)',
+                    [$origem, rawurldecode($caminho), $pagina, $cidade]);
+            } catch (PDOException) {}
         });
     }
     return $origem;

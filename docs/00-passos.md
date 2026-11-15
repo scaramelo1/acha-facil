@@ -397,3 +397,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (favoritos com data e área; avaliações com estrelas, comentário, resposta do comércio, oculta/editada; botões
    Números e Abrir). Pessoas ganhou "Estatística dos itens": mais salvos, favoritos por área, mais avaliados com
    média, e totais de favoritos/avaliações no topo. Foto do Google que não carrega vira a inicial. Só leitura
+42. 🟡 Data e hora das entradas (14/11, pedido do usuário: "nessa tabela consegue colocar a data/hora?"). Coluna
+   **Quando** em "Páginas onde entraram" (/admin/entradas.php): até 5 horários por página (dd/mm HH:MM) e "e mais N";
+   ordem "mais recentes" (padrão) ou "mais entradas". **Mudança 023**: tabela entradas_hora, uma linha por entrada,
+   gravada junto com a 022 em registrar_entrada_site(). Entradas de antes da 023 mostram só o dia ("sem hora").
+   Testado no banco de teste (14/11). Falta (usuário): aplicar a 023

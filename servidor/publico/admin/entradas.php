@@ -19,6 +19,31 @@ if (entradas_prontas()) {
         GROUP BY caminho, pagina, cidade ORDER BY total DESC, caminho LIMIT 500", array_merge([$origem, $desde], $cidade !== '' ? [$cidade] : []));
 }
 $total_entradas = array_sum(array_map(fn($l) => (int)$l['total'], $paginas));
+// quando foi (passo 42): data e hora de cada entrada (mudança 023); antes dela, ou sem hora, só o dia
+$quando = $ultimo = [];   // $ultimo[caminho] = data/hora mais recente, para ordenar
+if ($paginas) {
+    $cw = $cidade !== '' ? ' AND cidade = ?' : '';
+    $com_hora = [];
+    try {
+        foreach (linhas("SELECT caminho, quando FROM entradas_hora WHERE origem = ? AND quando >= ?$cw ORDER BY quando DESC LIMIT 5000",
+                array_merge([$origem, "$desde 00:00:00"], $cidade !== '' ? [$cidade] : [])) as $l) {
+            $quando[$l['caminho']][] = date('d/m H:i', strtotime($l['quando']));
+            $ultimo[$l['caminho']] ??= $l['quando'];
+            $com_hora[$l['caminho']][substr($l['quando'], 0, 10)] = ($com_hora[$l['caminho']][substr($l['quando'], 0, 10)] ?? 0) + 1;
+        }
+    } catch (PDOException) {}
+    // entradas sem hora (antes da 023): mostra o dia
+    foreach (linhas("SELECT caminho, dia, SUM(total) AS total FROM entradas WHERE origem = ? AND dia >= ?$cw GROUP BY caminho, dia ORDER BY dia DESC",
+            array_merge([$origem, $desde], $cidade !== '' ? [$cidade] : [])) as $l) {
+        $falta = (int)$l['total'] - ($com_hora[$l['caminho']][$l['dia']] ?? 0);
+        if ($falta > 0) $ultimo[$l['caminho']] = max($ultimo[$l['caminho']] ?? '', $l['dia'] . ' 00:00:00');
+        if ($falta > 0) $quando[$l['caminho']][] = date('d/m', strtotime($l['dia'])) . ($falta > 1 ? " ({$falta}x)" : '') . ' <span class="discreto">sem hora</span>';
+    }
+}
+$ordem = ($_GET['ordem'] ?? '') === 'total' ? 'total' : 'recentes';
+if ($ordem === 'recentes') {
+    usort($paginas, fn($a, $b) => strcmp($ultimo[$b['caminho']] ?? '', $ultimo[$a['caminho']] ?? '') ?: (int)$b['total'] <=> (int)$a['total']);
+}
 
 // 2 e 3. fichas abertas e toques de quem veio dessa origem
 $w = $cidade !== '' ? ' AND p.cidade = ?' : '';
@@ -73,11 +98,14 @@ admin_inicio(ORIGENS[$origem], $admin);
 <?php elseif (!$paginas): ?>
 <p class="discreto">Nenhuma entrada por esta origem no período.</p>
 <?php else: ?>
+<p class="discreto">Ordem: <?= $ordem === 'recentes' ? '<strong>mais recentes</strong> · <a href="' . h($link(['ordem' => 'total'])) . '">mais entradas</a>'
+  : '<a href="' . h($link(['ordem' => null])) . '">mais recentes</a> · <strong>mais entradas</strong>' ?>. Horário de Brasília; a hora conta desde 14/11/2026.</p>
 <div class="tabela"><table>
-  <tr><th>Página</th><th>Tipo</th><th>Entradas</th><th>%</th></tr>
+  <tr><th>Página</th><th>Tipo</th><th>Quando</th><th>Entradas</th><th>%</th></tr>
   <?php foreach ($paginas as $l): ?><tr>
     <td><a href="<?= h(url_publica(ltrim($l['caminho'], '/'))) ?>" target="_blank" rel="noopener"><?= h($l['caminho']) ?></a></td>
     <td><?= h(PAGINAS_ENTRADA[$l['pagina']] ?? $l['pagina']) ?><?= $l['cidade'] ? ' · ' . h(nome_cidade($l['cidade'], true)) : '' ?></td>
+    <td style="white-space:nowrap"><?php $q = $quando[$l['caminho']] ?? []; ?><?= implode('<br>', array_slice($q, 0, 5)) ?: '—' ?><?= count($q) > 5 ? '<br><span class="discreto">e mais ' . (count($q) - 5) . '</span>' : '' ?></td>
     <td><?= num((int)$l['total']) ?></td><td><?= pct((int)$l['total'], $total_entradas) ?></td>
   </tr><?php endforeach ?>
 </table></div>
