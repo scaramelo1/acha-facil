@@ -1,9 +1,9 @@
 {
   "site": "https://achafacilapp.com.br",
   "chave": "COLE_AQUI_A_CHAVE_GERADA_EM_ADMIN_NOVIDADES",
-  "pasta_robo": "C:\\Users\\Fellipe\\leads-sem-site",
+  "pasta_robo": "D:\\leads-sem-site",
   "comando": "python robo.py \"{cidade}\"",
-  "pasta_saida": "C:\\Users\\Fellipe\\leads-sem-site",
+  "pasta_saida": "D:\\leads-sem-site",
   "cidades_por_vez": 1,
   "cidades": [
     "Sao Joao da Boa Vista - SP",

@@ -115,7 +115,7 @@ continua).
   e foto (escopos básicos), então não precisa da verificação demorada do Google
 - Nome do app, logo e links de privacidade/termos na tela de consentimento iguais aos da loja
 
-## 6. Comandos (PC, PowerShell, em C:\Users\Fellipe\acha-facil)
+## 6. Comandos (PC, PowerShell, em D:\acha-facil)
 
 ```powershell
 git pull
