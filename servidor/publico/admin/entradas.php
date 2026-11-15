@@ -192,18 +192,21 @@ admin_inicio(ORIGENS[$origem], $admin);
 </table></div>
 <?php endif ?>
 
+<?php if (count($rel['dias']) > 1): ?>
 <h3>Entradas por dia</h3>
 <div class="barras-dias" role="img" aria-label="Entradas por dia">
   <?php foreach ($rel['dias'] as $d => $n): ?><div class="dia" title="<?= h(data_br($d)) ?>: <?= $n ?> entradas"><span class="vistas" style="height:<?= round(100 * $n / $maior_dia) ?>%"></span></div><?php endforeach ?>
 </div>
 <p class="discreto"><?= h(data_br($desde)) ?> a <?= h(data_br(hoje())) ?> · dia com mais entradas:
   <?php $top = array_search(max($rel['dias']), $rel['dias'], true); ?><?= h(data_br((string)$top)) ?> (<?= num(max($rel['dias'])) ?>)</p>
+<?php endif ?>
 
 <?php if (array_sum($rel['horas'])): ?>
 <h3>Horários de chegada</h3>
 <div class="barras-dias" role="img" aria-label="Entradas por hora do dia">
   <?php foreach ($rel['horas'] as $h => $n): ?><div class="dia" title="<?= $h ?>h: <?= $n ?> entradas"><span class="aparicoes" style="height:<?= round(100 * $n / $maior_hora) ?>%"></span></div><?php endforeach ?>
 </div>
+<div class="barras-rotulos" aria-hidden="true"><?php foreach (array_keys($rel['horas']) as $h): ?><span><?= $h ?>h</span><?php endforeach ?></div>
 <p class="discreto">0h a 23h (horário de Brasília) · horário com mais entradas: <?= array_search(max($rel['horas']), $rel['horas'], true) ?>h</p>
 <?php endif ?>
 <?php endif ?>
