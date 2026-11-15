@@ -71,8 +71,10 @@ function Enviar([string[]]$arquivos, [switch]$SoChave) {
 if ($Testar) {
   Log "Testando a chave em $endereco ..."
   if (Enviar @() -SoChave) { Log 'Chave OK: o site aceita os envios deste PC.' 'Green' } else { Parar 'O site recusou (veja a mensagem acima).' }
-  if (-not (Test-Path $cfg.pasta_robo)) { Parar "Pasta do robo nao existe: $($cfg.pasta_robo)" }
-  Log "Pasta do robo OK: $($cfg.pasta_robo)" 'Green'
+  foreach ($c in 'pasta_robo', 'pasta_saida') {
+    if (-not (Test-Path -LiteralPath $cfg.$c -PathType Container)) { Parar "A pasta `"$($cfg.$c)`" (campo $c) nao existe." }
+    Log "Pasta OK ($c): $($cfg.$c)" 'Green'
+  }
   Log "Comando do robo: $($cfg.comando)"
   exit 0
 }
@@ -97,12 +99,19 @@ else {
   for ($i = 0; $i -lt $n; $i++) { $fila += $cidades[([int]$estado.proxima + $i) % $cidades.Count] }
 }
 
+# as pastas precisam existir antes de rodar (senao o robo rodaria na pasta errada)
+foreach ($c in 'pasta_robo', 'pasta_saida') {
+  if (-not (Test-Path -LiteralPath $cfg.$c -PathType Container)) {
+    Parar "A pasta `"$($cfg.$c)`" (campo $c do robo-config.json) nao existe. Coloque a pasta onde o robo esta (docs/robo-automatico.md)."
+  }
+}
+
 $erros = 0
 foreach ($cid in $fila) {
   Log "=== $cid : rodando o robo ===" 'Cyan'
   $inicio = (Get-Date).AddSeconds(-5)
   $cmd = $cfg.comando.Replace('{cidade}', $cid)
-  Push-Location $cfg.pasta_robo
+  Push-Location -LiteralPath $cfg.pasta_robo -ErrorAction Stop
   try {
     & cmd.exe /c $cmd 2>&1 | ForEach-Object { Add-Content -Path $log -Value ('    ' + $_) -Encoding UTF8 }
     $rc = $LASTEXITCODE
