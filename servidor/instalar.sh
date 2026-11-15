@@ -72,6 +72,7 @@ for f in sql/migracoes/*.sql; do
     echo "✔ mudança $n aplicada (backup em $b)"
   fi
 done
+php "$RAIZ/marcar-pre-carregamento.php" || true   # passo 55: marca os pré-carregamentos do Chrome já gravados (só marca)
 mysql $BANCO < sql/categorias.sql   # depois das mudanças: usa colunas novas (cor)
 echo "✔ tabelas conferidas"
 mkdir -p $DADOS/fotos && chown -R www-data:www-data $DADOS && chmod 750 $DADOS $DADOS/fotos

@@ -476,3 +476,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    plano não é pago em 30 min (coluna pedidos.aviso_sem_pagamento_em, mudança 026 aplicada 15/11). /admin/pedido.php
    tem "Lembrar do pagamento" (WhatsApp com o link da assinatura) e /admin/pessoa.php tem "Mandar notificação para esta
    pessoa" (avisar_usuario, só os celulares dela). Testado no banco de teste. instalar.sh rodado (cron ligado).
+55. 🟡 Entradas com e sem pré-carregamento do Chrome (15/11, pedido do usuário). e_pre_carregamento() em inc/numeros.php
+   (cabeçalho Sec-Purpose/Purpose prefetch, ou IP 162.120./193.186./72.14. com nome *.googlezip.net); coluna
+   entradas_hora.pre (**mudança 027 — usuário aplica**). /admin/entradas.php ganhou a caixa "entradas sem
+   pré-carregamento" e a explicação; /admin/numeros.php, "pelo Google sem pré-carregamento". marcar-pre-carregamento.php
+   (rodado pelo instalar.sh) marca as entradas antigas pelo registro do Apache. Testado no banco de teste com os dados
+   de produção: hoje 61 de 77 entradas do Google foram pré-carregamento. Falta: rodar o instalar.sh.

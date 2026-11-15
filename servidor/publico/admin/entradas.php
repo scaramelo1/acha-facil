@@ -19,6 +19,13 @@ if (entradas_prontas()) {
         GROUP BY caminho, pagina, cidade ORDER BY total DESC, caminho LIMIT 500", array_merge([$origem, $desde], $cidade !== '' ? [$cidade] : []));
 }
 $total_entradas = array_sum(array_map(fn($l) => (int)$l['total'], $paginas));
+// pré-carregamento do Chrome (passo 55, mudança 027): quantas dessas entradas foram o Chrome baixando antes do clique
+$pre = null;
+if ($paginas && pre_carregamento_pronto()) {
+    $wp = $cidade !== '' ? ' AND cidade = ?' : '';
+    $pre = (int)valor("SELECT COUNT(*) FROM entradas_hora WHERE origem = ? AND quando >= ? AND pre = 1$wp",
+        array_merge([$origem, "$desde 00:00:00"], $cidade !== '' ? [$cidade] : []));
+}
 // quando foi (passo 42): data e hora de cada entrada (mudança 023); antes dela, ou sem hora, só o dia
 $quando = $ultimo = [];   // $ultimo[caminho] = data/hora mais recente, para ordenar
 if ($paginas) {
@@ -144,8 +151,13 @@ admin_inicio(ORIGENS[$origem], $admin);
   <button class="botao pequeno">Filtrar</button>
 </form>
 
+<?php if ($pre !== null): ?><p class="discreto"><strong>Pré-carregamento:</strong> quando o site aparece bem colocado no Google, o Chrome baixa a
+  página antes do clique (<?= num($pre) ?> de <?= num($total_entradas) ?> entradas). Nem sempre a pessoa abre. As fichas abertas e as visualizações
+  também contam esses downloads; os <strong>toques</strong> são sempre de gente de verdade.</p><?php endif ?>
 <div class="numeros-resumo">
   <?php if (entradas_prontas()): ?><div><strong><?= num($total_entradas) ?></strong><span>entradas no site</span></div><?php endif ?>
+  <?php if ($pre !== null): ?><div title="Tirando o Chrome baixando a página antes do clique. Algumas pessoas que clicaram ficam de fora: o número real fica entre este e o total.">
+    <strong><?= num(max(0, $total_entradas - $pre)) ?></strong><span>entradas sem pré-carregamento</span></div><?php endif ?>
   <div><strong><?= num(count($abertas)) ?></strong><span>fichas abertas</span></div>
   <div><strong><?= num($soma($abertas, 'visualizacoes')) ?></strong><span>visualizações</span></div>
   <div><strong><?= num($soma($tocadas, 'toques')) ?></strong><span>toques em <?= num(count($tocadas)) ?> comércios</span></div>

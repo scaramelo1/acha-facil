@@ -111,6 +111,11 @@ if (entradas_prontas()) {
         GROUP BY caminho ORDER BY total DESC LIMIT 15", $cp);
 }
 $entradas_total = array_sum($entradas);
+$google_pre = null;   // passo 55: entradas do Google que foram pré-carregamento do Chrome
+if ($entradas && pre_carregamento_pronto()) {
+    $google_pre = (int)valor("SELECT COUNT(*) FROM entradas_hora WHERE origem = 'google' AND pre = 1 AND quando >= ?" . ($cidade !== '' ? ' AND cidade = ?' : ''),
+        array_merge(["$desde 00:00:00"], $cidade !== '' ? [$cidade] : []));
+}
 // detalhe de uma origem do site (passo 39)
 $link_origem = fn(string $o) => in_array($o, ORIGENS_SITE, true)
     ? '<a href="entradas.php?' . h(http_build_query(array_filter(['origem' => $o, 'cidade' => $cidade, 'dias' => $dias]))) . '">' . h(ORIGENS[$o] ?? $o) . '</a>'
@@ -173,6 +178,7 @@ admin_inicio('Números', $admin);
 <div class="numeros-resumo">
   <div><strong><?= num($entradas_total) ?></strong><span>entradas no site</span></div>
   <div><strong><?= num((int)($entradas['google'] ?? 0)) ?></strong><span><a href="entradas.php?<?= h(http_build_query(array_filter(['origem' => 'google', 'cidade' => $cidade, 'dias' => $dias]))) ?>">pelo Google</a> (<?= pct((int)($entradas['google'] ?? 0), $entradas_total) ?>)</span></div>
+  <?php if ($google_pre !== null): ?><div title="Tirando o Chrome baixando a página antes do clique"><strong><?= num(max(0, (int)($entradas['google'] ?? 0) - $google_pre)) ?></strong><span>pelo Google sem pré-carregamento</span></div><?php endif ?>
 </div>
 <p class="discreto"><strong>Entrada</strong> = pessoa que chegou ao site vindo de fora; quem continua navegando (até 30 min) não conta de novo.</p>
 <div class="tabela"><table>

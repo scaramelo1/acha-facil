@@ -57,6 +57,26 @@ function origem_do_referer(?string $ref = null): ?string {
  * guarda a origem num cookie de 30 min (renovado a cada página) e conta 1 entrada no fim, se a página existir (200).
  * Devolve a origem da visita atual: a do Referer de fora, a do cookie ou 'direto'.
  */
+/**
+ * Pré-carregamento do Chrome (passo 55): o Chrome baixa a página antes do clique, quando o site aparece bem colocado no
+ * Google. Vem com o cabeçalho Sec-Purpose/Purpose "prefetch" ou pelo servidor do Google *.fetch.tunnel.googlezip.net
+ * (endereços 162.120., 193.186. e 72.14.; o nome só é conferido nesses, para não atrasar ninguém).
+ */
+function e_pre_carregamento(?string $ip = null, ?string $proposito = null): bool {
+    $proposito ??= (string)($_SERVER['HTTP_SEC_PURPOSE'] ?? $_SERVER['HTTP_PURPOSE'] ?? $_SERVER['HTTP_X_PURPOSE'] ?? '');
+    if (stripos($proposito, 'prefetch') !== false || stripos($proposito, 'preview') !== false) return true;
+    $ip ??= (string)($_SERVER['REMOTE_ADDR'] ?? '');
+    if (!preg_match('/^(162\.120\.|193\.186\.|72\.14\.)/', $ip)) return false;
+    static $nomes = [];
+    return $nomes[$ip] ??= str_ends_with((string)@gethostbyaddr($ip), '.googlezip.net');
+}
+
+/** A mudança 027 (marca de pré-carregamento) já foi aplicada? */
+function pre_carregamento_pronto(): bool {
+    static $ok = null;
+    try { return $ok ??= (bool)valor("SELECT 1 FROM migracoes WHERE nome = '027-entradas-pre-carregamento.sql'"); } catch (PDOException) { return $ok = false; }
+}
+
 function registrar_entrada_site(string $pagina, ?string $cidade = null): string {
     static $origem = null;
     if ($origem !== null) return $origem;
@@ -77,8 +97,10 @@ function registrar_entrada_site(string $pagina, ?string $cidade = null): string 
                 q('INSERT INTO entradas (dia, origem, caminho, pagina, cidade, total) VALUES (CURDATE(), ?, ?, ?, ?, 1)
                     ON DUPLICATE KEY UPDATE total = total + 1', [$origem, rawurldecode($caminho), $pagina, $cidade]);
             } catch (PDOException) {}   // mudança 022 ainda não aplicada: só não conta
-            try {   // data e hora de cada entrada (mudança 023, passo 42)
-                q('INSERT INTO entradas_hora (quando, origem, caminho, pagina, cidade) VALUES (NOW(), ?, ?, ?, ?)',
+            try {   // data e hora de cada entrada (mudança 023, passo 42) e se foi pré-carregamento (027, passo 55)
+                if (pre_carregamento_pronto()) q('INSERT INTO entradas_hora (quando, origem, caminho, pagina, cidade, pre) VALUES (NOW(), ?, ?, ?, ?, ?)',
+                    [$origem, rawurldecode($caminho), $pagina, $cidade, e_pre_carregamento() ? 1 : 0]);
+                else q('INSERT INTO entradas_hora (quando, origem, caminho, pagina, cidade) VALUES (NOW(), ?, ?, ?, ?)',
                     [$origem, rawurldecode($caminho), $pagina, $cidade]);
             } catch (PDOException) {}
         });
