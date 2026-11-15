@@ -470,3 +470,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Admins recebem push a cada mensagem; a pessoa recebe push quando a equipe responde (avisar_usuario). Ficha: o quadro
    "Informação errada?" leva ao suporte (com e sem dono); botão também em Minha conta. Testado no banco de teste.
    Falta: aplicar a 025; tela de suporte dentro do app (hoje o push só abre o app; a conversa fica no site).
+54. 🟡 Avisos de plano: só pago + "Cadastro sem pagamento" + notificação para uma pessoa (15/11, pedido do usuário).
+   Escolher plano não avisa mais na hora; pago = "Novo plano pago" (como antes). avisar-sem-pagamento.php (cron
+   /etc/cron.d/acha-facil a cada 10 min, criado pelo instalar.sh) avisa uma vez "Cadastro sem pagamento" quando o
+   plano não é pago em 30 min (coluna pedidos.aviso_sem_pagamento_em, **mudança 026 — usuário aplica**). /admin/pedido.php
+   tem "Lembrar do pagamento" (WhatsApp com o link da assinatura) e /admin/pessoa.php tem "Mandar notificação para esta
+   pessoa" (avisar_usuario, só os celulares dela). Testado no banco de teste. Falta: rodar o instalar.sh.

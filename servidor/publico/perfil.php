@@ -54,16 +54,14 @@ if (e_post()) {
         require_once __DIR__ . '/../inc/avisos.php';
         if ($uid = pedido_usuario_atual()) $dados['usuario_id'] = $uid;
         $pedido_id = inserir('pedidos', $dados);
-        // aviso no celular dos admins já no pedido (o "plano pago" vem depois, quando o Mercado Pago confirmar)
+        // aviso aos admins: plano escolhido NÃO avisa agora (passo 54) — avisa o pagamento (Mercado Pago) ou, sem pagar em
+        // 30 min, o "Cadastro sem pagamento" (avisar-sem-pagamento.php). Assumir sem plano e tirar do app avisam na hora.
         $comercio = $p['nome'] ?? 'um negócio novo';
-        [$titulo_aviso, $texto_aviso] = match (true) {
-            $acao === 'remover' => ['Pedido para tirar do app', "$nome pediu para tirar $comercio do app."],
-            $plano !== null => ['Plano escolhido (ainda sem pagamento)', "$nome quer assumir $comercio, que já está no app, com o plano "
-                . PLANOS_NOME[$plano] . ". Foi para o pagamento; o aviso \"Novo plano pago\" chega quando pagar."
-                . ($plano === 'site' && $mensagem !== '' ? " Endereço do site: $mensagem" : '')],
-            default => [$p ? 'Pedido para assumir' : 'Pedido para incluir', "$nome quer " . ($p ? 'assumir' : 'incluir') . " $comercio."],
-        };
-        avisar_admins($titulo_aviso, $texto_aviso, ['pedido' => (int)$pedido_id]);
+        if ($plano === null || !$com_assinatura) {
+            [$titulo_aviso, $texto_aviso] = $acao === 'remover' ? ['Pedido para tirar do app', "$nome pediu para tirar $comercio do app."]
+                : [$p ? 'Pedido para assumir' : 'Pedido para incluir', "$nome quer " . ($p ? 'assumir' : 'incluir') . " $comercio."];
+            avisar_admins($titulo_aviso, $texto_aviso, ['pedido' => (int)$pedido_id]);
+        }
         if ($com_assinatura) ir('assinatura.php?c=' . $dados['codigo']);
         $enviado = true;
     }

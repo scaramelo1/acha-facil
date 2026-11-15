@@ -64,6 +64,15 @@ admin_inicio('Pedido', $admin);
   <div class="aviso erro"><strong>Pagamento não feito.</strong> A pessoa escolheu o plano <?= h(PLANOS_NOME[$pe['plano']] ?? $pe['plano']) ?>
     mas não terminou o pagamento. Quem paga entra no painel sozinho; libere por aqui só se combinou cortesia com ela.
     <?php if ($p && $pe['tipo'] === 'assumir'): ?>O comércio <strong><?= h($p['nome']) ?></strong> <em>já estava no app</em> (veio da lista do Google), não é um negócio novo.<?php endif ?></div>
+  <?php if (!empty($pe['codigo'])):
+      $msg_pag = "Olá, {$pe['nome']}! Aqui é do Acha Fácil. Vimos que você escolheu o plano " . (PLANOS_NOME[$pe['plano']] ?? $pe['plano'])
+          . ($p ? " para {$p['nome']}" : '') . ", mas o pagamento não foi concluído. Para terminar, é só abrir este link:\n"
+          . url_publica('assinatura.php?c=' . $pe['codigo']) . "\nQualquer dúvida, é só responder aqui."; ?>
+    <div class="quadro"><strong>Lembrar do pagamento</strong>
+      <p><?php if ($w = link_whatsapp($pe['telefone'], $msg_pag)): ?><a class="botao whats" href="<?= h($w) ?>" target="_blank" rel="noopener">Mandar pelo WhatsApp</a><?php endif ?>
+        <?php if (!empty($pe['usuario_id'])): ?><a class="botao contorno" href="pessoa.php?id=<?= (int)$pe['usuario_id'] ?>#notificar">Mandar notificação no app</a><?php endif ?></p>
+    </div>
+  <?php endif ?>
 <?php endif ?>
 <?php if ($pe['tipo'] === 'incluir' && $pe['status'] === 'feito' && $p && $p['status'] === 'ativo'):
     $msg_ok = "Olá, {$pe['nome']}! Aqui é do Acha Fácil. O seu comércio {$p['nome']} foi aceito e já aparece no app e no site:\n" . url_publica(caminho_ficha((int)$p['id'], (string)$p['nome'], (string)$p['cidade']))

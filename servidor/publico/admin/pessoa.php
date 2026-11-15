@@ -6,6 +6,23 @@ $admin = exigir_admin();
 $u = linha('SELECT u.*, (SELECT MAX(s.usado_em) FROM sessoes_app s WHERE s.usuario_id = u.id) AS ultimo_uso FROM usuarios u WHERE u.id = ?', [(int)($_GET['id'] ?? 0)]);
 if (!$u) { flash('Pessoa não encontrada.', 'erro'); ir('admin/pessoas.php'); }
 
+// notificação só para esta pessoa (passo 54): vai para todos os celulares em que ela entrou no app com esta conta
+require_once __DIR__ . '/../../inc/avisos.php';
+$aparelhos = (int)valor('SELECT COUNT(*) FROM avisos_aparelhos WHERE usuario_id = ?', [$u['id']]);
+try { $aparelhos += (int)valor('SELECT COUNT(*) FROM avisos_publico WHERE usuario_id = ?', [$u['id']]); } catch (PDOException) {}
+if (e_post() && ($_POST['acao'] ?? '') === 'notificar') {
+    exigir_post();
+    $titulo = trim((string)($_POST['titulo'] ?? ''));
+    $texto = trim((string)($_POST['texto'] ?? ''));
+    if ($titulo === '' || $texto === '') flash('Preencha o título e o texto.', 'erro');
+    else {
+        $n = avisar_usuario((int)$u['id'], mb_substr($titulo, 0, 80), mb_substr($texto, 0, 180));
+        registrar((int)$admin['id'], 'notificou_pessoa', null, $u['nome'] . ': ' . mb_substr($titulo, 0, 60) . " ($n aparelho(s))");
+        flash($n ? "Notificação entregue em $n celular(es)." : 'Não foi entregue: a pessoa não tem o app com avisos ligados nesta conta. Mande pelo e-mail ou WhatsApp.', $n ? 'ok' : 'erro');
+    }
+    ir('admin/pessoa.php?id=' . $u['id'] . '#notificar');
+}
+
 $favoritos = linhas('SELECT f.criado_em, p.id, p.nome, p.tipo, p.cidade, p.bairro, p.status, c.nome AS categoria
     FROM favoritos f JOIN profissionais p ON p.id = f.profissional_id JOIN categorias c ON c.id = p.categoria_id
     WHERE f.usuario_id = ? ORDER BY f.criado_em DESC', [$u['id']]);
@@ -43,6 +60,22 @@ admin_inicio($u['nome'], $admin);
   <div><strong><?= num(count($avaliacoes)) ?></strong><span>avaliações</span></div>
   <div><strong><?= $avaliacoes ? number_format($media, 1, ',', '.') : '—' ?></strong><span>média de estrelas</span></div>
 </div>
+
+<h2 id="notificar">Mandar notificação para esta pessoa</h2>
+<?php if (!$aparelhos): ?>
+  <p class="discreto">Ela não tem o app com os avisos ligados nesta conta (só usou o site, ou não permitiu as notificações). Use o e-mail
+    <a href="mailto:<?= h($u['email']) ?>"><?= h($u['email']) ?></a>.</p>
+<?php else: ?>
+  <form method="post" class="quadro">
+    <?= campo_csrf() ?><input type="hidden" name="acao" value="notificar">
+    <p class="discreto">Vai para <?= $aparelhos ?> celular(es) dela. Só ela recebe.</p>
+    <label for="n-titulo">Título</label>
+    <input id="n-titulo" name="titulo" maxlength="80" required placeholder="Ex.: Seu pagamento não foi concluído">
+    <label for="n-texto">Texto</label>
+    <textarea id="n-texto" name="texto" rows="3" maxlength="180" required placeholder="Ex.: Fale com a gente no WhatsApp para terminar o plano Básico."></textarea>
+    <p><button class="botao">Enviar notificação</button></p>
+  </form>
+<?php endif ?>
 
 <h2 id="favoritos">Favoritos</h2>
 <?php if (!$favoritos): ?><p class="discreto">Não salvou nenhum comércio.</p><?php else: ?>
