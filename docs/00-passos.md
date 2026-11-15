@@ -79,7 +79,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Aviso de versão nova (08/11, igual ao ReadyTAF): o app pergunta api/versao.php ao abrir (no máximo a cada 6 h) e,
    se o APK do site for mais novo, mostra "Nova versão" com Baixar. A versão vem de dentro do APK (publicar-apk.sh).
    Sempre subir o "version" do app.json antes de gerar APK novo (1.2.0 desde 08/11)
-7. 🟡 Contas no app só com o Google (07/11): o app pede uma entrada ao servidor (api/google.php, acao=iniciar), abre
+7. ✅ Contas no app só com o Google (07/11): o app pede uma entrada ao servidor (api/google.php, acao=iniciar), abre
    /google/entrar.php no navegador, a pessoa entra no Google e /google/retorno.php grava a conta (nome, e-mail, foto);
    enquanto isso o app pergunta ao servidor a cada 1,5 s (acao=verificar, chave secreta só do app) e recebe a sessão.
    Não depende de o celular devolver um link para o app (no emulador o link caía no APK antigo). Sem senha:
@@ -203,7 +203,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 
 ## Plano de crescimento (10/11) — detalhes em `docs/plano-crescimento.md`
 
-20. 🟡 Contador de visualizações em todas as fichas (10/11): código feito e testado numa cópia isolada.
+20. ✅ Contador de visualizações em todas as fichas (10/11): código feito e testado numa cópia isolada.
    Servidor: `servidor/inc/numeros.php` (contar_visita com origem e pessoas diferentes por dia; quem reabre em menos de
    30 min não conta de novo; robôs não contam; contar_aparicoes nas listas: início, categoria e busca até 40, perto 10;
    contar_contato com origem app/web). Mudança 017: `contatos.origem` e `contatos.pessoas`, tabelas `vistas` (código
@@ -397,11 +397,11 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (favoritos com data e área; avaliações com estrelas, comentário, resposta do comércio, oculta/editada; botões
    Números e Abrir). Pessoas ganhou "Estatística dos itens": mais salvos, favoritos por área, mais avaliados com
    média, e totais de favoritos/avaliações no topo. Foto do Google que não carrega vira a inicial. Só leitura
-42. 🟡 Data e hora das entradas (14/11, pedido do usuário: "nessa tabela consegue colocar a data/hora?"). Coluna
+42. ✅ Data e hora das entradas (14/11, pedido do usuário: "nessa tabela consegue colocar a data/hora?"). Coluna
    **Quando** em "Páginas onde entraram" (/admin/entradas.php): até 5 horários por página (dd/mm HH:MM) e "e mais N";
    ordem "mais recentes" (padrão) ou "mais entradas". **Mudança 023**: tabela entradas_hora, uma linha por entrada,
    gravada junto com a 022 em registrar_entrada_site(). Entradas de antes da 023 mostram só o dia ("sem hora").
-   Testado no banco de teste (14/11). Falta (usuário): aplicar a 023
+   Testado no banco de teste (14/11). 023 aplicada; marcado como concluído pelo usuário em 15/11
 43. ✅ Relatório de cidades mais procuradas (14/11, pedido do usuário). Em /admin/entradas.php, acima da tabela de
    páginas: ranking de cidades (entradas, %, comércios diferentes, 3 áreas mais procuradas, visualizações e toques),
    áreas mais procuradas, 20 comércios mais procurados, entradas por dia e por hora; botão Imprimir. Vale para
