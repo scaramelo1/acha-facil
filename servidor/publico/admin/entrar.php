@@ -22,6 +22,9 @@ if (e_post()) {
 admin_inicio('Entrar', null);
 ?>
 <h1>Administração</h1>
+<?php require_once __DIR__ . '/../../inc/conta-web.php'; ?>
+<p><?= botao_google('/admin/', 'Entrar com o Google (conta de admin)') ?></p>
+<p class="discreto">Ou com e-mail e senha:</p>
 <?php if ($erro): ?><div class="aviso erro"><?= h($erro) ?></div><?php endif ?>
 <form method="post" class="estreito">
   <?= campo_csrf() ?>

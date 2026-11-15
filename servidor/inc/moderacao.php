@@ -41,6 +41,17 @@ function mostrar_flash(): void {
 function admin_atual(): ?array {
     iniciar_sessao();
     $id = (int)($_SESSION['admin_id'] ?? 0);
+    if (!$id) {
+        // entrou no site com a conta Google de um admin (passo 45): libera a administração sem pedir a senha
+        require_once __DIR__ . '/conta-web.php';
+        require_once __DIR__ . '/avisos.php';
+        $id = (int)admin_do_usuario(usuario_web());
+        if ($id) {
+            session_regenerate_id(true);
+            $_SESSION['admin_id'] = $id;
+            registrar($id, 'entrou', null, 'pela conta Google do site');
+        }
+    }
     return $id ? linha('SELECT id, nome, email FROM admins WHERE id = ? AND ativo = 1', [$id]) : null;
 }
 function exigir_admin(): array {

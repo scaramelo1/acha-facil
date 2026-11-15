@@ -55,6 +55,7 @@ pagina_inicio('Minha conta · Acha Fácil', 'Seus comércios salvos e suas avali
     <div>
       <h1>Olá, <?= h(primeiro_nome($u['nome'])) ?>!</h1>
       <p class="discreto"><?= h($u['email']) ?> · a mesma conta do app Acha Fácil</p>
+      <?php require_once __DIR__ . '/../inc/avisos.php'; if (admin_do_usuario($u)): ?><p><a class="botao amarelo" href="<?= h(url('admin/')) ?>">Painel da administração</a></p><?php endif ?>
     </div>
   </div>
 

@@ -54,7 +54,7 @@ function pagina_inicio(string $titulo, string $descricao, string $classe = '', a
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=22">
+<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=23">
 <?= $opc['head'] ?? '' ?>
 </head>
 <body class="<?= h($classe) ?>">
@@ -79,6 +79,8 @@ function pagina_inicio(string $titulo, string $descricao, string $classe = '', a
       if (j.usuario.foto) { var i = document.createElement('img'); i.src = j.usuario.foto; i.alt = ''; i.referrerPolicy = 'no-referrer';
         i.onerror = function () { i.remove(); }; a.appendChild(i); }
       var s = document.createElement('span'); s.textContent = nome || 'Minha conta'; a.appendChild(s);
+      if (j.usuario.admin) { var ad = document.createElement('a'); ad.href = base + '/admin/'; ad.className = 'nav-admin'; ad.textContent = 'Administração';
+        a.parentNode.insertBefore(ad, a); }
     }).catch(function () {});
 })();
 </script>

@@ -443,3 +443,5 @@ a.area:hover { border-color: var(--verde); }
 .lista-conta { list-style: none; padding: 0; display: grid; gap: 10px; }
 .lista-conta li { background: var(--branco); border-radius: 16px; padding: 12px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; box-shadow: var(--sombra); }
 .lista-conta li form { margin-left: auto; }
+.topo nav a.nav-admin { background: rgba(255,255,255,.15); }
+@media (max-width: 760px) { .topo nav a.nav-admin { display: inline-flex; padding: 8px 10px; font-size: .9rem; } }

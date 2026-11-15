@@ -418,3 +418,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    ou a foto da pessoa (descoberto por JS, as páginas em cache continuam iguais para todos). /minha-conta.php: salvos
    (tirar), minhas avaliações (mudar/apagar), sair (POST com CSRF) e excluir conta. robots.txt e privacidade.php
    atualizados. Sem mudança no banco. Testado no banco de teste (14/11); o vaivém real com o Google só no navegador
+45. ✅ Painel do admin pela conta Google do site (14/11, pedido do usuário). Quem entrou no site com o e-mail de um
+   admin (tabela admins) abre /admin sem a senha: admin_atual() em inc/moderacao.php liga a sessão pela conta do site
+   (registro: "entrou pela conta Google do site"). Topo do site mostra "Administração" (JS, j.usuario.admin), Minha
+   conta mostra "Painel da administração", e /admin/entrar.php ganhou "Entrar com o Google (conta de admin)".
+   Sair da administração sai também da conta do site. E-mail e senha continuam valendo
