@@ -492,4 +492,5 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Novidades. Tudo em arquivos ($DADOS/novidades), sem mudança no banco. PC: scripts/robo/robo-rodar.ps1 (rodízio de
    cidades, -Cidade, -Todas, -Arquivo, -Testar; registro em robo-log.txt) e robo-agendar.ps1 (Agendador de Tarefas,
    todo dia 03:00). Guia em docs/robo-automatico.md. Testado numa cópia com o banco de teste (envio por HTTP, chave
-   errada, aprovar, automático). Falta: o usuário configurar o PC (comando do robô no robo-config.json).
+   errada, aprovar, automático). Parte do PC adiada (15/11, pedido do usuário): falta achar a pasta do robô no PC
+   (D:\leads-sem-site não existe) e o comando dele para o robo-config.json; depois -Testar, -Cidade e robo-agendar.ps1.
