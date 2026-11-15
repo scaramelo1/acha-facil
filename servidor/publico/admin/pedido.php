@@ -1,6 +1,7 @@
 <?php
 // Pedido de um dono: assumir o perfil (depois de confirmar por telefone, libera o link do painel) ou tirar do app
 require __DIR__ . '/../../inc/admin.php';
+require_once __DIR__ . '/../../inc/avisos.php';
 $admin = exigir_admin();
 $id = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
 $pe = linha('SELECT * FROM pedidos WHERE id = ?', [$id]);
@@ -14,7 +15,10 @@ if (e_post()) {
     if ($acao === 'liberar' && $p && $pe['tipo'] === 'assumir') {
         $_SESSION['link_novo'] = [$id, liberar_acesso((int)$p['id'], $id, $pe['nome'], $pe['telefone'], (int)$admin['id'])];
         q("UPDATE pedidos SET status = 'feito' WHERE id = ?", [$id]);
-        flash('Painel liberado. Mande o link abaixo para o dono (ele só aparece agora).');
+        $n = avisar_usuario(isset($pe['usuario_id']) ? (int)$pe['usuario_id'] : null, 'Pedido aceito!',
+            "Confirmamos que você é o responsável por {$p['nome']}. Vamos mandar o link do painel pelo WhatsApp.",
+            ['tela' => 'profissional', 'id' => (int)$p['id']]);
+        flash('Painel liberado. Mande o link abaixo para o dono (ele só aparece agora).' . ($n ? ' Ele também recebeu o aviso no celular.' : ''));
     } elseif ($acao === 'novo_link' && $p && $pe['tipo'] === 'assumir' && $pe['status'] === 'feito') {
         $_SESSION['link_novo'] = [$id, liberar_acesso((int)$p['id'], $id, $pe['nome'], $pe['telefone'], (int)$admin['id'])];
         flash('Link novo gerado. Se o antigo não deve mais valer, corte-o na lista de acessos.');
@@ -22,8 +26,11 @@ if (e_post()) {
         q("UPDATE profissionais SET status = 'ativo', geo_tentado = NULL WHERE id = ? AND status = 'pendente'", [$p['id']]);
         q("UPDATE pedidos SET status = 'feito' WHERE id = ?", [$id]);
         registrar((int)$admin['id'], 'incluiu', (int)$p['id'], 'pedido ' . $id);
-        flash($p['nome'] . ' já aparece no app.');
-        ir('admin/');
+        web_cache_limpar();
+        $n = avisar_usuario(isset($pe['usuario_id']) ? (int)$pe['usuario_id'] : null, 'Seu comércio foi aceito!',
+            "{$p['nome']} já aparece no Acha Fácil. Toque para ver.", ['tela' => 'profissional', 'id' => (int)$p['id']]);
+        flash($p['nome'] . ' já aparece no app. ' . ($n ? 'A pessoa recebeu o aviso no celular; ' : '') . 'Avise também pelo WhatsApp abaixo.');
+        ir('admin/pedido.php?id=' . $id);
     } elseif ($acao === 'tirar' && $p && $pe['tipo'] === 'remover') {
         q("UPDATE profissionais SET status = 'pausado' WHERE id = ?", [$p['id']]);
         q("UPDATE pedidos SET status = 'feito' WHERE id = ?", [$id]);
@@ -51,7 +58,20 @@ if (($_SESSION['link_novo'][0] ?? null) === $id) { $link = $_SESSION['link_novo'
 admin_inicio('Pedido', $admin);
 ?>
 <p><a href="./">&larr; Pendências</a></p>
-<h1><?= h(TIPO_PEDIDO[$pe['tipo']] ?? $pe['tipo']) ?></h1>
+<h1><?= h(TIPO_PEDIDO[$pe['tipo']] ?? $pe['tipo']) ?><?= $pe['plano'] ? ' · plano ' . h(PLANOS_NOME[$pe['plano']] ?? $pe['plano']) : '' ?></h1>
+<?php if ($pe['plano'] && !pedido_pago($pe) && $pe['status'] === 'novo'): ?>
+  <div class="aviso erro"><strong>Pagamento não feito.</strong> A pessoa escolheu o plano <?= h(PLANOS_NOME[$pe['plano']] ?? $pe['plano']) ?>
+    mas não terminou o pagamento. Quem paga entra no painel sozinho; libere por aqui só se combinou cortesia com ela.
+    <?php if ($p && $pe['tipo'] === 'assumir'): ?>O comércio <strong><?= h($p['nome']) ?></strong> <em>já estava no app</em> (veio da lista do Google), não é um negócio novo.<?php endif ?></div>
+<?php endif ?>
+<?php if ($pe['tipo'] === 'incluir' && $pe['status'] === 'feito' && $p && $p['status'] === 'ativo'):
+    $msg_ok = "Olá, {$pe['nome']}! Aqui é do Acha Fácil. O seu comércio {$p['nome']} foi aceito e já aparece no app e no site:\n" . url_publica(caminho_ficha((int)$p['id'], (string)$p['nome'], (string)$p['cidade']))
+            . "\nQuer colocar fotos, descrição e aparecer em destaque? Veja os planos: " . url_publica('planos.php?id=' . (int)$p['id']); ?>
+  <div class="quadro">
+    <strong>Avisar que foi aceito</strong>
+    <p><?php if ($w = link_whatsapp($pe['telefone'], $msg_ok)): ?><a class="botao whats" href="<?= h($w) ?>" target="_blank" rel="noopener">Mandar pelo WhatsApp</a><?php else: ?>Telefone inválido para WhatsApp: <?= h(telefone_formatado($pe['telefone'])) ?><?php endif ?></p>
+  </div>
+<?php endif ?>
 
 <?php if ($link):
     $msg = "Olá, {$pe['nome']}! Aqui é do Acha Fácil. Este é o link do painel do seu comércio" . ($p ? " ({$p['nome']})" : '') . ":\n$link\n"
@@ -68,7 +88,7 @@ admin_inicio('Pedido', $admin);
   <tr><th>Comércio</th><td><?= $p ? '<strong>' . h($p['nome']) . '</strong><br>' . h($p['endereco'] ?? '') . ' · ' . h(nome_cidade($p['cidade']))
         . '<br>Telefone do cadastro: ' . h(telefone_formatado($p['telefone'] ?: $p['whatsapp'])) : '<em>Negócio novo (não está no app)</em>' ?></td></tr>
   <tr><th>Quem pediu</th><td><?= h($pe['nome']) ?> · <?= h(telefone_formatado($pe['telefone'])) ?><?= !empty($pe['email']) ? ' · ' . h($pe['email']) : '' ?></td></tr>
-  <?php if ($pe['plano']): ?><tr><th>Plano</th><td><?= h(PLANOS_NOME[$pe['plano']] ?? $pe['plano']) ?><?= !empty($pe['mp_status']) ? ' · Mercado Pago: ' . h($pe['mp_status']) : '' ?></td></tr><?php endif ?>
+  <?php if ($pe['plano']): ?><tr><th>Plano</th><td><?= h(PLANOS_NOME[$pe['plano']] ?? $pe['plano']) ?><?= pedido_pago($pe) ? ' · <strong>pago</strong>' : ' · <strong>não pago</strong>' ?><?= !empty($pe['mp_status']) ? ' (Mercado Pago: ' . h($pe['mp_status']) . ')' : '' ?></td></tr><?php endif ?>
   <?php if ($pe['tipo'] === 'incluir' && $p): ?>
     <tr><th>Dados enviados</th><td>
       <strong><?= h($p['nome']) ?></strong> · <?= h($p['tipo'] ?? '') ?> · área <?= h((string)valor('SELECT nome FROM categorias WHERE id = ?', [$p['categoria_id']])) ?><br>

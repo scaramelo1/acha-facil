@@ -434,3 +434,23 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
       (manter o antigo enquanto houver APK antigo usando).
    c) No /etc/acha-facil/config.php: 'google_retorno' => 'https://achafacilapp.com.br/google/retorno.php' (ver passo 25).
    d) Testar a entrada no site e no app (o app usa o mesmo retorno). Mudar o nome/logo pode pedir nova verificação do Google.
+47. ✅ Anúncios do Google AdSense no site (15/11, pedido do usuário). Código ca-pub-6554734640437999 (ADSENSE_PADRAO em
+   inc/pagina.php; 'adsense_cliente' no config troca). Script só onde pagina_inicio() recebe 'anuncios' => true:
+   inicial, cidade, listas por área/tipo, busca da cidade, agenda e páginas de eventos, e fichas de quem NÃO paga
+   (importado e sem basico_pago_em e sem destaque_pago). Sem anúncio: fichas pagas, planos, pagamento, incluir, entrar,
+   minha conta, painel, admin, termos, privacidade. publico/ads.txt criado. Liga/desliga em /admin/anuncios.php
+   (arquivo anuncios-desligados no dados_dir + limpa o cache das páginas). Privacidade atualizada (cookies do Google,
+   o app não tem anúncios). Testado no ar: ficha Destaque paga e Básico pago sem anúncio; ficha sem plano com anúncio
+48. ⬜ AdSense: o usuário marca "Adicionei o código" → Verificar → Pedir revisão e espera a aprovação (dias a ~2 semanas).
+   Depois de aprovado: em Anúncios → Por site, ligar anúncios automáticos e DESLIGAR a vinheta (tela cheia) e os
+   anúncios "âncora" se cobrirem o botão de WhatsApp. Se recusar por "conteúdo de baixo valor": melhorar texto das
+   páginas de cidade/área e pedir de novo
+49. ⬜ Depois de 1 mês de anúncios: ver o ganho no AdSense e decidir sobre o app (AdMob, banner só nas listas;
+   precisa de react-native-google-mobile-ads, APK novo e "contém anúncios" na Play Console). Opcional: nos planos,
+   dizer "com o plano, sua página fica sem propaganda"
+50. 🟡 Pedidos de donos mais claros + aviso de "aceito" (15/11, pedido do usuário: pedido 15, Arte Tintas, chegou como
+   "plano Básico" mas parecia comércio novo e não estava pago). O aviso de plano agora diz "Plano escolhido (ainda sem
+   pagamento)" e que o comércio já está no app; /admin e /admin/pedido.php mostram "não pago" e um alerta antes de
+   liberar. Ao publicar um "Incluir negócio" ou liberar um painel, a pessoa recebe push (canal novidades, abre a ficha)
+   se fez o pedido logada com o Google no site (pedidos.usuario_id, **mudança 024 — usuário aplica**), e o pedido
+   mostra o botão "Mandar pelo WhatsApp" com a mensagem de aceito + link da ficha e dos planos. Falta: aplicar a 024.

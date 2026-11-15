@@ -22,6 +22,37 @@ function avisar_admins(string $titulo, string $texto, array $dados = []): void {
     }
 }
 
+/** Mudança 024 aplicada (pedidos.usuario_id)? */
+function pedido_usuario_pronto(): bool {
+    static $ok = null;
+    try { return $ok ??= (bool)valor("SELECT 1 FROM migracoes WHERE nome = '024-pedido-usuario.sql'"); } catch (PDOException) { return $ok = false; }
+}
+
+/** Conta de quem está fazendo o pedido no site (entrou com o Google), para gravar em pedidos.usuario_id. */
+function pedido_usuario_atual(): ?int {
+    if (!pedido_usuario_pronto()) return null;
+    require_once __DIR__ . '/conta-web.php';
+    $u = usuario_web();
+    return $u ? (int)$u['id'] : null;
+}
+
+/** Aviso no celular de uma pessoa (todos os aparelhos em que ela entrou no app). Nunca derruba quem chamou. */
+function avisar_usuario(?int $usuario_id, string $titulo, string $texto, array $dados = []): int {
+    if (!$usuario_id) return 0;
+    try {
+        $tokens = array_column(linhas('SELECT token FROM avisos_aparelhos WHERE usuario_id = ?', [$usuario_id]), 'token');
+        try { $tokens = array_merge($tokens, array_column(linhas('SELECT token FROM avisos_publico WHERE usuario_id = ?', [$usuario_id]), 'token')); }
+        catch (PDOException) {}
+        return expo_enviar(array_values(array_unique($tokens)), $titulo, $texto, $dados, 'novidades')[0];
+    } catch (Throwable $e) {
+        error_log('acha-facil aviso usuario: ' . $e->getMessage());
+        return 0;
+    }
+}
+
+/** O pedido com plano já foi pago? */
+function pedido_pago(array $pe): bool { return in_array($pe['mp_status'] ?? '', ['authorized', 'approved'], true); }
+
 /**
  * Manda o mesmo aviso para uma lista de endereços Expo Push, de 100 em 100. Aparelho que desinstalou o app
  * (DeviceNotRegistered) sai das duas tabelas de aparelhos. Devolve [entregues, falhas]. Não lança erro.

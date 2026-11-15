@@ -38,8 +38,10 @@ if (e_post() && $pronto) {
     } else {
         db()->beginTransaction();
         $pid = inserir('profissionais', $d + ['status' => 'pendente', 'importado' => 1]);
+        require_once __DIR__ . '/../inc/avisos.php';
+        $uid = pedido_usuario_atual();
         $pedido = inserir('pedidos', ['profissional_id' => $pid, 'tipo' => 'incluir', 'nome' => $nome, 'telefone' => $contato,
-            'mensagem' => txt('mensagem', 1000), 'ip' => ip()]);
+            'mensagem' => txt('mensagem', 1000), 'ip' => ip()] + ($uid ? ['usuario_id' => $uid] : []));
         db()->commit();
         require_once __DIR__ . '/../inc/avisos.php';
         avisar_admins('Negócio novo para incluir', "$nome quer incluir {$d['nome']} (" . nome_cidade($d['cidade'], true) . ').', ['pedido' => $pedido]);
