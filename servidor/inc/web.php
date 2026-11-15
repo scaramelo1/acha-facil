@@ -472,8 +472,12 @@ function web_pagina_ficha(array $p): void {
         <h2 class="h-pequeno">Este comércio é seu?</h2>
         <p>Corrija os dados, coloque fotos, o horário e o que você vende. <a class="botao amarelo" href="<?= h($c['linkAssumir']) ?>">Ver os planos</a></p>
         <p class="discreto">Os dados vieram de informações públicas do comércio na internet. Não quer aparecer? <a href="<?= h($c['linkRemover']) ?>" rel="nofollow">Tirar meu comércio do Acha Fácil</a>.</p>
+        <p class="discreto">Informação errada? <a href="<?= h(url('suporte.php?id=' . (int)$p['id'])) ?>" rel="nofollow">Envie uma mensagem para a equipe</a> (precisa entrar com a conta Google).</p>
       <?php else: ?>
-        <p class="discreto">Informação errada? Fale com a gente: <?= contatos_html() ?>.</p>
+        <h2 class="h-pequeno">Informação errada ou algum problema?</h2>
+        <p>Mande uma mensagem para a equipe do Acha Fácil. É preciso <strong>entrar com a conta Google</strong>: assim a
+          gente responde e você recebe o aviso no celular.</p>
+        <p><a class="botao contorno" href="<?= h(url('suporte.php?id=' . (int)$p['id'])) ?>" rel="nofollow">Enviar mensagem para a equipe</a></p>
       <?php endif ?>
     </aside>
 

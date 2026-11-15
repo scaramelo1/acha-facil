@@ -464,3 +464,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    "Tirar do app" exige login Google; o admin recebe o aviso "Pedido para tirar do app". Cache web limpo ao liberar
    painel, pagar o Básico e cortar acesso. Corrigido também pedido_pago() repetido (avisos.php x mercadopago.php).
 
+53. 🟡 Suporte / Fale com a equipe (15/11, pedido do usuário: mensagens para os admins como chamados, só com login).
+   /suporte.php (exige conta Google; ?id= = comércio, ?c= = chamado) e /admin/suporte.php (menu "Suporte" com contador
+   dos que esperam resposta). inc/suporte.php; tabelas chamados e chamados_mensagens (**mudança 025 — usuário aplica**).
+   Admins recebem push a cada mensagem; a pessoa recebe push quando a equipe responde (avisar_usuario). Ficha: o quadro
+   "Informação errada?" leva ao suporte (com e sem dono); botão também em Minha conta. Testado no banco de teste.
+   Falta: aplicar a 025; tela de suporte dentro do app (hoje o push só abre o app; a conversa fica no site).

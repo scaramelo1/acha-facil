@@ -59,6 +59,8 @@ pagina_inicio('Minha conta · Acha Fácil', 'Seus comércios salvos e suas avali
     </div>
   </div>
 
+  <p><a class="botao contorno" href="<?= h(url('suporte.php')) ?>">Fale com a equipe (suporte)</a></p>
+
   <h2 id="salvos">Salvos (<?= count($salvos) ?>)</h2>
   <?php if (!$salvos): ?>
     <p class="discreto">Nenhum comércio salvo ainda. Na página de um comércio, toque em <strong>♡ Salvar</strong>.</p>
