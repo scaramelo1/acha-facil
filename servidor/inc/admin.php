@@ -44,6 +44,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
         <a href="<?= $base ?>/admin/cupons.php">Cupons</a>
         <a href="<?= $base ?>/admin/eventos.php">Eventos<?= $ev ? ' <span class="contador">' . $ev . '</span>' : '' ?></a>
         <a href="<?= $base ?>/admin/app.php">App e downloads</a>
+        <a href="<?= $base ?>/admin/anuncios.php">Anúncios</a>
         <a href="<?= $base ?>/admin/registro.php">Registro</a>
         <a href="<?= $base ?>/admin/senha.php">Trocar senha</a>
         <a href="<?= $base ?>/admin/sair.php">Sair</a>

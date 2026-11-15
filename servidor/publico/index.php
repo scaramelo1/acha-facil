@@ -19,7 +19,7 @@ $por_cidade = array_column(linhas('SELECT p.cidade, COUNT(*) AS total FROM profi
     WHERE ' . visivel() . ' GROUP BY p.cidade'), 'total', 'cidade');
 
 pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
-    "App gratuito com $total comércios e serviços em " . resumo_cidades() . ": restaurantes, mercados, oficinas, clínicas, lojas e muito mais. Chame no WhatsApp com um toque.");
+    "App gratuito com $total comércios e serviços em " . resumo_cidades() . ": restaurantes, mercados, oficinas, clínicas, lojas e muito mais. Chame no WhatsApp com um toque.", '', ['anuncios' => true]);
 ?>
 <main>
   <section class="hero">

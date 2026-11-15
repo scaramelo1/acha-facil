@@ -24,9 +24,25 @@ const EMOJI_AREAS = ['silverware-fork-knife' => '🍽️', 'cart-outline' => '�
     'dumbbell' => '🏋️', 'paw' => '🐾', 'bed-outline' => '🛏️', 'bank-outline' => '🏦', 'factory' => '🏭', 'hand-heart-outline' => '🤝'];
 function emoji_area(?string $icone): string { return EMOJI_AREAS[$icone] ?? '📍'; }
 
+// Anúncios do Google AdSense (15/11). Só nas páginas que pedem com $opc['anuncios'] = true: inicial, cidade, listas, busca
+// pública, eventos e fichas SEM dono. Nunca em ficha de quem paga, planos, pagamento, conta, painel ou admin.
+// O código vem do config ('adsense_cliente'); vazio no config = o padrão abaixo. Desligar: /admin/anuncios.php.
+const ADSENSE_PADRAO = 'ca-pub-6554734640437999';
+function adsense_cliente(): string {
+    $c = site('adsense_cliente');
+    return preg_match('/^ca-pub-\d{10,20}$/', $c) ? $c : ADSENSE_PADRAO;
+}
+function anuncios_arquivo_desligado(): string { return config()['dados_dir'] . '/anuncios-desligados'; }
+function anuncios_ligados(): bool { return !is_file(anuncios_arquivo_desligado()); }
+function anuncios_head(): string {
+    if (!anuncios_ligados()) return '';
+    return '<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' . h(adsense_cliente()) . '" crossorigin="anonymous"></script>' . "\n";
+}
+
 /**
  * Começo da página. $opc (páginas públicas da cidade, passo 21): 'canonica' (endereço completo), 'noindex' (true = o Google
- * não guarda), 'imagem' (prévia do link), 'head' (HTML a mais no <head>, ex.: dados estruturados).
+ * não guarda), 'imagem' (prévia do link), 'head' (HTML a mais no <head>, ex.: dados estruturados),
+ * 'anuncios' (true = pode mostrar anúncios do Google; padrão sem).
  */
 function pagina_inicio(string $titulo, string $descricao, string $classe = '', array $opc = []): void {
     $base = config()['url'];
@@ -56,6 +72,7 @@ function pagina_inicio(string $titulo, string $descricao, string $classe = '', a
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
 <link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=23">
 <?= $opc['head'] ?? '' ?>
+<?= !empty($opc['anuncios']) ? anuncios_head() : '' ?>
 </head>
 <body class="<?= h($classe) ?>">
 <header class="topo">

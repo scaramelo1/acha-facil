@@ -8,12 +8,12 @@ pagina_inicio('Privacidade · Acha Fácil', 'Quais dados o Acha Fácil usa, para
 ?>
 <main class="documento">
   <h1>Política de privacidade</h1>
-  <p class="atualizado">Última atualização: 10 de novembro de 2026</p>
+  <p class="atualizado">Última atualização: 15 de novembro de 2026</p>
 
   <div class="quadro">
     <strong>Resumo:</strong> dá para usar o Acha Fácil sem dar nenhum dado pessoal. Se você entrar com a sua conta Google, guardamos só nome, e-mail,
-    foto do perfil e o que você fizer no app (avaliações, comentários e salvos). Não vendemos dados, não mostramos anúncios de
-    terceiros e não rastreamos você. Pode excluir tudo pelo próprio app.
+    foto do perfil e o que você fizer no app (avaliações, comentários e salvos). Não vendemos dados. O <strong>app</strong> não tem anúncios; algumas páginas do <strong>site</strong>
+    mostram anúncios do Google, que usam cookies (veja o item 4). Pode excluir tudo pelo próprio app.
   </div>
 
   <h2>1. Quem cuida dos seus dados</h2>
@@ -65,6 +65,12 @@ pagina_inicio('Privacidade · Acha Fácil', 'Quais dados o Acha Fácil usa, para
     <li><strong>Ninguém compra seus dados.</strong> Não vendemos nem alugamos dados.</li>
     <li>Hospedagem: os dados ficam em servidor contratado pelo Acha Fácil, com acesso protegido.</li>
     <li>Mercado Pago: apenas para as assinaturas dos profissionais.</li>
+    <li><strong>Anúncios do Google (só no site):</strong> algumas páginas do site (inicial, listas, eventos e fichas de comércios sem plano)
+      mostram anúncios do Google AdSense. O Google e seus parceiros podem usar cookies para mostrar anúncios com base nas suas visitas
+      a este e a outros sites. O Acha Fácil não envia ao Google o seu nome, e-mail nem dados da sua conta. Você pode desligar os anúncios
+      personalizados em <a href="https://adssettings.google.com" target="_blank" rel="noopener">Configurações de anúncios do Google</a>
+      e ver como o Google usa os dados em <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">policies.google.com</a>.
+      O app não tem anúncios.</li>
     <li>Autoridades: somente quando a lei ou uma ordem judicial exigir.</li>
   </ul>
   <p>Quando você toca em WhatsApp, ligar, Instagram ou mapa, você sai para outro serviço, que tem a sua própria política de privacidade.</p>

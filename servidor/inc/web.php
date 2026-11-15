@@ -220,7 +220,7 @@ function web_pagina_cidade(string $cidade): void {
     [$trilha, $ld] = web_trilha([["$nome - $uf", null]]);
     pagina_inicio("Comércios e serviços em $nome - $uf | Acha Fácil!",
         web_num($total) . " comércios e serviços de $nome ($uf): restaurantes, mercados, oficinas, clínicas, lojas e muito mais. Endereço, horário e WhatsApp.",
-        'web', ['canonica' => web_absoluta(url_cidade($cidade)), 'head' => web_json_ld($ld)]);
+        'web', ['canonica' => web_absoluta(url_cidade($cidade)), 'head' => web_json_ld($ld), 'anuncios' => true]);
     ?>
 <main>
   <section class="web-topo"><div class="conteudo">
@@ -288,7 +288,7 @@ function web_pagina_lista(string $cidade, array $area, ?string $tipo, ?string $b
     $lista_ld = ['@context' => 'https://schema.org', '@type' => 'ItemList', 'name' => "$titulo_lista em $nome_cidade",
         'itemListElement' => array_map(fn($p, $i) => ['@type' => 'ListItem', 'position' => ($pagina - 1) * WEB_POR_PAGINA + $i + 1,
             'url' => web_absoluta(url_ficha($p)), 'name' => $p['nome']], $itens, array_keys($itens))];
-    pagina_inicio($titulo, $descricao, 'web', ['canonica' => $canonica, 'noindex' => $noindex, 'head' => web_json_ld($ld, $lista_ld)]);
+    pagina_inicio($titulo, $descricao, 'web', ['canonica' => $canonica, 'noindex' => $noindex, 'head' => web_json_ld($ld, $lista_ld), 'anuncios' => true]);
     ?>
 <main>
   <section class="web-topo"><div class="conteudo">
@@ -373,7 +373,8 @@ function web_pagina_ficha(array $p): void {
     $descricao = $p['nome'] . ' em ' . $nome_cidade . ' (' . $uf . ')' . ($tipo ? ", $tipo" : '') . '. '
         . ($p['endereco'] ? 'Endereço: ' . $p['endereco'] . '. ' : '') . 'Veja horário, telefone e WhatsApp no Acha Fácil.';
     pagina_inicio($p['nome'] . ' - ' . ($tipo ? "$tipo em " : '') . "$nome_cidade | Acha Fácil!", mb_substr($descricao, 0, 300), 'web',
-        ['canonica' => $url, 'imagem' => $imagem, 'head' => web_json_ld($ld, $ld_trilha)]);
+        ['canonica' => $url, 'imagem' => $imagem, 'head' => web_json_ld($ld, $ld_trilha),
+            'anuncios' => $p['importado'] && !$p['basico_pago_em'] && !$p['destaque_pago']]);   // anúncio só em ficha de quem não paga plano
     [$parecidos, $mesmo_tipo] = web_parecidos($p);
     ?>
 <main class="ficha">
@@ -545,7 +546,7 @@ function web_pagina_busca(string $cidade, string $termo): void {
     }
     [$trilha] = web_trilha([["$nome_cidade - $uf", url_cidade($cidade)], ['Busca', null]]);
     pagina_inicio("Procurar em $nome_cidade | Acha Fácil!", "Procure comércios e serviços em $nome_cidade ($uf).", 'web',
-        ['canonica' => web_absoluta(url_cidade($cidade)), 'noindex' => true]);
+        ['canonica' => web_absoluta(url_cidade($cidade)), 'noindex' => true, 'anuncios' => true]);
     ?>
 <main>
   <section class="web-topo"><div class="conteudo">
