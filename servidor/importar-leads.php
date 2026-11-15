@@ -12,7 +12,11 @@ require_once __DIR__ . '/inc/guia.php';
 
 // --teste: faz tudo e mostra o resultado, mas desfaz no fim (nada muda no banco)
 $teste = in_array('--teste', $argv, true);
-$args = array_values(array_filter($argv, fn($a) => $a !== '--teste'));
+// --detalhes=<arquivo.json>: grava a lista do que mudou (novos, mudaram, fecharam) para /admin/novidades.php
+$detalhes_arq = null;
+foreach ($argv as $a) if (str_starts_with($a, '--detalhes=')) $detalhes_arq = substr($a, 11);
+$args = array_values(array_filter($argv, fn($a) => $a !== '--teste' && !str_starts_with($a, '--detalhes=')));
+$det = ['novos' => [], 'mudaram' => [], 'fecharam' => []];
 $arquivo = $args[1] ?? '/var/www/fsa-designer/leads/dados/leads.html';
 $cidade_lista = $args[2] ?? 'sao-joao';
 // vale também cidade cadastrada e ainda desligada em /admin/cidades.php (prepara os comércios antes de ligar)
@@ -191,8 +195,11 @@ foreach ($linhas_html as [, $status, $tipo, $attrs, $tr]) {
     if ($ativo === 'inativo') {
         $fechados++; $pulados++;
         if (str_contains($tr, 'Fechado permanentemente')) {
-            $ja = linha('SELECT id, importado, status FROM profissionais WHERE chave_importacao = ?', [$k]);
-            if ($ja && (int)$ja['importado'] === 1 && $ja['status'] === 'ativo') { q("UPDATE profissionais SET status = 'pausado' WHERE id = ?", [$ja['id']]); $pausados++; }
+            $ja = linha('SELECT id, importado, status, nome, endereco FROM profissionais WHERE chave_importacao = ?', [$k]);
+            if ($ja && (int)$ja['importado'] === 1 && $ja['status'] === 'ativo') {
+                q("UPDATE profissionais SET status = 'pausado' WHERE id = ?", [$ja['id']]); $pausados++;
+                $det['fecharam'][] = ['id' => (int)$ja['id'], 'nome' => $ja['nome'], 'endereco' => $ja['endereco']];
+            }
         }
         continue;
     }
@@ -210,16 +217,26 @@ foreach ($linhas_html as [, $status, $tipo, $attrs, $tr]) {
         'endereco' => $endereco, 'bairro' => $bairro, 'mapa' => $mapa && preg_match('#^https://(www\.google\.com/maps|maps\.google\.com/)#', $mapa) ? mb_substr($mapa, 0, 500) : null,
         'popularidade' => $popularidade,
     ];
-    $atual = linha('SELECT id, importado, status, categoria_id, tipo, mapa FROM profissionais WHERE chave_importacao = ?', [$k]);
+    $atual = linha('SELECT id, importado, status, categoria_id, tipo, mapa, nome, telefone, whatsapp, endereco, bairro, instagram, site FROM profissionais WHERE chave_importacao = ?', [$k]);
     if (!$atual) {
         inserir('profissionais', $dados + ['chave_importacao' => $k, 'importado' => 1, 'status' => 'ativo', 'assinatura' => 'sem']);
         $novos++;
+        $det['novos'][] = ['nome' => $nome, 'tipo' => $dados['tipo'], 'area' => array_search($categoria_id, $cat, true) ?: 'outros',
+            'telefone' => $telefone, 'whatsapp' => $whatsapp, 'endereco' => $endereco, 'bairro' => $bairro, 'cidade' => $cidade,
+            'mapa' => $dados['mapa'], 'popularidade' => $popularidade];
     } elseif ((int)$atual['importado'] === 1 && $atual['status'] === 'ativo') {
         // lista nova mais pobre não estraga o que já estava bom: área/tipo sem informação e link do Maps sem coordenadas
         if ($dados['categoria_id'] === $cat['outros'] && (int)$atual['categoria_id'] !== $cat['outros']) { unset($dados['categoria_id']); $dados['tipo'] = $dados['tipo'] ?? $atual['tipo']; }
         if ($dados['tipo'] === null) unset($dados['tipo']);
         if ($dados['popularidade'] === 0) unset($dados['popularidade']);   // lista sem número de avaliações não zera a ordem
         if (str_contains((string)$atual['mapa'], '!3d') && !str_contains((string)$dados['mapa'], '!3d')) unset($dados['mapa']);
+        // o que mudou de verdade (sem contar maiúsculas/acentos): nome, telefone, WhatsApp, endereço, bairro, Instagram, site
+        $campos = [];
+        foreach (['nome', 'telefone', 'whatsapp', 'endereco', 'bairro', 'instagram', 'site'] as $cp) {
+            $antes = trim((string)$atual[$cp]); $depois = trim((string)($dados[$cp] ?? ''));
+            if ($depois !== '' && chave($antes) !== chave($depois)) $campos[$cp] = [$antes, $depois];
+        }
+        if ($campos) $det['mudaram'][] = ['id' => (int)$atual['id'], 'nome' => $atual['nome'], 'campos' => $campos];
         atualizar('profissionais', (int)$atual['id'], $dados);
         $atualizados++;
     } else {
@@ -232,6 +249,7 @@ $total = (int)valor('SELECT COUNT(*) FROM profissionais WHERE importado = 1 AND 
 $sem_area = $teste ? linhas("SELECT COALESCE(p.tipo, CONCAT('(sem tipo) ', p.nome)) t, COUNT(*) n FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
     WHERE p.cidade = ? AND p.status = 'ativo' AND c.slug = 'outros' GROUP BY t ORDER BY n DESC LIMIT 150", [$cidade_lista]) : [];
 $teste ? db()->rollBack() : db()->commit();
+if ($detalhes_arq) file_put_contents($detalhes_arq, json_encode($det, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 echo ($teste ? "🧪 TESTE (nada gravado) " : '') . "✔ Leads de " . nome_cidade($cidade_lista) . ": $novos novos, $atualizados atualizados, $pulados pulados (repetidos, mantidos, $publicos lugares públicos, $fechados fechados no Google" . ($pausados ? ", $pausados que fecharam de vez saíram do app" : '') . "). No app: $total comércios importados nesta cidade.\n";
 echo '  Por área: ' . implode(', ', array_map(fn($a) => "{$a['slug']} {$a['n']}", $por_area)) . "\n";
 if ($sem_area) echo '  Em "Outros": ' . implode(' | ', array_map(fn($a) => "{$a['t']} {$a['n']}", $sem_area)) . "\n";

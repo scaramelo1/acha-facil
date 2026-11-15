@@ -13,6 +13,8 @@ function admin_inicio(string $titulo, ?array $admin): void {
     $novos += $ev;
     require_once __DIR__ . '/suporte.php';
     $sup = $admin ? suporte_abertos_contar() : 0;   // chamados esperando resposta (passo 53)
+    require_once __DIR__ . '/novidades.php';
+    $nov = $admin ? nov_aguardando_contar() : 0;   // listas do robô esperando aprovação (passo 56)
     ?><!doctype html>
 <html lang="pt-BR">
 <head>
@@ -32,7 +34,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
     <a href="<?= $base ?>/admin/">Pendências<?= $pend + $novos ? ' <span class="contador">' . ($pend + $novos) . '</span>' : '' ?></a>
     <a href="<?= $base ?>/admin/numeros.php">Números</a>
     <a href="<?= $base ?>/admin/cidades.php">Cidades</a>
-    <a href="<?= $base ?>/admin/importar.php">Importar lista</a>
+    <a href="<?= $base ?>/admin/novidades.php">Novidades<?= $nov ? ' <span class="contador">' . $nov . '</span>' : '' ?></a>
     <a href="<?= $base ?>/admin/pessoas.php">Pessoas</a>
     <a href="<?= $base ?>/admin/suporte.php">Suporte<?= $sup ? ' <span class="contador">' . $sup . '</span>' : '' ?></a>
     <details class="menu-suspenso">
@@ -41,7 +43,8 @@ function admin_inicio(string $titulo, ?array $admin): void {
         <a class="so-celular" href="<?= $base ?>/admin/">Pendências<?= $pend + $novos ? ' <span class="contador">' . ($pend + $novos) . '</span>' : '' ?></a>
         <a class="so-celular" href="<?= $base ?>/admin/numeros.php">Números</a>
         <a class="so-celular" href="<?= $base ?>/admin/cidades.php">Cidades</a>
-        <a class="so-celular" href="<?= $base ?>/admin/importar.php">Importar lista</a>
+        <a class="so-celular" href="<?= $base ?>/admin/novidades.php">Novidades<?= $nov ? ' <span class="contador">' . $nov . '</span>' : '' ?></a>
+        <a href="<?= $base ?>/admin/importar.php">Importar lista</a>
         <a class="so-celular" href="<?= $base ?>/admin/pessoas.php">Pessoas</a>
         <a class="so-celular" href="<?= $base ?>/admin/suporte.php">Suporte<?= $sup ? ' <span class="contador">' . $sup . '</span>' : '' ?></a>
         <a href="<?= $base ?>/admin/notificacoes.php">Notificações</a>

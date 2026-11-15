@@ -1,0 +1,27 @@
+{
+  "site": "https://achafacilapp.com.br",
+  "chave": "COLE_AQUI_A_CHAVE_GERADA_EM_ADMIN_NOVIDADES",
+  "pasta_robo": "C:\\Users\\Fellipe\\leads-sem-site",
+  "comando": "python robo.py \"{cidade}\"",
+  "pasta_saida": "C:\\Users\\Fellipe\\leads-sem-site",
+  "cidades_por_vez": 1,
+  "cidades": [
+    "Sao Joao da Boa Vista - SP",
+    "Aguas da Prata - SP",
+    "Pocos de Caldas - MG",
+    "Vargem Grande do Sul - SP",
+    "Santa Rita do Sapucai - MG",
+    "Aguai - SP",
+    "Andradas - MG",
+    "Aparecida - SP",
+    "Campos do Jordao - SP",
+    "Casa Branca - SP",
+    "Espirito Santo do Pinhal - SP",
+    "Guaxupe - MG",
+    "Holambra - SP",
+    "Mococa - SP",
+    "Mogi Guacu - SP",
+    "Sao Jose do Rio Pardo - SP",
+    "Serra Negra - SP"
+  ]
+}

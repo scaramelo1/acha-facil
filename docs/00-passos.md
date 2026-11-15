@@ -482,3 +482,14 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    pré-carregamento" e a explicação; /admin/numeros.php, "pelo Google sem pré-carregamento". marcar-pre-carregamento.php
    (rodado pelo instalar.sh) marca as entradas antigas pelo registro do Apache. Testado no banco de teste com os dados
    de produção: hoje 61 de 77 entradas do Google foram pré-carregamento. Falta: rodar o instalar.sh.
+56. 🟡 Robô automático + Novidades (15/11, pedido do usuário: "sistema que atualize as listagens para ver se tem algo
+   novo", opção A = robô no PC). Servidor: inc/novidades.php, /admin/novidades.php (menu "Novidades" com contador) e
+   /admin/robo-enviar.php (recebe a lista do PC com a chave do robô no cabeçalho X-Chave-Robo; sem login). Cada lista é
+   conferida em modo TESTE (importar-leads.php --detalhes=) e mostra os comércios **novos**, os que **mudaram**
+   (nome/telefone/WhatsApp/endereço/bairro/Instagram/site, sem contar maiúsculas e acentos) e os que **fecharam**;
+   "Importar para o app" ou "Descartar"; lista nova da mesma cidade descarta a anterior que esperava. Modo automático
+   (liga/desliga na página) importa sozinho. Push para os admins quando há novidade. "Importar lista" agora manda para
+   Novidades. Tudo em arquivos ($DADOS/novidades), sem mudança no banco. PC: scripts/robo/robo-rodar.ps1 (rodízio de
+   cidades, -Cidade, -Todas, -Arquivo, -Testar; registro em robo-log.txt) e robo-agendar.ps1 (Agendador de Tarefas,
+   todo dia 03:00). Guia em docs/robo-automatico.md. Testado numa cópia com o banco de teste (envio por HTTP, chave
+   errada, aprovar, automático). Falta: o usuário configurar o PC (comando do robô no robo-config.json).

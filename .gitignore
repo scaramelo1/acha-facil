@@ -49,3 +49,8 @@ servidor/publico/assets/icone-previa.png
 credentials.json
 credentials/
 saida/
+
+# robo automatico no PC (scripts/robo): chave e registros
+scripts/robo/robo-config.json
+scripts/robo/robo-log.txt
+scripts/robo/robo-estado.json
