@@ -68,6 +68,7 @@ function liberar_acesso(int $profissional_id, ?int $pedido_id, string $nome, ?st
     inserir('acessos_dono', ['profissional_id' => $profissional_id, 'pedido_id' => $pedido_id, 'nome' => mb_substr($nome, 0, 120),
         'telefone' => $telefone, 'token_hash' => hash('sha256', $token), 'admin_id' => $admin_id]);
     registrar($admin_id, 'liberou_acesso', $profissional_id, $nome);
+    web_cache_limpar();   // a ficha deixa de mostrar "Este comércio é seu?"
     return url_publica('painel/?t=' . $token);
 }
 

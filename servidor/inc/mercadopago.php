@@ -202,6 +202,7 @@ function mp_conferir_pagamento(string $mp_id): ?array {
         $pid = (int)($pedido['profissional_id'] ?? 0);
         if ($marcou === 1 && $pid) {
             q('UPDATE profissionais SET basico_pago_em = COALESCE(basico_pago_em, NOW()) WHERE id = ?', [$pid]);
+            web_cache_limpar();
             require_once __DIR__ . '/avisos.php';
             avisar_admins('Novo plano pago', $pedido['nome'] . ' pagou o plano ' . (PLANOS_NOME[$pedido['plano']] ?? '') . ' de '
                 . (string)valor('SELECT nome FROM profissionais WHERE id = ?', [$pid]) . '.', ['pedido' => (int)$pedido['id']]);

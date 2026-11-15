@@ -2,6 +2,7 @@
 // Pedido de um dono: assumir o perfil (depois de confirmar por telefone, libera o link do painel) ou tirar do app
 require __DIR__ . '/../../inc/admin.php';
 require_once __DIR__ . '/../../inc/avisos.php';
+require_once __DIR__ . '/../../inc/mercadopago.php';   // pedido_pago()
 $admin = exigir_admin();
 $id = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
 $pe = linha('SELECT * FROM pedidos WHERE id = ?', [$id]);

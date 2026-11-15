@@ -18,8 +18,23 @@ if ($acao === 'remover' && !$p) ir('busca.php');
 if ($acao === 'assumir' && !$p) ir($plano ? 'busca.php' : 'incluir.php');   // negócio fora do app: incluir é de graça
 // assumir o perfil ou escolher um plano: só com a conta Google (para receber o aviso de "aceito" no celular)
 require_once __DIR__ . '/../inc/conta-web.php';
-$conta = $acao === 'assumir' ? exigir_login_web($plano ? 'Plano ' . PLANOS_NOME[$plano] : 'Assumir o perfil',
-    ($p ? "Você vai pedir para cuidar de {$p['nome']} no Acha Fácil." : 'Você vai fazer um pedido para o seu comércio.')) : usuario_web();
+require_once __DIR__ . '/../inc/avisos.php';
+// tirar do app também (passo 52): o admin recebe o aviso e sabe quem pediu
+$conta = exigir_login_web($acao === 'remover' ? 'Tirar do app' : ($plano ? 'Plano ' . PLANOS_NOME[$plano] : 'Assumir o perfil'),
+    $acao === 'remover' ? "Você vai pedir para tirar {$p['nome']} do Acha Fácil."
+        : ($p ? "Você vai pedir para cuidar de {$p['nome']} no Acha Fácil." : 'Você vai fazer um pedido para o seu comércio.'));
+// comércio que já tem dono (plano pago ou painel liberado): ninguém mais assume nem tira por aqui
+require_once __DIR__ . '/../inc/moderacao.php';
+$e_o_dono = fn(): bool => (int)(dono_atual()['id'] ?? 0) === (int)$p['id']
+    || (pedido_usuario_pronto() && valor("SELECT 1 FROM pedidos WHERE profissional_id = ? AND usuario_id = ? AND status = 'feito'", [$p['id'], $conta['id']]));
+if ($p && tem_dono($p) && !$e_o_dono()) {
+    pagina_inicio('Comércio com responsável · Acha Fácil!', 'Este comércio já tem um responsável no Acha Fácil.', '', ['noindex' => true]);
+    echo '<main class="documento"><h1>Este comércio já tem responsável</h1><div class="quadro"><strong>' . h($p['nome']) . '</strong></div>'
+        . '<p>O responsável por este comércio já cuida da página no Acha Fácil. Se acha que isso está errado, fale com a gente: '
+        . contatos_html() . '.</p></main>';
+    pagina_fim();
+    exit;
+}
 $enviado = false;
 $erro = null;
 $com_assinatura = $plano !== null && mp_pronto();

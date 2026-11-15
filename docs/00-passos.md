@@ -457,3 +457,10 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 51. ✅ Login com o Google obrigatório nos pedidos de donos (15/11, pedido do usuário). perfil.php?acao=assumir (com ou
    sem plano) e incluir.php mostram "Entrar com o Google" (exigir_login_web() em inc/conta-web.php) e voltam para a
    mesma página; o nome vem preenchido da conta. "Tirar do app" continua sem login.
+52. ✅ Comércio com dono + login para tirar do app (15/11, pedido do usuário). tem_dono() / SQL_TEM_DONO em inc/guia.php:
+   Básico pago, Destaque em dia ou painel liberado (acessos_dono ativo). Com dono, some "Este comércio é seu?" no site
+   (web.php) e no app (linkAssumir/linkRemover = null, cadastrado = true; sem APK novo) e perfil.php mostra "Este
+   comércio já tem responsável" (menos para o próprio dono: painel aberto ou pedido feito pela mesma conta Google).
+   "Tirar do app" exige login Google; o admin recebe o aviso "Pedido para tirar do app". Cache web limpo ao liberar
+   painel, pagar o Básico e cortar acesso. Corrigido também pedido_pago() repetido (avisos.php x mercadopago.php).
+

@@ -120,8 +120,17 @@ function visivel(?string $cidade = null): string {
 // Ordem do dia: muda uma vez por dia, para ninguém ficar sempre no topo nem sempre no fim
 function semente_dia(): int { return (int)date('Ymd'); }
 
+// Comércio com dono: pagou o Básico, tem o Destaque em dia ou um admin liberou o painel (acesso ativo). Some o
+// "Este comércio é seu?" e ninguém mais pede para assumir ou tirar pelo site/app.
+const SQL_TEM_DONO = '(p.importado = 0 OR p.basico_pago_em IS NOT NULL OR ' . SQL_DESTAQUE . '
+    OR EXISTS (SELECT 1 FROM acessos_dono ad WHERE ad.profissional_id = p.id AND ad.ativo = 1))';
+function tem_dono(array $p): bool {
+    if (array_key_exists('tem_dono', $p)) return (bool)$p['tem_dono'];
+    return (bool)valor('SELECT ' . SQL_TEM_DONO . ' FROM profissionais p WHERE p.id = ?', [(int)$p['id']]);
+}
+
 const CAMPOS_RESUMO = 'p.id, p.nome, p.tipo, p.cidade, p.importado, p.servicos, p.bairro, p.atende_em_casa, p.foto, p.fotos, p.verificado, p.plano,
-    ' . SQL_DESTAQUE . ' AS destaque_pago,
+    ' . SQL_DESTAQUE . ' AS destaque_pago, ' . SQL_TEM_DONO . ' AS tem_dono,
     p.nota_media, p.total_avaliacoes, p.whatsapp, p.telefone, c.id AS categoria_id, c.nome AS categoria, c.icone, c.cor';
 
 require_once __DIR__ . '/horarios.php';
@@ -155,7 +164,7 @@ function prof_resumo(array $p): array {
         'avaliacoes' => (int)$p['total_avaliacoes'],
         'temWhatsapp' => (bool)$p['whatsapp'],
         'temTelefone' => (bool)$p['telefone'],
-        'cadastrado' => !$p['importado'],   // false = veio da lista pública, o dono ainda não assumiu
+        'cadastrado' => !$p['importado'] || tem_dono($p),   // false = veio da lista pública, o dono ainda não assumiu
     ];
 }
 
@@ -260,7 +269,7 @@ function buscar(string $termo, ?string $cidade, int $limite = 50): array {
 }
 
 function profissional_visivel(int $id): ?array {
-    return $id ? linha('SELECT p.*, ' . SQL_DESTAQUE . ' AS destaque_pago, c.nome AS categoria, c.icone, c.cor FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
+    return $id ? linha('SELECT p.*, ' . SQL_DESTAQUE . ' AS destaque_pago, ' . SQL_TEM_DONO . ' AS tem_dono, c.nome AS categoria, c.icone, c.cor FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
         WHERE p.id = ? AND ' . visivel(), [$id]) : null;
 }
 
@@ -277,8 +286,8 @@ function prof_completo(array $p, ?int $usuario_id): array {
         'endereco' => $p['endereco'],
         'mapa' => $p['mapa'] ?: ($p['endereco'] ? 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($p['endereco'] . ', ' . nome_cidade($p['cidade']) . ' - ' . uf_cidade($p['cidade'])) : null),
         'site' => $p['site'],
-        'linkAssumir' => $p['importado'] ? url_publica('planos.php?id=' . $p['id']) : null,
-        'linkRemover' => $p['importado'] ? url_publica('perfil.php?id=' . $p['id'] . '&acao=remover') : null,
+        'linkAssumir' => $p['importado'] && !tem_dono($p) ? url_publica('planos.php?id=' . $p['id']) : null,
+        'linkRemover' => $p['importado'] && !tem_dono($p) ? url_publica('perfil.php?id=' . $p['id'] . '&acao=remover') : null,
         'horario' => $p['horario'],
         'horarios' => horarios_api(horarios_ler($p['horarios'] ?? null)),   // um campo por linha (Segunda a sexta, Sábado...)
         'fotos' => array_map('foto_url', lista_fotos($p['fotos'] ?? null)),   // carrossel da capa

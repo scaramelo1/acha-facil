@@ -468,7 +468,7 @@ function web_pagina_ficha(array $p): void {
     </article>
 
     <aside class="caixa ficha-dono">
-      <?php if ($p['importado'] && !$p['basico_pago_em'] && !$p['destaque_pago']): // dono ainda não pagou nenhum plano ?>
+      <?php if ($p['importado'] && !tem_dono($p)): // sem dono: não pagou plano nem teve o painel liberado ?>
         <h2 class="h-pequeno">Este comércio é seu?</h2>
         <p>Corrija os dados, coloque fotos, o horário e o que você vende. <a class="botao amarelo" href="<?= h($c['linkAssumir']) ?>">Ver os planos</a></p>
         <p class="discreto">Os dados vieram de informações públicas do comércio na internet. Não quer aparecer? <a href="<?= h($c['linkRemover']) ?>" rel="nofollow">Tirar meu comércio do Acha Fácil</a>.</p>

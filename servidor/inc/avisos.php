@@ -50,9 +50,6 @@ function avisar_usuario(?int $usuario_id, string $titulo, string $texto, array $
     }
 }
 
-/** O pedido com plano já foi pago? */
-function pedido_pago(array $pe): bool { return in_array($pe['mp_status'] ?? '', ['authorized', 'approved'], true); }
-
 /**
  * Manda o mesmo aviso para uma lista de endereços Expo Push, de 100 em 100. Aparelho que desinstalou o app
  * (DeviceNotRegistered) sai das duas tabelas de aparelhos. Devolve [entregues, falhas]. Não lança erro.

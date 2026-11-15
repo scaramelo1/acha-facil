@@ -75,6 +75,7 @@ function ligar_cortesia(int $pedido_id, string $codigo): void {
     if (!$pid) return;
     if (plano_unico((string)$pedido['plano'])) {
         q('UPDATE profissionais SET basico_pago_em = COALESCE(basico_pago_em, NOW()) WHERE id = ?', [$pid]);
+        web_cache_limpar();
     } else {
         q("UPDATE profissionais SET plano = ?, assinatura = 'cortesia' WHERE id = ?", [$pedido['plano'], $pid]);
     }
