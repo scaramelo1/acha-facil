@@ -7,6 +7,9 @@ Disallow: /google/
 Disallow: /assinatura.php
 Disallow: /perfil.php
 Disallow: /baixar-apk.php
+Disallow: /entrar.php
+Disallow: /sair.php
+Disallow: /minha-conta.php
 Disallow: /*/buscar
 
 Sitemap: https://achafacilapp.com.br/sitemap.xml

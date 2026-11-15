@@ -25,7 +25,8 @@ pagina_inicio('Privacidade · Acha Fácil', 'Quais dados o Acha Fácil usa, para
     <thead><tr><th>Situação</th><th>Dados</th><th>Para quê</th></tr></thead>
     <tbody>
       <tr><td>Usar sem conta</td><td>Nenhum dado pessoal. Contamos, sem saber quem foi, quantas vezes cada perfil foi aberto e quantos toques teve em WhatsApp, ligar, Instagram e mapa.</td><td>Mostrar ao profissional o retorno do anúncio.</td></tr>
-      <tr><td>Entrar com o Google</td><td>Nome, e-mail e foto do perfil, enviados pelo Google quando você escolhe entrar. Não recebemos a sua senha do Google nem outros dados da sua conta.</td><td>Entrar no app, avaliar, comentar e salvar profissionais.</td></tr>
+      <tr><td>Entrar com o Google</td><td>Nome, e-mail e foto do perfil, enviados pelo Google quando você escolhe entrar. Não recebemos a sua senha do Google nem outros dados da sua conta.</td><td>Entrar no app ou no site, avaliar, comentar e salvar profissionais.</td></tr>
+      <tr><td>Cookies do site</td><td>Se você entrar no site: um cookie com um código da sua sessão (dura até 180 dias ou até você sair). Sem entrar: um cookie de 30 minutos que diz só de onde você chegou ao site (Google, redes sociais...), sem dado pessoal.</td><td>Manter você na sua conta e contar, sem saber quem foi, de onde vêm as visitas.</td></tr>
       <tr><td>Avaliar e salvar</td><td>Estrelas, comentário, data e a lista de salvos.</td><td>Mostrar as avaliações (com primeiro nome e inicial, ex.: "Maria S.") e seus salvos.</td></tr>
       <tr><td>Notificações</td><td>Só se você permitir os avisos no celular: o endereço de aviso do aparelho (um código criado pelo serviço de avisos do celular), a última cidade escolhida no app e, se você entrou, a ligação com a sua conta.</td><td>Mandar novidades do Acha Fácil da sua cidade. Você pode desligar quando quiser nas configurações do celular; se desinstalar o app, o endereço é apagado.</td></tr>
       <tr><td>Segurança</td><td>Endereço IP de tentativas de entrada que falharam (apagado em 1 dia) e registros de acesso ao servidor (data, hora e IP).</td><td>Proteger contas contra invasão. Os registros de acesso são guardados por 6 meses, como manda o Marco Civil da Internet.</td></tr>
@@ -85,7 +86,9 @@ pagina_inicio('Privacidade · Acha Fácil', 'Quais dados o Acha Fácil usa, para
       <li>Toque na aba <strong>Conta</strong>, embaixo.</li>
       <li>Toque em <strong>Excluir minha conta</strong> e confirme.</li>
     </ol>
-    <p><strong>Sem o app:</strong> peça a exclusão por <?= contatos_html() ?>, informando o e-mail da conta. Respondemos em até 15 dias.</p>
+    <p><strong>Pelo site (na hora):</strong> entre com o Google, abra <a href="<?= $base ?>/minha-conta.php">Minha conta</a>, toque em
+      <strong>Excluir minha conta</strong>, marque a confirmação e toque no botão.</p>
+    <p><strong>Ou:</strong> peça a exclusão por <?= contatos_html() ?>, informando o e-mail da conta. Respondemos em até 15 dias.</p>
     <p style="margin-bottom:0">São apagados: nome, e-mail, foto, avaliações, comentários e salvos. Nada mais fica guardado, exceto os registros de acesso que a lei obriga a manter por 6 meses.</p>
   </div>
 

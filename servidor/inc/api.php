@@ -45,6 +45,8 @@ function usuario_app(): ?array {
     static $u = false;
     if ($u !== false) return $u;
     $t = (string)($_SERVER['HTTP_X_TOKEN'] ?? '');
+    // site (passo 44): o token vem no cookie af_conta, só com o cabeçalho X-AF-Web (outro site não consegue mandar)
+    if ($t === '' && ($_SERVER['HTTP_X_AF_WEB'] ?? '') === '1') $t = (string)($_COOKIE['af_conta'] ?? '');
     if (!preg_match('/^[a-f0-9]{64}$/', $t)) return $u = null;
     $u = linha('SELECT u.* FROM sessoes_app s JOIN usuarios u ON u.id = s.usuario_id AND u.ativo = 1 WHERE s.token_hash = ?', [token_hash($t)]);
     if ($u) q('UPDATE sessoes_app SET usado_em = NOW() WHERE token_hash = ? AND usado_em < NOW() - INTERVAL 1 HOUR', [token_hash($t)]);

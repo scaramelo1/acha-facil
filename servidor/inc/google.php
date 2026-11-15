@@ -58,7 +58,7 @@ function conta_do_google(array $p): int {
  * instalado com o mesmo esquema (um APK antigo, por exemplo) pegava o link e mostrava "Unmatched Route". A pessoa
  * volta pelo X do navegador ou pelo botão voltar, e o app confere a entrada no servidor ao voltar para a frente.
  */
-function pagina_google(string $titulo, string $texto): void {
+function pagina_google(string $titulo, string $texto, ?string $volta_site = null): void {   // $volta_site: entrada pelo site (passo 44)
     header('Content-Type: text/html; charset=utf-8');
     echo '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
         . '<meta name="robots" content="noindex"><title>' . h($titulo) . ' · Acha Fácil</title><style>'
@@ -68,6 +68,7 @@ function pagina_google(string $titulo, string $texto): void {
         . '.marca{font-style:italic;font-weight:900;font-size:22px;margin-bottom:28px}'
         . '.volta{background:#F7C600;color:#005C38;font-weight:700;font-size:18px;padding:16px 20px;border-radius:18px;line-height:1.4}</style></head><body><div>'
         . '<div class="marca">Acha Fácil!</div><h1>' . h($titulo) . '</h1><p>' . h($texto) . '</p>'
-        . '<div class="volta">Toque no <b>X</b> lá em cima ou no botão <b>voltar</b> do celular.</div>'
+        . ($volta_site !== null ? '<a href="' . h(url(ltrim($volta_site, '/'))) . '">Voltar ao site</a>'
+            : '<div class="volta">Toque no <b>X</b> lá em cima ou no botão <b>voltar</b> do celular.</div>')
         . '</div></body></html>';
 }

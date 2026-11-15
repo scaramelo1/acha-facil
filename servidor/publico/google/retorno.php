@@ -3,18 +3,22 @@
 // na entrada; o app, que pergunta ao servidor (api/google.php, acao=verificar), recebe a sessão quando a pessoa
 // volta para ele (a página não abre link para o app: ver pagina_google em inc/google.php).
 require __DIR__ . '/../../inc/google.php';
+require_once __DIR__ . '/../../inc/conta-web.php';
 header('Cache-Control: no-store');
 header('X-Robots-Tag: noindex');
 $estado = (string)($_GET['state'] ?? '');
 $l = preg_match('/^[a-f0-9]{64}$/', $estado)
     ? linha('SELECT * FROM logins_google WHERE estado = ? AND usuario_id IS NULL AND criado_em > NOW() - INTERVAL 10 MINUTE', [$estado])
     : null;
-if (!$l) { pagina_google('Esta entrada expirou', 'Volte ao app e toque em "Entrar com o Google" de novo.'); exit; }
-$falhar = function (string $msg) use ($estado): never {
+if (!$l) { pagina_google('Esta entrada expirou', 'Volte e toque em "Entrar com o Google" de novo.', isset($_COOKIE['af_estado']) ? '/' : null); exit; }
+// entrada pelo site (passo 44): volta = "web:/página"; o estado tem de ser o do cookie deste navegador
+$site = str_starts_with((string)$l['volta'], 'web:') ? volta_web(substr((string)$l['volta'], 4)) : null;
+$falhar = function (string $msg) use ($estado, $site): never {
     q('DELETE FROM logins_google WHERE estado = ?', [$estado]);   // o app recebe "não deu certo" e mostra o aviso
-    pagina_google('Não foi possível entrar', $msg . ' Volte ao app e tente de novo.');
+    pagina_google('Não foi possível entrar', $msg . ($site !== null ? ' Tente de novo.' : ' Volte ao app e tente de novo.'), $site);
     exit;
 };
+if ($site !== null && !hash_equals($estado, (string)($_COOKIE['af_estado'] ?? ''))) $falhar('Abra a entrada pelo mesmo navegador.');
 if (isset($_GET['error'])) $falhar('Você cancelou a entrada com o Google.');
 $code = (string)($_GET['code'] ?? '');
 if ($code === '') $falhar('O Google não confirmou a entrada.');
@@ -35,5 +39,12 @@ try {
     $falhar('Não foi possível entrar com o Google agora. Tente de novo.');
 }
 
+if ($site !== null) {
+    q('DELETE FROM logins_google WHERE estado = ?', [$estado]);
+    conta_cookie('af_estado', '', time() - 3600);
+    entrar_web($uid);
+    header('Location: ' . url(ltrim($site, '/')));
+    exit;
+}
 q('UPDATE logins_google SET usuario_id = ?, criado_em = NOW() WHERE estado = ?', [$uid, $estado]);
 pagina_google('Pronto, você entrou!', 'Agora é só voltar para o Acha Fácil.');

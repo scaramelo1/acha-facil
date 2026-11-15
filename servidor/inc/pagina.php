@@ -54,14 +54,34 @@ function pagina_inicio(string $titulo, string $descricao, string $classe = '', a
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=21">
+<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=22">
 <?= $opc['head'] ?? '' ?>
 </head>
 <body class="<?= h($classe) ?>">
 <header class="topo">
   <a class="marca" href="<?= $base ?>/"><img src="<?= $base ?>/assets/logo.png" alt="" width="40" height="40"><span>Acha <b>Fácil!</b></span></a>
-  <nav><a href="<?= $base ?>/#cidades">Cidades</a><a href="<?= $base ?>/#seu-negocio">Seu negócio</a><a href="<?= $base ?>/#baixar" class="nav-botao">Baixar o app</a></nav>
+  <nav><a href="<?= $base ?>/#cidades">Cidades</a><a href="<?= $base ?>/#seu-negocio">Seu negócio</a><a href="<?= $base ?>/#baixar" class="nav-botao">Baixar o app</a>
+    <a href="<?= $base ?>/entrar.php" class="nav-conta" id="conta-topo" rel="nofollow">Entrar</a></nav>
 </header>
+<script>
+// conta no site (passo 44): "Entrar" volta para esta página; quem já entrou vê a foto e vai para Minha conta.
+// As páginas ficam em cache iguais para todos: quem entrou é descoberto aqui, só se o cookie af_logado existir.
+(function () {
+  var a = document.getElementById('conta-topo'), base = <?= json_encode($base) ?>;
+  a.href = base + '/entrar.php?volta=' + encodeURIComponent(location.pathname + location.search);
+  if (document.cookie.indexOf('af_logado=1') < 0) return;
+  fetch(base + '/api/eu.php', { credentials: 'same-origin', headers: { 'X-AF-Web': '1' } })
+    .then(function (r) { if (r.status === 401) { document.cookie = 'af_logado=; Max-Age=0; path=/'; } return r.ok ? r.json() : null; })
+    .then(function (j) {
+      if (!j || !j.usuario) return;
+      a.href = base + '/minha-conta.php'; a.title = 'Minha conta'; a.textContent = ''; a.classList.add('logado');
+      var nome = (j.usuario.nome || '').split(' ')[0];
+      if (j.usuario.foto) { var i = document.createElement('img'); i.src = j.usuario.foto; i.alt = ''; i.referrerPolicy = 'no-referrer';
+        i.onerror = function () { i.remove(); }; a.appendChild(i); }
+      var s = document.createElement('span'); s.textContent = nome || 'Minha conta'; a.appendChild(s);
+    }).catch(function () {});
+})();
+</script>
 <?php
 }
 

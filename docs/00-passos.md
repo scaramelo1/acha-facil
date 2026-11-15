@@ -408,3 +408,13 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    qualquer origem/cidade/período. Entradas de 11/11 a 14/11 trazidas do registro do Apache por
    servidor/importar-logs-entradas.php (roda uma vez, marca 'logs-entradas-antes-022' em migracoes; --teste só
    conta): 332 do Google (Poços 206, Mococa 83, Aguaí 42). Backup das tabelas em /var/lib/acha-facil/backups
+44. ✅ Entrar no site com o Google e fazer o mesmo que no app (14/11, pedido do usuário). Mesma conta do app:
+   /entrar.php?volta= cria a entrada em logins_google com volta "web:/página" e cookie af_estado (google/retorno.php
+   confere que é o mesmo navegador), depois o mesmo caminho do Google do app (mesmo endereço de retorno cadastrado).
+   Na volta: sessão em sessoes_app guardada no cookie httponly af_conta (180 dias) + af_logado=1 para o JS
+   (inc/conta-web.php). api/ aceita o cookie só com o cabeçalho X-AF-Web: 1 (usuario_app() em inc/api.php), então o
+   site usa os mesmos endereços do app (favoritos, avaliar, eu). Ficha: botão ♡ Salvar e "Avaliar este comércio"
+   (estrelas + comentário, mudar/apagar); sem conta mostra "Entrar com o Google". Topo de todas as páginas: "Entrar"
+   ou a foto da pessoa (descoberto por JS, as páginas em cache continuam iguais para todos). /minha-conta.php: salvos
+   (tirar), minhas avaliações (mudar/apagar), sair (POST com CSRF) e excluir conta. robots.txt e privacidade.php
+   atualizados. Sem mudança no banco. Testado no banco de teste (14/11); o vaivém real com o Google só no navegador

@@ -415,3 +415,31 @@ a.area:hover { border-color: var(--verde); }
   background: var(--amarelo-claro); border: 2px solid var(--amarelo); border-radius: 18px; padding: 16px 18px; }
 .convite-evento p { margin: 0; flex: 1 1 260px; }
 .convite-evento b { color: var(--verde); }
+
+/* conta no site (passo 44) */
+.nav-conta { display: inline-flex; align-items: center; gap: 8px; border: 2px solid rgba(255,255,255,.5); }
+.nav-conta.logado { border-color: transparent; padding-left: 6px !important; }
+.nav-conta img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+@media (max-width: 760px) {
+  .topo nav a.nav-conta { display: inline-flex; padding: 8px 12px; }
+  .nav-conta.logado span { display: none; }
+}
+.botao-google { background: #fff; color: #1f1f1f; border: 2px solid var(--borda); gap: 10px; display: inline-flex; align-items: center; }
+.botao-google:hover { background: #f6f6f6; }
+.botao-salvar.salvo { background: var(--verde); color: #fff; }
+.avaliar { background: var(--creme); border-radius: 16px; padding: 16px 20px; margin: 16px 0; }
+.avaliar h3 { margin-top: 0; }
+.avaliar textarea { width: 100%; box-sizing: border-box; font: inherit; border-radius: 12px; border: 2px solid var(--borda); padding: 10px; }
+.estrelas-escolher { display: inline-flex; flex-direction: row-reverse; gap: 2px; margin-bottom: 10px; }
+.estrelas-escolher input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.estrelas-escolher label { cursor: pointer; font-size: 2.2rem; line-height: 1; color: #cfcfcf; }
+.estrelas-escolher label:hover, .estrelas-escolher label:hover ~ label,
+.estrelas-escolher label:has(input:checked), .estrelas-escolher label:has(input:checked) ~ label { color: var(--amarelo); }
+.estrelas-escolher input:focus-visible + span { outline: 3px solid var(--verde); border-radius: 6px; }
+.so-leitor { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.conta-topo { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.conta-topo img { border-radius: 50%; object-fit: cover; }
+.conta-topo h1 { margin: 0; }
+.lista-conta { list-style: none; padding: 0; display: grid; gap: 10px; }
+.lista-conta li { background: var(--branco); border-radius: 16px; padding: 12px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; box-shadow: var(--sombra); }
+.lista-conta li form { margin-left: auto; }

@@ -332,6 +332,12 @@ function web_pagina_ficha(array $p): void {
     $cidade = $p['cidade'];
     [$nome_cidade, , $uf] = CIDADES[$cidade];
     $c = prof_completo($p, null);
+    // conta no site (passo 44): salvar e avaliar com a mesma conta do app
+    require_once __DIR__ . '/conta-web.php';
+    $eu = usuario_web();
+    $salvo = $eu && valor('SELECT 1 FROM favoritos WHERE usuario_id = ? AND profissional_id = ?', [$eu['id'], $p['id']]);
+    $minha = $eu ? linha('SELECT estrelas, comentario FROM avaliacoes WHERE profissional_id = ? AND usuario_id = ?', [$p['id'], $eu['id']]) : null;
+    if ($eu) header('Cache-Control: private, no-store');
     $h = horarios_ler($p['horarios'] ?? null);
     $aberto = $h ? aberto_agora($h) : null;
     $tipo = $p['tipo'] ?: null;
@@ -394,6 +400,8 @@ function web_pagina_ficha(array $p): void {
         <?php if ($c['mapa']): ?><a class="botao contorno" href="<?= h($c['mapa']) ?>" data-contato="mapa" rel="nofollow noopener" target="_blank">Como chegar</a><?php endif ?>
         <?php if ($c['instagram']): ?><a class="botao contorno" href="<?= h($c['instagram']) ?>" data-contato="instagram" rel="nofollow noopener" target="_blank">Instagram</a><?php endif ?>
         <?php if ($p['site']): ?><a class="botao contorno" href="<?= h(preg_match('#^https?://#i', $p['site']) ? $p['site'] : 'https://' . $p['site']) ?>" data-contato="site" rel="nofollow noopener" target="_blank">Site</a><?php endif ?>
+        <?php if ($eu): ?><button type="button" class="botao contorno botao-salvar<?= $salvo ? ' salvo' : '' ?>" id="botao-salvar" aria-pressed="<?= $salvo ? 'true' : 'false' ?>"><?= $salvo ? '♥ Salvo' : '♡ Salvar' ?></button>
+        <?php else: ?><a class="botao contorno botao-salvar" href="<?= h(link_entrar(url_ficha($p))) ?>" rel="nofollow" title="Entre com o Google para salvar">♡ Salvar</a><?php endif ?>
       </div>
 
       <?php if ($fotos): ?>
@@ -426,8 +434,9 @@ function web_pagina_ficha(array $p): void {
         </div>
       </div>
 
+      <h2>Avaliações de quem usa o Acha Fácil</h2>
+      <?php if (!$c['comentarios']): ?><p class="discreto">Ainda sem avaliações. Seja o primeiro a avaliar!</p><?php endif ?>
       <?php if ($c['comentarios']): ?>
-        <h2>Avaliações de quem usa o Acha Fácil</h2>
         <ul class="avaliacoes">
           <?php foreach ($c['comentarios'] as $a): ?>
             <li><p><b><?= h($a['autor']) ?></b> <span class="estrelas" aria-label="<?= $a['estrelas'] ?> de 5 estrelas"><?= str_repeat('★', $a['estrelas']) . str_repeat('☆', 5 - $a['estrelas']) ?></span> <small><?= h($a['data']) ?></small></p>
@@ -435,8 +444,26 @@ function web_pagina_ficha(array $p): void {
               <?php if ($a['resposta']): ?><p class="resposta"><b>Resposta do comércio:</b> <?= nl2br(h($a['resposta'])) ?></p><?php endif ?></li>
           <?php endforeach ?>
         </ul>
-        <p class="discreto">Para avaliar, baixe o app Acha Fácil.</p>
       <?php endif ?>
+      <section class="avaliar" id="avaliar">
+        <h3><?= $minha ? 'Sua avaliação' : 'Avaliar este comércio' ?></h3>
+        <?php if (!$eu): ?>
+          <p>Entre com a sua conta Google para dar estrelas e comentar. É a mesma conta do app.</p>
+          <?= botao_google(url_ficha($p) . '#avaliar') ?>
+        <?php else: ?>
+          <form id="form-avaliar">
+            <div class="estrelas-escolher" role="radiogroup" aria-label="Estrelas">
+              <?php for ($i = 5; $i >= 1; $i--): // de trás para frente: o CSS (row-reverse + ~) pinta a escolhida e as de antes ?><label><input type="radio" name="estrelas" value="<?= $i ?>"<?= (int)($minha['estrelas'] ?? 0) === $i ? ' checked' : '' ?> required><span aria-hidden="true">★</span><b class="so-leitor"><?= $i ?> estrela<?= $i > 1 ? 's' : '' ?></b></label><?php endfor ?>
+            </div>
+            <label for="comentario">Comentário (opcional)</label>
+            <textarea id="comentario" name="comentario" maxlength="1000" rows="3" placeholder="Conte como foi o atendimento"><?= h((string)($minha['comentario'] ?? '')) ?></textarea>
+            <p class="discreto">Aparece com o seu primeiro nome (<?= h(primeiro_nome($eu['nome'])) ?>).</p>
+            <p><button class="botao"><?= $minha ? 'Salvar mudança' : 'Enviar avaliação' ?></button>
+              <?php if ($minha): ?><button type="button" class="botao contorno" id="apagar-avaliacao">Apagar</button><?php endif ?></p>
+            <p class="aviso erro" id="erro-avaliar" hidden></p>
+          </form>
+        <?php endif ?>
+      </section>
     </article>
 
     <aside class="caixa ficha-dono">
@@ -461,6 +488,39 @@ function web_pagina_ficha(array $p): void {
 </main>
 <script>
 // toques em WhatsApp, ligar, mapa... contam nos números do comércio (origem "site")
+<?php if ($eu): ?>
+// conta no site (passo 44): mesmos endereços do app, com o cookie da conta + X-AF-Web
+function contaApi(caminho, metodo, corpo) {
+  return fetch(<?= json_encode(url('api/')) ?> + caminho, { method: metodo, credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json', 'X-AF-Web': '1' }, body: corpo ? JSON.stringify(corpo) : undefined })
+    .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.erro || 'Não deu certo. Tente de novo.'); return j; }); });
+}
+var bs = document.getElementById('botao-salvar');
+bs.addEventListener('click', function () {
+  var salvar = bs.getAttribute('aria-pressed') !== 'true';
+  bs.disabled = true;
+  contaApi('favoritos.php', 'POST', { id: <?= (int)$p['id'] ?>, salvar: salvar }).then(function () {
+    bs.setAttribute('aria-pressed', salvar ? 'true' : 'false'); bs.classList.toggle('salvo', salvar);
+    bs.textContent = salvar ? '♥ Salvo' : '♡ Salvar';
+  }).catch(function (e) { alert(e.message); }).finally(function () { bs.disabled = false; });
+});
+var fa = document.getElementById('form-avaliar'), erroA = document.getElementById('erro-avaliar');
+function falhaA(e) { erroA.textContent = e.message; erroA.hidden = false; }
+fa.addEventListener('submit', function (ev) {
+  ev.preventDefault();
+  var est = fa.querySelector('input[name=estrelas]:checked');
+  if (!est) { falhaA(new Error('Escolha de 1 a 5 estrelas.')); return; }
+  fa.querySelector('button').disabled = true;
+  contaApi('avaliar.php', 'POST', { id: <?= (int)$p['id'] ?>, estrelas: +est.value, comentario: fa.comentario.value })
+    .then(function () { location.hash = 'avaliar'; location.reload(); })
+    .catch(function (e) { falhaA(e); fa.querySelector('button').disabled = false; });
+});
+var ap = document.getElementById('apagar-avaliacao');
+if (ap) ap.addEventListener('click', function () {
+  if (!confirm('Apagar a sua avaliação?')) return;
+  contaApi('avaliar.php?id=<?= (int)$p['id'] ?>', 'DELETE').then(function () { location.hash = 'avaliar'; location.reload(); }).catch(falhaA);
+});
+<?php endif ?>
 document.querySelectorAll('[data-contato]').forEach(function (a) {
   a.addEventListener('click', function () {
     try { fetch(<?= json_encode(url('api/contato.php')) ?>, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },
