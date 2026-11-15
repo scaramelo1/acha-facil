@@ -423,3 +423,14 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (registro: "entrou pela conta Google do site"). Topo do site mostra "Administração" (JS, j.usuario.admin), Minha
    conta mostra "Painel da administração", e /admin/entrar.php ganhou "Entrar com o Google (conta de admin)".
    Sair da administração sai também da conta do site. E-mail e senha continuam valendo
+46. ⬜ **Para amanhã (15/11):** login do Google com o nome **Acha Fácil!** em vez de **FSA Designer** (pedido do usuário).
+   Hoje a tela do Google mostra "FSA Designer" e volta pelo endereço antigo (fsadesigners.com.br). A fazer:
+   a) Google Cloud → APIs e serviços → Tela de consentimento OAuth (Branding): nome do app "Acha Fácil!", logo do
+      Acha Fácil, e-mail de suporte, página inicial https://achafacilapp.com.br/, privacidade
+      https://achafacilapp.com.br/privacidade.php, termos https://achafacilapp.com.br/termos.php e domínio autorizado
+      achafacilapp.com.br. Se o projeto do Google Cloud for compartilhado com outros sistemas da FSA, criar um projeto
+      só do Acha Fácil (novo client_id/secret no /etc/acha-facil/config.php).
+   b) Credenciais → cliente OAuth → URIs de redirecionamento: adicionar https://achafacilapp.com.br/google/retorno.php
+      (manter o antigo enquanto houver APK antigo usando).
+   c) No /etc/acha-facil/config.php: 'google_retorno' => 'https://achafacilapp.com.br/google/retorno.php' (ver passo 25).
+   d) Testar a entrada no site e no app (o app usa o mesmo retorno). Mudar o nome/logo pode pedir nova verificação do Google.
