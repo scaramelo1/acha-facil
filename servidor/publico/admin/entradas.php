@@ -64,6 +64,65 @@ $comercio = fn(array $l) => '<strong>' . h($l['nome']) . '</strong><br><span cla
 $ver = fn(array $l) => '<a class="botao pequeno contorno" href="numeros-ficha.php?id=' . (int)$l['id'] . '&amp;dias=' . $dias . '">Ver</a>'
     . ' <a class="botao pequeno contorno" href="' . h(url_ficha($l)) . '" target="_blank" rel="noopener">Abrir</a>';
 
+// relatório (passo 43): cidades, áreas, comércios, dias e horários mais procurados por quem veio desta origem
+$rel = ['cidades' => [], 'areas' => [], 'comercios' => [], 'dias' => [], 'horas' => array_fill(0, 24, 0)];
+if (entradas_prontas()) {
+    $pe = array_merge([$origem, $desde], $cidade !== '' ? [$cidade] : []);
+    $we = $cidade !== '' ? ' AND cidade = ?' : '';
+    $cam = linhas("SELECT caminho, pagina, cidade, SUM(total) AS total FROM entradas WHERE origem = ? AND dia >= ?$we GROUP BY caminho, pagina, cidade", $pe);
+    // área de cada entrada: ficha -> área do comércio; lista -> área do endereço
+    $ids = [];
+    foreach ($cam as $l) if ($l['pagina'] === 'ficha' && preg_match('/-(\d{1,9})$/', $l['caminho'], $m)) $ids[(int)$m[1]] = true;
+    $info = [];
+    foreach (array_chunk(array_keys($ids), 500) as $lote)
+        foreach (linhas('SELECT p.id, p.nome, p.tipo, p.cidade, c.nome AS categoria FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE p.id IN ('
+            . implode(',', array_fill(0, count($lote), '?')) . ')', $lote) as $p) $info[(int)$p['id']] = $p;
+    $area_slug = array_column(linhas('SELECT slug, nome FROM categorias'), 'nome', 'slug');
+    foreach ($cam as $l) {
+        $t = (int)$l['total'];
+        $c = $l['cidade'] ?? '';
+        $rel['cidades'][$c] ??= ['entradas' => 0, 'fichas' => 0, 'areas' => [], 'visualizacoes' => 0, 'pessoas' => 0, 'toques' => 0];
+        $rel['cidades'][$c]['entradas'] += $t;
+        $area = null;
+        if ($l['pagina'] === 'ficha' && preg_match('/-(\d{1,9})$/', $l['caminho'], $m) && isset($info[(int)$m[1]])) {
+            $p = $info[(int)$m[1]];
+            $area = $p['categoria'];
+            $rel['cidades'][$c]['fichas']++;
+            $rel['comercios'][$p['id']] = ($rel['comercios'][$p['id']] ?? ['p' => $p, 'total' => 0, 'caminho' => $l['caminho']]);
+            $rel['comercios'][$p['id']]['total'] += $t;
+        } elseif ($l['pagina'] === 'lista' && preg_match('#^/[^/]+/([^/]+)/#', $l['caminho'], $m)) {
+            $area = $area_slug[$m[1]] ?? null;
+        }
+        if ($area !== null) {
+            $rel['areas'][$area] = ($rel['areas'][$area] ?? 0) + $t;
+            $rel['cidades'][$c]['areas'][$area] = ($rel['cidades'][$c]['areas'][$area] ?? 0) + $t;
+        }
+    }
+    // visualizações e toques por cidade (contados desde 14/11)
+    $wc = $cidade !== '' ? ' AND p.cidade = ?' : '';
+    foreach (linhas("SELECT p.cidade, SUM(IF(k.tipo = 'perfil', k.total, 0)) AS v, SUM(IF(k.tipo = 'perfil', k.pessoas, 0)) AS pe,
+            SUM(IF(k.tipo <> 'perfil', k.total, 0)) AS t FROM contatos k JOIN profissionais p ON p.id = k.profissional_id
+            WHERE k.origem = ? AND k.dia >= ?$wc GROUP BY p.cidade", $pe) as $l) {
+        $rel['cidades'][$l['cidade']] ??= ['entradas' => 0, 'fichas' => 0, 'areas' => [], 'visualizacoes' => 0, 'pessoas' => 0, 'toques' => 0];
+        $rel['cidades'][$l['cidade']]['visualizacoes'] = (int)$l['v'];
+        $rel['cidades'][$l['cidade']]['pessoas'] = (int)$l['pe'];
+        $rel['cidades'][$l['cidade']]['toques'] = (int)$l['t'];
+    }
+    uasort($rel['cidades'], fn($a, $b) => $b['entradas'] <=> $a['entradas'] ?: $b['visualizacoes'] <=> $a['visualizacoes']);
+    arsort($rel['areas']);
+    uasort($rel['comercios'], fn($a, $b) => $b['total'] <=> $a['total']);
+    $rel['comercios'] = array_slice($rel['comercios'], 0, 20, true);
+    for ($d = $desde; $d <= hoje(); $d = date('Y-m-d', strtotime("$d +1 day"))) $rel['dias'][$d] = 0;
+    foreach (linhas("SELECT dia, SUM(total) AS t FROM entradas WHERE origem = ? AND dia >= ?$we GROUP BY dia", $pe) as $l) $rel['dias'][$l['dia']] = (int)$l['t'];
+    try {
+        foreach (linhas("SELECT HOUR(quando) AS h, COUNT(*) AS t FROM entradas_hora WHERE origem = ? AND quando >= ?$we GROUP BY h",
+                array_merge([$origem, "$desde 00:00:00"], $cidade !== '' ? [$cidade] : [])) as $l) $rel['horas'][(int)$l['h']] = (int)$l['t'];
+    } catch (PDOException) {}
+}
+$rel_total = array_sum(array_column($rel['cidades'], 'entradas'));
+$maior_dia = max([1, ...array_values($rel['dias'])]);
+$maior_hora = max([1, ...$rel['horas']]);
+
 admin_inicio(ORIGENS[$origem], $admin);
 ?>
 <p><a href="numeros.php?<?= h(http_build_query(array_filter(['cidade' => $cidade, 'dias' => $dias]))) ?>">‹ Números</a></p>
@@ -91,6 +150,63 @@ admin_inicio(ORIGENS[$origem], $admin);
   <div><strong><?= num($soma($abertas, 'visualizacoes')) ?></strong><span>visualizações</span></div>
   <div><strong><?= num($soma($tocadas, 'toques')) ?></strong><span>toques em <?= num(count($tocadas)) ?> comércios</span></div>
 </div>
+
+<?php if ($rel_total): ?>
+<h2>Relatório: cidades mais procuradas</h2>
+<p class="discreto">Cada entrada é uma pessoa chegando ao site por esta origem. Pelo Google, quase sempre é alguém que pesquisou o nome
+  de um comércio (ou "tipo + cidade") e caiu na ficha. Inclui as entradas de 11/11 a 14/11 tiradas do registro do servidor.
+  <strong>Atenção:</strong> uma parte é o Chrome carregando a página antes do clique (quando o site aparece bem colocado),
+  então leia como "vezes que o site apareceu e foi aberto ou pré-carregado". <a href="#" onclick="print();return false">Imprimir</a></p>
+<div class="tabela"><table>
+  <tr><th>#</th><th>Cidade</th><th>Entradas</th><th>%</th><th>Comércios diferentes</th><th>Áreas mais procuradas</th><th>Visualizações*</th><th>Toques*</th></tr>
+  <?php $i = 0; foreach ($rel['cidades'] as $c => $r): if (!$r['entradas'] && !$r['visualizacoes']) continue; $i++; arsort($r['areas']); ?><tr>
+    <td><?= $i ?></td>
+    <td><strong><?= $c !== '' ? h(nome_cidade($c)) : 'Sem cidade (página inicial, busca)' ?></strong></td>
+    <td><strong><?= num($r['entradas']) ?></strong></td><td><?= pct($r['entradas'], $rel_total) ?></td>
+    <td><?= num($r['fichas']) ?></td>
+    <td><?= h(implode(' · ', array_map(fn($a, $n) => "$a $n", array_keys(array_slice($r['areas'], 0, 3, true)), array_slice($r['areas'], 0, 3, true)))) ?: '—' ?></td>
+    <td><?= num($r['visualizacoes']) ?></td><td><?= num($r['toques']) ?></td>
+  </tr><?php endforeach ?>
+</table></div>
+<p class="discreto">* Visualizações e toques por origem contam desde 14/11/2026 (o registro do servidor não mostra quem abriu a ficha de novo nem os toques).</p>
+
+<?php if ($rel['areas']): ?>
+<h3>Áreas mais procuradas</h3>
+<div class="tabela"><table>
+  <tr><th>Área</th><th>Entradas</th><th>%</th></tr>
+  <?php $ta = array_sum($rel['areas']); foreach ($rel['areas'] as $a => $n): ?><tr><td><?= h($a) ?></td><td><?= num($n) ?></td><td><?= pct($n, $ta) ?></td></tr><?php endforeach ?>
+</table></div>
+<?php endif ?>
+
+<?php if ($rel['comercios']): ?>
+<h3>Comércios mais procurados</h3>
+<div class="tabela"><table>
+  <tr><th>#</th><th>Comércio</th><th>Entradas</th><th></th></tr>
+  <?php $i = 0; foreach ($rel['comercios'] as $id => $r): $i++; ?><tr>
+    <td><?= $i ?></td>
+    <td><strong><?= h($r['p']['nome']) ?></strong><br><span class="discreto"><?= h($r['p']['tipo'] ?: $r['p']['categoria']) ?> · <?= h(nome_cidade($r['p']['cidade'], true)) ?></span></td>
+    <td><?= num($r['total']) ?></td>
+    <td><a class="botao pequeno contorno" href="numeros-ficha.php?id=<?= (int)$id ?>&amp;dias=<?= $dias ?>">Números</a>
+      <a class="botao pequeno contorno" href="<?= h(url_publica(ltrim($r['caminho'], '/'))) ?>" target="_blank" rel="noopener">Abrir</a></td>
+  </tr><?php endforeach ?>
+</table></div>
+<?php endif ?>
+
+<h3>Entradas por dia</h3>
+<div class="barras-dias" role="img" aria-label="Entradas por dia">
+  <?php foreach ($rel['dias'] as $d => $n): ?><div class="dia" title="<?= h(data_br($d)) ?>: <?= $n ?> entradas"><span class="vistas" style="height:<?= round(100 * $n / $maior_dia) ?>%"></span></div><?php endforeach ?>
+</div>
+<p class="discreto"><?= h(data_br($desde)) ?> a <?= h(data_br(hoje())) ?> · dia com mais entradas:
+  <?php $top = array_search(max($rel['dias']), $rel['dias'], true); ?><?= h(data_br((string)$top)) ?> (<?= num(max($rel['dias'])) ?>)</p>
+
+<?php if (array_sum($rel['horas'])): ?>
+<h3>Horários de chegada</h3>
+<div class="barras-dias" role="img" aria-label="Entradas por hora do dia">
+  <?php foreach ($rel['horas'] as $h => $n): ?><div class="dia" title="<?= $h ?>h: <?= $n ?> entradas"><span class="aparicoes" style="height:<?= round(100 * $n / $maior_hora) ?>%"></span></div><?php endforeach ?>
+</div>
+<p class="discreto">0h a 23h (horário de Brasília) · horário com mais entradas: <?= array_search(max($rel['horas']), $rel['horas'], true) ?>h</p>
+<?php endif ?>
+<?php endif ?>
 
 <h2>1. Páginas onde entraram</h2>
 <?php if (!entradas_prontas()): ?>

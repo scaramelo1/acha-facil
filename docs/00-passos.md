@@ -402,3 +402,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    ordem "mais recentes" (padrão) ou "mais entradas". **Mudança 023**: tabela entradas_hora, uma linha por entrada,
    gravada junto com a 022 em registrar_entrada_site(). Entradas de antes da 023 mostram só o dia ("sem hora").
    Testado no banco de teste (14/11). Falta (usuário): aplicar a 023
+43. ✅ Relatório de cidades mais procuradas (14/11, pedido do usuário). Em /admin/entradas.php, acima da tabela de
+   páginas: ranking de cidades (entradas, %, comércios diferentes, 3 áreas mais procuradas, visualizações e toques),
+   áreas mais procuradas, 20 comércios mais procurados, entradas por dia e por hora; botão Imprimir. Vale para
+   qualquer origem/cidade/período. Entradas de 11/11 a 14/11 trazidas do registro do Apache por
+   servidor/importar-logs-entradas.php (roda uma vez, marca 'logs-entradas-antes-022' em migracoes; --teste só
+   conta): 332 do Google (Poços 206, Mococa 83, Aguaí 42). Backup das tabelas em /var/lib/acha-facil/backups
