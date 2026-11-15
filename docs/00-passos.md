@@ -448,9 +448,12 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 49. ⬜ Depois de 1 mês de anúncios: ver o ganho no AdSense e decidir sobre o app (AdMob, banner só nas listas;
    precisa de react-native-google-mobile-ads, APK novo e "contém anúncios" na Play Console). Opcional: nos planos,
    dizer "com o plano, sua página fica sem propaganda"
-50. 🟡 Pedidos de donos mais claros + aviso de "aceito" (15/11, pedido do usuário: pedido 15, Arte Tintas, chegou como
+50. ✅ Pedidos de donos mais claros + aviso de "aceito" (15/11, pedido do usuário: pedido 15, Arte Tintas, chegou como
    "plano Básico" mas parecia comércio novo e não estava pago). O aviso de plano agora diz "Plano escolhido (ainda sem
    pagamento)" e que o comércio já está no app; /admin e /admin/pedido.php mostram "não pago" e um alerta antes de
    liberar. Ao publicar um "Incluir negócio" ou liberar um painel, a pessoa recebe push (canal novidades, abre a ficha)
    se fez o pedido logada com o Google no site (pedidos.usuario_id, **mudança 024 — usuário aplica**), e o pedido
-   mostra o botão "Mandar pelo WhatsApp" com a mensagem de aceito + link da ficha e dos planos. Falta: aplicar a 024.
+   mostra o botão "Mandar pelo WhatsApp" com a mensagem de aceito + link da ficha e dos planos. 024 aplicada 15/11.
+51. ✅ Login com o Google obrigatório nos pedidos de donos (15/11, pedido do usuário). perfil.php?acao=assumir (com ou
+   sem plano) e incluir.php mostram "Entrar com o Google" (exigir_login_web() em inc/conta-web.php) e voltam para a
+   mesma página; o nome vem preenchido da conta. "Tirar do app" continua sem login.

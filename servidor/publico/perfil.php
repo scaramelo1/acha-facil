@@ -16,6 +16,10 @@ $id = (int)($_GET['id'] ?? 0);
 $p = $id ? linha('SELECT p.id, p.nome, p.tipo, p.endereco FROM profissionais p WHERE p.id = ? AND p.importado = 1', [$id]) : null;
 if ($acao === 'remover' && !$p) ir('busca.php');
 if ($acao === 'assumir' && !$p) ir($plano ? 'busca.php' : 'incluir.php');   // negócio fora do app: incluir é de graça
+// assumir o perfil ou escolher um plano: só com a conta Google (para receber o aviso de "aceito" no celular)
+require_once __DIR__ . '/../inc/conta-web.php';
+$conta = $acao === 'assumir' ? exigir_login_web($plano ? 'Plano ' . PLANOS_NOME[$plano] : 'Assumir o perfil',
+    ($p ? "Você vai pedir para cuidar de {$p['nome']} no Acha Fácil." : 'Você vai fazer um pedido para o seu comércio.')) : usuario_web();
 $enviado = false;
 $erro = null;
 $com_assinatura = $plano !== null && mp_pronto();
@@ -80,7 +84,7 @@ pagina_inicio("$titulo · Acha Fácil!", 'Pedido do dono do comércio para o Ach
     <form method="post">
       <?= campo_csrf() ?>
       <label for="nome">Seu nome</label>
-      <input id="nome" name="nome" required maxlength="120" value="<?= h($_POST['nome'] ?? '') ?>">
+      <input id="nome" name="nome" required maxlength="120" value="<?= h($_POST['nome'] ?? ($conta['nome'] ?? '')) ?>">
       <label for="telefone">Telefone ou WhatsApp (com DDD)</label>
       <input id="telefone" name="telefone" required inputmode="tel" maxlength="20" value="<?= h($_POST['telefone'] ?? '') ?>">
       <?php if ($com_assinatura): ?>

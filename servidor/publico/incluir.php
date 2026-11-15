@@ -6,6 +6,9 @@ require __DIR__ . '/../inc/base.php';
 require_once __DIR__ . '/../inc/guia.php';
 require __DIR__ . '/../inc/pagina.php';
 iniciar_sessao();
+// incluir negócio: só com a conta Google (para receber o aviso de "aceito" no celular)
+require_once __DIR__ . '/../inc/conta-web.php';
+$conta = exigir_login_web('Incluir meu negócio', 'Inclua o seu negócio no Acha Fácil de graça.');
 
 $areas = linhas("SELECT id, nome FROM categorias WHERE ativa = 1 ORDER BY ordem, nome");
 $pronto = valor("SELECT 1 FROM migracoes WHERE nome = '012-pedido-incluir.sql'");
@@ -96,7 +99,7 @@ pagina_inicio('Incluir meu negócio · Acha Fácil!', 'Inclua o seu negócio no 
 
       <h2>Você</h2>
       <label for="nome">Seu nome</label>
-      <input id="nome" name="nome" required maxlength="120" value="<?= h($f['nome'] ?? '') ?>">
+      <input id="nome" name="nome" required maxlength="120" value="<?= h($f['nome'] ?? ($conta['nome'] ?? '')) ?>">
       <label for="contato">Seu telefone ou WhatsApp (com DDD), para a equipe confirmar</label>
       <input id="contato" name="contato" required inputmode="tel" maxlength="20" value="<?= h($f['contato'] ?? '') ?>">
       <label for="mensagem">Recado para a equipe (opcional)</label>
