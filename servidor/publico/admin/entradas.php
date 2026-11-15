@@ -197,6 +197,8 @@ admin_inicio(ORIGENS[$origem], $admin);
 <div class="barras-dias" role="img" aria-label="Entradas por dia">
   <?php foreach ($rel['dias'] as $d => $n): ?><div class="dia" title="<?= h(data_br($d)) ?>: <?= $n ?> entradas"><span class="vistas" style="height:<?= round(100 * $n / $maior_dia) ?>%"></span></div><?php endforeach ?>
 </div>
+<?php $passo = (int)ceil(count($rel['dias']) / 12); $i = 0; ?>
+<div class="barras-rotulos datas" aria-hidden="true"><?php foreach (array_keys($rel['dias']) as $d): ?><span><?= $i++ % $passo === 0 ? date('d/m', strtotime((string)$d)) : '' ?></span><?php endforeach ?></div>
 <p class="discreto"><?= h(data_br($desde)) ?> a <?= h(data_br(hoje())) ?> · dia com mais entradas:
   <?php $top = array_search(max($rel['dias']), $rel['dias'], true); ?><?= h(data_br((string)$top)) ?> (<?= num(max($rel['dias'])) ?>)</p>
 <?php endif ?>
