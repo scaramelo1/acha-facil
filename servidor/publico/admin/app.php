@@ -19,7 +19,7 @@ if (e_post()) {
 
 $apk = apk_info();
 // contador de downloads do APK (passo 40)
-$dias = in_array((int)($_GET['dias'] ?? 30), [7, 30, 90], true) ? (int)($_GET['dias'] ?? 30) : 30;
+$dias = in_array((int)($_GET['dias'] ?? 30), [1, 7, 30, 90], true) ? (int)($_GET['dias'] ?? 30) : 30;
 $hist = apk_historico(desde_dias($dias));
 $hoje = $hist['dias'][hoje()] ?? ['inicio' => 0, 'fim' => 0];
 $maior = max([1, ...array_values(array_map(fn($d) => $d['inicio'], $hist['dias']))]);
@@ -32,12 +32,12 @@ admin_inicio('App e downloads', $admin);
 <div class="numeros-resumo">
   <div><strong><?= num(apk_downloads()) ?></strong><span>downloads desde o início</span></div>
   <div><strong><?= num($hoje['inicio']) ?></strong><span>hoje</span></div>
-  <div><strong><?= num($hist['inicio']) ?></strong><span>começaram (<?= $dias ?> dias)</span></div>
+  <div><strong><?= num($hist['inicio']) ?></strong><span>começaram (<?= $dias === 1 ? 'hoje' : $dias . ' dias' ?>)</span></div>
   <div><strong><?= num($hist['fim']) ?></strong><span>terminaram (<?= pct($hist['fim'], $hist['inicio']) ?>)</span></div>
 </div>
 <form method="get" class="filtros-numeros">
   <label>Período <select name="dias" onchange="this.form.submit()">
-    <?php foreach ([7, 30, 90] as $d): ?><option value="<?= $d ?>"<?= $d === $dias ? ' selected' : '' ?>>Últimos <?= $d ?> dias</option><?php endforeach ?>
+    <?php foreach ([1, 7, 30, 90] as $d): ?><option value="<?= $d ?>"<?= $d === $dias ? ' selected' : '' ?>><?= $d === 1 ? 'Hoje' : "Últimos $d dias" ?></option><?php endforeach ?>
   </select></label>
 </form>
 <p class="discreto"><span class="barra-legenda aparicoes"></span> começaram · <span class="barra-legenda vistas"></span> terminaram</p>

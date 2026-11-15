@@ -15,10 +15,10 @@ if (preg_match('/^(\d{4})-(\d{2})$/', (string)($_GET['mes'] ?? ''), $m) && check
     $ate = min(hoje(), date('Y-m-t', strtotime($desde)));
     $periodo = MESES[(int)$m[2]] . ' de ' . $m[1];
 } else {
-    $dias = in_array((int)($_GET['dias'] ?? 30), [7, 30, 90], true) ? (int)($_GET['dias'] ?? 30) : 30;
+    $dias = in_array((int)($_GET['dias'] ?? 30), [1, 7, 30, 90], true) ? (int)($_GET['dias'] ?? 30) : 30;
     $desde = desde_dias($dias);
     $ate = hoje();
-    $periodo = 'últimos ' . $dias . ' dias (' . data_br($desde) . ' a ' . data_br($ate) . ')';
+    $periodo = $dias === 1 ? 'hoje (' . data_br($ate) . ')' : 'últimos ' . $dias . ' dias (' . data_br($desde) . ' a ' . data_br($ate) . ')';
 }
 $n = numeros_ficha((int)$p['id'], $desde, $ate);
 $pos = posicao_ficha($p, $desde, $ate);

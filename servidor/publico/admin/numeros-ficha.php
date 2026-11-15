@@ -6,7 +6,7 @@ exigir_numeros_prontos();
 
 $p = linha('SELECT p.*, c.nome AS categoria FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE p.id = ?', [(int)($_GET['id'] ?? 0)]);
 if (!$p) { flash('Comércio não encontrado.', 'erro'); ir('admin/numeros.php'); }
-$dias = in_array((int)($_GET['dias'] ?? 30), [7, 30, 90], true) ? (int)($_GET['dias'] ?? 30) : 30;
+$dias = in_array((int)($_GET['dias'] ?? 30), [1, 7, 30, 90], true) ? (int)($_GET['dias'] ?? 30) : 30;
 $desde = desde_dias($dias);
 $n = numeros_ficha((int)$p['id'], $desde);
 $pos = posicao_ficha($p, $desde, hoje());
@@ -17,7 +17,7 @@ admin_inicio('Números · ' . $p['nome'], $admin);
 <p><a href="numeros.php">← Números das fichas</a></p>
 <h1><?= h($p['nome']) ?></h1>
 <p class="discreto"><?= h($p['tipo'] ?: $p['categoria']) ?> · <?= h(nome_cidade($p['cidade'])) ?><?= $p['bairro'] ? ' · ' . h($p['bairro']) : '' ?>
-  · <?php foreach ([7, 30, 90] as $d): ?><a href="?id=<?= (int)$p['id'] ?>&amp;dias=<?= $d ?>"><?= $d === $dias ? "<strong>$d dias</strong>" : "$d dias" ?></a> <?php endforeach ?></p>
+  · <?php foreach ([1, 7, 30, 90] as $d): $t = $d === 1 ? 'hoje' : "$d dias"; ?><a href="?id=<?= (int)$p['id'] ?>&amp;dias=<?= $d ?>"><?= $d === $dias ? "<strong>$t</strong>" : $t ?></a> <?php endforeach ?></p>
 <p><a class="botao pequeno" href="relatorio.php?id=<?= (int)$p['id'] ?>&amp;dias=<?= $dias ?>" target="_blank">Relatório para o comerciante</a></p>
 
 <div class="numeros-resumo">

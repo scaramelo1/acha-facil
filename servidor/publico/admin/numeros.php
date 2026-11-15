@@ -8,7 +8,7 @@ exigir_numeros_prontos();
 $cidade = isset(TODAS_CIDADES[$_GET['cidade'] ?? '']) ? (string)$_GET['cidade'] : '';
 $cat = (int)($_GET['categoria'] ?? 0);
 $tipo = trim(mb_substr((string)($_GET['tipo'] ?? ''), 0, 80));
-$dias = in_array((int)($_GET['dias'] ?? 30), [7, 30, 90], true) ? (int)($_GET['dias'] ?? 30) : 30;
+$dias = in_array((int)($_GET['dias'] ?? 30), [1, 7, 30, 90], true) ? (int)($_GET['dias'] ?? 30) : 30;
 $plano = in_array($_GET['plano'] ?? '', ['sem', 'basico', 'destaque'], true) ? (string)$_GET['plano'] : '';
 $so_vistos = !empty($_GET['vistos']);
 const COLUNAS = [
@@ -135,7 +135,7 @@ admin_inicio('Números', $admin);
     <?php foreach ($tipos as $t): ?><option value="<?= h($t['tipo']) ?>"<?= $t['tipo'] === $tipo ? ' selected' : '' ?>><?= h($t['tipo']) ?> (<?= (int)$t['n'] ?>)</option><?php endforeach ?>
   </select></label>
   <label>Período <select name="dias">
-    <?php foreach ([7, 30, 90] as $d): ?><option value="<?= $d ?>"<?= $d === $dias ? ' selected' : '' ?>>Últimos <?= $d ?> dias</option><?php endforeach ?>
+    <?php foreach ([1, 7, 30, 90] as $d): ?><option value="<?= $d ?>"<?= $d === $dias ? ' selected' : '' ?>><?= $d === 1 ? 'Hoje' : "Últimos $d dias" ?></option><?php endforeach ?>
   </select></label>
   <label>Plano <select name="plano"><option value="">Todos</option>
     <?php foreach ($nome_plano as $k => $n): ?><option value="<?= $k ?>"<?= $k === $plano ? ' selected' : '' ?>><?= $n ?></option><?php endforeach ?>

@@ -7,7 +7,7 @@ exigir_numeros_prontos();
 
 $origem = in_array($_GET['origem'] ?? '', ORIGENS_SITE, true) ? (string)$_GET['origem'] : 'google';
 $cidade = isset(TODAS_CIDADES[$_GET['cidade'] ?? '']) ? (string)$_GET['cidade'] : '';
-$dias = in_array((int)($_GET['dias'] ?? 30), [7, 30, 90], true) ? (int)($_GET['dias'] ?? 30) : 30;
+$dias = in_array((int)($_GET['dias'] ?? 30), [1, 7, 30, 90], true) ? (int)($_GET['dias'] ?? 30) : 30;
 $desde = desde_dias($dias);
 $link = fn(array $mudar) => '?' . http_build_query(array_filter(array_merge(['origem' => $origem, 'cidade' => $cidade, 'dias' => $dias], $mudar), fn($v) => $v !== '' && $v !== null));
 
@@ -139,7 +139,7 @@ admin_inicio(ORIGENS[$origem], $admin);
     <?php foreach (TODAS_CIDADES as $slug => $c): ?><option value="<?= h($slug) ?>"<?= $slug === $cidade ? ' selected' : '' ?>><?= h($c[0]) ?></option><?php endforeach ?>
   </select></label>
   <label>Período <select name="dias">
-    <?php foreach ([7, 30, 90] as $d): ?><option value="<?= $d ?>"<?= $d === $dias ? ' selected' : '' ?>>Últimos <?= $d ?> dias</option><?php endforeach ?>
+    <?php foreach ([1, 7, 30, 90] as $d): ?><option value="<?= $d ?>"<?= $d === $dias ? ' selected' : '' ?>><?= $d === 1 ? 'Hoje' : "Últimos $d dias" ?></option><?php endforeach ?>
   </select></label>
   <button class="botao pequeno">Filtrar</button>
 </form>
