@@ -41,6 +41,15 @@ export function Trancado({ id, tipo, titulo, texto, botao }: { id: number; tipo:
     pedirInfo(id, tipo);
   };
 
+  // aviso gravado no servidor: lembra no celular e liga as notificações
+  const marcarAvisado = () => {
+    Armazenamento.gravar(chaveAviso, '1');
+    Armazenamento.apagar(chavePendente);
+    setAvisado(true);
+    setPerguntar(false);
+    ligarAvisos().catch(() => {});
+  };
+
   const pedirAviso = async () => {
     if (!usuario) {
       // entra na conta e volta: o aviso é pedido sozinho (useEffect abaixo)
@@ -51,11 +60,7 @@ export function Trancado({ id, tipo, titulo, texto, botao }: { id: number; tipo:
     setEnviando(true);
     try {
       await chamar('avisar-info.php', 'POST', { id, tipo });
-      Armazenamento.gravar(chaveAviso, '1');
-      Armazenamento.apagar(chavePendente);
-      setAvisado(true);
-      setPerguntar(false);
-      ligarAvisos().catch(() => {});
+      marcarAvisado();
     } catch {
       Alert.alert('Não deu certo agora', 'Tente de novo daqui a pouco.');
     } finally {
@@ -64,10 +69,24 @@ export function Trancado({ id, tipo, titulo, texto, botao }: { id: number; tipo:
   };
 
   // voltou da tela Entrar já com a conta: faz o pedido de aviso que ficou guardado
+  // (o estado só muda na resposta do servidor, nunca direto no efeito)
   useEffect(() => {
-    if (usuario && !avisado && Armazenamento.ler(chavePendente) === '1') pedirAviso();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usuario]);
+    if (!usuario || avisado || Armazenamento.ler(chavePendente) !== '1') return;
+    let ativo = true;
+    chamar('avisar-info.php', 'POST', { id, tipo })
+      .then(() => {
+        if (!ativo) return;
+        Armazenamento.gravar(chaveAviso, '1');
+        Armazenamento.apagar(chavePendente);
+        setAvisado(true);
+        setPerguntar(false);
+        ligarAvisos().catch(() => {});
+      })
+      .catch(() => {});
+    return () => {
+      ativo = false;
+    };
+  }, [usuario, avisado, chavePendente, chaveAviso, id, tipo]);
 
   return (
     <View style={estilos.caixa}>
