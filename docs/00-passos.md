@@ -588,3 +588,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (pedir sem/com conta, aprovar alteração avisa 1 vez, horário segue esperando, Minha conta, ficha com e sem login).
    16/11: app 1.8.0 gerado no PC (saida\acha-facil-1.8.0-9.aab, versionCode 9). Falta: enviar à Play, `npx eas build:version:set`
    (9), gerar o APK do site (-Tipo apk) e publicar com servidor/publicar-apk.sh.
+66. ✅ Números sem o robô do AdSense (16/11). Depois de ligar o AdSense (15/11), o robô Mediapartners-Google e o
+   "Chrome" dos servidores do Google (rate-limited-proxy-74-125-*.google.com, sem Referer) contavam como gente que
+   "entrou direto": o recorde de 15/11 (354 entradas, 241 diretas) era quase todo robô. e_robo() em inc/numeros.php
+   agora ignora mediapartners/adsbot/googleother/google-/PlayStore-Google e esses IPs do Google sem Referer. Os dias
+   15 e 16/11 ficam inflados no histórico (não dá para separar depois). Gente de verdade vinda do Google: 15/11 = 29
+   cliques, 14/11 = 31 (o resto é pré-carregamento do Chrome).

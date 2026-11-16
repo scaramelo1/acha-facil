@@ -32,7 +32,11 @@ function origem_valida(?string $o, string $padrao = 'app'): string {
 /** Robôs de busca, prévias de link e ferramentas não contam. */
 function e_robo(): bool {
     $ua = (string)($_SERVER['HTTP_USER_AGENT'] ?? '');
-    return $ua === '' || (bool)preg_match('/bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp\/|curl|wget|python|httpclient|headless|lighthouse/i', $ua);
+    if ($ua === '' || preg_match('/bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp\/|curl|wget|python|httpclient|headless|lighthouse|'
+        . 'mediapartners|adsbot|googleother|google-|playstore-google|privacy preserving prefetch/i', $ua)) return true;
+    // 16/11: robô do AdSense que se passa por Chrome no Windows, vindo dos servidores do Google
+    // (rate-limited-proxy-74-125-*.google.com), sem Referer. Contava como "entrou direto" e inflou o dia 15/11.
+    return empty($_SERVER['HTTP_REFERER']) && preg_match('/^(74\.125\.(20[89]|21\d)|66\.249\.(6[4-9]|[7-9]\d))\./', ip()) === 1;
 }
 
 // ---------- de onde a pessoa chegou ao site (passo 38) ----------
