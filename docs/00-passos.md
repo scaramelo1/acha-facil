@@ -500,3 +500,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    sitemap-cidades.xml / sitemap-categorias.xml / sitemap-comercios.xml / sitemap-eventos.xml (um tipo em todas as
    cidades) e sitemap-<cidade>.xml (os tipos de uma cidade; endereço antigo continua valendo). Cache 6 h. No ar e
    conferido (Poços: 8.375 fichas e 489 áreas/tipos). Falta (usuário): enviar os 4 índices de tipo no Search Console.
+58. 🟡 Busca de verdade no topo da inicial do site (16/11, pedido do usuário). No lugar do celular desenhado: [Cidade ▾]
+   [O que você procura?] [🔍 Buscar] → /<cidade>/buscar?q= (sem texto → página da cidade; sem JavaScript passa por
+   /?cidade=&q=, que redireciona). Última cidade guardada no navegador (localStorage af_cidade, também ao tocar numa
+   cidade da lista); cidade com 0 comércios não entra na lista. O celular desenhado e os botões de baixar foram para o
+   bloco "Baixe o Acha Fácil!" do fim (#baixar). CSS site.css?v=27. Backup para voltar: /root/acha-facil-inicio.antes-busca.20261116-0722
+   (index.php, site.css, pagina.php). Falta: o usuário olhar no celular e no PC e aprovar.

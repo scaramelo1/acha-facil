@@ -5,6 +5,15 @@ require_once __DIR__ . '/../inc/guia.php';
 require __DIR__ . '/../inc/pagina.php';
 require_once __DIR__ . '/../inc/eventos.php';
 require_once __DIR__ . '/../inc/numeros.php';
+// Busca do topo (16/11): sem JavaScript o formulário vem para cá (?cidade=&q=) e vai para a busca da cidade
+if (isset($_GET['cidade'])) {
+    $c = (string)$_GET['cidade'];
+    $q = trim((string)($_GET['q'] ?? ''));
+    if (isset(CIDADES[$c])) {
+        header('Location: ' . (mb_strlen($q) >= 2 ? url(cidade_web($c) . '/buscar') . '?q=' . rawurlencode($q) : url_cidade($c)), true, 302);
+        exit;
+    }
+}
 registrar_entrada_site('inicio');   // passo 38: quem chega pela página inicial
 
 $areas = categorias_ativas();
@@ -23,23 +32,27 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
 ?>
 <main>
   <section class="hero">
-    <div class="conteudo">
-      <div>
-        <h1>Tudo o que tem na <mark>sua cidade</mark>, num toque.</h1>
-        <p class="lead">Em <a href="#cidades"><?= h(resumo_cidades()) ?></a>. Restaurante, mercado, oficina, clínica, loja ou quem faz aquele conserto. Procure no Acha Fácil e chame no WhatsApp, ligue ou veja como chegar.</p>
-        <ul class="numeros">
-          <li><b><?= $num($total) ?></b> comércios e serviços</li>
-          <li><b><?= count(CIDADES) ?></b> cidades</li>
-        </ul>
-        <div class="lojas" id="baixar"><?= botoes_lojas() ?></div>
-        <p class="discreto" style="margin-top:14px">Grátis. Não precisa criar conta para procurar.</p>
-      </div>
-      <div class="celular" aria-hidden="true">
-        <div class="ola"><small>Boa tarde!</small>O que você procura hoje?</div>
-        <div class="busca">🔍 pizza, borracharia, farmácia…</div>
-        <div class="grade"><span>🍽️</span><span>🛒</span><span>🛠️</span><span>🩺</span><span>💄</span><span>🚗</span></div>
-        <div class="item"><b>Conhecidos na cidade</b>Os mais procurados da cidade, todo dia uma seleção nova</div>
-      </div>
+    <div class="conteudo hero-busca">
+      <h1>Tudo o que tem na <mark>sua cidade</mark>, num toque.</h1>
+      <p class="lead">Ache restaurante, mercado, oficina, clínica ou loja e chame no WhatsApp, ligue ou veja como chegar.</p>
+      <form class="busca-topo" action="<?= h(url()) ?>" method="get" role="search" id="busca-topo">
+        <label for="busca-cidade" class="so-leitor">Cidade</label>
+        <select id="busca-cidade" name="cidade" required>
+          <option value="">📍 Escolha a cidade</option>
+          <?php foreach ($por_uf as $uf => $cidades_uf): ?><optgroup label="<?= h(NOMES_ESTADOS[$uf] ?? $uf) ?>">
+            <?php foreach ($cidades_uf as $slug => [$nome]): if (empty($por_cidade[$slug])) continue; ?><option value="<?= h($slug) ?>" data-cidade="<?= h(url_cidade($slug)) ?>" data-buscar="<?= h(url(cidade_web($slug) . '/buscar')) ?>"><?= h($nome) ?></option><?php endforeach ?>
+          </optgroup><?php endforeach ?>
+        </select>
+        <label for="busca-q" class="so-leitor">O que você procura?</label>
+        <input id="busca-q" name="q" type="search" placeholder="O que você procura? pizza, farmácia, borracharia…" autocomplete="off" enterkeyhint="search">
+        <button class="botao amarelo">🔍 Buscar</button>
+      </form>
+      <p class="busca-aviso" id="busca-aviso" hidden>Escolha a cidade primeiro.</p>
+      <ul class="numeros">
+        <li><b><?= $num($total) ?></b> comércios e serviços</li>
+        <li><b><?= count(CIDADES) ?></b> <a href="#cidades">cidades</a></li>
+      </ul>
+      <p class="discreto">Grátis. Não precisa criar conta para procurar.</p>
     </div>
     <svg class="onda" viewBox="0 0 1200 48" preserveAspectRatio="none" aria-hidden="true"><path d="M0 24 C200 0 400 48 600 24 S1000 0 1200 24 V48 H0Z" fill="#fff"/></svg>
   </section>
@@ -166,12 +179,42 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
     </div>
   </section>
 
-  <section class="verde">
-    <div class="conteudo" style="text-align:center">
-      <h2>Baixe o Acha Fácil!</h2>
-      <p class="intro" style="margin-left:auto;margin-right:auto">O comércio da sua cidade, pertinho de você.</p>
-      <div class="lojas centro"><?= botoes_lojas() ?></div>
+  <section class="verde" id="baixar">
+    <div class="conteudo baixe-app">
+      <div>
+        <h2>Baixe o Acha Fácil!</h2>
+        <p class="intro">O comércio da sua cidade, pertinho de você. No app ainda tem "Perto de você", favoritos e avisos.</p>
+        <div class="lojas"><?= botoes_lojas() ?></div>
+      </div>
+      <div class="celular" aria-hidden="true">
+        <div class="ola"><small>Boa tarde!</small>O que você procura hoje?</div>
+        <div class="busca">🔍 pizza, borracharia, farmácia…</div>
+        <div class="grade"><span>🍽️</span><span>🛒</span><span>🛠️</span><span>🩺</span><span>💄</span><span>🚗</span></div>
+        <div class="item"><b>Conhecidos na cidade</b>Os mais procurados da cidade, todo dia uma seleção nova</div>
+      </div>
     </div>
   </section>
 </main>
+<script>
+// Busca do topo: vai direto para a busca da cidade e lembra a última cidade escolhida neste navegador
+(function () {
+  var f = document.getElementById('busca-topo'), sel = document.getElementById('busca-cidade'),
+      q = document.getElementById('busca-q'), aviso = document.getElementById('busca-aviso'), CH = 'af_cidade';
+  function guardar(v) { try { localStorage.setItem(CH, v); } catch (e) {} }
+  try { var v = localStorage.getItem(CH); if (v && sel.querySelector('option[value="' + v + '"]')) sel.value = v; } catch (e) {}
+  sel.addEventListener('change', function () { aviso.hidden = true; if (sel.value) { guardar(sel.value); q.focus(); } });
+  f.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var op = sel.options[sel.selectedIndex];
+    if (!sel.value) { aviso.hidden = false; sel.focus(); return; }
+    guardar(sel.value);
+    var t = q.value.trim();
+    location.href = t.length >= 2 ? op.getAttribute('data-buscar') + '?q=' + encodeURIComponent(t) : op.getAttribute('data-cidade');
+  });
+  // quem toca numa cidade da lista também fica com ela guardada
+  document.querySelectorAll('#cidades .cidades-lista a').forEach(function (a, i) {
+    a.addEventListener('click', function () { var op = sel.querySelector('option[data-cidade="' + a.getAttribute('href') + '"]'); if (op) guardar(op.value); });
+  });
+})();
+</script>
 <?php pagina_fim();
