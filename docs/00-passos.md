@@ -524,3 +524,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Básico pago), com o selo "✓ Ficha completa" (site: .selo-completa; app: Etiqueta no CartaoProfissional).
    Testado numa cópia com o banco de teste (contagem, repetido, robô, sem a 028, admin, relatório, CSV, ordem e selo).
    App 1.8.0: falta gerar e testar no emulador.
+60. ✅ Fichas sem contato fora do Google (16/11, pedido do usuário). Ficha sem telefone e sem WhatsApp continua no site e
+   no app, mas sai com `noindex` e fica fora do sitemap (SQL_TEM_CONTATO / ficha_no_google() em inc/guia.php). Volta
+   sozinha quando ganhar telefone ou WhatsApp (dono aprovado, robô ou admin): a regra é conferida a cada página, sem
+   marcação guardada; lastmod do sitemap = atualizado_em. ~6.700 de 44.866 fichas saem. Conferido no ar (Mococa:
+   2.193 de 2.610 no sitemap; ficha sem contato com noindex, com contato sem).

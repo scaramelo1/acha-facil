@@ -110,6 +110,10 @@ const SQL_EM_DIA = '(p.basico_pago_em IS NOT NULL OR ' . SQL_ASSINATURA_EM_DIA .
 const SQL_DESTAQUE = "(p.plano IN ('destaque','site') AND " . SQL_ASSINATURA_EM_DIA . ')';
 // Ficha paga (passo 59): pagou o Básico (ou se cadastrou sozinha). Nas listas vem logo depois do Destaque.
 const SQL_FICHA_PAGA = '(p.importado = 0 OR p.basico_pago_em IS NOT NULL)';
+// Ficha no Google (16/11, pedido do usuário): só com telefone ou WhatsApp. Sem nenhum dos dois, a ficha continua no
+// site e no app, mas sai com noindex e fica fora do sitemap; volta sozinha quando ganhar um telefone ou WhatsApp.
+const SQL_TEM_CONTATO = "(COALESCE(p.telefone, '') <> '' OR COALESCE(p.whatsapp, '') <> '')";
+function ficha_no_google(array $p): bool { return trim((string)($p['telefone'] ?? '')) !== '' || trim((string)($p['whatsapp'] ?? '')) !== ''; }
 
 // Aparece no app: aprovado e com assinatura em dia.
 // Comércios importados da lista de leads aparecem sem assinatura até o dono assumir o perfil.

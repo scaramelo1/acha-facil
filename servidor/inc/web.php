@@ -385,7 +385,7 @@ function web_pagina_ficha(array $p): void {
     $descricao = $p['nome'] . ' em ' . $nome_cidade . ' (' . $uf . ')' . ($tipo ? ", $tipo" : '') . '. '
         . ($p['endereco'] ? 'Endereço: ' . $p['endereco'] . '. ' : '') . 'Veja horário, telefone e WhatsApp no Acha Fácil.';
     pagina_inicio($p['nome'] . ' - ' . ($tipo ? "$tipo em " : '') . "$nome_cidade | Acha Fácil!", mb_substr($descricao, 0, 300), 'web',
-        ['canonica' => $url, 'imagem' => $imagem, 'head' => web_json_ld($ld, $ld_trilha),
+        ['canonica' => $url, 'imagem' => $imagem, 'head' => web_json_ld($ld, $ld_trilha), 'noindex' => !ficha_no_google($p),
             'anuncios' => $p['importado'] && !$p['basico_pago_em'] && !$p['destaque_pago']]);   // anúncio só em ficha de quem não paga plano
     [$parecidos, $mesmo_tipo] = web_parecidos($p);
     $sem_dono = $p['importado'] && !tem_dono($p);
@@ -676,7 +676,7 @@ function web_sitemap_paginas(): string {
     return web_sitemap_urls(array_map(fn($c) => [url_publica($c), null], ['', 'planos.php', 'incluir.php', 'incluir-evento.php', 'termos.php', 'privacidade.php']));
 }
 /** Endereços de uma cidade num tipo: cidades = página da cidade; categorias = áreas e tipos com 3+;
- *  comercios = todas as fichas visíveis; eventos = agenda e próximos eventos. */
+ *  comercios = fichas visíveis com telefone ou WhatsApp (as sem contato ficam fora do Google); eventos = agenda e próximos eventos. */
 function web_sitemap_cidade(string $cidade, string $tipo): string {
     $urls = [];
     if ($tipo === 'cidades') $urls[] = [web_absoluta(url_cidade($cidade)), null];
@@ -685,7 +685,7 @@ function web_sitemap_cidade(string $cidade, string $tipo): string {
         foreach (web_tipos($cidade, (int)$a['id']) as $t) $urls[] = [web_absoluta(url_tipo($cidade, $a['slug'], $t['nome'])), null];
     }
     if ($tipo === 'comercios') foreach (q('SELECT p.id, p.nome, p.cidade, DATE(p.atualizado_em) AS mod_em FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
-        WHERE ' . visivel($cidade) . ' ORDER BY p.id') as $p) $urls[] = [web_absoluta(url_ficha($p)), $p['mod_em']];
+        WHERE ' . visivel($cidade) . ' AND ' . SQL_TEM_CONTATO . ' ORDER BY p.id') as $p) $urls[] = [web_absoluta(url_ficha($p)), $p['mod_em']];   // sem contato: fora do Google
     if ($tipo === 'eventos' && isset(web_sitemap_tipos()['eventos'])) {
         $urls[] = [web_absoluta(url_eventos($cidade)), null];
         foreach (eventos_proximos($cidade) as $e) $urls[] = [web_absoluta(url_evento($e)), substr((string)$e['atualizado_em'], 0, 10)];
