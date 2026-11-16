@@ -158,7 +158,8 @@ function web_pagina_eventos(string $cidade): void {
             $eventos, array_keys($eventos))];
     pagina_inicio("Eventos em $nome - $uf: agenda | Acha Fácil!",
         "Agenda de eventos em $nome ($uf): shows, festas, feiras e programação da cidade, em ordem de data, com local, horário e link oficial.",
-        'web', ['canonica' => web_absoluta(url_eventos($cidade)), 'head' => web_json_ld($ld_trilha, $ld), 'anuncios' => true]);
+        'web', ['canonica' => web_absoluta(url_eventos($cidade)), 'head' => web_json_ld($ld_trilha, $ld), 'anuncios' => true,
+            'noindex' => !$eventos]);   // 16/11: agenda vazia fica fora do Google e volta sozinha quando tiver evento
     ?>
 <main>
   <section class="web-topo"><div class="conteudo">

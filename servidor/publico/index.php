@@ -16,19 +16,37 @@ if (isset($_GET['cidade'])) {
 }
 registrar_entrada_site('inicio');   // passo 38: quem chega pela página inicial
 
-$areas = categorias_ativas();
-$total = (int)valor('SELECT COUNT(*) FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE ' . visivel());
+// Totais (áreas, cidades, comércios) e eventos guardados prontos por 1 hora (16/11): contar 44 mil fichas a cada visita
+// deixava a inicial lenta. Aprovar alteração/importar limpa o cache (web_cache_limpar) e os números se atualizam.
+require_once __DIR__ . '/../inc/web.php';
+$dados = json_decode(web_cache('inicio-dados', function () {
+    echo json_encode([
+        'areas' => categorias_ativas(),
+        'total' => (int)valor('SELECT COUNT(*) FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE ' . visivel()),
+        'eventos' => eventos_proximos_todas(6),
+        'por_cidade' => array_column(linhas('SELECT p.cidade, COUNT(*) AS total FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
+            WHERE ' . visivel() . ' GROUP BY p.cidade'), 'total', 'cidade'),
+    ], JSON_UNESCAPED_UNICODE);
+}), true) ?: [];
+$areas = $dados['areas'] ?? [];
+$total = (int)($dados['total'] ?? 0);
+$eventos = $dados['eventos'] ?? [];
+$por_cidade = $dados['por_cidade'] ?? [];
 $base = config()['url'];
 $num = fn(int $n) => number_format($n, 0, ',', '.');
-// total por cidade, para os cartões "Escolha sua cidade" (páginas públicas, passo 21)
-$eventos = eventos_proximos_todas(6);
 $por_uf = [];   // cidades separadas por estado, na ordem da tabela cidades
 foreach (CIDADES as $slug => $c) $por_uf[$c[2]][$slug] = $c;
-$por_cidade = array_column(linhas('SELECT p.cidade, COUNT(*) AS total FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
-    WHERE ' . visivel() . ' GROUP BY p.cidade'), 'total', 'cidade');
 
+// dados do site para o Google (16/11): nome do site e marca nos resultados
+$ld_site = ['@context' => 'https://schema.org', '@type' => 'WebSite', 'name' => 'Acha Fácil!', 'alternateName' => 'Acha Fácil',
+    'url' => url_publica(), 'inLanguage' => 'pt-BR'];
+$ld_org = ['@context' => 'https://schema.org', '@type' => 'Organization', 'name' => 'Acha Fácil!', 'url' => url_publica(),
+    'logo' => url_publica('assets/logo.png'), 'slogan' => 'O comércio da sua cidade, pertinho de você.'];
+// descrição até ~155 caracteres (o Google corta perto de 160)
+$mil = $total >= 1000 ? number_format(intdiv($total, 1000), 0, ',', '.') . ' mil' : (string)$total;
 pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
-    "App gratuito com $total comércios e serviços em " . resumo_cidades() . ": restaurantes, mercados, oficinas, clínicas, lojas e muito mais. Chame no WhatsApp com um toque.", '', ['anuncios' => true]);
+    "Guia grátis com $mil comércios em " . count(CIDADES) . ' cidades de ' . implode(' e ', array_keys($por_uf)) . '. Ache restaurante, mercado, oficina ou clínica e chame no WhatsApp.',
+    '', ['anuncios' => true, 'head' => web_json_ld($ld_site, $ld_org)]);
 ?>
 <main>
   <section class="hero">
@@ -170,7 +188,7 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
       <details><summary>Preciso criar conta?</summary><p>Não. A conta (só nome, e-mail e senha) serve para quem quer avaliar, comentar ou salvar lugares. Você pode excluir sua conta a qualquer momento pelo próprio app.</p></details>
       <details><summary>De onde vêm os comércios?</summary><p>De informações públicas (nome, endereço, telefone e redes sociais que o próprio comércio divulga na internet). O dono pode assumir o perfil e corrigir tudo, ou pedir para tirar do app pela <a href="<?= $base ?>/busca.php">busca do site</a>.</p></details>
       <details><summary>O Acha Fácil vende ou faz os serviços?</summary><p>Não. O Acha Fácil só mostra quem é quem. Preço, prazo e garantia são combinados direto com o comércio.</p></details>
-      <details><summary>Em que ordem aparecem?</summary><p>Quem paga o Destaque aparece primeiro. Depois vêm os perfis assumidos pelos donos e os demais. Dentro de cada grupo, a ordem muda todo dia, para ser justa com todos.</p></details>
+      <details><summary>Em que ordem aparecem?</summary><p>Quem paga o Destaque aparece primeiro. Depois vêm as fichas completas (dos donos que pagaram o Básico) e os demais. Dentro de cada grupo, a ordem muda todo dia, para ser justa com todos.</p></details>
       <details id="instalar-apk"><summary>Como instalar o APK no Android?</summary>
         <p>1. Toque em <strong>Baixar APK</strong> e espere terminar o download.<br>
         2. Toque na notificação do download (ou abra o arquivo <strong>acha-facil.apk</strong> na pasta Downloads).<br>

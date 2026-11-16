@@ -54,8 +54,7 @@ export default function TelaProfissional() {
     registrarContato(p.id, tipo);
     Linking.openURL(link).catch(() => Alert.alert('Não foi possível abrir', 'Confira se o aplicativo está instalado.'));
   };
-  // passo 59: ficha sem dono mostra "É o dono? Complete a sua ficha" nos espaços trancados
-  const aoTocarDono = p.linkAssumir ? () => router.push(`/planos?id=${p.id}`) : undefined;
+  // passo 59: o convite ao dono fica só no cartao "Este comércio é seu?", logo abaixo dos espaços trancados
   const temHorario = !!(p.horarios?.length || p.horario);
   const compartilhar = () =>
     Share.share({ message: `${p.nome} (${p.tipo}) no Acha Fácil${p.telefoneFormatado ? `: ${p.telefoneFormatado}` : ''}` });
@@ -104,10 +103,10 @@ export default function TelaProfissional() {
           </View>
         )}
         {!p.whatsapp && (
-          <Trancado id={p.id} tipo="whatsapp" titulo="WhatsApp" texto="O comércio ainda não informou o WhatsApp." botao="Quero o WhatsApp" aoTocarDono={aoTocarDono} />
+          <Trancado id={p.id} tipo="whatsapp" titulo="WhatsApp" texto="O comércio ainda não informou o WhatsApp." botao="Quero o WhatsApp" />
         )}
         {!p.fotos?.length && (
-          <Trancado id={p.id} tipo="fotos" titulo="Fotos" texto="Ainda sem fotos do lugar, dos produtos ou do cardápio." botao="Quero ver fotos" aoTocarDono={aoTocarDono} />
+          <Trancado id={p.id} tipo="fotos" titulo="Fotos" texto="Ainda sem fotos do lugar, dos produtos ou do cardápio." botao="Quero ver fotos" />
         )}
         {!p.descricao && p.servicos.length === 0 && (
           <Trancado
@@ -116,7 +115,6 @@ export default function TelaProfissional() {
             titulo="O que faz ou vende"
             texto="O comércio ainda não contou o que vende ou faz."
             botao="Quero saber mais"
-            aoTocarDono={aoTocarDono}
           />
         )}
 
@@ -161,7 +159,6 @@ export default function TelaProfissional() {
             titulo="Horário de funcionamento"
             texto="O comércio ainda não informou o horário."
             botao="Quero saber o horário"
-            aoTocarDono={aoTocarDono}
           />
         )}
 

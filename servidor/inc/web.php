@@ -178,12 +178,11 @@ function web_cartao(array $p): string {
  * Espaço trancado na ficha incompleta (passo 59): mostra o que falta e o botão "Quero saber...", que conta o pedido
  * (api/quero.php). O dono vê esses pedidos como motivo para completar a ficha.
  */
-function web_trancado(string $tipo, string $titulo, string $texto, string $botao, ?string $link_dono): string {
+function web_trancado(string $tipo, string $titulo, string $texto, string $botao): string {
     return '<div class="trancado" data-trancado="' . h($tipo) . '"><p class="trancado-titulo"><span aria-hidden="true">🔒</span> ' . h($titulo) . '</p>'
         . '<p class="trancado-texto">' . h($texto) . '</p>'
         . '<button type="button" class="botao pequeno contorno" data-quero="' . h($tipo) . '">🙋 ' . h($botao) . '</button>'
-        . '<p class="quero-ok" hidden>✓ Pedido anotado! Quando o comércio completar a ficha, a informação aparece aqui.</p>'
-        . ($link_dono ? '<p class="trancado-dono">É o dono? <a href="' . h($link_dono) . '">Complete a sua ficha</a></p>' : '') . '</div>';
+        . '<p class="quero-ok" hidden>✓ Pedido anotado! Quando o comércio completar a ficha, a informação aparece aqui.</p></div>';
 }
 function web_cartoes(array $lista): string {
     return '<ul class="cartoes">' . implode('', array_map('web_cartao', $lista)) . '</ul>';
@@ -306,7 +305,7 @@ function web_pagina_lista(string $cidade, array $area, ?string $tipo, ?string $b
   <section class="web-topo"><div class="conteudo">
     <?= $trilha ?>
     <h1><?= h($titulo_lista) ?> em <mark><?= h($nome_cidade) ?></mark></h1>
-    <p class="lead"><?= $qtd ?><?= $bairro !== null ? ' no bairro ' . h($bairro) : '' ?>. Quem paga o Destaque aparece primeiro; os outros mudam de lugar todo dia, para ser justo com todos.</p>
+    <p class="lead"><?= $qtd ?><?= $bairro !== null ? ' no bairro ' . h($bairro) : '' ?>. Destaque e fichas completas aparecem primeiro; os outros mudam de lugar todo dia, para ser justo com todos.</p>
     <?= web_form_busca($cidade) ?>
   </div></section>
 
@@ -423,8 +422,8 @@ function web_pagina_ficha(array $p): void {
 
       <?php if (!$c['whatsapp'] || !$fotos): // passo 59: o que falta, com o botão de pedir ?>
         <div class="trancados">
-          <?php if (!$c['whatsapp']): ?><?= web_trancado('whatsapp', 'WhatsApp', 'O comércio ainda não informou o WhatsApp.', 'Quero o WhatsApp', $link_dono) ?><?php endif ?>
-          <?php if (!$fotos): ?><?= web_trancado('fotos', 'Fotos', 'Ainda sem fotos do lugar, dos produtos ou do cardápio.', 'Quero ver fotos', $link_dono) ?><?php endif ?>
+          <?php if (!$c['whatsapp']): ?><?= web_trancado('whatsapp', 'WhatsApp', 'O comércio ainda não informou o WhatsApp.', 'Quero o WhatsApp') ?><?php endif ?>
+          <?php if (!$fotos): ?><?= web_trancado('fotos', 'Fotos', 'Ainda sem fotos do lugar, dos produtos ou do cardápio.', 'Quero ver fotos') ?><?php endif ?>
         </div>
       <?php endif ?>
 
@@ -438,7 +437,7 @@ function web_pagina_ficha(array $p): void {
         <div>
           <?php if ($p['descricao']): ?><h2>Sobre</h2><p><?= nl2br(h($p['descricao'])) ?></p><?php endif ?>
           <?php if ($c['servicos']): ?><h2>O que faz ou vende</h2><p class="chips chips-texto"><?php foreach ($c['servicos'] as $s): ?><span><?= h($s) ?></span><?php endforeach ?></p><?php endif ?>
-          <?php if (!$tem_sobre): ?><h2>O que faz ou vende</h2><?= web_trancado('sobre', 'Produtos e serviços', 'O comércio ainda não contou o que vende ou faz.', 'Quero saber mais', $link_dono) ?><?php endif ?>
+          <?php if (!$tem_sobre): ?><h2>O que faz ou vende</h2><?= web_trancado('sobre', 'Produtos e serviços', 'O comércio ainda não contou o que vende ou faz.', 'Quero saber mais') ?><?php endif ?>
           <h2>Endereço</h2>
           <p><?= $p['endereco'] ? h($p['endereco']) : 'Endereço não informado.' ?><?= $p['bairro'] && !str_contains((string)$p['endereco'], $p['bairro']) ? '<br>Bairro ' . h($p['bairro']) : '' ?><br><?= h("$nome_cidade - $uf") ?></p>
           <?php if ($p['atende_em_casa']): ?><p class="selo-verificado">🏠 Atende em casa</p><?php endif ?>
@@ -454,10 +453,14 @@ function web_pagina_ficha(array $p): void {
           <?php elseif ($p['horario']): ?>
             <p><?= h($p['horario']) ?></p>
           <?php else: ?>
-            <?= web_trancado('horario', 'Horário de funcionamento', 'O comércio ainda não informou o horário.', 'Quero saber o horário', $link_dono) ?>
+            <?= web_trancado('horario', 'Horário de funcionamento', 'O comércio ainda não informou o horário.', 'Quero saber o horário') ?>
           <?php endif ?>
         </div>
       </div>
+
+      <?php if ($link_dono && (!$c['whatsapp'] || !$fotos || !$tem_sobre || !$tem_horario)): // convite uma vez só, abaixo dos quadros trancados ?>
+        <p class="trancado-dono">🔒 Faltam dados nesta ficha. É o dono? <a href="<?= h($link_dono) ?>">Complete a sua ficha</a></p>
+      <?php endif ?>
 
       <h2>Avaliações de quem usa o Acha Fácil</h2>
       <?php if (!$c['comentarios']): ?><p class="discreto">Ainda sem avaliações. Seja o primeiro a avaliar!</p><?php endif ?>
@@ -687,7 +690,7 @@ function web_sitemap_cidade(string $cidade, string $tipo): string {
     if ($tipo === 'comercios') foreach (q('SELECT p.id, p.nome, p.cidade, DATE(p.atualizado_em) AS mod_em FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
         WHERE ' . visivel($cidade) . ' AND ' . SQL_TEM_CONTATO . ' ORDER BY p.id') as $p) $urls[] = [web_absoluta(url_ficha($p)), $p['mod_em']];   // sem contato: fora do Google
     if ($tipo === 'eventos' && isset(web_sitemap_tipos()['eventos'])) {
-        $urls[] = [web_absoluta(url_eventos($cidade)), null];
+        if (eventos_proximos($cidade)) $urls[] = [web_absoluta(url_eventos($cidade)), null];   // agenda vazia fica fora (noindex)
         foreach (eventos_proximos($cidade) as $e) $urls[] = [web_absoluta(url_evento($e)), substr((string)$e['atualizado_em'], 0, 10)];
     }
     return web_sitemap_urls($urls);
