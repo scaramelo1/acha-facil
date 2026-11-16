@@ -364,7 +364,7 @@ function web_pagina_ficha(array $p): void {
     $ld = ['@context' => 'https://schema.org', '@type' => 'LocalBusiness', '@id' => $url, 'name' => $p['nome'], 'url' => $url];
     if ($imagem) $ld['image'] = $imagem;
     if ($p['descricao']) $ld['description'] = mb_substr($p['descricao'], 0, 300);
-    if ($tel = $p['telefone'] ?: $p['whatsapp']) $ld['telephone'] = '+55' . so_digitos($tel);
+    if ($tel = $p['telefone'] ?: $p['whatsapp']) $ld['telephone'] = telefone_discar($tel);
     $ld['address'] = array_filter(['@type' => 'PostalAddress', 'streetAddress' => $p['endereco'], 'addressLocality' => $nome_cidade,
         'addressRegion' => $uf, 'addressCountry' => 'BR']);
     if ($p['lat'] !== null && $p['lng'] !== null) $ld['geo'] = ['@type' => 'GeoCoordinates', 'latitude' => (float)$p['lat'], 'longitude' => (float)$p['lng']];
@@ -412,7 +412,7 @@ function web_pagina_ficha(array $p): void {
 
       <div class="ficha-botoes">
         <?php if ($c['whatsapp']): ?><a class="botao whats" href="<?= h($c['whatsapp']) ?>" data-contato="whatsapp" rel="nofollow noopener" target="_blank">WhatsApp</a><?php endif ?>
-        <?php if ($p['telefone']): ?><a class="botao" href="tel:+55<?= h(so_digitos($p['telefone'])) ?>" data-contato="ligar" rel="nofollow">Ligar <?= h($c['telefoneFormatado']) ?></a><?php endif ?>
+        <?php if ($p['telefone']): ?><a class="botao" href="tel:<?= h(telefone_discar($p['telefone'])) ?>" data-contato="ligar" rel="nofollow">Ligar <?= h($c['telefoneFormatado']) ?><?= telefone_central($p['telefone']) ? ' (central)' : '' ?></a><?php endif ?>
         <?php if ($c['mapa']): ?><a class="botao contorno" href="<?= h($c['mapa']) ?>" data-contato="mapa" rel="nofollow noopener" target="_blank">Como chegar</a><?php endif ?>
         <?php if ($c['instagram']): ?><a class="botao contorno" href="<?= h($c['instagram']) ?>" data-contato="instagram" rel="nofollow noopener" target="_blank">Instagram</a><?php endif ?>
         <?php if ($p['site']): ?><a class="botao contorno" href="<?= h(preg_match('#^https?://#i', $p['site']) ? $p['site'] : 'https://' . $p['site']) ?>" data-contato="site" rel="nofollow noopener" target="_blank">Site</a><?php endif ?>

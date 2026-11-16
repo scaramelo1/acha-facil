@@ -92,14 +92,39 @@ const TIPO_AREA_CERTA = [
     'Serviço de escrituração contábil' => 'servicos', 'Serviço de declaração de impostos' => 'servicos',
     'Serviço de administração de propriedades' => 'servicos', 'Loja de materiais para preparação de cerveja' => 'lojas',
     'Agência de aluguel de apartamentos de curta duração' => 'hospedagem', 'Hotel fazenda' => 'hospedagem', 'Assistência técnica' => 'servicos',
+    // Outros (16/11, 2ª rodada)
+    'Vinícola' => 'alimentacao', 'Vinhedo' => 'alimentacao', 'Local com música ao vivo' => 'alimentacao', 'Karaokê' => 'alimentacao',
+    'Loteamento de terrenos' => 'servicos', 'Serviço de gerenciamento de descartes' => 'servicos', 'Estúdio de televisão' => 'servicos',
+    'Centro de coaching' => 'servicos', 'Agência de passeios de barco' => 'servicos', 'Serviço de tratamento de água e esgoto' => 'servicos',
+    'Serviço de corte a laser' => 'servicos', 'Fotógrafo aéreo' => 'servicos', 'Casa de leilões' => 'servicos', 'Serviço de contabilidade de custos' => 'servicos',
+    'Aluguel de quadriciclo' => 'esporte', 'Programa de condicionamento físico' => 'esporte', 'Centro de esportes de aventura' => 'esporte',
+    'Aula de aerodança' => 'esporte', 'Agricultura' => 'pet', 'Selaria' => 'pet', 'Empresa de cultivo de orquídeas' => 'pet',
+    'Feira de artesanato' => 'lojas', 'Compras' => 'lojas', 'Outlet' => 'lojas', 'Central de artesanato' => 'lojas', 'Antiquário' => 'lojas',
+    'Locadora de filmes' => 'lojas', 'Galeria de Arte' => 'lojas', 'Casa especializada em frutas' => 'mercados',
+    'Centro de exposições' => 'hospedagem', 'Rancho turístico' => 'hospedagem', 'Lago de pesca' => 'hospedagem', 'Acampamento de pesca' => 'hospedagem',
+    'Dude Ranch' => 'hospedagem', 'Serviço de aluguel de tendas' => 'hospedagem', 'Centro de diversões infantil' => 'hospedagem',
+    'Serviço de Aluguel de Equipamentos Audiovisuais' => 'hospedagem', 'Acampamento de verão' => 'hospedagem', 'Campo de férias' => 'hospedagem',
+    'Retiro' => 'hospedagem', 'Teatro' => 'hospedagem', 'Fundição' => 'industria', 'Processamento de frutas e legumes' => 'industria',
+    'Laboratório de química' => 'industria', 'Curtume' => 'industria', 'Planta química' => 'industria', 'Empresa de aquecedores' => 'casa',
+    'Empresa de purificação de água' => 'casa', 'Serviço de locação de ferramentas' => 'casa', 'Serviço de poda' => 'casa',
+    'Avaliador de joias' => 'moda', 'Empresa de aluguel de vestidos e smokings' => 'moda', 'Serviço de hipnoterapia' => 'saude',
+    'Oncologista' => 'saude', 'Endoscopista' => 'saude', 'Hematologista' => 'saude', 'Proctologista' => 'saude', 'Homeopatia' => 'saude',
+    'Banco de sangue' => 'saude', 'Centro de imagens por ressonância magnética' => 'saude', 'Terapia ocupacional' => 'saude', 'Doula' => 'saude',
+    'Consultório de enfermagem' => 'saude',
     // Saúde, Serviços, Veículos, Hospedagem
     'Farmácia veterinária' => 'pet', 'Alfaiate' => 'moda', 'Lavanderia automática' => 'servicos',
     'Empresa de Automação Empresarial' => 'servicos', 'Oficina de costura' => 'moda', 'Empresa de hospedagem na Web' => 'servicos',
 ];
 
-/** Tipo padronizado (Bares → Bar). */
+// Não é comércio (lugar público, prédio, ponte...): a ficha importada sai do app (status pausado; o admin pode voltar).
+const TIPO_NAO_COMERCIO = '/^(ponte|complexo (de condom[íi]nio|residencial|de apartamentos)|pres[íi]dio|reparti[çc][ãa]o p[úu]blica( federal)?|'
+    . 'banheiro p[úu]blico|base militar|cemit[ée]rio|escrit[óo]rio do governo.*|drinking water)$/iu';   // só tipo que nunca é comércio
+function tipo_nao_comercio(?string $tipo): bool { return $tipo !== null && preg_match(TIPO_NAO_COMERCIO, trim($tipo)) === 1; }
+
+/** Tipo padronizado (Bares → Bar); endereço no lugar do tipo ("R. Tabapuan, 12") vira vazio. */
 function limpar_tipo(?string $tipo): ?string {
     if ($tipo === null || trim($tipo) === '') return $tipo;
+    if (preg_match('/^(r|rua|av|avenida|al|alameda|rod|rodovia|estr|estrada|tv|travessa)\b\.?\s/iu', trim($tipo))) return null;
     return TIPO_IGUAL[trim($tipo)] ?? trim($tipo);
 }
 /** Slug da área certa para o tipo, ou null se o tipo não está na lista de correções. */
@@ -117,4 +142,17 @@ function bairros_da_cidade(string $cidade): array {
         if (preg_match('/\p{Lu}/u', $l['bairro'])) $r[chave_texto($l['bairro'])] ??= $l['bairro'];
     }
     return $cache[$cidade] = $r;
+}
+
+/** Bairro que só aparece numa ficha da cidade e não tem cara de bairro (Jardim, Vila, Parque...): quase sempre sujeira. */
+function bairro_raro_suspeito(string $b): bool {
+    return !preg_match('/^(jardim|jardins|vila|parque|residencial|recanto|conjunto|ch[áa]cara|ch[áa]caras|s[íi]tio|bairro|alto|nova|novo|portal|vista|'
+        . 'cidade|n[úu]cleo|loteamento|distrito|condom[íi]nio|est[âa]ncia|morada|vale|bosque|s[ãa]o|santa|santo|nossa|centro|zona|cohab|cdhu|'
+        . 'setor|granja|quinta|colina|colinas|solar|terras|village|cecap|conj|res|lot|jd|pq|vl|jardim|ilha|lagoa|serra|morro|praia|campo|'
+        . 'sert[ãa]o|fazenda|rio|monte|boa|bela|belo|vale|reserva|cond|ch|c[óo]rrego|ribeir[ãa]o|cap[ãa]o|tanque|pinheiros?|'
+        // bairros comuns de uma palavra só (não confundir com nome de pessoa ou de rua)
+        . 'alvorada|planalto|primavera|industrial|cachoeira|fortaleza|para[íi]so|esperan[çc]a|aeroporto|universit[áa]rio|liberdade|'
+        . 'independ[êe]ncia|progresso|recreio|itamaraty|itamarati|palmeiral|resedas|concei[çc][ãa]o|ros[áa]rio|aparecida|cruzeiro|esta[çc][ãa]o|'
+        . 'ferrovi[áa]rio|matadouro|baix[ãa]o|ip[êe]|ipiranga|lavap[ée]s|vit[óo]ria|bonfim|capela|cascata|cascatinha|chapad[ãa]o|'
+        . 'mirante|panorama|horizonte|bandeirantes|tropical|europa|am[ée]rica|brasil|eldorado|bnh)\b/iu', $b);
 }

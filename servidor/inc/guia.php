@@ -285,8 +285,9 @@ function prof_completo(array $p, ?int $usuario_id): array {
     $r += [
         'responsavel' => $p['responsavel'],
         'descricao' => $p['descricao'],
-        'telefone' => $p['telefone'],
+        'telefone' => $p['telefone'] && telefone_central($p['telefone']) ? telefone_discar($p['telefone']) : $p['telefone'],   // central: sem DDD
         'telefoneFormatado' => $p['telefone'] ? telefone_formatado($p['telefone']) : null,
+        'telefoneCentral' => $p['telefone'] ? telefone_central($p['telefone']) : false,   // 16/11: número nacional da rede, não da loja
         'whatsapp' => $p['whatsapp'] ? link_whatsapp($p['whatsapp'], 'Olá! Encontrei você no Acha Fácil.') : null,
         'instagram' => $p['instagram'] ? 'https://instagram.com/' . ltrim($p['instagram'], '@') : null,
         'endereco' => $p['endereco'],

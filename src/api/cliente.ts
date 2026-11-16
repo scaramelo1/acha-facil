@@ -103,6 +103,8 @@ export interface Profissional extends ProfissionalResumo {
   endereco: string | null;
   mapa: string | null;
   site: string | null;
+  /** Numero nacional da rede (4003, 0800...), nao o da loja. */
+  telefoneCentral?: boolean;
   linkAssumir: string | null;
   linkRemover: string | null;
   horario: string | null;

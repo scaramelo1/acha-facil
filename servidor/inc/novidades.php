@@ -145,6 +145,8 @@ function nov_importar(array $m, ?int $admin_id): array {
     copy($origem, $final);
     [$rc, $saida] = nov_rodar([nov_raiz() . '/importar-leads.php', $final, $slug]);
     if ($rc !== 0 || !str_contains($saida, '✔')) throw new RuntimeException('Erro ao importar (o banco não mudou): ' . $saida);
+    // 16/11: limpeza que depende da cidade inteira (bairros raros, fichas repetidas); guarda arquivo para desfazer
+    nov_rodar([nov_raiz() . '/limpar-dados.php', '--aplicar']);
     web_cache_limpar();
     registrar($admin_id, 'importou_lista', null, nome_cidade($slug) . ': ' . strtok($saida, "\n"));
     // localização dos novos, em segundo plano (OpenStreetMap: ~1,3 s por endereço sem coordenadas no link)

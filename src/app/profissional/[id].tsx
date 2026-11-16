@@ -142,7 +142,7 @@ export default function TelaProfissional() {
               onPress={p.mapa ? () => abrir('mapa', p.mapa!) : undefined}
             />
           ) : null}
-          {p.telefoneFormatado ? <Linha icone="phone" texto={p.telefoneFormatado} detalhe="Ligar" onPress={() => abrir('ligar', `tel:${p.telefone}`)} /> : null}
+          {p.telefoneFormatado ? <Linha icone="phone" texto={p.telefoneFormatado} detalhe={p.telefoneCentral ? 'Central de atendimento da rede' : 'Ligar'} onPress={() => abrir('ligar', `tel:${p.telefone}`)} /> : null}
           {p.instagram ? <Linha icone="instagram" texto="Ver Instagram" onPress={() => abrir('instagram', p.instagram!)} /> : null}
           {p.site ? <Linha icone="web" texto={siteCurto(p.site)} onPress={() => abrir('site', p.site!)} /> : null}
           {p.atendeEmCasa && <Linha icone="home-outline" texto="Vai até você" />}

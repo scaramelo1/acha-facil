@@ -544,3 +544,14 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
      81 tipos (1.004 fichas) para a área certa. Backups: /var/lib/acha-facil/backups/profissionais.antes-limpeza.20261116-0901.sql.gz
      e arquivos limpeza-bairros-tipos-*.sql (desfazer: mysql acha_facil < arquivo). Sobram nomes de rua soltos
      ("da Silva", "Antônio Frizzo de Mendonça") que a regra não separa de bairro com nome de pessoa.
+62. ✅ Qualidade dos dados, 2ª rodada (16/11, pedido do usuário). `php servidor/limpar-dados.php [--aplicar]` agora faz tudo:
+   bairros que aparecem 1 vez na cidade e não têm cara de bairro saem (bairro_raro_suspeito, com lista de nomes comuns
+   como Alvorada/Planalto); tipo que é endereço ("R. Ademar de Barros, 490") fica vazio; mais 60 tipos de "Outros" na
+   área certa (Outros 764 → 530); lugar que não é comércio sai do app (TIPO_NAO_COMERCIO: ponte, presídio, cemitério,
+   repartição pública, condomínio... → pausado; o importador também pula); fichas repetidas (mesmo nome e endereço na
+   cidade) ficam só na mais completa (as outras pausadas, favoritos/avaliações passam). Aplicado: 967 fichas, 14
+   repetidas e 20 não-comércio pausados. Backup: /var/lib/acha-facil/backups/profissionais.antes-limpeza2.20261116-0910.sql.gz
+   e limpeza-dados-20261116-091059.sql (desfazer). A importação pelo admin (Novidades) roda a limpeza sozinha depois.
+   Telefone de central (4003/4004/3003/0800): mostrado sem DDD ("4004-4828 (central)"), tel: sem DDD, API com
+   telefoneCentral (app 1.8.0 mostra "Central de atendimento da rede"). Telefones divididos (8 hotéis de Campos com o
+   mesmo número) conferidos: são da mesma rede (central de reservas), não é erro — mantidos.

@@ -50,8 +50,29 @@ function atualizar(string $tabela, int $id, array $dados): void {
 // ---------- formatação ----------
 function h($v): string { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 function so_digitos(?string $s): string { return preg_replace('/\D+/', '', (string)$s); }
+/**
+ * Número de central (16/11): 4003/4004/3003... (disca sem DDD, igual em todo o Brasil) e 0800/0300 (guardados sem o 0,
+ * ex.: 8007257333). É o número nacional da rede (bancos, Americanas...), não o da loja.
+ */
+function telefone_central(?string $t): bool {
+    $t = so_digitos($t);
+    if (strlen($t) === 10 && preg_match('/^(800|300|0800|0300)/', $t)) return true;
+    if (strlen($t) === 11 && preg_match('/^0(800|300)/', $t)) return true;
+    return strlen($t) === 10 && preg_match('/^\d\d(40[0-9]{2}|300[0-9])/', $t) === 1;
+}
+/** O que vai no link tel: (central sem DDD; 0800 com o 0). */
+function telefone_discar(?string $t): string {
+    $t = so_digitos($t);
+    if (!telefone_central($t)) return '+55' . $t;
+    if (preg_match('/^0?(800|300)(\d{7})$/', $t, $m)) return "0{$m[1]}{$m[2]}";
+    return substr($t, 2);
+}
 function telefone_formatado(?string $t): string {
     $t = so_digitos($t);
+    if (telefone_central($t)) {
+        $d = telefone_discar($t);
+        return str_starts_with($d, '0') ? preg_replace('/(\d{4})(\d{3})(\d{4})/', '$1 $2 $3', $d) : preg_replace('/(\d{4})(\d{4})/', '$1-$2', $d);
+    }
     if (strlen($t) === 11) return preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $t);
     if (strlen($t) === 10) return preg_replace('/(\d{2})(\d{4})(\d{4})/', '($1) $2-$3', $t);
     return $t;
