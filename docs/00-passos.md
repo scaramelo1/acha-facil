@@ -628,3 +628,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    robots 22 = admin/painel/api/assinatura/entrar etc. (de propósito); noindex 17 = incluir/suporte, tipo com menos de 3,
    bairro, ficha sem telefone, agenda vazia, 404 (de propósito). NÃO clicar em "Validar correção" nesses três.
    /favicon.ico na raiz (dava 404 para o Googlebot) copiado de assets/.
+71. ✅ Comparação com o período anterior em /admin/entradas.php (16/11, pedido do usuário: "134, se ontem foi 130, +4").
+   Cada quadro (entradas, de gente, fichas abertas, visualizações, toques) mostra a diferença: Hoje x ontem (dia inteiro),
+   7/30/90 dias x os 7/30/90 anteriores, em verde (+), vermelho (−) ou "igual", com o número anterior entre parênteses.
+   Período anterior antes dos dados (entradas desde 11/11, fichas/toques por origem desde 14/11) = "sem dados para comparar".
+   Tabela nova "Dia a dia" (período escolhido, no mínimo 7 dias) com a diferença para o dia anterior em cada coluna.
+   Sem mudança no banco. Testado numa cópia com o banco real (só leitura): Google, direto, cidade e 1/7/30 dias.

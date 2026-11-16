@@ -74,6 +74,76 @@ $comercio = fn(array $l) => '<strong>' . h($l['nome']) . '</strong><br><span cla
 $ver = fn(array $l) => '<a class="botao pequeno contorno" href="numeros-ficha.php?id=' . (int)$l['id'] . '&amp;dias=' . $dias . '">Ver</a>'
     . ' <a class="botao pequeno contorno" href="' . h(url_ficha($l)) . '" target="_blank" rel="noopener">Abrir</a>';
 
+// comparação com o período anterior (passo 71, pedido do usuário): "Hoje" x ontem, 7 dias x os 7 anteriores, etc.
+// Os mesmos 5 números dos quadros, contados por dia, para um intervalo qualquer (dia inicial e final inclusive).
+const ENTRADAS_DESDE = '2026-11-11';   // entradas tiradas do registro do servidor a partir daqui
+const ORIGEM_FICHAS_DESDE = '2026-11-14';   // visualizações e toques separados por origem desde aqui
+$totais_por_dia = function (string $ini, string $fim) use ($origem, $cidade): array {
+    $dias_lista = [];
+    for ($d = $ini; $d <= $fim; $d = date('Y-m-d', strtotime("$d +1 day")))
+        $dias_lista[$d] = ['entradas' => 0, 'gente' => 0, 'fichas' => 0, 'vis' => 0, 'toques' => 0, 'tocados' => 0];
+    $wc = $cidade !== '' ? ' AND cidade = ?' : '';
+    $pc = $cidade !== '' ? [$cidade] : [];
+    if (entradas_prontas()) {
+        foreach (linhas("SELECT dia, SUM(total) AS t FROM entradas WHERE origem = ? AND dia BETWEEN ? AND ?$wc GROUP BY dia",
+                array_merge([$origem, $ini, $fim], $pc)) as $l) {
+            $dias_lista[$l['dia']]['entradas'] = $dias_lista[$l['dia']]['gente'] = (int)$l['t'];
+        }
+        if (pre_carregamento_pronto()) {
+            foreach (linhas("SELECT DATE(quando) AS dia, COUNT(*) AS t FROM entradas_hora WHERE origem = ? AND quando BETWEEN ? AND ? AND pre = 1$wc GROUP BY DATE(quando)",
+                    array_merge([$origem, "$ini 00:00:00", "$fim 23:59:59"], $pc)) as $l) {
+                if (isset($dias_lista[$l['dia']])) $dias_lista[$l['dia']]['gente'] = max(0, $dias_lista[$l['dia']]['gente'] - (int)$l['t']);
+            }
+        }
+    }
+    $wp = $cidade !== '' ? ' AND p.cidade = ?' : '';
+    foreach (linhas("SELECT k.dia, COUNT(DISTINCT IF(k.tipo = 'perfil' AND k.total > 0, k.profissional_id, NULL)) AS fichas,
+            SUM(IF(k.tipo = 'perfil', k.total, 0)) AS vis, SUM(IF(k.tipo <> 'perfil', k.total, 0)) AS toques,
+            COUNT(DISTINCT IF(k.tipo <> 'perfil' AND k.total > 0, k.profissional_id, NULL)) AS tocados
+        FROM contatos k JOIN profissionais p ON p.id = k.profissional_id
+        WHERE k.origem = ? AND k.dia BETWEEN ? AND ?$wp GROUP BY k.dia", array_merge([$origem, $ini, $fim], $pc)) as $l) {
+        foreach (['fichas', 'vis', 'toques', 'tocados'] as $k) $dias_lista[$l['dia']][$k] = (int)$l[$k];
+    }
+    return $dias_lista;
+};
+$somar = function (array $dl): array {
+    $s = ['entradas' => 0, 'gente' => 0, 'fichas' => 0, 'vis' => 0, 'toques' => 0, 'tocados' => 0];
+    foreach ($dl as $d) foreach ($s as $k => $_) $s[$k] += $d[$k];
+    return $s;
+};
+$hoje_d = hoje();
+$ant_fim = date('Y-m-d', strtotime("$desde -1 day"));
+$ant_ini = date('Y-m-d', strtotime("$desde -$dias days"));
+$agora_t = $somar($totais_por_dia($desde, $hoje_d));
+$antes_t = $somar($totais_por_dia($ant_ini, $ant_fim));
+// fichas abertas e comércios tocados no período = comércios DIFERENTES (não a soma dos dias)
+$diferentes = function (string $ini, string $fim) use ($origem, $cidade): array {
+    $wp = $cidade !== '' ? ' AND p.cidade = ?' : '';
+    $l = linhas("SELECT COUNT(DISTINCT IF(k.tipo = 'perfil' AND k.total > 0, k.profissional_id, NULL)) AS fichas,
+            COUNT(DISTINCT IF(k.tipo <> 'perfil' AND k.total > 0, k.profissional_id, NULL)) AS tocados
+        FROM contatos k JOIN profissionais p ON p.id = k.profissional_id WHERE k.origem = ? AND k.dia BETWEEN ? AND ?$wp",
+        array_merge([$origem, $ini, $fim], $cidade !== '' ? [$cidade] : []))[0] ?? [];
+    return ['fichas' => (int)($l['fichas'] ?? 0), 'tocados' => (int)($l['tocados'] ?? 0)];
+};
+$agora_t = array_merge($agora_t, $diferentes($desde, $hoje_d));
+$antes_t = array_merge($antes_t, $diferentes($ant_ini, $ant_fim));
+$nome_antes = $dias === 1 ? 'ontem' : "os $dias dias anteriores";
+/** "+8 desde ontem" (verde), "−4 ..." (vermelho), "igual a ontem"; sem comparação se o período anterior é de antes dos dados. */
+$diferenca = function (string $k) use ($agora_t, $antes_t, $ant_ini, $ant_fim, $dias, $nome_antes): string {
+    $inicio_dados = in_array($k, ['entradas', 'gente'], true) ? ENTRADAS_DESDE : ORIGEM_FICHAS_DESDE;
+    if ($ant_fim < $inicio_dados) return '<small class="dif sem">sem dados ' . ($dias === 1 ? 'de ontem' : "dos $dias dias anteriores") . ' para comparar</small>';
+    $d = $agora_t[$k] - $antes_t[$k];
+    $base = num($antes_t[$k]);
+    $parcial = $ant_ini < $inicio_dados ? '*' : '';
+    if ($d === 0) return '<small class="dif igual">igual ' . ($dias === 1 ? 'a ontem' : 'aos ' . $dias . ' dias anteriores') . " ($base)$parcial</small>";
+    return '<small class="dif ' . ($d > 0 ? 'sobe' : 'desce') . '">' . ($d > 0 ? '+' : '−') . num(abs($d))
+        . ($dias === 1 ? ' desde ontem' : ' x ' . h($nome_antes)) . " ($base)$parcial</small>";
+};
+$tem_parcial = $ant_ini < ORIGEM_FICHAS_DESDE && $ant_fim >= ENTRADAS_DESDE;
+// dia a dia: o período escolhido (no mínimo os últimos 7 dias), mais novo primeiro, com a diferença para o dia anterior
+$dd_ini = max(ENTRADAS_DESDE, desde_dias(max(7, $dias)));
+$dia_a_dia = $totais_por_dia(date('Y-m-d', strtotime("$dd_ini -1 day")), $hoje_d);
+
 // relatório (passo 43): cidades, áreas, comércios, dias e horários mais procurados por quem veio desta origem
 $rel = ['cidades' => [], 'areas' => [], 'comercios' => [], 'dias' => [], 'horas' => array_fill(0, 24, 0)];
 if (entradas_prontas()) {
@@ -159,13 +229,35 @@ admin_inicio(ORIGENS[$origem], $admin);
   Desde 16/11 a ficha pré-carregada só conta como aberta (e nas visualizações) quando a pessoa abre de verdade; antes disso
   os downloads entravam também. Os <strong>toques</strong> são sempre de gente de verdade.</p><?php endif ?>
 <div class="numeros-resumo">
-  <?php if (entradas_prontas()): ?><div><strong><?= num($total_entradas) ?></strong><span>entradas no site</span></div><?php endif ?>
-  <?php if ($pre !== null): ?><div title="Cliques normais + pré-carregadas que a pessoa abriu (desde 16/11). Tira só o que o Chrome baixou e ninguém viu.">
-    <strong><?= num(max(0, $total_entradas - $pre)) ?></strong><span>entradas de gente (sem pré-carregamento)</span></div><?php endif ?>
-  <div><strong><?= num(count($abertas)) ?></strong><span>fichas abertas</span></div>
-  <div><strong><?= num($soma($abertas, 'visualizacoes')) ?></strong><span>visualizações</span></div>
-  <div><strong><?= num($soma($tocadas, 'toques')) ?></strong><span>toques em <?= num(count($tocadas)) ?> comércios</span></div>
+  <?php if (entradas_prontas()): ?><div><strong><?= num($agora_t['entradas']) ?></strong><span>entradas no site</span><?= $diferenca('entradas') ?></div><?php endif ?>
+  <?php if ($pre !== null || pre_carregamento_pronto()): ?><div title="Cliques normais + pré-carregadas que a pessoa abriu (desde 16/11). Tira só o que o Chrome baixou e ninguém viu.">
+    <strong><?= num($agora_t['gente']) ?></strong><span>entradas de gente (sem pré-carregamento)</span><?= $diferenca('gente') ?></div><?php endif ?>
+  <div><strong><?= num($agora_t['fichas']) ?></strong><span>fichas abertas</span><?= $diferenca('fichas') ?></div>
+  <div><strong><?= num($agora_t['vis']) ?></strong><span>visualizações</span><?= $diferenca('vis') ?></div>
+  <div><strong><?= num($agora_t['toques']) ?></strong><span>toques em <?= num($agora_t['tocados']) ?> comércios</span><?= $diferenca('toques') ?></div>
 </div>
+<p class="discreto">Entre parênteses, o número de <?= h($nome_antes) ?><?= $dias === 1 ? ' (o dia inteiro; hoje ainda não acabou)' : '' ?>.
+  <?= $tem_parcial ? '* O período anterior começa antes de os dados existirem (entradas desde 11/11, fichas e toques por origem desde 14/11): a comparação fica a favor de agora.' : '' ?>
+  Os dias 15 e 16/11 têm robôs do AdSense contados como gente (separados só a partir de 16/11).</p>
+
+<h2>Dia a dia</h2>
+<div class="tabela"><table class="dia-a-dia">
+  <tr><th>Dia</th><th>Entradas</th><th>De gente</th><th>Fichas abertas</th><th>Visualizações</th><th>Toques</th></tr>
+  <?php $dds = array_keys($dia_a_dia); for ($i = count($dds) - 1; $i >= 1; $i--): $d = $dds[$i]; $v = $dia_a_dia[$d]; $a = $dia_a_dia[$dds[$i - 1]]; ?><tr>
+    <td><strong><?= date('d/m', strtotime($d)) ?></strong> <span class="discreto"><?= ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'][(int)date('w', strtotime($d))] ?><?= $d === $hoje_d ? ' · hoje' : '' ?></span></td>
+    <?php foreach (['entradas', 'gente', 'fichas', 'vis', 'toques'] as $k):
+        $desde_k = in_array($k, ['entradas', 'gente'], true) ? ENTRADAS_DESDE : ORIGEM_FICHAS_DESDE;
+        $dif = $v[$k] - $a[$k]; ?>
+    <td><?= num($v[$k]) ?><?php if ($dds[$i - 1] >= $desde_k): ?> <small class="dif <?= $dif > 0 ? 'sobe' : ($dif < 0 ? 'desce' : 'igual') ?>"><?= $dif > 0 ? '+' . num($dif) : ($dif < 0 ? '−' . num(-$dif) : '=') ?></small><?php endif ?></td>
+    <?php endforeach ?>
+  </tr><?php endfor ?>
+</table></div>
+<p class="discreto">Ao lado de cada número, a diferença para o dia anterior. Hoje ainda não acabou.</p>
+<style>
+  .numeros-resumo .dif { display: block; margin-top: 4px; font-size: .8rem; font-weight: 700; }
+  .dif.sobe { color: #12803c; } .dif.desce { color: #c0392b; } .dif.igual, .dif.sem { color: var(--texto2); font-weight: 400; }
+  .dia-a-dia .dif { font-size: .78rem; }
+</style>
 
 <?php if ($rel_total): ?>
 <h2>Relatório: cidades mais procuradas</h2>
