@@ -347,6 +347,17 @@ a.area:hover { border-color: var(--verde); }
 .selo-destaque, .selo-verificado, .selo-aberto, .selo-fechado { display: inline-block; font-size: .8rem; font-weight: 900; border-radius: 999px; padding: 2px 10px; margin: 4px 6px 0 0; }
 .selo-destaque { background: var(--amarelo); color: var(--verde); }
 .selo-verificado { background: var(--verde-claro); color: var(--verde); }
+.selo-completa { display: inline-block; font-size: .8rem; font-weight: 900; border-radius: 999px; padding: 2px 10px; margin: 4px 6px 0 0; background: var(--verde-claro); color: var(--verde2); }
+
+/* ficha incompleta (passo 59): espaços trancados com "Quero saber..." */
+.trancados { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 16px 0; }
+.trancado { border: 2px dashed var(--borda); border-radius: 18px; padding: 14px 16px; background: var(--creme); }
+.trancado-titulo { margin: 0; font-weight: 900; color: var(--texto); }
+.trancado-texto { margin: 2px 0 10px; color: var(--texto2); font-size: .95rem; }
+.trancado .botao { margin: 0; }
+.quero-ok { margin: 0; font-weight: 800; color: var(--verde2); font-size: .95rem; }
+.trancado-dono { margin: 10px 0 0; font-size: .85rem; color: var(--texto2); }
+.trancado-dono a { color: var(--verde2); font-weight: 800; }
 .selo-aberto { background: #dcf5e3; color: #11672c; }
 .selo-fechado { background: #fde2e1; color: #9b1c1c; }
 .nota { display: inline-block; font-size: .9rem; font-weight: 800; color: #9a6b00; margin-top: 4px; }

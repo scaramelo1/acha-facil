@@ -71,7 +71,7 @@ function web_filtro(string $cidade, int $categoria_id, ?string $tipo, ?string $b
     if ($bairro !== null) { $sql .= ' AND p.bairro = ?'; $par[] = $bairro; }
     return [$sql, $par];
 }
-/** Uma página da lista, na mesma ordem justa do app (Destaque, assumidos, com avaliação, sorteio do dia). */
+/** Uma página da lista, na mesma ordem justa do app (Destaque, ficha paga, com avaliação, sorteio do dia). */
 function web_contar(string $cidade, int $categoria_id, ?string $tipo, ?string $bairro): int {
     [$sql, $par] = web_filtro($cidade, $categoria_id, $tipo, $bairro);
     return (int)valor("SELECT COUNT(*) FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE $sql", $par);
@@ -79,7 +79,7 @@ function web_contar(string $cidade, int $categoria_id, ?string $tipo, ?string $b
 function web_lista(string $cidade, int $categoria_id, ?string $tipo, ?string $bairro, int $pagina): array {
     [$sql, $par] = web_filtro($cidade, $categoria_id, $tipo, $bairro);
     return linhas('SELECT ' . CAMPOS_RESUMO . ", p.endereco FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
-        WHERE $sql ORDER BY " . SQL_DESTAQUE . ' DESC, p.importado ASC, p.total_avaliacoes > 0 DESC, RAND(?)
+        WHERE $sql ORDER BY " . SQL_DESTAQUE . ' DESC, ' . SQL_FICHA_PAGA . ' DESC, p.total_avaliacoes > 0 DESC, RAND(?)
         LIMIT ' . WEB_POR_PAGINA . ' OFFSET ' . (max(1, $pagina) - 1) * WEB_POR_PAGINA, [...$par, semente_dia()]);
 }
 /** Bairros da lista (sem o filtro de bairro), para o filtro. */
@@ -98,7 +98,7 @@ function web_ficha(int $id): ?array {
 /** "Outros dentistas em São João": do mesmo tipo (ou da mesma área, se o tipo tiver poucos). Devolve [lista, do mesmo tipo?]. */
 function web_parecidos(array $p, int $limite = 6): array {
     $campos = 'SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE ' . visivel($p['cidade']) . ' AND p.id <> ?';
-    $ordem = ' ORDER BY ' . SQL_DESTAQUE . " DESC, RAND(?) LIMIT $limite";
+    $ordem = ' ORDER BY ' . SQL_DESTAQUE . ' DESC, ' . SQL_FICHA_PAGA . " DESC, RAND(?) LIMIT $limite";
     $r = $p['tipo'] ? linhas("$campos AND p.tipo = ?$ordem", [$p['id'], $p['tipo'], semente_dia() + (int)$p['id']]) : [];
     if (count($r) >= 3) return [$r, true];
     return [linhas("$campos AND p.categoria_id = ?$ordem", [$p['id'], $p['categoria_id'], semente_dia() + (int)$p['id']]), false];
@@ -171,7 +171,19 @@ function web_cartao(array $p): string {
     $sub = array_filter([$p['tipo'] ?: $p['categoria'], $p['bairro']]);
     return '<li class="cc' . ($p['destaque_pago'] ? ' cc-destaque' : '') . '"><a href="' . h(url_ficha($p)) . '">' . web_logo($p)
         . '<span class="cc-texto"><b>' . h($p['nome']) . '</b><small>' . h(implode(' · ', $sub)) . '</small>'
-        . ($p['destaque_pago'] ? '<span class="selo-destaque">Destaque</span>' : '') . web_nota($p) . '</span></a></li>';
+        . ($p['destaque_pago'] ? '<span class="selo-destaque">Destaque</span>' : (!empty($p['tem_dono']) ? '<span class="selo-completa">✓ Ficha completa</span>' : ''))
+        . web_nota($p) . '</span></a></li>';
+}
+/**
+ * Espaço trancado na ficha incompleta (passo 59): mostra o que falta e o botão "Quero saber...", que conta o pedido
+ * (api/quero.php). O dono vê esses pedidos como motivo para completar a ficha.
+ */
+function web_trancado(string $tipo, string $titulo, string $texto, string $botao, ?string $link_dono): string {
+    return '<div class="trancado" data-trancado="' . h($tipo) . '"><p class="trancado-titulo"><span aria-hidden="true">🔒</span> ' . h($titulo) . '</p>'
+        . '<p class="trancado-texto">' . h($texto) . '</p>'
+        . '<button type="button" class="botao pequeno contorno" data-quero="' . h($tipo) . '">🙋 ' . h($botao) . '</button>'
+        . '<p class="quero-ok" hidden>✓ Pedido anotado! Quando o comércio completar a ficha, a informação aparece aqui.</p>'
+        . ($link_dono ? '<p class="trancado-dono">É o dono? <a href="' . h($link_dono) . '">Complete a sua ficha</a></p>' : '') . '</div>';
 }
 function web_cartoes(array $lista): string {
     return '<ul class="cartoes">' . implode('', array_map('web_cartao', $lista)) . '</ul>';
@@ -376,6 +388,10 @@ function web_pagina_ficha(array $p): void {
         ['canonica' => $url, 'imagem' => $imagem, 'head' => web_json_ld($ld, $ld_trilha),
             'anuncios' => $p['importado'] && !$p['basico_pago_em'] && !$p['destaque_pago']]);   // anúncio só em ficha de quem não paga plano
     [$parecidos, $mesmo_tipo] = web_parecidos($p);
+    $sem_dono = $p['importado'] && !tem_dono($p);
+    $link_dono = $sem_dono ? $c['linkAssumir'] : null;
+    $tem_horario = $h || $p['horario'];
+    $tem_sobre = $p['descricao'] || $c['servicos'];
     ?>
 <main class="ficha">
   <div class="conteudo">
@@ -405,6 +421,13 @@ function web_pagina_ficha(array $p): void {
         <?php else: ?><a class="botao contorno botao-salvar" href="<?= h(link_entrar(url_ficha($p))) ?>" rel="nofollow" title="Entre com o Google para salvar">♡ Salvar</a><?php endif ?>
       </div>
 
+      <?php if (!$c['whatsapp'] || !$fotos): // passo 59: o que falta, com o botão de pedir ?>
+        <div class="trancados">
+          <?php if (!$c['whatsapp']): ?><?= web_trancado('whatsapp', 'WhatsApp', 'O comércio ainda não informou o WhatsApp.', 'Quero o WhatsApp', $link_dono) ?><?php endif ?>
+          <?php if (!$fotos): ?><?= web_trancado('fotos', 'Fotos', 'Ainda sem fotos do lugar, dos produtos ou do cardápio.', 'Quero ver fotos', $link_dono) ?><?php endif ?>
+        </div>
+      <?php endif ?>
+
       <?php if ($fotos): ?>
         <div class="ficha-fotos">
           <?php foreach ($fotos as $i => $f): ?><a href="<?= h($f) ?>" target="_blank" rel="noopener"><img src="<?= h($f) ?>" alt="<?= h($p['nome']) ?>, foto <?= $i + 1 ?>" loading="<?= $i ? 'lazy' : 'eager' ?>" height="200"></a><?php endforeach ?>
@@ -415,6 +438,7 @@ function web_pagina_ficha(array $p): void {
         <div>
           <?php if ($p['descricao']): ?><h2>Sobre</h2><p><?= nl2br(h($p['descricao'])) ?></p><?php endif ?>
           <?php if ($c['servicos']): ?><h2>O que faz ou vende</h2><p class="chips chips-texto"><?php foreach ($c['servicos'] as $s): ?><span><?= h($s) ?></span><?php endforeach ?></p><?php endif ?>
+          <?php if (!$tem_sobre): ?><h2>O que faz ou vende</h2><?= web_trancado('sobre', 'Produtos e serviços', 'O comércio ainda não contou o que vende ou faz.', 'Quero saber mais', $link_dono) ?><?php endif ?>
           <h2>Endereço</h2>
           <p><?= $p['endereco'] ? h($p['endereco']) : 'Endereço não informado.' ?><?= $p['bairro'] && !str_contains((string)$p['endereco'], $p['bairro']) ? '<br>Bairro ' . h($p['bairro']) : '' ?><br><?= h("$nome_cidade - $uf") ?></p>
           <?php if ($p['atende_em_casa']): ?><p class="selo-verificado">🏠 Atende em casa</p><?php endif ?>
@@ -430,7 +454,7 @@ function web_pagina_ficha(array $p): void {
           <?php elseif ($p['horario']): ?>
             <p><?= h($p['horario']) ?></p>
           <?php else: ?>
-            <p class="discreto">Horário não informado. Chame antes de ir.</p>
+            <?= web_trancado('horario', 'Horário de funcionamento', 'O comércio ainda não informou o horário.', 'Quero saber o horário', $link_dono) ?>
           <?php endif ?>
         </div>
       </div>
@@ -468,7 +492,7 @@ function web_pagina_ficha(array $p): void {
     </article>
 
     <aside class="caixa ficha-dono">
-      <?php if ($p['importado'] && !tem_dono($p)): // sem dono: não pagou plano nem teve o painel liberado ?>
+      <?php if ($sem_dono): // sem dono: não pagou plano nem teve o painel liberado ?>
         <h2 class="h-pequeno">Este comércio é seu?</h2>
         <p>Corrija os dados, coloque fotos, o horário e o que você vende. <a class="botao amarelo" href="<?= h($c['linkAssumir']) ?>">Ver os planos</a></p>
         <p class="discreto">Os dados vieram de informações públicas do comércio na internet. Não quer aparecer? <a href="<?= h($c['linkRemover']) ?>" rel="nofollow">Tirar meu comércio do Acha Fácil</a>.</p>
@@ -526,6 +550,18 @@ if (ap) ap.addEventListener('click', function () {
   contaApi('avaliar.php?id=<?= (int)$p['id'] ?>', 'DELETE').then(function () { location.hash = 'avaliar'; location.reload(); }).catch(falhaA);
 });
 <?php endif ?>
+// passo 59: "Quero saber o horário" etc. Lembra neste navegador quem já pediu (a página fica guardada em cache)
+document.querySelectorAll('[data-quero]').forEach(function (b) {
+  var chave = 'af_quero_<?= (int)$p['id'] ?>_' + b.dataset.quero, ok = b.parentNode.querySelector('.quero-ok');
+  function feito() { b.hidden = true; ok.hidden = false; }
+  try { if (localStorage.getItem(chave)) feito(); } catch (e) {}
+  b.addEventListener('click', function () {
+    feito();
+    try { localStorage.setItem(chave, '1'); } catch (e) {}
+    try { fetch(<?= json_encode(url('api/quero.php')) ?>, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: <?= (int)$p['id'] ?>, tipo: b.dataset.quero, origem: 'web' }) }); } catch (e) {}
+  });
+});
 document.querySelectorAll('[data-contato]').forEach(function (a) {
   a.addEventListener('click', function () {
     try { fetch(<?= json_encode(url('api/contato.php')) ?>, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },
@@ -545,7 +581,7 @@ function web_pagina_busca(string $cidade, string $termo): void {
         $like = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $termo) . '%';
         $achados = linhas('SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
             WHERE ' . visivel($cidade) . ' AND (p.nome LIKE ? OR p.tipo LIKE ? OR p.servicos LIKE ? OR p.descricao LIKE ? OR p.bairro LIKE ? OR c.nome LIKE ?)
-            ORDER BY (c.nome LIKE ? OR p.tipo LIKE ? OR p.nome LIKE ?) DESC, ' . SQL_DESTAQUE . ' DESC, p.importado ASC, RAND(?) LIMIT 60',
+            ORDER BY (c.nome LIKE ? OR p.tipo LIKE ? OR p.nome LIKE ?) DESC, ' . SQL_DESTAQUE . ' DESC, ' . SQL_FICHA_PAGA . ' DESC, RAND(?) LIMIT 60',
             [...array_fill(0, 9, $like), semente_dia()]);
     }
     [$trilha] = web_trilha([["$nome_cidade - $uf", url_cidade($cidade)], ['Busca', null]]);

@@ -255,3 +255,45 @@ function posicao_ficha(array $p, string $desde, string $ate): ?array {
 function num(int|float $n): string { return number_format((float)$n, 0, ',', '.'); }
 /** 12,5% (ou — sem base) */
 function pct(int $parte, int $total): string { return $total > 0 ? number_format(100 * $parte / $total, 1, ',', '.') . '%' : '—'; }
+
+// ---------- pedidos de informação (passo 59) ----------
+// Botões nas fichas incompletas: "Quero saber o horário", "Quero ver fotos"... Cada pessoa conta 1 vez por dia, por tipo.
+const TIPOS_PEDIDO_INFO = ['horario' => 'Horário', 'fotos' => 'Fotos', 'sobre' => 'O que faz ou vende', 'whatsapp' => 'WhatsApp'];
+
+/** A mudança 028 já foi aplicada? Antes disso os botões aparecem, mas o pedido não é guardado. */
+function pedidos_info_prontos(): bool {
+    static $ok = null;
+    try { return $ok ??= (bool)valor("SELECT 1 FROM migracoes WHERE nome = '028-pedidos-info.sql'"); } catch (PDOException) { return $ok = false; }
+}
+
+/** Guarda o pedido. true = contou (1ª vez da pessoa hoje), false = repetido, robô ou banco sem a 028. */
+function pedir_info(int $profissional_id, string $tipo, string $origem): bool {
+    if (!isset(TIPOS_PEDIDO_INFO[$tipo]) || e_robo() || !pedidos_info_prontos()) return false;
+    try {
+        $novo = q('INSERT IGNORE INTO pedidos_info_vistos (profissional_id, tipo, dia, visitante) VALUES (?, ?, CURDATE(), ?)',
+            [$profissional_id, $tipo, visitante()])->rowCount() === 1;
+        if (!$novo) return false;
+        q('INSERT INTO pedidos_info (profissional_id, tipo, dia, origem, total) VALUES (?, ?, CURDATE(), ?, 1)
+            ON DUPLICATE KEY UPDATE total = total + 1', [$profissional_id, $tipo, $origem === 'web' ? 'web' : 'app']);
+        if (random_int(1, 300) === 1) q('DELETE FROM pedidos_info_vistos WHERE dia < CURDATE() - INTERVAL 1 DAY');
+        return true;
+    } catch (PDOException $e) {
+        error_log('Acha Fácil pedidos de info: ' . $e->getMessage());
+        return false;
+    }
+}
+
+/** ['horario' => 3, 'fotos' => 1, ...] de uma ficha no período (sem a 028: tudo zero). */
+function pedidos_info_ficha(int $id, string $desde, ?string $ate = null): array {
+    $r = array_fill_keys(array_keys(TIPOS_PEDIDO_INFO), 0);
+    if (!pedidos_info_prontos()) return $r;
+    foreach (linhas('SELECT tipo, SUM(total) AS t FROM pedidos_info WHERE profissional_id = ? AND dia BETWEEN ? AND ? GROUP BY tipo',
+        [$id, $desde, $ate ?? hoje()]) as $l) $r[$l['tipo']] = (int)$l['t'];
+    return $r;
+}
+
+/** "3 pessoas pediram o seu horário" (relatório para o comerciante e painel do dono). */
+function pedido_info_frase(string $tipo, int $total): string {
+    $o = ['horario' => 'o seu horário', 'fotos' => 'para ver fotos', 'sobre' => 'para saber o que você vende', 'whatsapp' => 'o seu WhatsApp'][$tipo] ?? $tipo;
+    return num($total) . ($total > 1 ? ' pessoas pediram ' : ' pessoa pediu ') . $o;
+}

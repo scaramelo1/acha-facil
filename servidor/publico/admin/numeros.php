@@ -11,16 +11,16 @@ $tipo = trim(mb_substr((string)($_GET['tipo'] ?? ''), 0, 80));
 $dias = in_array((int)($_GET['dias'] ?? 30), [1, 7, 30, 90], true) ? (int)($_GET['dias'] ?? 30) : 30;
 $plano = in_array($_GET['plano'] ?? '', ['sem', 'basico', 'destaque'], true) ? (string)$_GET['plano'] : '';
 $so_vistos = !empty($_GET['vistos']);
-const COLUNAS = [
+define('COLUNAS', [
     'aparicoes' => 'Aparições', 'visualizacoes' => 'Visualizações', 'pessoas' => 'Pessoas', 'whatsapp' => 'WhatsApp',
     'ligar' => 'Ligar', 'mapa' => 'Mapa', 'site_t' => 'Site', 'instagram' => 'Instagram', 'contatos' => 'Contatos',
-];
+] + (pedidos_info_prontos() ? ['pedidos' => 'Pedidos de info'] : []));   // passo 59: "Quero saber o horário" etc.
 $ordem = isset(COLUNAS[$_GET['ordem'] ?? '']) ? (string)$_GET['ordem'] : 'visualizacoes';
 $desde = desde_dias($dias);
 
 $plano_sql = "CASE WHEN " . SQL_DESTAQUE . " THEN 'destaque' WHEN " . SQL_EM_DIA . " THEN 'basico' ELSE 'sem' END";
 $where = ["p.status = 'ativo'"];
-$params = [$desde, $desde];
+$params = pedidos_info_prontos() ? [$desde, $desde, $desde] : [$desde, $desde];
 if ($cidade !== '') { $where[] = 'p.cidade = ?'; $params[] = $cidade; }
 if ($cat) { $where[] = 'p.categoria_id = ?'; $params[] = $cat; }
 if ($tipo !== '') { $where[] = 'p.tipo = ?'; $params[] = $tipo; }
@@ -31,7 +31,8 @@ $sql = "SELECT p.id, p.nome, p.tipo, p.cidade, p.bairro, p.whatsapp AS fone_what
         c.nome AS categoria, $plano_sql AS plano_atual,
         COALESCE(a.aparicoes, 0) AS aparicoes, COALESCE(k.visualizacoes, 0) AS visualizacoes, COALESCE(k.pessoas, 0) AS pessoas,
         COALESCE(k.whatsapp, 0) AS whatsapp, COALESCE(k.ligar, 0) AS ligar, COALESCE(k.mapa, 0) AS mapa,
-        COALESCE(k.site_t, 0) AS site_t, COALESCE(k.instagram, 0) AS instagram, COALESCE(k.contatos, 0) AS contatos
+        COALESCE(k.site_t, 0) AS site_t, COALESCE(k.instagram, 0) AS instagram, COALESCE(k.contatos, 0) AS contatos"
+        . (pedidos_info_prontos() ? ', COALESCE(pi.pedidos, 0) AS pedidos' : '') . "
     FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
     LEFT JOIN (SELECT profissional_id,
             SUM(IF(tipo = 'perfil', total, 0)) AS visualizacoes, SUM(IF(tipo = 'perfil', pessoas, 0)) AS pessoas,
@@ -39,7 +40,9 @@ $sql = "SELECT p.id, p.nome, p.tipo, p.cidade, p.bairro, p.whatsapp AS fone_what
             SUM(IF(tipo = 'mapa', total, 0)) AS mapa, SUM(IF(tipo = 'site', total, 0)) AS site_t,
             SUM(IF(tipo = 'instagram', total, 0)) AS instagram, SUM(IF(tipo <> 'perfil', total, 0)) AS contatos
         FROM contatos WHERE dia >= ? GROUP BY profissional_id) k ON k.profissional_id = p.id
-    LEFT JOIN (SELECT profissional_id, SUM(total) AS aparicoes FROM aparicoes WHERE dia >= ? GROUP BY profissional_id) a ON a.profissional_id = p.id
+    LEFT JOIN (SELECT profissional_id, SUM(total) AS aparicoes FROM aparicoes WHERE dia >= ? GROUP BY profissional_id) a ON a.profissional_id = p.id"
+    . (pedidos_info_prontos() ? "
+    LEFT JOIN (SELECT profissional_id, SUM(total) AS pedidos FROM pedidos_info WHERE dia >= ? GROUP BY profissional_id) pi ON pi.profissional_id = p.id" : '') . "
     WHERE " . implode(' AND ', $where) . "
     ORDER BY $ordem DESC, visualizacoes DESC, aparicoes DESC, p.nome";
 $lista = linhas($sql, $params);

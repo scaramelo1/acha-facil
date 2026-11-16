@@ -10,6 +10,7 @@ $dias = in_array((int)($_GET['dias'] ?? 30), [1, 7, 30, 90], true) ? (int)($_GET
 $desde = desde_dias($dias);
 $n = numeros_ficha((int)$p['id'], $desde);
 $pos = posicao_ficha($p, $desde, hoje());
+$pedidos = pedidos_info_ficha((int)$p['id'], $desde);   // passo 59
 $maior = max([1, ...array_values(array_map(fn($d) => max($d["aparicoes"], $d["visualizacoes"]), $n["por_dia"]))]);
 
 admin_inicio('Números · ' . $p['nome'], $admin);
@@ -54,6 +55,14 @@ admin_inicio('Números · ' . $p['nome'], $admin);
     <?php if (!$n['onde']): ?><p class="discreto">Não apareceu em listas no período.</p><?php else: ?>
     <div class="tabela"><table>
       <?php foreach ($n['onde'] as $o => $t): ?><tr><td><?= h(ONDE_APARICAO[$o] ?? $o) ?></td><td><?= num($t) ?></td></tr><?php endforeach ?>
+    </table></div>
+    <?php endif ?>
+  </div>
+  <div>
+    <h2>Pedidos de informação</h2>
+    <?php if (!pedidos_info_prontos()): ?><p class="discreto">Falta aplicar a mudança 028.</p><?php else: ?>
+    <div class="tabela"><table>
+      <?php foreach (TIPOS_PEDIDO_INFO as $k => $nome): ?><tr><td><?= $nome ?></td><td><?= num($pedidos[$k]) ?></td></tr><?php endforeach ?>
     </table></div>
     <?php endif ?>
   </div>

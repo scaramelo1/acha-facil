@@ -247,6 +247,7 @@ export function CartaoProfissional({ p, distancia, origem }: { p: ProfissionalRe
             </View>
           )}
           {p.destaque && <Etiqueta texto="Destaque" icone="star-four-points" amarela />}
+          {!p.destaque && p.cadastrado && <Etiqueta texto="Ficha completa" icone="check-circle-outline" />}
           {p.verificado && <SeloVerificado compacto />}
           {p.avaliacoes > 0 && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>

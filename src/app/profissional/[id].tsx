@@ -8,6 +8,7 @@ import { chamar, ORIGENS, registrarContato, type Origem, type Profissional } fro
 import { Cabecalho } from '../../componentes/Cabecalho';
 import { CapaComercio } from '../../componentes/CapaComercio';
 import { Horarios } from '../../componentes/Horarios';
+import { Trancado } from '../../componentes/Trancado';
 import { Botao, Estrelas, Falha, Carregando, SeloVerificado, estilos as ui, useCarregar } from '../../componentes/ui';
 import { useConta } from '../../conta';
 import { cartao, cores, fonte, RAIO } from '../../tema';
@@ -53,6 +54,9 @@ export default function TelaProfissional() {
     registrarContato(p.id, tipo);
     Linking.openURL(link).catch(() => Alert.alert('Não foi possível abrir', 'Confira se o aplicativo está instalado.'));
   };
+  // passo 59: ficha sem dono mostra "É o dono? Complete a sua ficha" nos espaços trancados
+  const aoTocarDono = p.linkAssumir ? () => router.push(`/planos?id=${p.id}`) : undefined;
+  const temHorario = !!(p.horarios?.length || p.horario);
   const compartilhar = () =>
     Share.share({ message: `${p.nome} (${p.tipo}) no Acha Fácil${p.telefoneFormatado ? `: ${p.telefoneFormatado}` : ''}` });
 
@@ -99,6 +103,22 @@ export default function TelaProfissional() {
             <Text style={[ui.texto, { flex: 1 }]}>Telefone ainda não informado</Text>
           </View>
         )}
+        {!p.whatsapp && (
+          <Trancado id={p.id} tipo="whatsapp" titulo="WhatsApp" texto="O comércio ainda não informou o WhatsApp." botao="Quero o WhatsApp" aoTocarDono={aoTocarDono} />
+        )}
+        {!p.fotos?.length && (
+          <Trancado id={p.id} tipo="fotos" titulo="Fotos" texto="Ainda sem fotos do lugar, dos produtos ou do cardápio." botao="Quero ver fotos" aoTocarDono={aoTocarDono} />
+        )}
+        {!p.descricao && p.servicos.length === 0 && (
+          <Trancado
+            id={p.id}
+            tipo="sobre"
+            titulo="O que faz ou vende"
+            texto="O comércio ainda não contou o que vende ou faz."
+            botao="Quero saber mais"
+            aoTocarDono={aoTocarDono}
+          />
+        )}
 
         {p.descricao ? <Text style={[ui.texto, { marginTop: 16 }]}>{p.descricao}</Text> : null}
 
@@ -130,10 +150,20 @@ export default function TelaProfissional() {
           {p.atendeEmCasa && <Linha icone="home-outline" texto="Vai até você" />}
           {p.horarios?.length ? (
             <Horarios lista={p.horarios} />
-          ) : (
-            <Linha icone="clock-outline" texto="Horário de funcionamento" detalhe={p.horario ?? 'Ainda não informado'} ultima />
-          )}
+          ) : p.horario ? (
+            <Linha icone="clock-outline" texto="Horário de funcionamento" detalhe={p.horario} ultima />
+          ) : null}
         </View>
+        {!temHorario && (
+          <Trancado
+            id={p.id}
+            tipo="horario"
+            titulo="Horário de funcionamento"
+            texto="O comércio ainda não informou o horário."
+            botao="Quero saber o horário"
+            aoTocarDono={aoTocarDono}
+          />
+        )}
 
         {p.linkAssumir && (
           <Pressable

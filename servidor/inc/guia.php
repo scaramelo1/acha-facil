@@ -108,6 +108,8 @@ const SQL_ASSINATURA_EM_DIA = "(p.assinatura = 'cortesia' OR (p.assinatura IN ('
 // Destaque atrasado: sai do destaque e, se pagou o Básico, continua no app com o Básico.
 const SQL_EM_DIA = '(p.basico_pago_em IS NOT NULL OR ' . SQL_ASSINATURA_EM_DIA . ')';
 const SQL_DESTAQUE = "(p.plano IN ('destaque','site') AND " . SQL_ASSINATURA_EM_DIA . ')';
+// Ficha paga (passo 59): pagou o Básico (ou se cadastrou sozinha). Nas listas vem logo depois do Destaque.
+const SQL_FICHA_PAGA = '(p.importado = 0 OR p.basico_pago_em IS NOT NULL)';
 
 // Aparece no app: aprovado e com assinatura em dia.
 // Comércios importados da lista de leads aparecem sem assinatura até o dono assumir o perfil.
@@ -249,11 +251,11 @@ function tipos_da_categoria(int $categoria_id, string $cidade): array {
         GROUP BY p.tipo ORDER BY total DESC, p.tipo LIMIT 30', [$categoria_id]));
 }
 
-// destaques primeiro, depois quem se cadastrou, depois quem tem nota; rodízio diário dentro de cada grupo
+// destaques primeiro, depois ficha paga (Básico ou cadastro próprio), depois quem tem nota; rodízio diário dentro de cada grupo
 function da_categoria(int $categoria_id, string $cidade): array {
     return array_map('prof_resumo', linhas('SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
         WHERE ' . visivel($cidade) . " AND p.categoria_id = ?
-        ORDER BY " . SQL_DESTAQUE . " DESC, p.importado ASC, p.total_avaliacoes > 0 DESC, RAND(?)",
+        ORDER BY " . SQL_DESTAQUE . " DESC, " . SQL_FICHA_PAGA . " DESC, p.total_avaliacoes > 0 DESC, RAND(?)",
         [$categoria_id, semente_dia()]));
 }
 
@@ -264,7 +266,7 @@ function buscar(string $termo, ?string $cidade, int $limite = 50): array {
     $like = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $termo) . '%';
     return array_map('prof_resumo', linhas('SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
         WHERE ' . visivel($cidade) . ' AND (p.nome LIKE ? OR p.tipo LIKE ? OR p.servicos LIKE ? OR p.descricao LIKE ? OR p.bairro LIKE ? OR c.nome LIKE ?)
-        ORDER BY (c.nome LIKE ? OR p.tipo LIKE ? OR p.nome LIKE ?) DESC, ' . SQL_DESTAQUE . ' DESC, p.importado ASC, RAND(?) LIMIT ' . $limite,
+        ORDER BY (c.nome LIKE ? OR p.tipo LIKE ? OR p.nome LIKE ?) DESC, ' . SQL_DESTAQUE . ' DESC, ' . SQL_FICHA_PAGA . ' DESC, RAND(?) LIMIT ' . $limite,
         [$like, $like, $like, $like, $like, $like, $like, $like, $like, semente_dia()]));
 }
 

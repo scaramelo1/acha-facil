@@ -277,3 +277,9 @@ export async function chamar<T>(caminho: string, metodo: 'GET' | 'POST' | 'DELET
 export function registrarContato(id: number, tipo: 'whatsapp' | 'ligar' | 'instagram' | 'mapa' | 'site') {
   chamar('contato.php', 'POST', { id, tipo, origem: 'app' }).catch(() => {});
 }
+
+/** Passo 59: "Quero saber o horário", "Quero ver fotos"... numa ficha incompleta. Conta 1 por pessoa no dia. Falha em silêncio. */
+export type TipoPedidoInfo = 'horario' | 'fotos' | 'sobre' | 'whatsapp';
+export function pedirInfo(id: number, tipo: TipoPedidoInfo) {
+  chamar('quero.php', 'POST', { id, tipo, origem: 'app' }).catch(() => {});
+}

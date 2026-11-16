@@ -130,6 +130,13 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
   <?php endif ?>
   <?php endif ?>
 
+  <?php $pedidos = array_filter(pedidos_info_ficha((int)$p['id'], desde_dias(30)));   // passo 59
+  if ($pedidos): ?>
+  <div class="quadro"><strong>O que as pessoas pediram nos últimos 30 dias:</strong>
+    <?php foreach ($pedidos as $k => $t): ?><br><?= h(pedido_info_frase($k, $t)) ?><?php endforeach ?>
+    <br>Preencha abaixo e a informação aparece no app depois da conferência.</div>
+  <?php endif ?>
+
   <div class="quadro"><strong>Como funciona:</strong> você pede as mudanças aqui e a equipe do Acha Fácil confere antes de
     publicar. Assim ninguém consegue mudar o telefone ou o endereço de um comércio para enganar clientes.</div>
 

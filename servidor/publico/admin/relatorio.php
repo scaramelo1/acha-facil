@@ -21,6 +21,7 @@ if (preg_match('/^(\d{4})-(\d{2})$/', (string)($_GET['mes'] ?? ''), $m) && check
     $periodo = $dias === 1 ? 'hoje (' . data_br($ate) . ')' : 'últimos ' . $dias . ' dias (' . data_br($desde) . ' a ' . data_br($ate) . ')';
 }
 $n = numeros_ficha((int)$p['id'], $desde, $ate);
+$pedidos = array_filter(pedidos_info_ficha((int)$p['id'], $desde, $ate));   // passo 59
 $pos = posicao_ficha($p, $desde, $ate);
 $cidade = nome_cidade($p['cidade']);
 
@@ -110,6 +111,7 @@ for ($i = 0; $i < 4; $i++) { $t = strtotime(date('Y-m-01') . " -$i month"); $mes
       </div>
       <div>
         <h2>O que falta na sua ficha</h2>
+        <?php foreach ($pedidos as $k => $t): ?><p class="posicao"><?= h(pedido_info_frase($k, $t)) ?></p><?php endforeach ?>
         <?php if (!$falta): ?><p class="sub">Sua ficha está completa. 👏</p><?php else: ?>
         <ul><?php foreach ($falta as $f): ?><li><?= h($f) ?></li><?php endforeach ?></ul>
         <?php endif ?>

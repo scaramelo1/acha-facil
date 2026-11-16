@@ -508,3 +508,17 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (index.php, site.css, pagina.php). Campo da cidade com a largura do maior nome cadastrado (--cidade-largura, máx. 34ch;
    cresce sozinho com cidade nova); abaixo de 860 px os campos ficam um embaixo do outro. CSS v=28.
    Falta: o usuário olhar no celular e no PC e aprovar.
+59. 🟡 Ficha incompleta que "vende" o plano (16/11, pedido do usuário; itens 1, 2 e 3 da avaliação). A ficha sem dados
+   continua sem dados (o dono paga para completar), mas agora mostra o que falta:
+   (1) Botões "Quero o WhatsApp", "Quero ver fotos", "Quero saber mais" e "Quero saber o horário" (api/quero.php,
+   pedir_info() em inc/numeros.php; 1 por pessoa, ficha e tipo no dia; robô não conta). Mudança 028 (pedidos_info e
+   pedidos_info_vistos) — USUÁRIO APLICA; antes dela os botões aparecem mas nada é guardado. Os pedidos aparecem em
+   /admin/numeros.php (coluna "Pedidos de info", ordena e vai no CSV de prospecção), /admin/numeros-ficha.php,
+   no relatório para o comerciante ("3 pessoas pediram o seu horário") e no painel do dono.
+   (2) Espaços trancados (🔒, borda tracejada) no lugar de "Horário não informado" e onde faltam WhatsApp, fotos e
+   "O que faz ou vende", com "É o dono? Complete a sua ficha" só em ficha sem dono. Site: web_trancado() em inc/web.php;
+   app: src/componentes/Trancado.tsx (lembra quem já pediu no celular).
+   (3) Ficha paga logo depois do Destaque nas listas e buscas (SQL_FICHA_PAGA em inc/guia.php: importado = 0 ou
+   Básico pago), com o selo "✓ Ficha completa" (site: .selo-completa; app: Etiqueta no CartaoProfissional).
+   Testado numa cópia com o banco de teste (contagem, repetido, robô, sem a 028, admin, relatório, CSV, ordem e selo).
+   App 1.8.0: falta gerar e testar no emulador.
