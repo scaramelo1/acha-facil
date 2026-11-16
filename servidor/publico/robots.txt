@@ -11,5 +11,10 @@ Disallow: /entrar.php
 Disallow: /sair.php
 Disallow: /minha-conta.php
 Disallow: /*/buscar
+# 16/11 (passo 70): links de cada ficha que não são conteúdo (planos do comércio, suporte, incluir com nº):
+# eram dezenas de milhares de endereços disputando a atenção do Google com as fichas. A página /planos.php continua.
+Disallow: /planos.php?
+Disallow: /suporte.php
+Disallow: /incluir.php?
 
 Sitemap: https://achafacilapp.com.br/sitemap.xml

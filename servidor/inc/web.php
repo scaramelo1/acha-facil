@@ -181,13 +181,10 @@ function web_cartao(array $p): string {
 function web_trancado(string $tipo, string $titulo, string $texto, string $botao): string {
     return '<div class="trancado" data-trancado="' . h($tipo) . '"><p class="trancado-titulo"><span aria-hidden="true">🔒</span> ' . h($titulo) . '</p>'
         . '<p class="trancado-texto">' . h($texto) . '</p>'
-        . '<button type="button" class="botao pequeno contorno" data-quero="' . h($tipo) . '">🙋 ' . h($botao) . '</button>'
-        . '<p class="quero-ok" hidden>✓ Pedido anotado! Quando o comércio completar a ficha, a informação aparece aqui.</p>'
-        // passo 65: aviso opcional para quem pediu (precisa da conta Google)
-        . (web_avisos_ligados() ? '<div class="quero-avisar" hidden><p>Quer ser avisado quando o comércio colocar ' . h(AVISO_INFO_TEXTO[$tipo] ?? 'isso') . '?</p>'
-            . '<button type="button" class="botao pequeno" data-avisar="' . h($tipo) . '">🔔 Sim, me avise</button> '
-            . '<button type="button" class="botao pequeno contorno" data-nao-avisar>Não, obrigado</button></div>'
-            . '<p class="avisar-ok" hidden>🔔 Combinado! Você recebe um aviso no celular (app Acha Fácil) e em <a href="' . h(url('minha-conta.php')) . '">Minha conta</a> quando a informação entrar.</p>' : '')
+        . '<button type="button" class="botao pequeno contorno" data-quero="' . h($tipo) . '"'
+        . (web_avisos_ligados() ? ' data-aviso-texto="' . h(AVISO_INFO_TEXTO[$tipo] ?? 'isso') . '"' : '') . '>🙋 ' . h($botao) . '</button>'
+        // "Pedido anotado", "Quer ser avisado?" e "Combinado" são criados pelo JS da ficha (passo 70): o mesmo texto
+        // escondido em todas as fichas deixava as páginas parecidas demais para o Google
         . '</div>';
 }
 function web_avisos_ligados(): bool {
@@ -473,7 +470,7 @@ function web_pagina_ficha(array $p): void {
       </div>
 
       <?php if ($link_dono && (!$c['whatsapp'] || !$fotos || !$tem_sobre || !$tem_horario)): // convite uma vez só, abaixo dos quadros trancados ?>
-        <p class="trancado-dono">🔒 Faltam dados nesta ficha. É o dono? <a href="<?= h($link_dono) ?>">Complete a sua ficha</a></p>
+        <p class="trancado-dono">🔒 Faltam dados nesta ficha. É o dono? <a href="<?= h($link_dono) ?>" rel="nofollow">Complete a sua ficha</a></p>
       <?php endif ?>
 
       <h2>Avaliações de quem usa o Acha Fácil</h2>
@@ -511,7 +508,7 @@ function web_pagina_ficha(array $p): void {
     <aside class="caixa ficha-dono">
       <?php if ($sem_dono): // sem dono: não pagou plano nem teve o painel liberado ?>
         <h2 class="h-pequeno">Este comércio é seu?</h2>
-        <p>Corrija os dados, coloque fotos, o horário e o que você vende. <a class="botao amarelo" href="<?= h($c['linkAssumir']) ?>">Ver os planos</a></p>
+        <p>Corrija os dados, coloque fotos, o horário e o que você vende. <a class="botao amarelo" href="<?= h($c['linkAssumir']) ?>" rel="nofollow">Ver os planos</a></p>
         <p class="discreto">Os dados vieram de informações públicas do comércio na internet. Não quer aparecer? <a href="<?= h($c['linkRemover']) ?>" rel="nofollow">Tirar meu comércio do Acha Fácil</a>.</p>
         <p class="discreto">Informação errada? <a href="<?= h(url('suporte.php?id=' . (int)$p['id'])) ?>" rel="nofollow">Envie uma mensagem para a equipe</a> (precisa entrar com a conta Google).</p>
       <?php else: ?>
@@ -572,6 +569,20 @@ if (ap) ap.addEventListener('click', function () {
 var logado = <?= $eu ? 'true' : 'false' ?>, entrarPara = <?= json_encode(link_entrar(url_ficha($p) . '?avisar=TIPO')) ?>;
 function lerLocal(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 function gravarLocal(k) { try { localStorage.setItem(k, '1'); } catch (e) {} }
+// mensagens que aparecem depois do toque (passo 70: fora do HTML, para as fichas não ficarem iguais para o Google)
+document.querySelectorAll('[data-quero]').forEach(function (b) {
+  var cx = b.parentNode, p = document.createElement('p');
+  p.className = 'quero-ok'; p.hidden = true; p.textContent = '✓ Pedido anotado! Quando o comércio completar a ficha, a informação aparece aqui.';
+  cx.appendChild(p);
+  if (!b.dataset.avisoTexto) return;
+  var q = document.createElement('div'); q.className = 'quero-avisar'; q.hidden = true;
+  q.innerHTML = '<p></p><button type="button" class="botao pequeno" data-avisar>🔔 Sim, me avise</button> '
+    + '<button type="button" class="botao pequeno contorno" data-nao-avisar>Não, obrigado</button>';
+  q.querySelector('p').textContent = 'Quer ser avisado quando o comércio colocar ' + b.dataset.avisoTexto + '?';
+  var ok = document.createElement('p'); ok.className = 'avisar-ok'; ok.hidden = true;
+  ok.innerHTML = '🔔 Combinado! Você recebe um aviso no celular (app Acha Fácil) e em <a href="' + <?= json_encode(url('minha-conta.php')) ?> + '">Minha conta</a> quando a informação entrar.';
+  cx.appendChild(q); cx.appendChild(ok);
+});
 function avisoFeito(caixa) { var q = caixa.querySelector('.quero-avisar'), ok = caixa.querySelector('.avisar-ok'); if (q) q.hidden = true; if (ok) ok.hidden = false; }
 function pedirAviso(tipo, caixa) {
   if (!logado) { gravarLocal('af_avisar_volta'); location.href = entrarPara.replace('TIPO', encodeURIComponent(tipo)); return; }

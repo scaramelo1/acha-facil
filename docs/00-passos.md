@@ -615,3 +615,11 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    primeira e última visita; páginas e fichas por dia). Sem mudança no banco. Cron de hora em hora (root) no instalar.sh;
    já rodado uma vez à mão em 16/11 (4.298 fichas visitadas desde 10/11).
    Falta (usuário): rodar o instalar.sh para ligar o cron.
+70. 🟡 Google: "Rastreada, mas não indexada" (16/11, relatório de cobertura enviado pelo usuário). Das 730 páginas (até 12/11):
+   526 fichas, 104 planos.php?id=, 79 tipos, 17 áreas. Fichas recusadas x aceitas têm o mesmo conteúdo (sem descrição/fotos/
+   horário); diferença é a fama (popularidade 36 x 76). Correções: robots.txt bloqueia /planos.php?, /suporte.php e
+   /incluir.php? (eram ~76 mil endereços de cada ficha gastando o rastreamento; /planos.php puro continua); links "Ver os
+   planos" e "Complete a sua ficha" com nofollow; mensagens "Pedido anotado", "Quer ser avisado?" e "Combinado" dos espaços
+   trancados agora são criadas pelo JS (antes iam escondidas no HTML de toda ficha e deixavam as páginas parecidas).
+   Detectada, mas não indexada: 13.402 (fila do Google, inclusive São João). JS conferido só por sintaxe (sem navegador na VPS).
+   Falta (usuário): testar no navegador o toque em "Quero saber..." numa ficha; daqui a 1 semana exportar de novo a cobertura.
