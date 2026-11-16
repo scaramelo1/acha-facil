@@ -269,6 +269,9 @@ function aprovar_alteracao(int $id, int $admin_id): void {
     $agora = linha('SELECT foto, fotos FROM profissionais WHERE id = ?', [$a['profissional_id']]);
     apagar_fotos_sobrando(arquivos_dos_campos($prof), arquivos_dos_campos($agora));
     web_cache_limpar();   // as páginas públicas mostram o dado novo na hora
+    // passo 65: avisa quem pediu "me avise quando colocar o WhatsApp/horário/fotos"
+    try { require_once __DIR__ . '/avisos-info.php'; avisar_infos_completas([(int)$a['profissional_id']]); }
+    catch (Throwable $e) { error_log('acha-facil avisos info: ' . $e->getMessage()); }
 }
 
 function recusar_alteracao(int $id, int $admin_id, string $motivo): void {

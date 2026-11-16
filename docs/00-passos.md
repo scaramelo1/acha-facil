@@ -576,3 +576,13 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (api/admin.php acao link_editar → /admin/do-app.php, código de uso único de 2 min em dados_dir/links-admin).
    Comércio editado pelo admin não é mais mudado pela importação das listas nem pela limpeza (editados_pelo_admin()).
    Sem mudança no banco. Testado em cópia isolada (salvar, erro de telefone, logo/fotos, link do app, não-admin barrado).
+65. 🟡 "Quer ser avisado?" depois do "Quero saber" (16/11, pedido do usuário, opção A). Depois do toque, aparece a pergunta
+   [Sim, me avise] / [Não, obrigado]; o pedido continua contando sem conta. Sim → precisa da conta Google (site: entra e
+   volta com ?avisar=TIPO e o aviso é gravado sozinho; app: "Entrar e me avisar", e ao voltar logado o aviso é pedido).
+   Mudança 029 (avisos_info) — USUÁRIO APLICA; antes dela a pergunta não aparece. inc/avisos-info.php
+   (pedir_aviso_info, avisar_infos_completas, avisos_info_do_usuario, avisos_info_esperando), api/avisar-info.php.
+   Quando a informação entra (alteração aprovada em aprovar_alteracao, ou lista importada), quem pediu recebe a
+   notificação no celular (avisar_usuario, dados tela=profissional: até o app atual abre a ficha) uma vez só, e o aviso
+   aparece em Minha conta → "Avisos que você pediu" (com Cancelar). Relatório para o comerciante: "· N estão esperando o
+   aviso". App: src/componentes/Trancado.tsx (vai no 1.8.0, ainda não gerado). Testado numa cópia com o banco de teste
+   (pedir sem/com conta, aprovar alteração avisa 1 vez, horário segue esperando, Minha conta, ficha com e sem login).

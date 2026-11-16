@@ -267,6 +267,7 @@ $total = (int)valor('SELECT COUNT(*) FROM profissionais WHERE importado = 1 AND 
 $sem_area = $teste ? linhas("SELECT COALESCE(p.tipo, CONCAT('(sem tipo) ', p.nome)) t, COUNT(*) n FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
     WHERE p.cidade = ? AND p.status = 'ativo' AND c.slug = 'outros' GROUP BY t ORDER BY n DESC LIMIT 150", [$cidade_lista]) : [];
 $teste ? db()->rollBack() : db()->commit();
+if (!$teste) { require_once __DIR__ . '/inc/avisos-info.php'; avisar_infos_completas(); }   // passo 65
 if ($detalhes_arq) file_put_contents($detalhes_arq, json_encode($det, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 echo ($teste ? "🧪 TESTE (nada gravado) " : '') . "✔ Leads de " . nome_cidade($cidade_lista) . ": $novos novos, $atualizados atualizados, $pulados pulados (repetidos, mantidos, $publicos lugares públicos, $fechados fechados no Google" . ($pausados ? ", $pausados que fecharam de vez saíram do app" : '') . "). No app: $total comércios importados nesta cidade.\n";
 echo '  Por área: ' . implode(', ', array_map(fn($a) => "{$a['slug']} {$a['n']}", $por_area)) . "\n";

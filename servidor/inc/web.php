@@ -182,7 +182,18 @@ function web_trancado(string $tipo, string $titulo, string $texto, string $botao
     return '<div class="trancado" data-trancado="' . h($tipo) . '"><p class="trancado-titulo"><span aria-hidden="true">🔒</span> ' . h($titulo) . '</p>'
         . '<p class="trancado-texto">' . h($texto) . '</p>'
         . '<button type="button" class="botao pequeno contorno" data-quero="' . h($tipo) . '">🙋 ' . h($botao) . '</button>'
-        . '<p class="quero-ok" hidden>✓ Pedido anotado! Quando o comércio completar a ficha, a informação aparece aqui.</p></div>';
+        . '<p class="quero-ok" hidden>✓ Pedido anotado! Quando o comércio completar a ficha, a informação aparece aqui.</p>'
+        // passo 65: aviso opcional para quem pediu (precisa da conta Google)
+        . (web_avisos_ligados() ? '<div class="quero-avisar" hidden><p>Quer ser avisado quando o comércio colocar ' . h(AVISO_INFO_TEXTO[$tipo] ?? 'isso') . '?</p>'
+            . '<button type="button" class="botao pequeno" data-avisar="' . h($tipo) . '">🔔 Sim, me avise</button> '
+            . '<button type="button" class="botao pequeno contorno" data-nao-avisar>Não, obrigado</button></div>'
+            . '<p class="avisar-ok" hidden>🔔 Combinado! Você recebe um aviso no celular (app Acha Fácil) e em <a href="' . h(url('minha-conta.php')) . '">Minha conta</a> quando a informação entrar.</p>' : '')
+        . '</div>';
+}
+function web_avisos_ligados(): bool {
+    static $ok = null;
+    if ($ok === null) { require_once __DIR__ . '/avisos-info.php'; $ok = avisos_info_prontos(); }
+    return $ok;
 }
 function web_cartoes(array $lista): string {
     return '<ul class="cartoes">' . implode('', array_map('web_cartao', $lista)) . '</ul>';
@@ -557,17 +568,42 @@ if (ap) ap.addEventListener('click', function () {
 });
 <?php endif ?>
 // passo 59: "Quero saber o horário" etc. Lembra neste navegador quem já pediu (a página fica guardada em cache)
+// passo 65: depois do pedido, pergunta se quer ser avisado (precisa entrar com o Google; volta para cá com ?avisar=)
+var logado = <?= $eu ? 'true' : 'false' ?>, entrarPara = <?= json_encode(link_entrar(url_ficha($p) . '?avisar=TIPO')) ?>;
+function lerLocal(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function gravarLocal(k) { try { localStorage.setItem(k, '1'); } catch (e) {} }
+function avisoFeito(caixa) { var q = caixa.querySelector('.quero-avisar'), ok = caixa.querySelector('.avisar-ok'); if (q) q.hidden = true; if (ok) ok.hidden = false; }
+function pedirAviso(tipo, caixa) {
+  if (!logado) { gravarLocal('af_avisar_volta'); location.href = entrarPara.replace('TIPO', encodeURIComponent(tipo)); return; }
+  fetch(<?= json_encode(url('api/avisar-info.php')) ?>, { method: 'POST', credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json', 'X-AF-Web': '1' }, body: JSON.stringify({ id: <?= (int)$p['id'] ?>, tipo: tipo }) })
+    .then(function (r) { if (!r.ok) throw new Error(); gravarLocal('af_avisar_<?= (int)$p['id'] ?>_' + tipo); avisoFeito(caixa); })
+    .catch(function () { alert('Não deu certo agora. Tente de novo.'); });
+}
 document.querySelectorAll('[data-quero]').forEach(function (b) {
-  var chave = 'af_quero_<?= (int)$p['id'] ?>_' + b.dataset.quero, ok = b.parentNode.querySelector('.quero-ok');
-  function feito() { b.hidden = true; ok.hidden = false; }
-  try { if (localStorage.getItem(chave)) feito(); } catch (e) {}
+  var chave = 'af_quero_<?= (int)$p['id'] ?>_' + b.dataset.quero, caixa = b.parentNode, ok = caixa.querySelector('.quero-ok'),
+      perg = caixa.querySelector('.quero-avisar'), jaAvisa = lerLocal('af_avisar_<?= (int)$p['id'] ?>_' + b.dataset.quero);
+  function feito(perguntar) { b.hidden = true; ok.hidden = false; if (jaAvisa) avisoFeito(caixa); else if (perg && perguntar) perg.hidden = false; }
+  if (lerLocal(chave)) feito(false);
+  if (perg) {
+    perg.querySelector('[data-avisar]').addEventListener('click', function () { pedirAviso(b.dataset.quero, caixa); });
+    perg.querySelector('[data-nao-avisar]').addEventListener('click', function () { perg.hidden = true; });
+  }
   b.addEventListener('click', function () {
-    feito();
+    feito(true);
     try { localStorage.setItem(chave, '1'); } catch (e) {}
     try { fetch(<?= json_encode(url('api/quero.php')) ?>, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: <?= (int)$p['id'] ?>, tipo: b.dataset.quero, origem: 'web' }) }); } catch (e) {}
   });
 });
+// voltou do login do Google com ?avisar=TIPO: grava o pedido de aviso e tira o ?avisar do endereço
+(function () {
+  var m = location.search.match(/[?&]avisar=(horario|fotos|sobre|whatsapp)/);
+  if (!m || !logado) return;
+  var b = document.querySelector('[data-quero="' + m[1] + '"]');
+  if (b) { b.hidden = true; b.parentNode.querySelector('.quero-ok').hidden = false; pedirAviso(m[1], b.parentNode); b.parentNode.scrollIntoView({ block: 'center' }); }
+  history.replaceState(null, '', location.pathname + location.hash);
+})();
 document.querySelectorAll('[data-contato]').forEach(function (a) {
   a.addEventListener('click', function () {
     try { fetch(<?= json_encode(url('api/contato.php')) ?>, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },

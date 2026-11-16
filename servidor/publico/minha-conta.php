@@ -12,7 +12,11 @@ if (!$u) { header('Location: ' . link_entrar('/minha-conta.php')); exit; }
 if (e_post()) {
     exigir_post();
     $acao = (string)($_POST['acao'] ?? '');
-    if ($acao === 'tirar_salvo') {
+    if ($acao === 'cancelar_aviso') {   // passo 65
+        q('DELETE FROM avisos_info WHERE usuario_id = ? AND profissional_id = ? AND tipo = ? AND avisado_em IS NULL',
+            [$u['id'], (int)($_POST['id'] ?? 0), (string)($_POST['tipo'] ?? '')]);
+        flash('Aviso cancelado.');
+    } elseif ($acao === 'tirar_salvo') {
         q('DELETE FROM favoritos WHERE usuario_id = ? AND profissional_id = ?', [$u['id'], (int)($_POST['id'] ?? 0)]);
         flash('Tirado dos salvos.');
     } elseif ($acao === 'apagar_avaliacao') {
@@ -60,6 +64,23 @@ pagina_inicio('Minha conta · Acha Fácil', 'Seus comércios salvos e suas avali
   </div>
 
   <p><a class="botao contorno" href="<?= h(url('suporte.php')) ?>">Fale com a equipe (suporte)</a></p>
+
+  <?php require_once __DIR__ . '/../inc/avisos-info.php'; $meus_avisos = avisos_info_do_usuario((int)$u['id']);   // passo 65
+  if ($meus_avisos): ?>
+  <h2 id="avisos">Avisos que você pediu (<?= count($meus_avisos) ?>)</h2>
+  <ul class="lista-conta">
+    <?php foreach ($meus_avisos as $a): ?><li>
+      <a href="<?= h(url_ficha($a)) ?>"><strong><?= h(nome_curto($a['nome'], 50)) ?></strong></a>
+      <?php if ($a['avisado_em']): ?>
+        <span>🔔 <strong>Já colocou <?= h(AVISO_INFO_TEXTO[$a['tipo']] ?? $a['tipo']) ?></strong> · <?= h(data_br(substr($a['avisado_em'], 0, 10))) ?></span>
+      <?php else: ?>
+        <span class="discreto">Esperando <?= h(AVISO_INFO_TEXTO[$a['tipo']] ?? $a['tipo']) ?> · <?= h(nome_cidade($a['cidade'], true)) ?></span>
+        <form method="post"><?= campo_csrf() ?><input type="hidden" name="acao" value="cancelar_aviso"><input type="hidden" name="id" value="<?= (int)$a['id'] ?>">
+          <input type="hidden" name="tipo" value="<?= h($a['tipo']) ?>"><button class="botao pequeno contorno">Cancelar</button></form>
+      <?php endif ?>
+    </li><?php endforeach ?>
+  </ul>
+  <?php endif ?>
 
   <h2 id="salvos">Salvos (<?= count($salvos) ?>)</h2>
   <?php if (!$salvos): ?>

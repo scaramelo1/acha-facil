@@ -1,38 +1,74 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { pedirInfo, type TipoPedidoInfo } from '../api/cliente';
+import { chamar, pedirInfo, type TipoPedidoInfo } from '../api/cliente';
 import { Armazenamento } from '../armazenamento';
+import { ligarAvisos } from '../avisos';
+import { useConta } from '../conta';
 import { cores, fonte } from '../tema';
+
+const TEXTO_AVISO: Record<TipoPedidoInfo, string> = {
+  horario: 'o horário',
+  fotos: 'fotos',
+  sobre: 'o que vende ou faz',
+  whatsapp: 'o WhatsApp',
+};
 
 /**
  * Espaço trancado na ficha incompleta (passo 59): mostra o que falta e o botão "Quero saber...".
  * O pedido é contado no servidor (api/quero.php) e vira argumento para o dono completar a ficha.
+ * Passo 65: depois do pedido, pergunta se a pessoa quer ser avisada quando a informação entrar
+ * (precisa da conta; sem conta, vai para Entrar e o pedido de aviso é feito ao voltar).
  * O celular lembra quem já pediu, para não mostrar o botão de novo.
  */
-export function Trancado({
-  id,
-  tipo,
-  titulo,
-  texto,
-  botao,
-  aoTocarDono,
-}: {
-  id: number;
-  tipo: TipoPedidoInfo;
-  titulo: string;
-  texto: string;
-  botao: string;
-  aoTocarDono?: () => void;
-}) {
+export function Trancado({ id, tipo, titulo, texto, botao }: { id: number; tipo: TipoPedidoInfo; titulo: string; texto: string; botao: string }) {
+  const { usuario } = useConta();
+  const router = useRouter();
   const chave = `quero_${id}_${tipo}`;
+  const chaveAviso = `avisar_${id}_${tipo}`;
+  const chavePendente = `avisar_pendente_${id}_${tipo}`;
   const [feito, setFeito] = useState(() => Armazenamento.ler(chave) === '1');
+  const [avisado, setAvisado] = useState(() => Armazenamento.ler(chaveAviso) === '1');
+  const [perguntar, setPerguntar] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+
   const pedir = () => {
     setFeito(true);
+    setPerguntar(!avisado);
     Armazenamento.gravar(chave, '1');
     pedirInfo(id, tipo);
   };
+
+  const pedirAviso = async () => {
+    if (!usuario) {
+      // entra na conta e volta: o aviso é pedido sozinho (useEffect abaixo)
+      Armazenamento.gravar(chavePendente, '1');
+      router.push('/entrar');
+      return;
+    }
+    setEnviando(true);
+    try {
+      await chamar('avisar-info.php', 'POST', { id, tipo });
+      Armazenamento.gravar(chaveAviso, '1');
+      Armazenamento.apagar(chavePendente);
+      setAvisado(true);
+      setPerguntar(false);
+      ligarAvisos().catch(() => {});
+    } catch {
+      Alert.alert('Não deu certo agora', 'Tente de novo daqui a pouco.');
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  // voltou da tela Entrar já com a conta: faz o pedido de aviso que ficou guardado
+  useEffect(() => {
+    if (usuario && !avisado && Armazenamento.ler(chavePendente) === '1') pedirAviso();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usuario]);
+
   return (
     <View style={estilos.caixa}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -51,13 +87,31 @@ export function Trancado({
           <Text style={estilos.botaoTexto}>{botao}</Text>
         </Pressable>
       )}
-      {aoTocarDono && (
-        <Text style={estilos.dono}>
-          É o dono?{' '}
-          <Text style={{ fontWeight: '800', color: cores.verde, textDecorationLine: 'underline' }} onPress={aoTocarDono}>
-            Complete a sua ficha
-          </Text>
-        </Text>
+      {feito && avisado && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <MaterialCommunityIcons name="bell-ring-outline" size={20} color={cores.verde} />
+          <Text style={[estilos.ok, { flex: 1 }]}>Combinado! Você recebe um aviso quando o comércio colocar {TEXTO_AVISO[tipo]}.</Text>
+        </View>
+      )}
+      {feito && !avisado && perguntar && (
+        <View style={estilos.pergunta}>
+          <Text style={estilos.perguntaTexto}>Quer ser avisado quando o comércio colocar {TEXTO_AVISO[tipo]}?</Text>
+          {!usuario && <Text style={estilos.texto}>Para receber o aviso, entre com a sua conta Google.</Text>}
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            <Pressable
+              accessibilityRole="button"
+              disabled={enviando}
+              onPress={pedirAviso}
+              style={({ pressed }) => [estilos.botaoSim, (pressed || enviando) && { opacity: 0.8 }]}
+            >
+              <MaterialCommunityIcons name="bell-outline" size={18} color={cores.verde} />
+              <Text style={estilos.botaoTexto}>{usuario ? 'Sim, me avise' : 'Entrar e me avisar'}</Text>
+            </Pressable>
+            <Pressable accessibilityRole="button" onPress={() => setPerguntar(false)} style={({ pressed }) => [estilos.botao, pressed && { opacity: 0.85 }]}>
+              <Text style={estilos.botaoTexto}>Não, obrigado</Text>
+            </Pressable>
+          </View>
+        </View>
       )}
     </View>
   );
@@ -79,7 +133,18 @@ const estilos = StyleSheet.create({
     paddingHorizontal: 16,
     alignSelf: 'flex-start',
   },
+  botaoSim: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    minHeight: 48,
+    borderRadius: 24,
+    backgroundColor: cores.amarelo,
+    paddingHorizontal: 16,
+  },
   botaoTexto: { fontSize: fonte.pequena, fontWeight: '900', color: cores.verde },
   ok: { fontSize: fonte.pequena, fontWeight: '700', color: cores.verde },
-  dono: { fontSize: 14, color: cores.textoSuave },
+  pergunta: { backgroundColor: cores.fundoSuave, borderRadius: 14, padding: 12, gap: 8 },
+  perguntaTexto: { fontSize: fonte.pequena, fontWeight: '800', color: cores.texto },
 });

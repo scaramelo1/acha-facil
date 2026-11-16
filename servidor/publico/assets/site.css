@@ -356,6 +356,10 @@ a.area:hover { border-color: var(--verde); }
 .trancado-texto { margin: 2px 0 10px; color: var(--texto2); font-size: .95rem; }
 .trancado .botao { margin: 0; }
 .quero-ok { margin: 0; font-weight: 800; color: var(--verde2); font-size: .95rem; }
+.quero-avisar { margin-top: 10px; padding: 10px 12px; border-radius: 14px; background: var(--amarelo-claro); }
+.quero-avisar p { margin: 0 0 8px; font-weight: 800; font-size: .95rem; }
+.quero-avisar .botao { margin: 0 6px 6px 0; }
+.avisar-ok { margin: 8px 0 0; font-size: .92rem; color: var(--verde); font-weight: 700; }
 .trancado-dono { margin: 10px 0 0; font-size: .85rem; color: var(--texto2); }
 .trancado-dono a { color: var(--verde2); font-weight: 800; }
 .selo-aberto { background: #dcf5e3; color: #11672c; }
