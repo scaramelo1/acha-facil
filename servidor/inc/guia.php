@@ -113,6 +113,19 @@ const SQL_FICHA_PAGA = '(p.importado = 0 OR p.basico_pago_em IS NOT NULL)';
 // Ficha no Google (16/11, pedido do usuário): só com telefone ou WhatsApp. Sem nenhum dos dois, a ficha continua no
 // site e no app, mas sai com noindex e fica fora do sitemap; volta sozinha quando ganhar um telefone ou WhatsApp.
 const SQL_TEM_CONTATO = "(COALESCE(p.telefone, '') <> '' OR COALESCE(p.whatsapp, '') <> '')";
+/**
+ * Nome curto (16/11): muitos comércios põem palavras-chave no nome do Google ("Espaço Vital - A Essência | Clínica
+ * Odontológica | Implantes | ..."). Fica a parte antes do primeiro "|" e, se ainda passar de 60 letras, corta na
+ * última palavra inteira. O nome completo continua na ficha.
+ */
+function nome_curto(string $nome, int $max = 60): string {
+    $n = trim(preg_split('/\s*[|｜]\s*/u', $nome)[0]);
+    if (mb_strlen($n) < 3) $n = trim($nome);
+    if (mb_strlen($n) <= $max) return $n;
+    $c = mb_substr($n, 0, $max);
+    $c = preg_replace('/\s+\S*$/u', '', $c) ?: $c;
+    return rtrim($c, " -–,.:;") . '…';
+}
 function ficha_no_google(array $p): bool { return trim((string)($p['telefone'] ?? '')) !== '' || trim((string)($p['whatsapp'] ?? '')) !== ''; }
 
 // Aparece no app: aprovado e com assinatura em dia.

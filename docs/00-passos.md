@@ -561,3 +561,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    manda data-lat/data-lng e data-ativo. Testado com lista de exemplo e com o robô simulado no banco de teste.
    Falta (usuário, no PC): usar o robô novo (ou ajustar o de raspagem: ver docs/robo-automatico.md) e reimportar as
    cidades; hoje 15% exato.
+64. ✅ Nome curto e grafias de bairro (16/11, pedido do usuário). nome_curto() em inc/guia.php: a ficha do site usa a parte
+   antes do primeiro "|" (e no máx. 60 letras) no título da página, no nome em destaque, na descrição e no Google
+   (name; o completo vai em alternateName e numa linha abaixo do nome). Bairros: BAIRRO_ACENTOS / acentuar_bairro() em
+   inc/limpeza.php (Sao → São, Jose → José, Braz → Brás...), também no importador; aplicado em 3.306 fichas. Backup:
+   /var/lib/acha-facil/backups/profissionais.antes-acentos.20261116-0932.sql.gz e limpeza-dados-20261116-093218.sql.

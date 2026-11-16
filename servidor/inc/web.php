@@ -354,14 +354,16 @@ function web_pagina_ficha(array $p): void {
     $tipo = $p['tipo'] ?: null;
     $trilha_itens = [["$nome_cidade - $uf", url_cidade($cidade)], [$p['categoria'], url_area($cidade, $p['categoria_slug'])]];
     if ($tipo) $trilha_itens[] = [$tipo, url_tipo($cidade, $p['categoria_slug'], $tipo)];
-    $trilha_itens[] = [$p['nome'], null];
+    $nome = nome_curto($p['nome']);   // 16/11: título, destaque e Google usam o nome curto
+    $trilha_itens[] = [$nome, null];
     [$trilha, $ld_trilha] = web_trilha($trilha_itens);
     $url = web_absoluta(url_ficha($p));
     $fotos = $c['fotos'];
     $imagem = $c['foto'] ?? ($fotos[0] ?? null);
 
     // dados estruturados LocalBusiness
-    $ld = ['@context' => 'https://schema.org', '@type' => 'LocalBusiness', '@id' => $url, 'name' => $p['nome'], 'url' => $url];
+    $ld = ['@context' => 'https://schema.org', '@type' => 'LocalBusiness', '@id' => $url, 'name' => $nome, 'url' => $url];
+    if ($nome !== $p['nome']) $ld['alternateName'] = $p['nome'];
     if ($imagem) $ld['image'] = $imagem;
     if ($p['descricao']) $ld['description'] = mb_substr($p['descricao'], 0, 300);
     if ($tel = $p['telefone'] ?: $p['whatsapp']) $ld['telephone'] = telefone_discar($tel);
@@ -381,9 +383,9 @@ function web_pagina_ficha(array $p): void {
     if ($sameAs) $ld['sameAs'] = $sameAs;
 
     $sub = array_filter([$tipo ?? $p['categoria'], $p['bairro'], "$nome_cidade - $uf"]);
-    $descricao = $p['nome'] . ' em ' . $nome_cidade . ' (' . $uf . ')' . ($tipo ? ", $tipo" : '') . '. '
+    $descricao = $nome . ' em ' . $nome_cidade . ' (' . $uf . ')' . ($tipo ? ", $tipo" : '') . '. '
         . ($p['endereco'] ? 'Endereço: ' . $p['endereco'] . '. ' : '') . 'Veja horário, telefone e WhatsApp no Acha Fácil.';
-    pagina_inicio($p['nome'] . ' - ' . ($tipo ? "$tipo em " : '') . "$nome_cidade | Acha Fácil!", mb_substr($descricao, 0, 300), 'web',
+    pagina_inicio($nome . ' - ' . ($tipo ? "$tipo em " : '') . "$nome_cidade | Acha Fácil!", mb_substr($descricao, 0, 300), 'web',
         ['canonica' => $url, 'imagem' => $imagem, 'head' => web_json_ld($ld, $ld_trilha), 'noindex' => !ficha_no_google($p),
             'anuncios' => $p['importado'] && !$p['basico_pago_em'] && !$p['destaque_pago']]);   // anúncio só em ficha de quem não paga plano
     [$parecidos, $mesmo_tipo] = web_parecidos($p);
@@ -399,7 +401,8 @@ function web_pagina_ficha(array $p): void {
       <header class="ficha-topo">
         <?= web_logo($p, 'ficha-logo') ?>
         <div>
-          <h1><?= h($p['nome']) ?></h1>
+          <h1><?= h($nome) ?></h1>
+          <?php if ($nome !== $p['nome']): ?><p class="ficha-nome-completo"><?= h($p['nome']) ?></p><?php endif ?>
           <p class="ficha-sub"><?= h(implode(' · ', $sub)) ?></p>
           <p class="ficha-selos">
             <?php if ($p['destaque_pago']): ?><span class="selo-destaque">Destaque</span><?php endif ?>

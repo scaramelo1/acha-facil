@@ -374,6 +374,7 @@ a.area:hover { border-color: var(--verde); }
 .ficha-logo { width: 96px; height: 96px; font-size: 2.6rem; }
 .ficha-topo h1 { font-size: clamp(1.7rem, 5vw, 2.6rem); color: var(--verde); margin: 0; overflow-wrap: anywhere; }
 .ficha-sub { margin: 4px 0 0; color: var(--texto2); }
+.ficha-nome-completo { margin: 2px 0 0; color: var(--texto2); font-size: .9rem; line-height: 1.35; }   /* nome inteiro do Google, quando o título usa o curto */
 .ficha-selos { margin: 4px 0 0; }
 .ficha-botoes { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0; }
 .ficha-botoes .botao { min-height: 52px; padding: 0 20px; }

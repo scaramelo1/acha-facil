@@ -48,7 +48,7 @@ function limpar_bairro(?string $b, string $nome_comercio = '', string $cidade = 
     $b = preg_replace(['/^jd\.?\s+/iu', '/^jar\.?\s+/iu', '/^pq\.?\s+/iu', '/^vl\.?\s+/iu', '/^v\.\s*/u', '/^v\s+(?=\p{Lu})/u', '/^res\.?\s+/iu', '/^resid\.?\s+/iu',
         '/^conj\.?\s*hab\.?\s+/iu', '/^cj\.?\s+/iu', '/^chac\.?\s+/iu', '/^st\.?\s+/iu'],
         ['Jardim ', 'Jardim ', 'Parque ', 'Vila ', 'Vila ', 'Vila ', 'Residencial ', 'Residencial ', 'Conjunto Habitacional ', 'Conjunto ', 'Chácara ', 'Sítio '], $b);
-    return $b;
+    return acentuar_bairro($b);
 }
 
 // Tipos com nomes repetidos (plural, maiúscula, hífen): o da esquerda vira o da direita.
@@ -155,4 +155,26 @@ function bairro_raro_suspeito(string $b): bool {
         . 'independ[êe]ncia|progresso|recreio|itamaraty|itamarati|palmeiral|resedas|concei[çc][ãa]o|ros[áa]rio|aparecida|cruzeiro|esta[çc][ãa]o|'
         . 'ferrovi[áa]rio|matadouro|baix[ãa]o|ip[êe]|ipiranga|lavap[ée]s|vit[óo]ria|bonfim|capela|cascata|cascatinha|chapad[ãa]o|'
         . 'mirante|panorama|horizonte|bandeirantes|tropical|europa|am[ée]rica|brasil|eldorado|bnh)\b/iu', $b);
+}
+
+// Palavras comuns de bairro escritas sem acento (ou com outra grafia) → forma certa. Só palavra inteira com maiúscula.
+const BAIRRO_ACENTOS = [
+    'Sao' => 'São', 'Jose' => 'José', 'Joao' => 'João', 'Antonio' => 'Antônio', 'Conceicao' => 'Conceição', 'Paraiso' => 'Paraíso',
+    'Esperanca' => 'Esperança', 'Centenario' => 'Centenário', 'Ipe' => 'Ipê', 'Ipes' => 'Ipês', 'Sebastiao' => 'Sebastião', 'Lucia' => 'Lúcia',
+    'Cecilia' => 'Cecília', 'Emilia' => 'Emília', 'Vitoria' => 'Vitória', 'Gloria' => 'Glória', 'Patricia' => 'Patrícia',
+    'America' => 'América', 'Italia' => 'Itália', 'Brasilia' => 'Brasília', 'Lavinia' => 'Lavínia', 'Paraiba' => 'Paraíba',
+    'Mario' => 'Mário', 'Marcia' => 'Márcia', 'Fatima' => 'Fátima', 'Bras' => 'Brás', 'Braz' => 'Brás', 'Inacio' => 'Inácio',
+    'Mauricio' => 'Maurício', 'Cristovao' => 'Cristóvão', 'Estancia' => 'Estância', 'Aurea' => 'Áurea', 'Ceu' => 'Céu',
+    'Galvao' => 'Galvão', 'Simao' => 'Simão', 'Monica' => 'Mônica', 'Imperio' => 'Império', 'Chacara' => 'Chácara',
+    'Chacaras' => 'Chácaras', 'Sitio' => 'Sítio', 'Recanto' => 'Recanto', 'Patio' => 'Pátio', 'Aguas' => 'Águas', 'Agua' => 'Água',
+    'Rosario' => 'Rosário', 'Belem' => 'Belém', 'Jardins' => 'Jardins', 'Eden' => 'Éden', 'Pinheirao' => 'Pinheirão',
+    'Matao' => 'Matão', 'Capao' => 'Capão', 'Ribeirao' => 'Ribeirão', 'Corrego' => 'Córrego', 'Planalto' => 'Planalto',
+    'Uniao' => 'União', 'Independencia' => 'Independência', 'Aviacao' => 'Aviação', 'Estacao' => 'Estação', 'Industria' => 'Indústria',
+    'Universitario' => 'Universitário', 'Lazaro' => 'Lázaro', 'Benedito' => 'Benedito', 'Leticia' => 'Letícia', 'Julia' => 'Júlia',
+    'Claudia' => 'Cláudia', 'Lidia' => 'Lídia', 'Amelia' => 'Amélia', 'Alvaro' => 'Álvaro', 'Angelica' => 'Angélica',
+    'Monte' => 'Monte', 'Sinha' => 'Sinhá', 'Pantano' => 'Pântano', 'Ze' => 'Zé', 'Tome' => 'Tomé', 'Nazare' => 'Nazaré',
+];
+/** "Jardim Sao Jose" → "Jardim São José"; "Braz" → "Brás". */
+function acentuar_bairro(string $b): string {
+    return preg_replace_callback('/\b\p{Lu}\p{Ll}+\b/u', fn($m) => BAIRRO_ACENTOS[$m[0]] ?? $m[0], $b);
 }
