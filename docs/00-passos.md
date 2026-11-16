@@ -586,3 +586,5 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    aparece em Minha conta → "Avisos que você pediu" (com Cancelar). Relatório para o comerciante: "· N estão esperando o
    aviso". App: src/componentes/Trancado.tsx (vai no 1.8.0, ainda não gerado). Testado numa cópia com o banco de teste
    (pedir sem/com conta, aprovar alteração avisa 1 vez, horário segue esperando, Minha conta, ficha com e sem login).
+   16/11: app 1.8.0 gerado no PC (saida\acha-facil-1.8.0-9.aab, versionCode 9). Falta: enviar à Play, `npx eas build:version:set`
+   (9), gerar o APK do site (-Tipo apk) e publicar com servidor/publicar-apk.sh.
