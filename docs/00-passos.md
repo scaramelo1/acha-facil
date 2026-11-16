@@ -594,3 +594,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    agora ignora mediapartners/adsbot/googleother/google-/PlayStore-Google e esses IPs do Google sem Referer. Os dias
    15 e 16/11 ficam inflados no histórico (não dá para separar depois). Gente de verdade vinda do Google: 15/11 = 29
    cliques, 14/11 = 31 (o resto é pré-carregamento do Chrome).
+67. ✅ Ficha pré-carregada só conta quando a pessoa abre (16/11, pedido do usuário). web.php não chama contar_visita
+   quando e_pre_carregamento(); a página leva visita_adiada_js (inc/numeros.php), que só roda quando a pessoa vê a
+   página (prerenderingchange) e chama api/visita.php (sinal HMAC do dia): conta a visita com a origem certa e marca a
+   entrada como entradas_hora.pre = 2 (pré-carregada e vista; 1 = só baixada; 0 = clique normal). /admin/entradas.php:
+   "entradas de gente" = total − só baixadas. Testado na cópia (pré-carregada sem abrir: 0 visitas; aberta: 1 visita e
+   pre 2; sinal falso recusado; clique normal conta direto). Dias antes de 16/11 continuam com os downloads somados.

@@ -25,6 +25,9 @@ if ($paginas && pre_carregamento_pronto()) {
     $wp = $cidade !== '' ? ' AND cidade = ?' : '';
     $pre = (int)valor("SELECT COUNT(*) FROM entradas_hora WHERE origem = ? AND quando >= ? AND pre = 1$wp",
         array_merge([$origem, "$desde 00:00:00"], $cidade !== '' ? [$cidade] : []));
+    // 16/11: pré-carregadas que a pessoa abriu de verdade (pre = 2) contam como gente; pre = 1 = só baixada
+    $pre_vistas = (int)valor("SELECT COUNT(*) FROM entradas_hora WHERE origem = ? AND quando >= ? AND pre = 2$wp",
+        array_merge([$origem, "$desde 00:00:00"], $cidade !== '' ? [$cidade] : []));
 }
 // quando foi (passo 42): data e hora de cada entrada (mudança 023); antes dela, ou sem hora, só o dia
 $quando = $ultimo = [];   // $ultimo[caminho] = data/hora mais recente, para ordenar
@@ -152,12 +155,13 @@ admin_inicio(ORIGENS[$origem], $admin);
 </form>
 
 <?php if ($pre !== null): ?><p class="discreto"><strong>Pré-carregamento:</strong> quando o site aparece bem colocado no Google, o Chrome baixa a
-  página antes do clique (<?= num($pre) ?> de <?= num($total_entradas) ?> entradas). Nem sempre a pessoa abre. As fichas abertas e as visualizações
-  também contam esses downloads; os <strong>toques</strong> são sempre de gente de verdade.</p><?php endif ?>
+  página antes do clique. <?= num($pre) ?> de <?= num($total_entradas) ?> entradas foram só baixadas e ninguém abriu<?= $pre_vistas ? '; ' . num($pre_vistas) . ' foram pré-carregadas e a pessoa abriu' : '' ?>.
+  Desde 16/11 a ficha pré-carregada só conta como aberta (e nas visualizações) quando a pessoa abre de verdade; antes disso
+  os downloads entravam também. Os <strong>toques</strong> são sempre de gente de verdade.</p><?php endif ?>
 <div class="numeros-resumo">
   <?php if (entradas_prontas()): ?><div><strong><?= num($total_entradas) ?></strong><span>entradas no site</span></div><?php endif ?>
-  <?php if ($pre !== null): ?><div title="Tirando o Chrome baixando a página antes do clique. Algumas pessoas que clicaram ficam de fora: o número real fica entre este e o total.">
-    <strong><?= num(max(0, $total_entradas - $pre)) ?></strong><span>entradas sem pré-carregamento</span></div><?php endif ?>
+  <?php if ($pre !== null): ?><div title="Cliques normais + pré-carregadas que a pessoa abriu (desde 16/11). Tira só o que o Chrome baixou e ninguém viu.">
+    <strong><?= num(max(0, $total_entradas - $pre)) ?></strong><span>entradas de gente (sem pré-carregamento)</span></div><?php endif ?>
   <div><strong><?= num(count($abertas)) ?></strong><span>fichas abertas</span></div>
   <div><strong><?= num($soma($abertas, 'visualizacoes')) ?></strong><span>visualizações</span></div>
   <div><strong><?= num($soma($tocadas, 'toques')) ?></strong><span>toques em <?= num(count($tocadas)) ?> comércios</span></div>

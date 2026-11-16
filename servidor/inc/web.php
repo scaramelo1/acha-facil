@@ -612,6 +612,7 @@ document.querySelectorAll('[data-contato]').forEach(function (a) {
 });
 </script>
 <?php
+    echo visita_adiada_js((int)$p['id'], rawurldecode((string)parse_url((string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH)));   // 16/11
     pagina_fim();
 }
 

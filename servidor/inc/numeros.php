@@ -301,3 +301,30 @@ function pedido_info_frase(string $tipo, int $total): string {
     $o = ['horario' => 'o seu horário', 'fotos' => 'para ver fotos', 'sobre' => 'para saber o que você vende', 'whatsapp' => 'o seu WhatsApp'][$tipo] ?? $tipo;
     return num($total) . ($total > 1 ? ' pessoas pediram ' : ' pessoa pediu ') . $o;
 }
+
+// ---------- pré-carregamento que a pessoa abriu de verdade (16/11) ----------
+// O Chrome baixa a ficha antes do clique (pré-carregamento). Nessa hora a visita NÃO conta: a página leva um sinal
+// (visita_adiada_js) que só roda quando a pessoa abre a página; aí api/visita.php conta a visita e marca a entrada
+// como aberta (entradas_hora.pre = 2: pré-carregada e vista; 1 = só baixada; 0 = clique normal).
+
+function visita_adiada_sinal(int $id, string $origem): string {
+    return substr(hash_hmac('sha256', "$id|$origem|" . hoje(), sal_visitas()), 0, 24);
+}
+/** <script> que avisa o servidor quando a ficha pré-carregada é aberta de verdade (vazio se a visita já contou). */
+function visita_adiada_js(int $id, string $caminho): string {
+    $origem = $GLOBALS['visita_adiada'] ?? null;
+    if ($origem === null) return '';
+    $dados = json_encode(['id' => $id, 'origem' => $origem, 'sinal' => visita_adiada_sinal($id, $origem), 'caminho' => $caminho]);
+    return '<script>(function(){var d=' . $dados . ';function contar(){try{fetch(' . json_encode(url('api/visita.php'))
+        . ',{method:"POST",keepalive:true,headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});}catch(e){}}'
+        . 'if(document.prerendering){document.addEventListener("prerenderingchange",contar,{once:true});}else{contar();}})();</script>';
+}
+/** A pessoa abriu a ficha pré-carregada: conta a visita e marca a entrada mais recente desse endereço como vista. */
+function contar_visita_adiada(int $id, string $origem, string $caminho): void {
+    contar_visita($id, $origem);
+    if (!pre_carregamento_pronto()) return;
+    try {
+        q('UPDATE entradas_hora SET pre = 2 WHERE pre = 1 AND caminho = ? AND quando >= NOW() - INTERVAL 1 DAY ORDER BY quando DESC LIMIT 1',
+            [mb_substr($caminho, 0, 190)]);
+    } catch (PDOException) {}
+}
