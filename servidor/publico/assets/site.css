@@ -82,11 +82,11 @@ section.verde .intro { color: #cfe6d9; }
 }
 
 /* busca de verdade no topo da inicial (16/11): cidade + o que procura + Buscar */
-.hero .conteudo.hero-busca { display: block; max-width: 860px; text-align: center; }
+.hero .conteudo.hero-busca { display: block; max-width: 980px; text-align: center; }
 .hero-busca h1 { margin-bottom: .3em; }
 .hero-busca .lead { max-width: 46ch; margin: 0 auto 24px; }
 .busca-topo {
-  display: grid; grid-template-columns: minmax(180px, .8fr) 1.6fr auto; gap: 10px; text-align: left;
+  display: grid; grid-template-columns: calc(var(--cidade-largura, 20ch) + 64px) minmax(180px, 1fr) auto; gap: 10px; text-align: left;
   background: var(--verde); padding: 12px; border-radius: 26px; box-shadow: 0 10px 0 rgba(0, 92, 56, .15);
 }
 .busca-topo select, .busca-topo input { border-color: transparent; }
@@ -95,7 +95,7 @@ section.verde .intro { color: #cfe6d9; }
 .busca-aviso { margin: 10px 0 0; font-weight: 800; color: #b3261e; }
 .hero-busca .numeros { justify-content: center; margin: 24px 0 10px; }
 .hero-busca .numeros a { color: inherit; }
-@media (max-width: 760px) {
+@media (max-width: 860px) {
   .busca-topo { grid-template-columns: 1fr; border-radius: 22px; }
   .busca-topo .botao { width: 100%; }
 }

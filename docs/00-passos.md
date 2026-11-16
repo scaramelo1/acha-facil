@@ -505,4 +505,6 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    /?cidade=&q=, que redireciona). Última cidade guardada no navegador (localStorage af_cidade, também ao tocar numa
    cidade da lista); cidade com 0 comércios não entra na lista. O celular desenhado e os botões de baixar foram para o
    bloco "Baixe o Acha Fácil!" do fim (#baixar). CSS site.css?v=27. Backup para voltar: /root/acha-facil-inicio.antes-busca.20261116-0722
-   (index.php, site.css, pagina.php). Falta: o usuário olhar no celular e no PC e aprovar.
+   (index.php, site.css, pagina.php). Campo da cidade com a largura do maior nome cadastrado (--cidade-largura, máx. 34ch;
+   cresce sozinho com cidade nova); abaixo de 860 px os campos ficam um embaixo do outro. CSS v=28.
+   Falta: o usuário olhar no celular e no PC e aprovar.

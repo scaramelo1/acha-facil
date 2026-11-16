@@ -35,7 +35,9 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
     <div class="conteudo hero-busca">
       <h1>Tudo o que tem na <mark>sua cidade</mark>, num toque.</h1>
       <p class="lead">Ache restaurante, mercado, oficina, clínica ou loja e chame no WhatsApp, ligue ou veja como chegar.</p>
-      <form class="busca-topo" action="<?= h(url()) ?>" method="get" role="search" id="busca-topo">
+      <?php // largura da cidade = maior nome cadastrado (cresce sozinha quando entra cidade nova; mínimo o "Escolha a cidade")
+        $maior_nome = 19; foreach (CIDADES as $slug => [$nome]) if (!empty($por_cidade[$slug])) $maior_nome = max($maior_nome, mb_strlen($nome)); ?>
+      <form class="busca-topo" style="--cidade-largura: <?= min($maior_nome, 34) ?>ch" action="<?= h(url()) ?>" method="get" role="search" id="busca-topo">
         <label for="busca-cidade" class="so-leitor">Cidade</label>
         <select id="busca-cidade" name="cidade" required>
           <option value="">📍 Escolha a cidade</option>
