@@ -270,8 +270,17 @@ function pedidos_info_prontos(): bool {
     try { return $ok ??= (bool)valor("SELECT 1 FROM migracoes WHERE nome = '028-pedidos-info.sql'"); } catch (PDOException) { return $ok = false; }
 }
 
-/** Guarda o pedido. true = contou (1ª vez da pessoa hoje), false = repetido, robô ou banco sem a 028. */
-function pedir_info(int $profissional_id, string $tipo, string $origem): bool {
+/** A mudança 030 (quem pediu) já foi aplicada? Antes dela só a contagem é guardada. */
+function pedidos_info_pessoas_prontos(): bool {
+    static $ok = null;
+    try { return $ok ??= (bool)valor("SELECT 1 FROM migracoes WHERE nome = '030-pedidos-info-pessoas.sql'"); } catch (PDOException) { return $ok = false; }
+}
+
+/**
+ * Guarda o pedido. true = contou (1ª vez da pessoa hoje), false = repetido, robô ou banco sem a 028.
+ * $usuario_id: conta de quem pediu (app ou site), ou null = anônimo (passo 68, com a 030).
+ */
+function pedir_info(int $profissional_id, string $tipo, string $origem, ?int $usuario_id = null): bool {
     if (!isset(TIPOS_PEDIDO_INFO[$tipo]) || e_robo() || !pedidos_info_prontos()) return false;
     try {
         $novo = q('INSERT IGNORE INTO pedidos_info_vistos (profissional_id, tipo, dia, visitante) VALUES (?, ?, CURDATE(), ?)',
@@ -279,6 +288,8 @@ function pedir_info(int $profissional_id, string $tipo, string $origem): bool {
         if (!$novo) return false;
         q('INSERT INTO pedidos_info (profissional_id, tipo, dia, origem, total) VALUES (?, ?, CURDATE(), ?, 1)
             ON DUPLICATE KEY UPDATE total = total + 1', [$profissional_id, $tipo, $origem === 'web' ? 'web' : 'app']);
+        if (pedidos_info_pessoas_prontos()) q('INSERT INTO pedidos_info_pessoas (profissional_id, tipo, usuario_id, origem) VALUES (?, ?, ?, ?)',
+            [$profissional_id, $tipo, $usuario_id, $origem === 'web' ? 'web' : 'app']);
         if (random_int(1, 300) === 1) q('DELETE FROM pedidos_info_vistos WHERE dia < CURDATE() - INTERVAL 1 DAY');
         return true;
     } catch (PDOException $e) {

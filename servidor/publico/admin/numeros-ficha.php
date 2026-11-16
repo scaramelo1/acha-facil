@@ -64,6 +64,7 @@ admin_inicio('Números · ' . $p['nome'], $admin);
     <div class="tabela"><table>
       <?php foreach (TIPOS_PEDIDO_INFO as $k => $nome): ?><tr><td><?= $nome ?></td><td><?= num($pedidos[$k]) ?></td></tr><?php endforeach ?>
     </table></div>
+    <p><a href="quem-pediu.php?id=<?= (int)$p['id'] ?>">Ver quem pediu</a></p>
     <?php endif ?>
   </div>
   <div>

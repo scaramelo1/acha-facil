@@ -592,7 +592,7 @@ document.querySelectorAll('[data-quero]').forEach(function (b) {
   b.addEventListener('click', function () {
     feito(true);
     try { localStorage.setItem(chave, '1'); } catch (e) {}
-    try { fetch(<?= json_encode(url('api/quero.php')) ?>, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },
+    try { fetch(<?= json_encode(url('api/quero.php')) ?>, { method: 'POST', keepalive: true, credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-AF-Web': '1' },
       body: JSON.stringify({ id: <?= (int)$p['id'] ?>, tipo: b.dataset.quero, origem: 'web' }) }); } catch (e) {}
   });
 });

@@ -600,3 +600,10 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    entrada como entradas_hora.pre = 2 (pré-carregada e vista; 1 = só baixada; 0 = clique normal). /admin/entradas.php:
    "entradas de gente" = total − só baixadas. Testado na cópia (pré-carregada sem abrir: 0 visitas; aberta: 1 visita e
    pre 2; sinal falso recusado; clique normal conta direto). Dias antes de 16/11 continuam com os downloads somados.
+68. 🟡 Ver quem pediu no "Quero saber" (16/11, pedido do usuário). Antes só havia a contagem por dia, sem a pessoa.
+   Mudança 030 (pedidos_info_pessoas: comércio, tipo, usuario_id ou NULL = anônimo, origem app/site, data). api/quero.php
+   guarda a conta de quem pediu (X-Token no app; no site o botão agora manda o cookie + X-AF-Web). Telas: /admin/quem-pediu.php
+   (todos ou ?id= um comércio; filtro "só com cadastro"; embaixo quem pediu para ser avisado, da avisos_info), link "Quem pediu"
+   em Números > Pedidos de informação e nos números da ficha, e seção "Pediu informação" em /admin/pessoa.php.
+   Sem a 030 aplicada, nada quebra (só a contagem continua). Pedidos antigos (antes de 16/11) não têm a pessoa.
+   Falta (usuário): aplicar a 030 com o instalar.sh.

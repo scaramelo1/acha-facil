@@ -30,6 +30,12 @@ $avaliacoes = linhas('SELECT a.estrelas, a.comentario, a.status, a.resposta, a.c
         p.id, p.nome, p.tipo, p.cidade, p.bairro, p.status AS status_ficha, c.nome AS categoria
     FROM avaliacoes a JOIN profissionais p ON p.id = a.profissional_id JOIN categorias c ON c.id = p.categoria_id
     WHERE a.usuario_id = ? ORDER BY a.criado_em DESC', [$u['id']]);
+// passo 68: toques em "Quero saber..." feitos com esta conta (com a mudança 030)
+require_once __DIR__ . '/../../inc/numeros.php';
+$pedidos_info = pedidos_info_pessoas_prontos() ? linhas('SELECT q.tipo AS pedido, q.origem, q.criado_em AS quando,
+        p.id, p.nome, p.tipo, p.cidade, p.bairro, p.status, c.nome AS categoria
+    FROM pedidos_info_pessoas q JOIN profissionais p ON p.id = q.profissional_id JOIN categorias c ON c.id = p.categoria_id
+    WHERE q.usuario_id = ? ORDER BY q.id DESC LIMIT 100', [$u['id']]) : [];
 $media = $avaliacoes ? array_sum(array_column($avaliacoes, 'estrelas')) / count($avaliacoes) : 0;
 $por_area = [];
 foreach ($favoritos as $f) $por_area[$f['categoria']] = ($por_area[$f['categoria']] ?? 0) + 1;
@@ -85,6 +91,17 @@ admin_inicio($u['nome'], $admin);
   <?php foreach ($favoritos as $f): ?><tr>
     <td><?= $comercio($f) ?><?= $f['status'] === 'ativo' ? '' : ' <span class="discreto">(fora do app)</span>' ?></td>
     <td><?= h(data_br($f['criado_em'])) ?></td><td><?= $botoes($f) ?></td>
+  </tr><?php endforeach ?>
+</table></div>
+<?php endif ?>
+
+<?php if ($pedidos_info): ?>
+<h2 id="quero-saber">Pediu informação ("Quero saber")</h2>
+<div class="tabela"><table>
+  <tr><th>Comércio</th><th>Pediu</th><th>Quando</th><th></th></tr>
+  <?php foreach ($pedidos_info as $q): ?><tr>
+    <td><?= $comercio($q) ?></td><td><?= h(TIPOS_PEDIDO_INFO[$q['pedido']] ?? $q['pedido']) ?><?= $q['origem'] === 'web' ? ' <span class="discreto">(site)</span>' : '' ?></td>
+    <td><?= h(datahora_br($q['quando'])) ?></td><td><?= $botoes($q) ?></td>
   </tr><?php endforeach ?>
 </table></div>
 <?php endif ?>

@@ -235,7 +235,8 @@ admin_inicio('Números', $admin);
   tocou em "Quero saber o horário", "Quero ver fotos", "Quero saber mais" ou "Quero o WhatsApp".</p>
 <?php else: ?>
 <p class="discreto">Fichas em que alguém tocou em "Quero saber..." (1 por pessoa, por dia). São os comércios para chamar primeiro:
-  abra o <strong>Relatório</strong> e mande para o dono. <a href="<?= h($link(['csv' => 'pedidos'])) ?>">Baixar CSV</a></p>
+  abra o <strong>Relatório</strong> e mande para o dono. <a href="<?= h($link(['csv' => 'pedidos'])) ?>">Baixar CSV</a>
+  · <a href="quem-pediu.php"><strong>Ver quem pediu</strong></a> (com cadastro ou anônimo)</p>
 <div class="tabela"><table>
   <tr><th>Comércio</th><th>Plano</th><th>Contato do comércio</th>
     <?php foreach (TIPOS_PEDIDO_INFO as $n): ?><th><?= $n ?></th><?php endforeach ?><th>Total</th><th></th></tr>
@@ -247,7 +248,8 @@ admin_inicio('Números', $admin);
     <?php foreach (TIPOS_PEDIDO_INFO as $k => $n): ?><td><?= (int)$l[$k] ? num((int)$l[$k]) : '' ?></td><?php endforeach ?>
     <td><strong><?= num((int)$l['total']) ?></strong></td>
     <td><a class="botao pequeno" href="relatorio.php?id=<?= (int)$l['id'] ?>&amp;dias=<?= $dias ?>" target="_blank">Relatório</a>
-      <a class="botao pequeno contorno" href="numeros-ficha.php?id=<?= (int)$l['id'] ?>&amp;dias=<?= $dias ?>">Ver</a></td>
+      <a class="botao pequeno contorno" href="numeros-ficha.php?id=<?= (int)$l['id'] ?>&amp;dias=<?= $dias ?>">Ver</a>
+      <a class="botao pequeno contorno" href="quem-pediu.php?id=<?= (int)$l['id'] ?>">Quem pediu</a></td>
   </tr>
   <?php endforeach ?>
 </table></div>

@@ -7,5 +7,7 @@ metodo('POST');
 $p = profissional_visivel((int)(corpo()['id'] ?? 0)) ?? erro('Comércio não encontrado.', 404);
 $tipo = campo('tipo', 12);
 if (!isset(TIPOS_PEDIDO_INFO[$tipo])) erro('Pedido inválido.');
-pedir_info((int)$p['id'], $tipo, campo('origem', 12) === 'web' ? 'web' : 'app');
+// passo 68: com conta (X-Token no app, cookie + X-AF-Web no site) guarda quem pediu; sem conta fica anônimo
+$u = usuario_app();
+pedir_info((int)$p['id'], $tipo, campo('origem', 12) === 'web' ? 'web' : 'app', $u ? (int)$u['id'] : null);
 responder(['ok' => true]);
