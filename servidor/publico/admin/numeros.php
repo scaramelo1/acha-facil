@@ -209,6 +209,7 @@ admin_inicio('Números', $admin);
   <div><strong><?= num((int)($entradas['google'] ?? 0)) ?></strong><span><a href="entradas.php?<?= h(http_build_query(array_filter(['origem' => 'google', 'cidade' => $cidade, 'dias' => $dias]))) ?>">pelo Google</a> (<?= pct((int)($entradas['google'] ?? 0), $entradas_total) ?>)</span></div>
   <?php if ($google_pre !== null): ?><div title="Tirando o Chrome baixando a página antes do clique"><strong><?= num(max(0, (int)($entradas['google'] ?? 0) - $google_pre)) ?></strong><span>pelo Google sem pré-carregamento</span></div><?php endif ?>
 </div>
+<p><a class="botao pequeno" href="google.php">Google por cidade</a> <span class="discreto">quanto de cada cidade o Google já leu e quantas pessoas chegaram pela pesquisa</span></p>
 <p class="discreto"><strong>Entrada</strong> = pessoa que chegou ao site vindo de fora; quem continua navegando (até 30 min) não conta de novo.</p>
 <div class="tabela"><table>
   <tr><th>Entradas por origem</th><th>Vezes</th><th>%</th></tr>

@@ -45,6 +45,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
         <a class="so-celular" href="<?= $base ?>/admin/cidades.php">Cidades</a>
         <a class="so-celular" href="<?= $base ?>/admin/novidades.php">Novidades<?= $nov ? ' <span class="contador">' . $nov . '</span>' : '' ?></a>
         <a href="<?= $base ?>/admin/comercios.php">Comércios (editar)</a>
+        <a href="<?= $base ?>/admin/google.php">Google por cidade</a>
         <a href="<?= $base ?>/admin/importar.php">Importar lista</a>
         <a class="so-celular" href="<?= $base ?>/admin/pessoas.php">Pessoas</a>
         <a class="so-celular" href="<?= $base ?>/admin/suporte.php">Suporte<?= $sup ? ' <span class="contador">' . $sup . '</span>' : '' ?></a>

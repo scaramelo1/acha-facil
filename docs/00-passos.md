@@ -607,3 +607,11 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    em Números > Pedidos de informação e nos números da ficha, e seção "Pediu informação" em /admin/pessoa.php.
    Sem a 030 aplicada, nada quebra (só a contagem continua). Pedidos antigos (antes de 16/11) não têm a pessoa.
    Falta (usuário): aplicar a 030 com o instalar.sh.
+69. ✅ Google por cidade (16/11, pedido do usuário). /admin/google.php (Números > "Google por cidade" e menu Mais): por cidade,
+   fichas no sitemap, fichas já visitadas pelo robô do Google, %, páginas lidas nos últimos 7 dias, última visita, entradas
+   pela pesquisa (total e 7 dias); em vermelho as cidades com menos de 10%, lista "Para empurrar no Search Console" (sitemap
+   e página da cidade de cada uma) e tabela de páginas lidas por dia. Dados do robô: servidor/google-visitas.php lê o
+   registro do Apache (Googlebot com IP conferido nos dois sentidos) e guarda em $DADOS/google/visitas.json (fichas pelo nº,
+   primeira e última visita; páginas e fichas por dia). Sem mudança no banco. Cron de hora em hora (root) no instalar.sh;
+   já rodado uma vez à mão em 16/11 (4.298 fichas visitadas desde 10/11).
+   Falta (usuário): rodar o instalar.sh para ligar o cron.

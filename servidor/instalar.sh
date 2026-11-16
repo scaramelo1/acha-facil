@@ -97,9 +97,11 @@ fi
 # 4. aviso "Cadastro sem pagamento" (passo 54): a cada 10 minutos
 cat > /etc/cron.d/$NOME <<CRON
 */10 * * * * www-data php $RAIZ/avisar-sem-pagamento.php >/dev/null 2>&1
+17 * * * * root php $RAIZ/google-visitas.php >/dev/null 2>&1
 CRON
 chmod 644 /etc/cron.d/$NOME
-echo "✔ verificação de pagamento a cada 10 min (/etc/cron.d/$NOME)"
+echo "✔ verificação de pagamento a cada 10 min e visitas do Google de hora em hora (/etc/cron.d/$NOME)"
+php "$RAIZ/google-visitas.php" || true
 if [ "${1:-}" = "--leads" ]; then
   # São João: a lista enviada em /admin/importar.php ($DADOS/leads/sao-joao.html) ou, sem ela, a de fsadesigners.com.br/leads
   [ -f "$DADOS/leads/sao-joao.html" ] || php "$RAIZ/importar-leads.php"
