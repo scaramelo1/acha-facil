@@ -513,7 +513,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (1) Botões "Quero o WhatsApp", "Quero ver fotos", "Quero saber mais" e "Quero saber o horário" (api/quero.php,
    pedir_info() em inc/numeros.php; 1 por pessoa, ficha e tipo no dia; robô não conta). Mudança 028 (pedidos_info e
    pedidos_info_vistos) — USUÁRIO APLICA; antes dela os botões aparecem mas nada é guardado. Os pedidos aparecem em
-   /admin/numeros.php (coluna "Pedidos de info", ordena e vai no CSV de prospecção), /admin/numeros-ficha.php,
+   /admin/numeros.php (seção própria "Pedidos de informação", só as fichas com pedido, com contato do comércio,
+   botão Relatório e CSV próprio; desde 16/11 a tabela "Fichas" mostra só as fichas com algum número no período),
+   /admin/numeros-ficha.php,
    no relatório para o comerciante ("3 pessoas pediram o seu horário") e no painel do dono.
    (2) Espaços trancados (🔒, borda tracejada) no lugar de "Horário não informado" e onde faltam WhatsApp, fotos e
    "O que faz ou vende", com "É o dono? Complete a sua ficha" só em ficha sem dono. Site: web_trancado() em inc/web.php;
