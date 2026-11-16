@@ -32,3 +32,26 @@ Quem assumiu o perfil (dono) nunca é mexido.
 - `pasta_saida`: pasta onde o robô grava o `leads_*.html`
 - `cidades_por_vez`: quantas cidades por execução (1 = uma por noite)
 - `cidades`: a lista do rodízio
+
+## Ponto exato no mapa (16/11, passo 63)
+
+O "Perto de você" e o "Como chegar" usam o ponto de cada comércio. Até 16/11 só ~15% estavam no endereço exato: as
+listas traziam o link `maps?cid=`, que não tem coordenadas, e o servidor procurava o endereço no OpenStreetMap (quase
+sempre cai no meio da rua ou no centro do bairro).
+
+O importador agora aceita o ponto exato de três jeitos (o primeiro que vier):
+1. `data-lat="-21.97" data-lng="-46.79"` na `<tr>` da lista;
+2. link do Maps com `!3d…!4d…` (o link da página do lugar);
+3. link com `query=lat,lng` ou `@lat,lng` (este é só o centro do mapa, vale por último).
+Ponto acertado à mão (geo_origem = manual) nunca é trocado.
+
+**Robô da API oficial (`scripts/robo/leads_places_api.py`)**: já manda `data-lat`/`data-lng` (campo `places.location`,
+que vem no mesmo pedido, sem custo a mais) e `data-ativo` (fechado de vez sai do app). No PowerShell:
+
+    $env:GOOGLE_MAPS_API_KEY = "sua chave"
+    python leads_places_api.py "Mococa" SP
+
+**Robô de raspagem (Playwright)**: ao abrir cada lugar, guarde o endereço da página (`page.url`, que tem `!3d…!4d…`) no
+link do nome, ou grave `data-lat`/`data-lng` na `<tr>`. Qualquer um dos dois já basta.
+
+Cada cidade fica exata na próxima vez que a lista dela for importada (Admin → Importar lista, ou o rodízio do robô).

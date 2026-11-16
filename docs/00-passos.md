@@ -555,3 +555,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Telefone de central (4003/4004/3003/0800): mostrado sem DDD ("4004-4828 (central)"), tel: sem DDD, API com
    telefoneCentral (app 1.8.0 mostra "Central de atendimento da rede"). Telefones divididos (8 hotéis de Campos com o
    mesmo número) conferidos: são da mesma rede (central de reservas), não é erro — mantidos.
+63. 🟡 Ponto exato no mapa vindo do robô (16/11, pedido do usuário). Importador aceita data-lat/data-lng na `<tr>` ou o
+   link do Maps com !3d…!4d… (prioridade), query=lat,lng ou @lat,lng; grava geo_origem = 'google'; ponto manual fica.
+   scripts/robo/leads_places_api.py (cópia do robô da API oficial enviado pelo usuário) agora pede places.location e
+   manda data-lat/data-lng e data-ativo. Testado com lista de exemplo e com o robô simulado no banco de teste.
+   Falta (usuário, no PC): usar o robô novo (ou ajustar o de raspagem: ver docs/robo-automatico.md) e reimportar as
+   cidades; hoje 15% exato.

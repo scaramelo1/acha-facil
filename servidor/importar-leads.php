@@ -157,6 +157,9 @@ db()->beginTransaction();
 foreach ($linhas_html as [, $status, $tipo, $attrs, $tr]) {
     $area = preg_match('/data-seg="([^"]*)"/', $attrs, $x) ? $x[1] : '';
     $ativo = preg_match('/data-ativo="([^"]*)"/', $attrs, $x) ? $x[1] : 'ativo';
+    // 16/11: ponto exato do Google, se o robô mandar (data-lat/data-lng; robô da API oficial com places.location)
+    $lat_lista = preg_match('/data-lat="(-?\d+\.\d+)"/', $attrs, $x) ? (float)$x[1] : null;
+    $lng_lista = preg_match('/data-lng="(-?\d+\.\d+)"/', $attrs, $x) ? (float)$x[1] : null;
     preg_match_all('#<td[^>]*>(.*?)</td>#s', $tr, $td);
     $td = $td[1];
     if (count($td) < 8) { $pulados++; continue; }
@@ -222,7 +225,14 @@ foreach ($linhas_html as [, $status, $tipo, $attrs, $tr]) {
         'endereco' => $endereco, 'bairro' => $bairro, 'mapa' => $mapa && preg_match('#^https://(www\.google\.com/maps|maps\.google\.com/)#', $mapa) ? mb_substr($mapa, 0, 500) : null,
         'popularidade' => $popularidade,
     ];
-    $atual = linha('SELECT id, importado, status, categoria_id, tipo, mapa, nome, telefone, whatsapp, endereco, bairro, instagram, site FROM profissionais WHERE chave_importacao = ?', [$k]);
+    // coordenadas exatas: da lista (data-lat/lng) ou do link do Maps (!3d…!4d…, @lat,lng, query=lat,lng); só dentro do Brasil
+    // (!3d…!4d… é o ponto do comércio; @lat,lng é só o centro do mapa: vem por último)
+    if ($lat_lista === null) foreach (['/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/', '/query=(-?\d+\.\d+)(?:,|%2C)(-?\d+\.\d+)/', '/@(-?\d+\.\d+),(-?\d+\.\d+)/'] as $re) {
+        if (preg_match($re, (string)$mapa, $g)) { [$lat_lista, $lng_lista] = [(float)$g[1], (float)$g[2]]; break; }
+    }
+    if ($lat_lista !== null && $lng_lista !== null && $lat_lista > -34 && $lat_lista < 6 && $lng_lista > -74 && $lng_lista < -34)
+        $dados += ['lat' => $lat_lista, 'lng' => $lng_lista, 'geo_origem' => 'google'];
+    $atual = linha('SELECT id, importado, status, categoria_id, tipo, mapa, nome, telefone, whatsapp, endereco, bairro, instagram, site, geo_origem FROM profissionais WHERE chave_importacao = ?', [$k]);
     if (!$atual) {
         inserir('profissionais', $dados + ['chave_importacao' => $k, 'importado' => 1, 'status' => 'ativo', 'assinatura' => 'sem']);
         $novos++;
@@ -235,6 +245,7 @@ foreach ($linhas_html as [, $status, $tipo, $attrs, $tr]) {
         if ($dados['tipo'] === null) unset($dados['tipo']);
         if ($dados['popularidade'] === 0) unset($dados['popularidade']);   // lista sem número de avaliações não zera a ordem
         if (str_contains((string)$atual['mapa'], '!3d') && !str_contains((string)$dados['mapa'], '!3d')) unset($dados['mapa']);
+        if ($atual['geo_origem'] === 'manual') unset($dados['lat'], $dados['lng'], $dados['geo_origem']);   // ponto acertado à mão fica
         // o que mudou de verdade (sem contar maiúsculas/acentos): nome, telefone, WhatsApp, endereço, bairro, Instagram, site
         $campos = [];
         foreach (['nome', 'telefone', 'whatsapp', 'endereco', 'bairro', 'instagram', 'site'] as $cp) {
