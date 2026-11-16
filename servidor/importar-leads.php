@@ -10,6 +10,7 @@ if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require __DIR__ . '/inc/base.php';
 require_once __DIR__ . '/inc/guia.php';
 require_once __DIR__ . '/inc/limpeza.php';   // 16/11: bairros e tipos limpos
+require_once __DIR__ . '/inc/moderacao.php';   // editados_pelo_admin()
 
 // --teste: faz tudo e mostra o resultado, mas desfaz no fim (nada muda no banco)
 $teste = in_array('--teste', $argv, true);
@@ -154,6 +155,7 @@ if (!$linhas_html) exit("✘ Nenhum comércio encontrado em $arquivo (formato mu
 $novos = $atualizados = $pulados = $publicos = $fechados = $pausados = 0;
 $vistos = [];
 db()->beginTransaction();
+$do_admin = editados_pelo_admin();   // 16/11: comércio editado à mão em /admin/comercio.php não é mudado pela lista
 foreach ($linhas_html as [, $status, $tipo, $attrs, $tr]) {
     $area = preg_match('/data-seg="([^"]*)"/', $attrs, $x) ? $x[1] : '';
     $ativo = preg_match('/data-ativo="([^"]*)"/', $attrs, $x) ? $x[1] : 'ativo';
@@ -201,7 +203,7 @@ foreach ($linhas_html as [, $status, $tipo, $attrs, $tr]) {
         $fechados++; $pulados++;
         if (str_contains($tr, 'Fechado permanentemente')) {
             $ja = linha('SELECT id, importado, status, nome, endereco FROM profissionais WHERE chave_importacao = ?', [$k]);
-            if ($ja && (int)$ja['importado'] === 1 && $ja['status'] === 'ativo') {
+            if ($ja && (int)$ja['importado'] === 1 && $ja['status'] === 'ativo' && !isset($do_admin[(int)$ja['id']])) {
                 q("UPDATE profissionais SET status = 'pausado' WHERE id = ?", [$ja['id']]); $pausados++;
                 $det['fecharam'][] = ['id' => (int)$ja['id'], 'nome' => $ja['nome'], 'endereco' => $ja['endereco']];
             }
@@ -239,7 +241,7 @@ foreach ($linhas_html as [, $status, $tipo, $attrs, $tr]) {
         $det['novos'][] = ['nome' => $nome, 'tipo' => $dados['tipo'], 'area' => array_search($categoria_id, $cat, true) ?: 'outros',
             'telefone' => $telefone, 'whatsapp' => $whatsapp, 'endereco' => $endereco, 'bairro' => $bairro, 'cidade' => $cidade,
             'mapa' => $dados['mapa'], 'popularidade' => $popularidade];
-    } elseif ((int)$atual['importado'] === 1 && $atual['status'] === 'ativo') {
+    } elseif ((int)$atual['importado'] === 1 && $atual['status'] === 'ativo' && !isset($do_admin[(int)$atual['id']])) {
         // lista nova mais pobre não estraga o que já estava bom: área/tipo sem informação e link do Maps sem coordenadas
         if ($dados['categoria_id'] === $cat['outros'] && (int)$atual['categoria_id'] !== $cat['outros']) { unset($dados['categoria_id']); $dados['tipo'] = $dados['tipo'] ?? $atual['tipo']; }
         if ($dados['tipo'] === null) unset($dados['tipo']);
@@ -256,7 +258,7 @@ foreach ($linhas_html as [, $status, $tipo, $attrs, $tr]) {
         atualizar('profissionais', (int)$atual['id'], $dados);
         $atualizados++;
     } else {
-        $pulados++; // dono assumiu o perfil, ou foi removido/pausado pelo admin
+        $pulados++; // dono assumiu o perfil, foi removido/pausado ou editado à mão pelo admin
     }
 }
 // resumo por área do que ficou nesta cidade (antes de confirmar ou desfazer)

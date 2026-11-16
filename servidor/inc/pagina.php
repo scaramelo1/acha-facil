@@ -70,7 +70,7 @@ function pagina_inicio(string $titulo, string $descricao, string $classe = '', a
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=30">
+<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=31">
 <?= $opc['head'] ?? '' ?>
 <?= !empty($opc['anuncios']) ? anuncios_head() : '' ?>
 </head>
@@ -97,7 +97,10 @@ function pagina_inicio(string $titulo, string $descricao, string $classe = '', a
         i.onerror = function () { i.remove(); }; a.appendChild(i); }
       var s = document.createElement('span'); s.textContent = nome || 'Minha conta'; a.appendChild(s);
       if (j.usuario.admin) { var ad = document.createElement('a'); ad.href = base + '/admin/'; ad.className = 'nav-admin'; ad.textContent = 'Administração';
-        a.parentNode.insertBefore(ad, a); }
+        a.parentNode.insertBefore(ad, a);
+        // lápis de editar na ficha (16/11): fica escondido na página em cache e só aparece para admin
+        var mostrar = function () { document.querySelectorAll('[data-so-admin]').forEach(function (e) { e.hidden = false; }); };
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mostrar); else mostrar(); }
     }).catch(function () {});
 })();
 </script>

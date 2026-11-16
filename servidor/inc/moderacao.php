@@ -61,6 +61,35 @@ function exigir_admin(): array {
     return $a;
 }
 
+// ---------- edição pelo admin (16/11) ----------
+/** Ids dos comércios que um admin já editou em /admin/comercio.php: importação e limpeza não mexem mais neles. */
+function editados_pelo_admin(): array {
+    return array_fill_keys(array_map('intval', array_column(linhas("SELECT DISTINCT profissional_id FROM registro_admin
+        WHERE acao = 'editou_comercio' AND profissional_id IS NOT NULL"), 'profissional_id')), true);
+}
+
+/**
+ * Lápis da ficha no app: o app (já com a conta de admin) pede um link de uso único, válido por 2 minutos, que abre
+ * /admin/comercio.php no navegador do celular já com a conta entrada. O código só existe num arquivo (hash) em
+ * dados_dir/links-admin e é apagado no primeiro uso.
+ */
+function link_admin_app(int $usuario_id, int $profissional_id): string {
+    $dir = config()['dados_dir'] . '/links-admin';
+    if (!is_dir($dir)) @mkdir($dir, 0750, true);
+    foreach (glob("$dir/*") ?: [] as $f) if (filemtime($f) < time() - 600) @unlink($f);   // velhos
+    $c = bin2hex(random_bytes(24));
+    file_put_contents("$dir/" . hash('sha256', $c), json_encode(['u' => $usuario_id, 'p' => $profissional_id, 'ate' => time() + 120]));
+    return url_publica('admin/do-app.php?c=' . $c);
+}
+/** Usa o código (uma vez só). Devolve ['u' => usuário, 'p' => comércio] ou null. */
+function usar_link_admin_app(string $c): ?array {
+    if (!preg_match('/^[a-f0-9]{48}$/', $c)) return null;
+    $f = config()['dados_dir'] . '/links-admin/' . hash('sha256', $c);
+    $d = is_file($f) ? json_decode((string)file_get_contents($f), true) : null;
+    @unlink($f);
+    return is_array($d) && ($d['ate'] ?? 0) >= time() ? ['u' => (int)$d['u'], 'p' => (int)$d['p']] : null;
+}
+
 // ---------- acesso do dono ----------
 /** Cria o link secreto do painel para o dono (só o hash fica no banco). Devolve o endereço completo. */
 function liberar_acesso(int $profissional_id, ?int $pedido_id, string $nome, ?string $telefone, int $admin_id): string {

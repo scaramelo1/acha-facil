@@ -566,3 +566,13 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (name; o completo vai em alternateName e numa linha abaixo do nome). Bairros: BAIRRO_ACENTOS / acentuar_bairro() em
    inc/limpeza.php (Sao → São, Jose → José, Braz → Brás...), também no importador; aplicado em 3.306 fichas. Backup:
    /var/lib/acha-facil/backups/profissionais.antes-acentos.20261116-0932.sql.gz e limpeza-dados-20261116-093218.sql.
+65. ✅ Admin edita qualquer comércio (16/11, pedido do usuário). /admin/comercio.php?id= muda tudo direto, sem conferência:
+   situação (ativo/pausado...), selo Verificado, nome, cidade, área, tipo, responsável, descrição, serviços, telefones,
+   Instagram, site, endereço, bairro, horário, ponto no mapa (vira geo_origem manual) e link do "Como chegar", plano e
+   pagamento (Básico pago, plano, assinatura, paga até), logo e fotos. /admin/comercios.php procura (nome, telefone,
+   endereço, tipo ou nº) e mostra os editados recentemente (menu Mais > Comércios). Registro: acao 'editou_comercio'.
+   Lápis ✏️ na ficha: no site fica escondido na página em cache e só aparece para conta admin (data-so-admin, ligado
+   pelo topo em inc/pagina.php); no app (1.8.0) aparece com usuario.admin e abre a edição no navegador já entrado
+   (api/admin.php acao link_editar → /admin/do-app.php, código de uso único de 2 min em dados_dir/links-admin).
+   Comércio editado pelo admin não é mais mudado pela importação das listas nem pela limpeza (editados_pelo_admin()).
+   Sem mudança no banco. Testado em cópia isolada (salvar, erro de telefone, logo/fotos, link do app, não-admin barrado).

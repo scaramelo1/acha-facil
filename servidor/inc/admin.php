@@ -24,7 +24,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
 <title><?= h($titulo) ?> · Admin Acha Fácil</title>
 <link rel="icon" type="image/png" href="<?= $base ?>/assets/favicon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=26">
+<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=31">
 </head>
 <body class="admin">
 <header class="topo">
@@ -44,6 +44,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
         <a class="so-celular" href="<?= $base ?>/admin/numeros.php">Números</a>
         <a class="so-celular" href="<?= $base ?>/admin/cidades.php">Cidades</a>
         <a class="so-celular" href="<?= $base ?>/admin/novidades.php">Novidades<?= $nov ? ' <span class="contador">' . $nov . '</span>' : '' ?></a>
+        <a href="<?= $base ?>/admin/comercios.php">Comércios (editar)</a>
         <a href="<?= $base ?>/admin/importar.php">Importar lista</a>
         <a class="so-celular" href="<?= $base ?>/admin/pessoas.php">Pessoas</a>
         <a class="so-celular" href="<?= $base ?>/admin/suporte.php">Suporte<?= $sup ? ' <span class="contador">' . $sup . '</span>' : '' ?></a>

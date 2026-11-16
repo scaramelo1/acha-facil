@@ -82,7 +82,10 @@ export default function TelaProfissional() {
               )}
             </View>
           </View>
-          <BotaoSalvar p={p} aoMudar={(f) => setDados({ ...p, favorito: f })} />
+          <View style={{ gap: 8 }}>
+            <BotaoSalvar p={p} aoMudar={(f) => setDados({ ...p, favorito: f })} />
+            {usuario?.admin && <BotaoEditar id={p.id} aoVoltar={recarregar} />}
+          </View>
         </View>
 
         <View style={estilos.acoes}>
@@ -245,6 +248,34 @@ function Linha({ icone, texto, detalhe, onPress, ultima }: { icone: NomeIcone; t
   );
 }
 
+// Lapis de editar (so administradores): abre /admin/comercio.php no navegador ja com a conta entrada (link de uso unico).
+// O que o admin salva vai direto para o app; ao voltar, a ficha recarrega.
+function BotaoEditar({ id, aoVoltar }: { id: number; aoVoltar: () => void }) {
+  const [abrindo, setAbrindo] = useState(false);
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Editar este comércio (administração)"
+      disabled={abrindo}
+      style={({ pressed }) => [estilos.salvar, estilos.editar, (pressed || abrindo) && { opacity: 0.7 }]}
+      onPress={async () => {
+        setAbrindo(true);
+        try {
+          const r = await chamar<{ url: string }>('admin.php', 'POST', { acao: 'link_editar', id });
+          await WebBrowser.openBrowserAsync(r.url);
+          aoVoltar();
+        } catch (e) {
+          Alert.alert('Não foi possível abrir a edição', e instanceof Error ? e.message : '');
+        } finally {
+          setAbrindo(false);
+        }
+      }}
+    >
+      <MaterialCommunityIcons name="pencil" size={26} color={cores.verde} />
+    </Pressable>
+  );
+}
+
 function BotaoSalvar({ p, aoMudar }: { p: Profissional; aoMudar: (f: boolean) => void }) {
   const { usuario } = useConta();
   const router = useRouter();
@@ -276,6 +307,7 @@ const estilos = StyleSheet.create({
   tipo: { fontSize: fonte.normal, color: cores.textoSuave },
   sub: { fontSize: fonte.pequena - 1, color: cores.textoSuave },
   salvar: { width: 56, height: 56, borderRadius: 16, borderWidth: 1.5, borderColor: cores.borda, backgroundColor: cores.cartao, alignItems: 'center', justifyContent: 'center' },
+  editar: { backgroundColor: cores.amarelo, borderColor: cores.amarelo },
   acoes: { flexDirection: 'row', gap: 10, marginTop: 16 },
   whats: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, minHeight: 56, borderRadius: 28, backgroundColor: cores.whatsapp, marginTop: 12 },
   whatsTexto: { color: '#fff', fontSize: fonte.media, fontWeight: '800' },

@@ -11,6 +11,7 @@ declare(strict_types=1);
 require __DIR__ . '/inc/base.php';
 require_once __DIR__ . '/inc/guia.php';
 require_once __DIR__ . '/inc/limpeza.php';
+require_once __DIR__ . '/inc/moderacao.php';   // editados_pelo_admin()
 if (PHP_SAPI !== 'cli') exit("Rode pelo terminal.\n");
 $aplicar = in_array('--aplicar', $argv, true);
 
@@ -19,6 +20,7 @@ $nome_area = array_column(linhas('SELECT slug, nome FROM categorias'), 'nome', '
 $slug_de = array_flip($cat);
 $todos = linhas("SELECT p.id, p.nome, p.bairro, p.tipo, p.categoria_id, p.cidade, p.status, p.endereco, p.telefone, p.whatsapp, p.instagram,
     p.site, p.lat, p.total_avaliacoes, " . SQL_TEM_DONO . " AS tem_dono FROM profissionais p WHERE p.status = 'ativo'");
+$do_admin = editados_pelo_admin();   // editado à mão em /admin/comercio.php: não mexe
 $conta = function (array &$l, string $k) { $l[$k] = ($l[$k] ?? 0) + 1; };
 
 // 1) regras de cada ficha
@@ -28,7 +30,7 @@ foreach ($todos as $p) {
     $b = $p['bairro'] === '' ? null : $p['bairro'];
     $t = $p['tipo'];
     $c = (int)$p['categoria_id'];
-    if ($p['tem_dono']) { $novo[$p['id']] = [$b, $t, $c, 'ativo', false]; continue; }   // dado do dono: não mexe
+    if ($p['tem_dono'] || isset($do_admin[(int)$p['id']])) { $novo[$p['id']] = [$b, $t, $c, 'ativo', false]; continue; }   // dado do dono: não mexe
     $nb = $b === null ? null : limpar_bairro($b, $p['nome'], $p['cidade']);
     if ($b !== null && $nb === null) $conta($tirados, $b);
     elseif ($nb !== null && $nb !== $b) $conta($padronizados, "$b → $nb");

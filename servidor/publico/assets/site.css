@@ -497,3 +497,14 @@ a.area:hover { border-color: var(--verde); }
 .selo-status { font-size: .78rem; font-weight: 800; padding: 2px 10px; border-radius: 99px; background: #eee; }
 .selo-status.respondido { background: var(--amarelo); }
 .selo-status.aberto { background: #e8f2ec; color: var(--verde); }
+
+/* edição pelo admin (16/11) */
+.ficha-editar { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%;
+  background: var(--amarelo); color: var(--verde); vertical-align: middle; margin-left: 6px; text-decoration: none; }
+.ficha-editar[hidden] { display: none; }
+.ficha-editar:hover { background: var(--verde); color: #fff; }
+.duas-colunas { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+.form-admin-comercio input:not([type=checkbox]), .form-admin-comercio textarea, .form-admin-comercio select { width: 100%; }
+.form-admin-comercio .salvar-fixo { position: sticky; bottom: 0; background: var(--creme); padding: 12px 0; margin: 24px 0 0; }
+.busca-admin { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.busca-admin input { flex: 1 1 260px; }

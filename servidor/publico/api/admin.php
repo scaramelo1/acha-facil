@@ -4,6 +4,7 @@
 // POST {acao: 'aprovar' | 'recusar', id, motivo}: decide uma alteração (as mesmas regras do /admin do site).
 // POST {acao: 'apagar_cidade', cidade, uf}: tira a cidade da lista do "Quero minha Cidade!".
 // POST {acao: 'autorizar_evento' | 'recusar_evento', id}: evento enviado pelo público em /incluir-evento.php.
+// POST {acao: 'link_editar', id}: link de uso único (2 min) que abre /admin/comercio.php no navegador já entrado (lápis da ficha).
 require __DIR__ . '/../../inc/api.php';
 require_once __DIR__ . '/../../inc/moderacao.php';
 require_once __DIR__ . '/../../inc/avisos.php';
@@ -12,6 +13,12 @@ $m = metodo('GET', 'POST');
 $u = exigir_usuario();
 $admin_id = admin_do_usuario($u) ?? erro('Só para administradores.', 403);
 
+// lápis da ficha (16/11): editar o comércio no site
+if ($m === 'POST' && campo('acao', 20) === 'link_editar') {
+    $pid = (int)(corpo()['id'] ?? 0);
+    if (!valor('SELECT id FROM profissionais WHERE id = ?', [$pid])) erro('Comércio não encontrado.', 404);
+    responder(['url' => link_admin_app((int)$u['id'], $pid)]);
+}
 // eventos enviados pelo público (passo 36): autorizar ou recusar
 if ($m === 'POST' && in_array(campo('acao', 20), ['autorizar_evento', 'recusar_evento'], true)) {
     $id = (int)(corpo()['id'] ?? 0);
