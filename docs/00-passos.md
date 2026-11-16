@@ -598,7 +598,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    quando e_pre_carregamento(); a página leva visita_adiada_js (inc/numeros.php), que só roda quando a pessoa vê a
    página (prerenderingchange) e chama api/visita.php (sinal HMAC do dia): conta a visita com a origem certa e marca a
    entrada como entradas_hora.pre = 2 (pré-carregada e vista; 1 = só baixada; 0 = clique normal). /admin/entradas.php:
-   "entradas de gente" = total − só baixadas. Testado na cópia (pré-carregada sem abrir: 0 visitas; aberta: 1 visita e
+   "entradas de pessoas" = total − só baixadas. Testado na cópia (pré-carregada sem abrir: 0 visitas; aberta: 1 visita e
    pre 2; sinal falso recusado; clique normal conta direto). Dias antes de 16/11 continuam com os downloads somados.
 68. 🟡 Ver quem pediu no "Quero saber" (16/11, pedido do usuário). Antes só havia a contagem por dia, sem a pessoa.
    Mudança 030 (pedidos_info_pessoas: comércio, tipo, usuario_id ou NULL = anônimo, origem app/site, data). api/quero.php

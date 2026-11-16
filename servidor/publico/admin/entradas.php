@@ -231,7 +231,7 @@ admin_inicio(ORIGENS[$origem], $admin);
 <div class="numeros-resumo">
   <?php if (entradas_prontas()): ?><div><strong><?= num($agora_t['entradas']) ?></strong><span>entradas no site</span><?= $diferenca('entradas') ?></div><?php endif ?>
   <?php if ($pre !== null || pre_carregamento_pronto()): ?><div title="Cliques normais + pré-carregadas que a pessoa abriu (desde 16/11). Tira só o que o Chrome baixou e ninguém viu.">
-    <strong><?= num($agora_t['gente']) ?></strong><span>entradas de gente (sem pré-carregamento)</span><?= $diferenca('gente') ?></div><?php endif ?>
+    <strong><?= num($agora_t['gente']) ?></strong><span>entradas de pessoas (sem pré-carregamento)</span><?= $diferenca('gente') ?></div><?php endif ?>
   <div><strong><?= num($agora_t['fichas']) ?></strong><span>fichas abertas</span><?= $diferenca('fichas') ?></div>
   <div><strong><?= num($agora_t['vis']) ?></strong><span>visualizações</span><?= $diferenca('vis') ?></div>
   <div><strong><?= num($agora_t['toques']) ?></strong><span>toques em <?= num($agora_t['tocados']) ?> comércios</span><?= $diferenca('toques') ?></div>
@@ -242,7 +242,7 @@ admin_inicio(ORIGENS[$origem], $admin);
 
 <h2>Dia a dia</h2>
 <div class="tabela"><table class="dia-a-dia">
-  <tr><th>Dia</th><th>Entradas</th><th>De gente</th><th>Fichas abertas</th><th>Visualizações</th><th>Toques</th></tr>
+  <tr><th>Dia</th><th>Entradas</th><th>De pessoas</th><th>Fichas abertas</th><th>Visualizações</th><th>Toques</th></tr>
   <?php $dds = array_keys($dia_a_dia); for ($i = count($dds) - 1; $i >= 1; $i--): $d = $dds[$i]; $v = $dia_a_dia[$d]; $a = $dia_a_dia[$dds[$i - 1]]; ?><tr>
     <td><strong><?= date('d/m', strtotime($d)) ?></strong> <span class="discreto"><?= ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'][(int)date('w', strtotime($d))] ?><?= $d === $hoje_d ? ' · hoje' : '' ?></span></td>
     <?php foreach (['entradas', 'gente', 'fichas', 'vis', 'toques'] as $k):
