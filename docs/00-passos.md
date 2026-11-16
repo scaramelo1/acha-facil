@@ -494,3 +494,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    todo dia 03:00). Guia em docs/robo-automatico.md. Testado numa cópia com o banco de teste (envio por HTTP, chave
    errada, aprovar, automático). Parte do PC adiada (15/11, pedido do usuário): falta achar a pasta do robô no PC
    (D:\leads-sem-site não existe) e o comando dele para o robo-config.json; depois -Testar, -Cidade e robo-agendar.ps1.
+57. 🟡 Sitemap dividido por cidade e por tipo (16/11, pedido do usuário: ver no Search Console qual grupo indexa melhor).
+   /sitemap.xml continua sendo o índice, agora com um arquivo por cidade × tipo: sitemap-<cidade>-cidades.xml (página
+   da cidade), -categorias.xml (áreas e tipos com 3+), -comercios.xml (fichas) e -eventos.xml (agenda). Índices extras:
+   sitemap-cidades.xml / sitemap-categorias.xml / sitemap-comercios.xml / sitemap-eventos.xml (um tipo em todas as
+   cidades) e sitemap-<cidade>.xml (os tipos de uma cidade; endereço antigo continua valendo). Cache 6 h. No ar e
+   conferido (Poços: 8.375 fichas e 489 áreas/tipos). Falta (usuário): enviar os 4 índices de tipo no Search Console.

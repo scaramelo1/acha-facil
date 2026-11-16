@@ -8,7 +8,7 @@
 //   /<cidade>/c/<nome>-<id>       ficha do comércio
 //   /<cidade>/buscar?q=           busca (não indexada)
 //   /<cidade>/eventos/ e /<cidade>/eventos/<nome>-<id>   agenda de eventos (inc/eventos.php, passo 32)
-//   /sitemap.xml e /sitemap-<cidade>.xml
+//   /sitemap.xml, /sitemap-<cidade>-<tipo>.xml, /sitemap-<tipo>.xml e /sitemap-<cidade>.xml (ver "sitemap" abaixo)
 // Rotas: publico/.htaccess manda o que não é arquivo para publico/web.php.
 declare(strict_types=1);
 require_once __DIR__ . '/guia.php';
@@ -590,11 +590,45 @@ function web_pagina_404(): void {
 }
 
 // ---------- sitemap ----------
-function web_sitemap_indice(): string {
+// Dividido por cidade e por tipo (pedido do usuário, 16/11) para ver no Search Console qual grupo indexa melhor:
+//   /sitemap.xml                       índice com TODOS os arquivos abaixo (o que já está cadastrado no Google)
+//   /sitemap-<cidade>-<tipo>.xml       um arquivo por cidade e tipo (cidades, categorias, comercios, eventos)
+//   /sitemap-<tipo>.xml                índice de um tipo em todas as cidades (ex.: sitemap-comercios.xml)
+//   /sitemap-<cidade>.xml              índice de uma cidade com os tipos dela (endereço antigo continua valendo)
+//   /sitemap-paginas.xml               páginas fixas (inicial, planos, termos...)
+const WEB_SITEMAP_TIPOS = [
+    'cidades' => 'Páginas das cidades',
+    'categorias' => 'Áreas e tipos de negócio',
+    'comercios' => 'Fichas dos comércios',
+    'eventos' => 'Agenda e eventos',
+];
+/** Tipos que existem hoje (eventos só com a mudança 020 aplicada). */
+function web_sitemap_tipos(): array {
+    $t = WEB_SITEMAP_TIPOS;
+    if (!(function_exists('eventos_prontos') && eventos_prontos())) unset($t['eventos']);
+    return $t;
+}
+function web_sitemap_arquivo(string $cidade, string $tipo): string {
+    return url_publica('sitemap-' . cidade_web($cidade) . "-$tipo.xml");
+}
+function web_sitemap_lista(array $arquivos): string {
     $x = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
-    $x .= '<sitemap><loc>' . h(url_publica('sitemap-paginas.xml')) . "</loc></sitemap>\n";
-    foreach (CIDADES as $slug => $_) $x .= '<sitemap><loc>' . h(url_publica('sitemap-' . cidade_web($slug) . '.xml')) . "</loc></sitemap>\n";
+    foreach ($arquivos as $a) $x .= '<sitemap><loc>' . h($a) . "</loc></sitemap>\n";
     return $x . "</sitemapindex>\n";
+}
+/** Índice geral: páginas fixas + cada cidade × tipo (um índice não pode apontar para outro índice). */
+function web_sitemap_indice(): string {
+    $a = [url_publica('sitemap-paginas.xml')];
+    foreach (CIDADES as $slug => $_) foreach (web_sitemap_tipos() as $tipo => $_n) $a[] = web_sitemap_arquivo($slug, $tipo);
+    return web_sitemap_lista($a);
+}
+/** Índice de um tipo em todas as cidades. */
+function web_sitemap_indice_tipo(string $tipo): string {
+    return web_sitemap_lista(array_map(fn($slug) => web_sitemap_arquivo($slug, $tipo), array_keys(CIDADES)));
+}
+/** Índice de uma cidade com os tipos dela. */
+function web_sitemap_indice_cidade(string $cidade): string {
+    return web_sitemap_lista(array_map(fn($tipo) => web_sitemap_arquivo($cidade, $tipo), array_keys(web_sitemap_tipos())));
 }
 function web_sitemap_urls(array $urls): string {
     $x = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
@@ -605,16 +639,18 @@ function web_sitemap_urls(array $urls): string {
 function web_sitemap_paginas(): string {
     return web_sitemap_urls(array_map(fn($c) => [url_publica($c), null], ['', 'planos.php', 'incluir.php', 'incluir-evento.php', 'termos.php', 'privacidade.php']));
 }
-/** Cidade, áreas, tipos com 3+ e todas as fichas visíveis da cidade. */
-function web_sitemap_cidade(string $cidade): string {
-    $urls = [[web_absoluta(url_cidade($cidade)), null]];
-    foreach (web_areas($cidade) as $a) {
+/** Endereços de uma cidade num tipo: cidades = página da cidade; categorias = áreas e tipos com 3+;
+ *  comercios = todas as fichas visíveis; eventos = agenda e próximos eventos. */
+function web_sitemap_cidade(string $cidade, string $tipo): string {
+    $urls = [];
+    if ($tipo === 'cidades') $urls[] = [web_absoluta(url_cidade($cidade)), null];
+    if ($tipo === 'categorias') foreach (web_areas($cidade) as $a) {
         $urls[] = [web_absoluta(url_area($cidade, $a['slug'])), null];
         foreach (web_tipos($cidade, (int)$a['id']) as $t) $urls[] = [web_absoluta(url_tipo($cidade, $a['slug'], $t['nome'])), null];
     }
-    foreach (q('SELECT p.id, p.nome, p.cidade, DATE(p.atualizado_em) AS mod_em FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
+    if ($tipo === 'comercios') foreach (q('SELECT p.id, p.nome, p.cidade, DATE(p.atualizado_em) AS mod_em FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
         WHERE ' . visivel($cidade) . ' ORDER BY p.id') as $p) $urls[] = [web_absoluta(url_ficha($p)), $p['mod_em']];
-    if (function_exists('eventos_prontos') && eventos_prontos()) {
+    if ($tipo === 'eventos' && isset(web_sitemap_tipos()['eventos'])) {
         $urls[] = [web_absoluta(url_eventos($cidade)), null];
         foreach (eventos_proximos($cidade) as $e) $urls[] = [web_absoluta(url_evento($e)), substr((string)$e['atualizado_em'], 0, 10)];
     }

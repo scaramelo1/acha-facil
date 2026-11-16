@@ -23,15 +23,21 @@ function so_get(): void {
 }
 so_get();
 
-// sitemap
+// sitemap (dividido por cidade e tipo; ver inc/web.php)
 if (count($partes) === 1 && preg_match('/^sitemap(?:-([a-z0-9-]+))?\.xml$/', $partes[0], $m)) {
-    $c = isset($m[1]) ? cidade_da_web($m[1]) : null;
-    if (isset($m[1]) && $m[1] !== 'paginas' && !$c) { web_pagina_404(); exit; }
+    $nome = $m[1] ?? '';
+    $tipos = web_sitemap_tipos();
+    $gerar = null;
+    if ($nome === '') $gerar = fn() => web_sitemap_indice();
+    elseif ($nome === 'paginas') $gerar = fn() => web_sitemap_paginas();
+    elseif (isset($tipos[$nome])) $gerar = fn() => web_sitemap_indice_tipo($nome);
+    elseif ($c = cidade_da_web($nome)) $gerar = fn() => web_sitemap_indice_cidade($c);
+    elseif (preg_match('/^(.+)-(' . implode('|', array_keys($tipos)) . ')$/', $nome, $mt) && ($c = cidade_da_web($mt[1])))
+        $gerar = fn() => web_sitemap_cidade($c, $mt[2]);
+    if (!$gerar) { web_pagina_404(); exit; }
     header('Content-Type: application/xml; charset=utf-8');
     header('X-Robots-Tag: noindex');
-    echo web_cache('sitemap|' . $partes[0], function () use ($m, $c) {
-        echo !isset($m[1]) ? web_sitemap_indice() : ($m[1] === 'paginas' ? web_sitemap_paginas() : web_sitemap_cidade($c));
-    }, 6 * 3600);
+    echo web_cache('sitemap2|' . $partes[0], function () use ($gerar) { echo $gerar(); }, 6 * 3600);
     exit;
 }
 
