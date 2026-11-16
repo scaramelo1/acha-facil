@@ -623,3 +623,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    trancados agora são criadas pelo JS (antes iam escondidas no HTML de toda ficha e deixavam as páginas parecidas).
    Detectada, mas não indexada: 13.402 (fila do Google, inclusive São João). JS conferido só por sintaxe (sem navegador na VPS).
    Falta (usuário): testar no navegador o toque em "Quero saber..." numa ficha; daqui a 1 semana exportar de novo a cobertura.
+   Resumo da cobertura de 16/11 (todos esperados): canônica alternativa 32 = planos.php?id= (aponta para /planos.php, certo;
+   agora também bloqueado no robots, então vai migrar para "Bloqueada pelo robots.txt", que vai crescer — normal);
+   robots 22 = admin/painel/api/assinatura/entrar etc. (de propósito); noindex 17 = incluir/suporte, tipo com menos de 3,
+   bairro, ficha sem telefone, agenda vazia, 404 (de propósito). NÃO clicar em "Validar correção" nesses três.
+   /favicon.ico na raiz (dava 404 para o Googlebot) copiado de assets/.
