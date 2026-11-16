@@ -24,7 +24,7 @@ TERMOS = """restaurante|lanchonete|pizzaria|hamburgueria|padaria|confeitaria|doc
 
 FIELDS = ("places.id,places.displayName,places.primaryTypeDisplayName,places.formattedAddress,places.addressComponents,"
           "places.nationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount,places.googleMapsUri,"
-          "places.businessStatus,places.location,nextPageToken")
+          "places.businessStatus,places.location,places.regularOpeningHours,nextPageToken")
 
 def busca(termo):
     out, token = [], None
@@ -118,10 +118,20 @@ def main():
                                   tel=p.get("nationalPhoneNumber", ""), site=p.get("websiteUri", ""),
                                   nota=p.get("rating"), n=p.get("userRatingCount"), link=p.get("googleMapsUri", ""),
                                   lat=(p.get("location") or {}).get("latitude"), lng=(p.get("location") or {}).get("longitude"),
-                                  ativo={"CLOSED_PERMANENTLY": "inativo", "CLOSED_TEMPORARILY": "confirmar"}.get(p.get("businessStatus"), "ativo")))
+                                  status_google=p.get("businessStatus"), tem_horario=bool(p.get("regularOpeningHours"))))
+    # etiqueta Ativo / Confirmar / Inativo (mesmas regras e textos das listas que já estão no Acha Fácil)
+    for l in leads:
+        if l["status_google"] == "CLOSED_PERMANENTLY": l["ativo"], l["ativo_mot"] = "inativo", "Fechado permanentemente no Google"
+        elif l["status_google"] == "CLOSED_TEMPORARILY": l["ativo"], l["ativo_mot"] = "confirmar", "Fechado temporariamente no Google"
+        else:
+            falta = [x for x, ok in (("horário", l["tem_horario"]), ("telefone", bool(l["tel"])), ("avaliações", bool(l["n"]))) if not ok]
+            if len(falta) >= 2 or (not l["tem_horario"] and not l["n"]):
+                l["ativo"], l["ativo_mot"] = "confirmar", "Sem " + ", sem ".join(falta[:-1]) + (" e sem " if len(falta) > 1 else "") + falta[-1] + " no Google"
+            else:
+                l["ativo"], l["ativo_mot"] = "ativo", "Perfil ativo no Google (horário/avaliações)"
     print(len(leads), "comércios únicos; checando sites...")
     with cf.ThreadPoolExecutor(24) as ex:
-        for l, (st, mot) in zip(leads, ex.map(lambda l: checa_site(l["site"]) if l["ativo"] != "inativo" else ("sem_site", "Fechado"), leads)):
+        for l, (st, mot) in zip(leads, ex.map(lambda l: checa_site(l["site"]), leads)):
             l["st"], l["mot"] = st, mot
     linhas = []
     for l in sorted(leads, key=lambda l: (l["cat"], l["nome"])):
@@ -133,7 +143,8 @@ def main():
         linhas.append(
             f'<tr data-status="{l["st"]}" data-cat="{e(l["cat"])}" data-ativo="{l["ativo"]}"'
             + (f' data-lat="{l["lat"]:.7f}" data-lng="{l["lng"]:.7f}"' if l["lat"] is not None and l["lng"] is not None else '') + '> '
-            f'<td><a class="nm" href="{e(l["link"])}" target="_blank">{e(l["nome"])}</a><div class="sub">{e(l["end"])}</div></td> '
+            f'<td><a class="nm" href="{e(l["link"])}" target="_blank">{e(l["nome"])}</a><div class="sub">{e(l["end"])}</div>'
+            f'<span class="tag a-{l["ativo"]}" title="{e(l["ativo_mot"])}">{l["ativo"].capitalize()}</span></td> '
             f'<td>{e(l["cat"])}</td> '
             f'<td><span class="tag t-{l["st"]}">{ROTULO[l["st"]]}</span><div class="sub">{e(l["mot"])}</div></td> '
             f'<td class="nw">{e(l["tel"])}</td> <td>{wa}</td>'
@@ -143,7 +154,7 @@ def main():
     doc = f"""<!doctype html><html lang="pt-br"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Leads {e(CIDADE)}</title><style>body{{font-family:system-ui,sans-serif;margin:16px;color:#222}}table{{border-collapse:collapse;width:100%;font-size:14px}}
 td,th{{border-bottom:1px solid #eee;padding:6px;text-align:left;vertical-align:top}}.muted{{color:#888}}.sub{{color:#777;font-size:12px}}.nw{{white-space:nowrap}}
-.tag{{padding:2px 6px;border-radius:4px;font-size:12px}}.t-sem_site{{background:#fde2e2}}.t-site_fora{{background:#ffe8cc}}.t-site_desatualizado{{background:#fff5bf}}.t-tem_site{{background:#dff5e1}}
+.tag{{padding:2px 6px;border-radius:4px;font-size:12px}}.t-sem_site{{background:#fde2e2}}.t-site_fora{{background:#ffe8cc}}.t-site_desatualizado{{background:#fff5bf}}.t-tem_site{{background:#dff5e1}}.a-ativo{{background:#dff5e1}}.a-confirmar{{background:#fff5bf}}.a-inativo{{background:#eee;color:#666}}
 a.nm{{font-weight:600;color:#1a56db;text-decoration:none}}a.wa{{color:#128c4b}}</style></head><body>
 <h1>Leads — {e(CIDADE)}</h1>
 <div class="muted">{e(CIDADE)} - {UF} · atualizado em {hoje} · fonte: Google Maps</div>
@@ -155,6 +166,8 @@ a.nm{{font-weight:600;color:#1a56db;text-decoration:none}}a.wa{{color:#128c4b}}<
     open(nome_arq, "w", encoding="utf-8").write(doc)
     from collections import Counter
     c = Counter(l["st"] for l in leads)
+    a = Counter(l["ativo"] for l in leads)
+    print("Ativo:", a.get("ativo", 0), "· Confirmar:", a.get("confirmar", 0), "· Inativo:", a.get("inativo", 0))
     print(nome_arq, "| total", len(leads), "|", " · ".join(f"{ROTULO[k]}: {c.get(k, 0)}" for k in ROTULO),
           "| com ponto no mapa:", sum(1 for l in leads if l["lat"] is not None), "| fechados de vez:", sum(1 for l in leads if l["ativo"] == "inativo"))
 
