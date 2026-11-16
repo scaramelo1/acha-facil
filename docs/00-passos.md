@@ -529,3 +529,18 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    sozinha quando ganhar telefone ou WhatsApp (dono aprovado, robô ou admin): a regra é conferida a cada página, sem
    marcação guardada; lastmod do sitemap = atualizado_em. ~6.700 de 44.866 fichas saem. Conferido no ar (Mococa:
    2.193 de 2.610 no sitemap; ficha sem contato com noindex, com contato sem).
+61. ✅ Avaliação do site 16/11, correções (pedido do usuário):
+   - Convite "É o dono? Complete a sua ficha" uma vez só, abaixo dos quadros trancados (site); no app fica só o cartão
+     "Este comércio é seu?" (vai no 1.8.0).
+   - Agenda de eventos sem evento: `noindex` e fora do sitemap; volta sozinha quando tiver evento.
+   - Textos da ordem: "Destaque e fichas completas aparecem primeiro" (área) e pergunta da ordem na inicial.
+   - Inicial: totais e eventos em cache de 1 h (web_cache 'inicio-dados'; 0,65 s → ~0,1 s), descrição com ~125
+     caracteres e dados do site (WebSite + Organization). Obs.: o Google tirou a "caixa de busca" dos resultados em 2024;
+     os dados servem para o nome do site e a marca.
+   - Limpeza de bairros e tipos: regras em servidor/inc/limpeza.php (limpar_bairro, TIPO_IGUAL, TIPO_AREA_CERTA), usadas
+     pelo importador em toda lista nova e por `php servidor/limpar-dados.php [--aplicar]` no que já está no banco. Só
+     ficha importada sem dono. Aplicado: 3.667 fichas; bairros por cidade 3.967 → 2.752 (tirados ~1.100 que não eram
+     bairro, incl. "Região Urbana Homogênea"; padronizados Jd./Conj. Hab./acentos); 10 tipos juntados (Bares → Bar...);
+     81 tipos (1.004 fichas) para a área certa. Backups: /var/lib/acha-facil/backups/profissionais.antes-limpeza.20261116-0901.sql.gz
+     e arquivos limpeza-bairros-tipos-*.sql (desfazer: mysql acha_facil < arquivo). Sobram nomes de rua soltos
+     ("da Silva", "Antônio Frizzo de Mendonça") que a regra não separa de bairro com nome de pessoa.

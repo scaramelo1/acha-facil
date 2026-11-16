@@ -9,6 +9,7 @@ declare(strict_types=1);
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require __DIR__ . '/inc/base.php';
 require_once __DIR__ . '/inc/guia.php';
+require_once __DIR__ . '/inc/limpeza.php';   // 16/11: bairros e tipos limpos
 
 // --teste: faz tudo e mostra o resultado, mas desfaz no fim (nada muda no banco)
 $teste = in_array('--teste', $argv, true);
@@ -189,6 +190,7 @@ foreach ($linhas_html as [, $status, $tipo, $attrs, $tr]) {
 
     $tipo = mb_substr(html_entity_decode($tipo, ENT_QUOTES | ENT_HTML5, 'UTF-8'), 0, 80);
     if (mb_strtolower($tipo) === 'sem categoria') $tipo = '';
+    $tipo = (string)limpar_tipo($tipo);   // 16/11: Bares → Bar etc. (inc/limpeza.php)
     if ($tipo !== '' && preg_match(NAO_COMERCIO, $tipo)) { $pulados++; $publicos++; continue; }
     if (($tipo === '' && preg_match(SO_LUGAR, $nome)) || in_array(mb_strtolower($nome), array_map(fn($c) => mb_strtolower($c[0]), TODAS_CIDADES), true)) { $pulados++; $publicos++; continue; }
     // fechado no Google: não entra; se fechou de vez e já estava no app (importado, sem dono), sai do app (pausado)
@@ -209,6 +211,9 @@ foreach ($linhas_html as [, $status, $tipo, $attrs, $tr]) {
     if ($categoria_id === $cat['outros']) {
         foreach (PALAVRAS_AREA as $re => $slug) if (preg_match($re, $tipo ?: $nome) && isset($cat[$slug])) { $categoria_id = $cat[$slug]; break; }
     }
+    // 16/11: tipo que o robô põe na área errada (Despachante em Beleza...) e bairro limpo (inc/limpeza.php)
+    if (($certa = area_certa_do_tipo($tipo)) && isset($cat[$certa])) $categoria_id = $cat[$certa];
+    $bairro = limpar_bairro($bairro, $nome, $cidade);
     $dados = [
         'categoria_id' => $categoria_id,
         'tipo' => $tipo ?: null,
