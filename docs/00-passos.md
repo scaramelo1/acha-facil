@@ -739,3 +739,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (inc/web.php): links das fotos com data-foto, janela #foto-janela (fundo escuro, setas, arrastar com o dedo, teclado
    ← → Esc, contador "1 de N", fecha no X ou tocando fora); imagens grandes só carregam ao abrir. CSS .foto-janela/.fj-*
    em site.css (v=34). Sem JS o link ainda abre a imagem. App já tinha carrossel na capa (CapaComercio), sem mudança.
+92. ✅ Dono volta ao painel por Minha conta (17/11, pedido do usuário: "onde ela entra para editar o painel"). Falha achada:
+   quem pagava (ex.: Pix no app do banco, ligado pelo webhook) e não clicava em "Editar os dados" ficava sem acessos_dono e
+   o login com o Google não achava o painel. acesso_da_conta() (inc/moderacao.php) agora cria o acesso pelo pedido pago da
+   conta (acesso_pelo_pagamento). /minha-conta.php mostra "Seu comércio: X" + botão "Painel do meu comércio" (/painel/?entrar=1).
+   Testado em cópia isolada.

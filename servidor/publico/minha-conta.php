@@ -63,6 +63,11 @@ pagina_inicio('Minha conta · Acha Fácil', 'Seus comércios salvos e suas avali
     </div>
   </div>
 
+  <?php require_once __DIR__ . '/../inc/moderacao.php';   // 17/11 (passo 92): dono volta ao painel por aqui
+  if (($acesso_dono = acesso_da_conta((int)$u['id'])) && ($meu = linha('SELECT p.nome FROM acessos_dono a JOIN profissionais p ON p.id = a.profissional_id WHERE a.id = ?', [$acesso_dono]))): ?>
+  <div class="quadro"><strong>Seu comércio: <?= h($meu['nome']) ?></strong><br>Mude os dados, o horário, o logo e as fotos pelo painel.
+    <p style="margin:10px 0 0"><a class="botao amarelo" href="<?= h(url('painel/?entrar=1')) ?>">Painel do meu comércio</a></p></div>
+  <?php endif ?>
   <p><a class="botao contorno" href="<?= h(url('suporte.php')) ?>">Fale com a equipe (suporte)</a></p>
 
   <?php require_once __DIR__ . '/../inc/avisos-info.php'; $meus_avisos = avisos_info_do_usuario((int)$u['id']);   // passo 65

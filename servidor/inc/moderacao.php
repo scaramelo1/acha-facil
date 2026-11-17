@@ -144,6 +144,13 @@ function acesso_da_conta(int $usuario_id): ?int {
     try {
         $id = valor('SELECT a.id FROM acessos_dono a JOIN pedidos pe ON pe.id = a.pedido_id
             WHERE pe.usuario_id = ? AND a.ativo = 1 ORDER BY a.id DESC LIMIT 1', [$usuario_id]);
+        // 17/11 (passo 92): pagou (ou cupom de 100%) e não clicou em "Editar os dados" (ex.: Pix no app do banco, ligado
+        // pelo webhook) = ainda sem acesso. Cria agora pelo pedido pago, senão o login com o Google não acharia o painel.
+        if (!$id) {
+            $cod = valor("SELECT codigo FROM pedidos WHERE usuario_id = ? AND tipo = 'assumir' AND profissional_id IS NOT NULL
+                AND codigo IS NOT NULL AND mp_status IN ('authorized','approved') ORDER BY id DESC LIMIT 1", [$usuario_id]);
+            if ($cod) $id = acesso_pelo_pagamento((string)$cod);
+        }
     } catch (PDOException) { return null; }   // antes da mudança 024 (pedidos.usuario_id)
     return $id ? (int)$id : null;
 }
