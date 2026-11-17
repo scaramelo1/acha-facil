@@ -40,6 +40,6 @@ guararema, atibaia, santana-de-parnaiba, embu-das-artes.
 
 ## Andamento
 - [ ] Monte Alegre do Sul · [ ] Águas de Lindóia · [ ] Pedreira · [ ] Socorro
-- [ ] Santo Antônio do Pinhal · [ ] São Tomé das Letras · [ ] Joanópolis · [x] Monte Verde (17/11, 842 comércios, ligada)
+- [ ] Santo Antônio do Pinhal · [ ] São Tomé das Letras · [ ] Joanópolis · [x] Monte Verde (17/11, 842 comércios, ligada, sitemap no Search Console)
 - [ ] Águas de São Pedro · [ ] Brotas · [ ] Boituva · [ ] Itu
 - [ ] Guararema · [ ] Atibaia · [ ] Santana de Parnaíba · [ ] Embu das Artes
