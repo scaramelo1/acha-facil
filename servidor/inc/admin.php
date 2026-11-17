@@ -33,6 +33,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
   <nav>
     <a href="<?= $base ?>/admin/">Pendências<?= $pend + $novos ? ' <span class="contador">' . ($pend + $novos) . '</span>' : '' ?></a>
     <a href="<?= $base ?>/admin/numeros.php">Números</a>
+    <a href="<?= $base ?>/admin/pedidos-info.php">Pedidos de informação</a>
     <a href="<?= $base ?>/admin/cidades.php">Cidades</a>
     <a href="<?= $base ?>/admin/novidades.php">Novidades<?= $nov ? ' <span class="contador">' . $nov . '</span>' : '' ?></a>
     <a href="<?= $base ?>/admin/pessoas.php">Pessoas</a>
@@ -42,6 +43,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
       <div class="menu-lista">
         <a class="so-celular" href="<?= $base ?>/admin/">Pendências<?= $pend + $novos ? ' <span class="contador">' . ($pend + $novos) . '</span>' : '' ?></a>
         <a class="so-celular" href="<?= $base ?>/admin/numeros.php">Números</a>
+        <a class="so-celular" href="<?= $base ?>/admin/pedidos-info.php">Pedidos de informação</a>
         <a class="so-celular" href="<?= $base ?>/admin/cidades.php">Cidades</a>
         <a class="so-celular" href="<?= $base ?>/admin/novidades.php">Novidades<?= $nov ? ' <span class="contador">' . $nov . '</span>' : '' ?></a>
         <a href="<?= $base ?>/admin/comercios.php">Comércios (editar)</a>

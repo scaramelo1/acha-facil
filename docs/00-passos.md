@@ -634,7 +634,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Período anterior antes dos dados (entradas desde 11/11, fichas/toques por origem desde 14/11) = "sem dados para comparar".
    Tabela nova "Dia a dia" (período escolhido, no mínimo 7 dias) com a diferença para o dia anterior em cada coluna.
    Sem mudança no banco. Testado numa cópia com o banco real (só leitura): Google, direto, cidade e 1/7/30 dias.
-72. ✅ Pedidos de informação em página própria (17/11, pedido do usuário). /admin/pedidos-info.php (mesmos filtros de
-   numeros.php) com a coluna **Datas**: em que dia chegou cada pedido e o que foi pedido (ex.: 16/11/2026 Horário (2), WhatsApp).
-   Em /admin/numeros.php ficou só o resumo (comércios, pedidos, último dia) + botão **Ver**. CSV mudou para a página nova,
-   com a coluna "Datas dos pedidos". Sem mudança no banco. Testado no banco de teste.
+72. ✅ Pedidos de informação em página própria (17/11, pedido do usuário). /admin/pedidos-info.php, no MENU do admin
+   (ao lado de Números; no celular, em "Mais"). Saiu de /admin/numeros.php. Filtros de cidade, plano e período; CSV junto.
+   As datas NÃO ficam na tabela: ficam em /admin/quem-pediu.php, seção nova "Datas dos pedidos" (data, o que pediu, app/site,
+   vezes), tirada da contagem por dia (pedidos_info), por isso mostra também os pedidos de antes de 16/11. Sem mudança no banco.

@@ -21,6 +21,10 @@ if (pedidos_info_pessoas_prontos()) {
     $resumo = linha('SELECT COUNT(*) AS total, SUM(usuario_id IS NOT NULL) AS com_conta FROM pedidos_info_pessoas q WHERE '
         . ($p ? 'q.profissional_id = ?' : '1 = 1'), $p ? [$id] : []);
 }
+// datas de todos os pedidos (17/11, pedido do usuário): vêm da contagem por dia, então mostram também os de antes de 16/11
+$datas = pedidos_info_prontos() ? linhas('SELECT d.profissional_id, d.dia, d.tipo, d.origem, d.total, p.nome AS comercio, p.cidade
+    FROM pedidos_info d JOIN profissionais p ON p.id = d.profissional_id' . ($p ? ' WHERE d.profissional_id = ?' : '')
+    . ' ORDER BY d.dia DESC, p.nome, d.tipo LIMIT 300', $p ? [$id] : []) : [];
 $avisos = avisos_info_prontos() ? linhas('SELECT a.*, p.nome AS comercio, p.cidade, u.nome AS pessoa, u.email
     FROM avisos_info a JOIN profissionais p ON p.id = a.profissional_id JOIN usuarios u ON u.id = a.usuario_id'
     . ($p ? ' WHERE a.profissional_id = ?' : '') . ' ORDER BY a.id DESC LIMIT 200', $p ? [$id] : []) : [];
@@ -34,10 +38,26 @@ $comercio = fn(array $l) => '<a href="numeros-ficha.php?id=' . (int)$l['profissi
 
 admin_inicio('Quem pediu informação', $admin);
 ?>
-<p><a href="numeros.php">&larr; Números</a><?php if ($p): ?> · <a href="quem-pediu.php">todos os comércios</a><?php endif ?></p>
+<p><a href="pedidos-info.php">&larr; Pedidos de informação</a><?php if ($p): ?> · <a href="quem-pediu.php">todos os comércios</a><?php endif ?></p>
 <h1>Quem pediu informação<?= $p ? ': ' . h($p['nome']) : '' ?></h1>
 <p class="discreto">Toques em "Quero saber o horário / ver fotos / saber mais / o WhatsApp". Conta 1 por pessoa, comércio e
   tipo no dia. Quem estava com a conta Google entrada (no app ou no site) aparece com o nome; quem não tinha, como anônimo.</p>
+
+<h2>Datas dos pedidos</h2>
+<?php if (!$datas): ?><p class="discreto">Nenhum pedido<?= $p ? ' para este comércio' : '' ?>.</p><?php else: ?>
+<div class="tabela"><table>
+  <tr><th>Data</th><th>Pediu</th><?php if (!$p): ?><th>Comércio</th><?php endif ?><th>Onde</th><th>Vezes</th></tr>
+  <?php foreach ($datas as $l): ?><tr>
+    <td><?= h(data_br($l['dia'])) ?></td>
+    <td><?= h(TIPOS_PEDIDO_INFO[$l['tipo']] ?? $l['tipo']) ?></td>
+    <?php if (!$p): ?><td><?= $comercio($l) ?></td><?php endif ?>
+    <td><?= $l['origem'] === 'web' ? 'Site' : 'App' ?></td>
+    <td><?= num((int)$l['total']) ?></td>
+  </tr><?php endforeach ?>
+</table></div>
+<?php endif ?>
+
+<h2>Quem pediu</h2>
 
 <?php if (!pedidos_info_pessoas_prontos()): ?>
   <div class="aviso erro">Falta aplicar a mudança 030 (rode o instalar.sh). Até lá só a contagem é guardada, sem saber quem pediu.</div>
@@ -45,7 +65,7 @@ admin_inicio('Quem pediu informação', $admin);
   <p><strong><?= num((int)$resumo['total']) ?></strong> pedidos guardados · <strong><?= num((int)$resumo['com_conta']) ?></strong> com cadastro ·
     <strong><?= num((int)$resumo['total'] - (int)$resumo['com_conta']) ?></strong> anônimos
     · <?= $so ? '<a href="?id=' . ($p ? $id : '') . '">mostrar todos</a>' : '<a href="?so=conta' . ($p ? '&id=' . $id : '') . '">só com cadastro</a>' ?></p>
-  <?php if (!$lista): ?><p class="discreto">Nenhum pedido ainda (são guardados a partir de hoje, 16/11).</p><?php else: ?>
+  <?php if (!$lista): ?><p class="discreto">Nenhum nome guardado ainda: quem pediu só é guardado desde 16/11 (as datas de antes estão acima).</p><?php else: ?>
   <div class="tabela"><table>
     <tr><th>Quando</th><th>Quem</th><th>Pediu</th><?php if (!$p): ?><th>Comércio</th><?php endif ?><th>Onde</th></tr>
     <?php foreach ($lista as $l): ?><tr>

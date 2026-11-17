@@ -48,16 +48,6 @@ $sql = "SELECT p.id, p.nome, p.tipo, p.cidade, p.bairro, p.whatsapp AS fone_what
 $lista = linhas($sql, $params);
 
 $nome_plano = ['sem' => 'Sem plano', 'basico' => 'Básico', 'destaque' => 'Destaque'];
-// Pedidos de informação (passo 59): desde 17/11 a lista fica em pedidos-info.php (pedido do usuário); aqui só o resumo
-$pedidos_resumo = null;
-if (pedidos_info_prontos()) {
-    $wp = array_values(array_filter($where, fn($w) => !str_contains($w, 'k.') && !str_contains($w, 'a.aparicoes')));
-    $pedidos_resumo = linha("SELECT COUNT(DISTINCT p.id) AS comercios, COALESCE(SUM(pi.total), 0) AS total, MAX(pi.dia) AS ultimo
-        FROM pedidos_info pi JOIN profissionais p ON p.id = pi.profissional_id
-        WHERE pi.dia >= ? AND " . implode(' AND ', $wp), [$desde, ...array_slice($params, $filtro_params_ini)]);
-}
-$link_pedidos = 'pedidos-info.php?' . http_build_query(array_filter(['cidade' => $cidade, 'categoria' => $cat ?: null, 'tipo' => $tipo, 'dias' => $dias, 'plano' => $plano]));
-
 $soma = array_fill_keys(array_keys(COLUNAS), 0);
 foreach ($lista as $l) foreach ($soma as $k => $_) $soma[$k] += (int)$l[$k];
 
@@ -209,22 +199,6 @@ admin_inicio('Números', $admin);
   <?php foreach ($entradas_google as $l): ?><tr><td><a href="<?= h(url_publica(ltrim($l['caminho'], '/'))) ?>" target="_blank" rel="noopener"><?= h($l['caminho']) ?></a></td><td><?= num((int)$l['total']) ?></td></tr><?php endforeach ?>
 </table></div>
 <?php endif ?>
-<?php endif ?>
-
-<h2 id="pedidos">Pedidos de informação</h2>
-<?php if ($pedidos_resumo === null): ?>
-<p class="aviso">Os pedidos ("Quero saber o horário", "Quero ver fotos"...) começam a contar depois de aplicar a mudança 028
-  (bash servidor/instalar.sh, como root).</p>
-<?php elseif (!(int)$pedidos_resumo['total']): ?>
-<p class="discreto">Ninguém pediu informação no período<?= $cidade !== '' ? ' nesta cidade' : '' ?>.
-  <a href="<?= h($link_pedidos) ?>">Abrir a página dos pedidos</a></p>
-<?php else: ?>
-<div class="numeros-resumo">
-  <div><strong><?= num((int)$pedidos_resumo['comercios']) ?></strong><span>comércios com pedidos</span></div>
-  <div><strong><?= num((int)$pedidos_resumo['total']) ?></strong><span>pedidos (último em <?= h(data_br($pedidos_resumo['ultimo'])) ?>)</span></div>
-</div>
-<p><a class="botao pequeno" href="<?= h($link_pedidos) ?>">Ver</a>
-  <span class="discreto">lista dos comércios, o que pediram e em que data, com Relatório e Quem pediu</span></p>
 <?php endif ?>
 
 <h2>Fichas</h2>
