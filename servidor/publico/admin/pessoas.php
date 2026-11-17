@@ -2,6 +2,30 @@
 // Pessoas cadastradas no app (passo 40): conta pelo Google com nome, e-mail e foto. Só leitura, com busca e CSV.
 require __DIR__ . '/../../inc/admin.php';
 $admin = exigir_admin();
+require_once __DIR__ . '/../../inc/avisos.php';
+
+// 17/11 (pedido do usuário): notificação para pessoas escolhidas (marcar na lista e mandar)
+if (e_post() && ($_POST['acao'] ?? '') === 'notificar_marcadas') {
+    exigir_post();
+    $ids = array_values(array_unique(array_filter(array_map('intval', (array)($_POST['ids'] ?? [])))));
+    $titulo = trim((string)($_POST['titulo'] ?? ''));
+    $texto = trim((string)($_POST['texto'] ?? ''));
+    if (!$ids) flash('Marque pelo menos uma pessoa na lista.', 'erro');
+    elseif ($titulo === '' || $texto === '') flash('Preencha o título e o texto.', 'erro');
+    elseif (count($ids) > 200) flash('São no máximo 200 pessoas por vez. Para mais gente, use Notificações (por cidade).', 'erro');
+    else {
+        $entregues = $pessoas_ok = 0; $sem = [];
+        foreach (linhas('SELECT id, nome FROM usuarios WHERE id IN (' . implode(',', array_fill(0, count($ids), '?')) . ')', $ids) as $u) {
+            $n = avisar_usuario((int)$u['id'], mb_substr($titulo, 0, 80), mb_substr($texto, 0, 180));
+            $entregues += $n;
+            if ($n) $pessoas_ok++; else $sem[] = $u['nome'];
+        }
+        registrar((int)$admin['id'], 'notificou_pessoas', null, mb_substr($titulo, 0, 60) . " ($pessoas_ok de " . count($ids) . " pessoas, $entregues aparelho(s))");
+        flash("Notificação entregue para $pessoas_ok de " . count($ids) . ' pessoa(s) (' . $entregues . ' celular(es)).'
+            . ($sem ? ' Sem o app com avisos ligados: ' . implode(', ', array_slice($sem, 0, 15)) . (count($sem) > 15 ? '…' : '') . '.' : ''), $pessoas_ok ? 'ok' : 'erro');
+    }
+    ir('admin/pessoas.php?' . http_build_query(array_filter(['q' => $_POST['q'] ?? '', 'ordem' => $_POST['ordem'] ?? ''])));
+}
 
 $busca = trim(mb_substr((string)($_GET['q'] ?? ''), 0, 80));
 $ordem = ($_GET['ordem'] ?? '') === 'uso' ? 'uso' : 'novos';
@@ -27,6 +51,11 @@ if (!empty($_GET['csv'])) {
     exit;
 }
 
+// quem pode receber (celular com o app e avisos ligados nesta conta)
+$com_app = [];
+foreach (linhas('SELECT usuario_id, COUNT(*) AS n FROM avisos_aparelhos WHERE usuario_id IS NOT NULL GROUP BY usuario_id') as $l) $com_app[(int)$l['usuario_id']] = (int)$l['n'];
+try { foreach (linhas('SELECT usuario_id, COUNT(*) AS n FROM avisos_publico WHERE usuario_id IS NOT NULL GROUP BY usuario_id') as $l)
+    $com_app[(int)$l['usuario_id']] = ($com_app[(int)$l['usuario_id']] ?? 0) + (int)$l['n']; } catch (PDOException) {}
 $total = (int)valor('SELECT COUNT(*) FROM usuarios');
 $semana = (int)valor('SELECT COUNT(*) FROM usuarios WHERE criado_em >= CURDATE() - INTERVAL 6 DAY');
 $ativos = (int)valor('SELECT COUNT(DISTINCT usuario_id) FROM sessoes_app WHERE usado_em >= CURDATE() - INTERVAL 29 DAY');
@@ -67,10 +96,26 @@ admin_inicio('Pessoas', $admin);
 </form>
 
 <?php if (!$lista): ?><p class="discreto">Ninguém encontrado.</p><?php else: ?>
+<form method="post" id="form-marcadas">
+<?= campo_csrf() ?><input type="hidden" name="acao" value="notificar_marcadas">
+<input type="hidden" name="q" value="<?= h($busca) ?>"><input type="hidden" name="ordem" value="<?= h($ordem) ?>">
+<div class="quadro" id="notificar">
+  <strong>Mandar notificação para pessoas escolhidas</strong>
+  <p class="discreto" style="margin:.3em 0">Marque as pessoas na lista abaixo (📱 = recebe no celular). Só chega para quem tem o app com os avisos ligados nesta conta.</p>
+  <label for="m-titulo">Título</label>
+  <input id="m-titulo" name="titulo" maxlength="80" placeholder="Ex.: Novidade para você">
+  <label for="m-texto">Texto</label>
+  <textarea id="m-texto" name="texto" rows="2" maxlength="180" placeholder="Ex.: Agora dá para ver os comércios de Monte Verde no app."></textarea>
+  <p><button class="botao" id="m-enviar">Mandar para as marcadas (<span id="m-qtd">0</span>)</button>
+    <button type="button" class="botao contorno pequeno" id="m-todas-app">Marcar todas com 📱</button>
+    <button type="button" class="botao contorno pequeno" id="m-nenhuma">Desmarcar</button></p>
+</div>
 <div class="tabela"><table class="pessoas">
-  <tr><th></th><th>Nome</th><th>E-mail</th><th>Cadastro</th><th>Último uso</th><th>Favoritos</th><th>Avaliações</th></tr>
+  <tr><th><input type="checkbox" id="m-todas" aria-label="Marcar todas"></th><th></th><th>Nome</th><th>E-mail</th><th>Cadastro</th><th>Último uso</th><th>Favoritos</th><th>Avaliações</th></tr>
   <?php foreach ($lista as $u): ?>
   <tr<?= $u['ativo'] ? '' : ' class="discreto"' ?>>
+    <td><label style="white-space:nowrap"><input type="checkbox" name="ids[]" value="<?= (int)$u['id'] ?>" class="m-pessoa"<?= isset($com_app[(int)$u['id']]) ? ' data-app="1"' : '' ?>>
+      <?= isset($com_app[(int)$u['id']]) ? '<span title="Recebe no celular">📱</span>' : '' ?></label></td>
     <td><?php if ($u['foto'] && str_starts_with($u['foto'], 'https://')): ?>
       <img class="pessoa-foto" src="<?= h($u['foto']) ?>" alt="" width="44" height="44" loading="lazy" referrerpolicy="no-referrer"
         onerror="this.replaceWith(Object.assign(document.createElement('span'), {className: 'pessoa-foto pessoa-inicial', textContent: <?= h(json_encode($iniciais($u['nome']))) ?>}))">
@@ -84,6 +129,23 @@ admin_inicio('Pessoas', $admin);
   </tr>
   <?php endforeach ?>
 </table></div>
+</form>
+<script>
+(function () {
+  var caixas = [].slice.call(document.querySelectorAll('.m-pessoa')), qtd = document.getElementById('m-qtd');
+  function contar() { qtd.textContent = caixas.filter(function (c) { return c.checked; }).length; }
+  caixas.forEach(function (c) { c.addEventListener('change', contar); });
+  document.getElementById('m-todas').addEventListener('change', function () { var v = this.checked; caixas.forEach(function (c) { c.checked = v; }); contar(); });
+  document.getElementById('m-todas-app').addEventListener('click', function () { caixas.forEach(function (c) { c.checked = !!c.dataset.app; }); contar(); });
+  document.getElementById('m-nenhuma').addEventListener('click', function () { caixas.forEach(function (c) { c.checked = false; }); document.getElementById('m-todas').checked = false; contar(); });
+  document.getElementById('form-marcadas').addEventListener('submit', function (e) {
+    var n = parseInt(qtd.textContent, 10), t = document.getElementById('m-titulo').value.trim(), x = document.getElementById('m-texto').value.trim();
+    if (!n) { e.preventDefault(); alert('Marque pelo menos uma pessoa na lista.'); return; }
+    if (!t || !x) { e.preventDefault(); alert('Preencha o título e o texto.'); return; }
+    if (!confirm('Mandar "' + t + '" para ' + n + ' pessoa(s)?')) e.preventDefault();
+  });
+})();
+</script>
 <?php endif ?>
 
 <?php if ($mais_salvos || $mais_avaliados): ?>

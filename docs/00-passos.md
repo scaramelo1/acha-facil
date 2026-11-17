@@ -704,3 +704,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    painel do plano atual (Grátis/Básico/Destaque) com aviso "Visualização do administrador", botões e campos desligados e POST
    bloqueado; não entra como o dono nem mexe na sessão dele. Sem admin, o ?ver= é ignorado. Botão "👁 Ver o painel como o dono"
    em /admin/pedido.php.
+85. ✅ Notificação para pessoas escolhidas (17/11, pedido do usuário). /admin/pessoas.php: caixinha em cada pessoa (📱 = tem o
+   app com avisos ligados na conta), quadro com título e texto, "Marcar todas com 📱", contador e confirmação; manda com
+   avisar_usuario() para cada uma (máx. 200 por vez) e diz quem não recebeu. Registro: notificou_pessoas. Testado no banco de
+   teste (aparelho falso não recebe, como esperado).
