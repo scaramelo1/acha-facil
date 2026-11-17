@@ -182,7 +182,7 @@ for ($i = 0; $i < 4; $i++) { $t = strtotime(date('Y-m-01') . " -$i month"); $mes
     <?php endif ?>
 
     <p class="rodape">Veja os planos em <strong><?= h(preg_replace('#^https?://#', '', url_publica('planos.php'))) ?></strong>
-      · App Acha Fácil para Android<?= ($e = trim((string)(config()['contato_email'] ?? ''))) !== '' ? ' · ' . h($e) : '' ?></p>
+      · App Acha Fácil para Android</p>
   </div>
 </div>
 </body>
