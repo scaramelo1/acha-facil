@@ -171,7 +171,9 @@ function web_cartao(array $p): string {
     $sub = array_filter([$p['tipo'] ?: $p['categoria'], $p['bairro']]);
     return '<li class="cc' . ($p['destaque_pago'] ? ' cc-destaque' : '') . '"><a href="' . h(url_ficha($p)) . '">' . web_logo($p)
         . '<span class="cc-texto"><b>' . h($p['nome']) . '</b><small>' . h(implode(' · ', $sub)) . '</small>'
-        . ($p['destaque_pago'] ? '<span class="selo-destaque">Destaque</span>' : (!empty($p['tem_dono']) ? '<span class="selo-completa">✓ Ficha completa</span>' : ''))
+        . ($p['destaque_pago'] ? '<span class="selo-destaque">Destaque</span>'
+            : (ficha_paga($p) ? '<span class="selo-completa">✓ Ficha completa</span>'
+            : (!empty($p['tem_dono']) ? '<span class="selo-completa">✓ Confirmado pelo dono</span>' : '')))   // passo 78
         . web_nota($p) . '</span></a></li>';
 }
 /**
@@ -414,7 +416,8 @@ function web_pagina_ficha(array $p): void {
           <p class="ficha-sub"><?= h(implode(' · ', $sub)) ?></p>
           <p class="ficha-selos">
             <?php if ($p['destaque_pago']): ?><span class="selo-destaque">Destaque</span><?php endif ?>
-            <?php if ($c['verificado']): ?><span class="selo-verificado">✔ Verificado pelo Acha Fácil</span><?php endif ?>
+            <?php if ($c['verificado']): ?><span class="selo-verificado">✔ Verificado pelo Acha Fácil</span>
+            <?php elseif (!$p['destaque_pago'] && !$sem_dono && $p['importado']): // passo 78: assumiu (grátis ou Básico) ?><span class="selo-verificado">✓ Dados confirmados pelo dono</span><?php endif ?>
             <?php if ($aberto !== null): ?><span class="selo-<?= $aberto ? 'aberto' : 'fechado' ?>"><?= $aberto ? 'Aberto agora' : 'Fechado agora' ?></span><?php endif ?>
             <?= web_nota($p) ?>
           </p>
@@ -470,7 +473,7 @@ function web_pagina_ficha(array $p): void {
       </div>
 
       <?php if ($link_dono && (!$c['whatsapp'] || !$fotos || !$tem_sobre || !$tem_horario)): // convite uma vez só, abaixo dos quadros trancados ?>
-        <p class="trancado-dono">🔒 Faltam dados nesta ficha. É o dono? <a href="<?= h($link_dono) ?>" rel="nofollow">Complete a sua ficha</a></p>
+        <p class="trancado-dono">🔒 Faltam dados nesta ficha. É o dono? <a href="<?= h(url('perfil.php?acao=assumir&id=' . (int)$p['id'])) ?>" rel="nofollow">Cadastre-se grátis</a></p>
       <?php endif ?>
 
       <h2>Avaliações de quem usa o Acha Fácil</h2>
@@ -508,7 +511,9 @@ function web_pagina_ficha(array $p): void {
     <aside class="caixa ficha-dono">
       <?php if ($sem_dono): // sem dono: não pagou plano nem teve o painel liberado ?>
         <h2 class="h-pequeno">Este comércio é seu?</h2>
-        <p>Corrija os dados, coloque fotos, o horário e o que você vende. <a class="botao amarelo" href="<?= h($c['linkAssumir']) ?>" rel="nofollow">Ver os planos</a></p>
+        <p>Cadastre-se <strong>grátis</strong> com a sua conta Google e corrija o telefone, o WhatsApp, o endereço e o horário.
+          <a class="botao amarelo" href="<?= h(url('perfil.php?acao=assumir&id=' . (int)$p['id'])) ?>" rel="nofollow">Cadastrar grátis</a>
+          <a class="botao contorno" href="<?= h($c['linkAssumir']) ?>" rel="nofollow">Ver os planos</a></p>
         <p class="discreto">Os dados vieram de informações públicas do comércio na internet. Não quer aparecer? <a href="<?= h($c['linkRemover']) ?>" rel="nofollow">Tirar meu comércio do Acha Fácil</a>.</p>
         <p class="discreto">Informação errada? <a href="<?= h(url('suporte.php?id=' . (int)$p['id'])) ?>" rel="nofollow">Envie uma mensagem para a equipe</a> (precisa entrar com a conta Google).</p>
       <?php else: ?>

@@ -25,6 +25,9 @@ const CAMPOS_DONO = [
     'fotos' => ['Fotos do comércio', 2000],   // lista JSON dos arquivos da galeria (carrossel da capa)
 ];
 const MAX_FOTOS = 10;   // fotos na galeria de cada comércio
+// Plano Grátis (17/11, passo 78): o dono sem Básico/Destaque só muda o que já vem do Google. O resto é do Básico.
+const CAMPOS_GRATIS = ['nome', 'telefone', 'whatsapp', 'site', 'endereco', 'bairro', 'horario', 'horarios', 'atende_em_casa'];
+const CAMPOS_SO_BASICO = ['descricao', 'servicos', 'instagram', 'foto', 'fotos'];
 
 // ---------- registro ----------
 function registrar(?int $admin_id, string $acao, ?int $profissional_id = null, ?string $detalhe = null): void {
@@ -116,6 +119,31 @@ function acesso_pelo_pagamento(string $codigo): ?int {
     q("UPDATE pedidos SET status = 'feito' WHERE id = ? AND status = 'novo'", [$pe['id']]);
     registrar(null, 'acesso_pago', (int)$pe['profissional_id'], $pe['nome'] . ' (plano ' . $pe['plano'] . ')');
     return $id;
+}
+
+/**
+ * Plano Grátis (passo 78): o dono assume a ficha com a conta Google, sem pagar e sem esperar o admin. Cria o pedido
+ * (já resolvido) e o acesso. As MUDANÇAS continuam passando pela conferência (propor_alteracao). Devolve o id do acesso.
+ */
+function assumir_gratis(array $prof, ?int $usuario_id, string $nome, string $telefone): int {
+    $dados = ['profissional_id' => $prof['id'], 'tipo' => 'assumir', 'plano' => null, 'nome' => mb_substr($nome, 0, 120),
+        'telefone' => $telefone, 'mensagem' => 'Plano Grátis (assumiu pelo site)', 'status' => 'feito', 'ip' => ip()];
+    if ($usuario_id) $dados['usuario_id'] = $usuario_id;
+    $pedido_id = inserir('pedidos', $dados);
+    $id = inserir('acessos_dono', ['profissional_id' => $prof['id'], 'pedido_id' => $pedido_id, 'nome' => mb_substr($nome, 0, 120),
+        'telefone' => $telefone, 'token_hash' => hash('sha256', random_bytes(32))]);
+    registrar(null, 'acesso_gratis', (int)$prof['id'], $nome);
+    web_cache_limpar();   // a ficha deixa de mostrar "Este comércio é seu?" e ganha o selo
+    return $id;
+}
+
+/** Acesso ativo ligado à conta Google (pelo pedido que ela fez), para voltar ao painel sem link. */
+function acesso_da_conta(int $usuario_id): ?int {
+    try {
+        $id = valor('SELECT a.id FROM acessos_dono a JOIN pedidos pe ON pe.id = a.pedido_id
+            WHERE pe.usuario_id = ? AND a.ativo = 1 ORDER BY a.id DESC LIMIT 1', [$usuario_id]);
+    } catch (PDOException) { return null; }   // antes da mudança 024 (pedidos.usuario_id)
+    return $id ? (int)$id : null;
 }
 
 /** Dono conectado no painel (acesso ativo + comércio), ou null. */

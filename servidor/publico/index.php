@@ -155,10 +155,10 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
     <div class="conteudo duas">
       <div>
         <h2>Seu negócio já pode estar no Acha Fácil</h2>
-        <p class="intro">Montamos o guia com os dados públicos dos comércios das cidades atendidas. Procure o seu e confira os planos para corrigir os dados e colocar fotos.</p>
+        <p class="intro">Montamos o guia com os dados públicos dos comércios das cidades atendidas. Procure o seu e assuma a sua ficha de graça para corrigir os dados.</p>
         <ul class="lista-check">
-          <li>Corrija telefone, WhatsApp, endereço e horário</li>
-          <li>Coloque foto, descrição e o que você vende ou faz</li>
+          <li>Grátis: corrija telefone, WhatsApp, endereço e horário</li>
+          <li>No Básico: coloque logo, fotos, descrição e o que você vende ou faz</li>
           <li>No Destaque: selo "Verificado pelo Acha Fácil", responder as avaliações e ver quantas pessoas abriram sua página</li>
         </ul>
         <p class="discreto">Não está no app? <a href="<?= $base ?>/incluir.php">Inclua o seu negócio de graça</a>; a equipe confere antes de publicar.</p>
@@ -172,7 +172,8 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
           <button class="botao amarelo">Procurar</button>
         </form>
         <div class="planos">
-          <div class="plano"><h3>Básico <span class="preco"><?= h(preco_plano('basico')) ?> uma vez só</span></h3><p>Corrija os dados, coloque fotos, a descrição e o que você vende ou faz. Sem mensalidade.</p></div>
+          <div class="plano"><h3>Grátis <span class="preco">R$ 0</span></h3><p>Assuma a sua ficha com a conta Google e corrija nome, telefone, WhatsApp, endereço, site e horário. Selo "Dados confirmados pelo dono".</p></div>
+          <div class="plano"><h3>Básico <span class="preco"><?= h(preco_plano('basico')) ?> uma vez só</span></h3><p>Tudo do Grátis e mais logo, até 10 fotos, descrição, o que você vende ou faz e Instagram. Sem mensalidade.</p></div>
           <div class="plano destaque"><h3>Destaque <span class="preco"><?= h(preco_plano('destaque')) ?>/mês</span></h3><p>Tudo do Básico, selo de verificado, responder as avaliações, ver os números da sua página e aparecer no topo da tela inicial e da sua área.</p></div>
           <?php if (plano_site_pronto()): ?><div class="plano destaque"><h3>Destaque + Site <span class="preco"><?= h(preco_plano('site')) ?>/mês</span></h3><p>Tudo do Destaque e um site próprio do seu negócio, feito pela equipe do Acha Fácil, com domínio incluso.</p></div><?php endif ?>
         </div>
@@ -195,7 +196,7 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
         3. Se o celular avisar que é de "fonte desconhecida", toque em <strong>Configurações</strong>, ligue <strong>Permitir desta fonte</strong> e volte.<br>
         4. Toque em <strong>Instalar</strong> e depois em <strong>Abrir</strong>.<br>
         Para atualizar, é só baixar de novo e instalar por cima. No iPhone, o app virá pela App Store.</p></details>
-      <details><summary>Achei uma informação errada. O que faço?</summary><p>Fale com a gente: <?= contatos_html() ?>. Se for o dono, <a href="<?= $base ?>/planos.php">confira os planos</a> para corrigir os dados e colocar fotos.</p></details>
+      <details><summary>Achei uma informação errada. O que faço?</summary><p>Fale com a gente: <?= contatos_html() ?>. Se for o dono, <a href="<?= $base ?>/busca.php">procure o seu negócio</a> e corrija os dados de graça.</p></details>
     </div>
   </section>
 

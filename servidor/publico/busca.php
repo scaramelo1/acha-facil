@@ -33,7 +33,8 @@ pagina_inicio('Procure seu negócio · Acha Fácil!', 'Ache o seu comércio no A
           <span class="acoes">
             <?php if ($p['cadastrado']): ?><small>Perfil já assumido</small>
             <?php else: ?>
-              <a href="<?= $base ?>/planos.php?id=<?= $p['id'] ?>">É meu: ver planos</a>
+              <a href="<?= $base ?>/perfil.php?acao=assumir&amp;id=<?= $p['id'] ?>">É meu: cadastrar grátis</a>
+              <a href="<?= $base ?>/planos.php?id=<?= $p['id'] ?>">Ver planos</a>
               <a class="remover" href="<?= $base ?>/perfil.php?id=<?= $p['id'] ?>&amp;acao=remover">Tirar do app</a>
             <?php endif ?>
           </span>

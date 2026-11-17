@@ -47,11 +47,15 @@ pagina_inicio('Termos de uso · Acha Fácil', 'Regras de uso do app Acha Fácil,
     <li>Os comércios que o dono ainda não assumiu aparecem com informações públicas do próprio negócio na internet
     (nome, endereço, telefone, WhatsApp, site e redes sociais). Cada comércio tem uma página no app e no site
     (por exemplo, achafacilapp.com.br/<?= h(cidade_web(CIDADE_PADRAO)) ?>/), que pode aparecer em buscadores como o Google.
-    O dono pode corrigir os dados pelos planos ou pedir para tirar, sem custo, pela <a href="<?= $base ?>/busca.php">busca do site</a>.</li>
+    O dono pode assumir a página de graça (plano Grátis) e corrigir os dados, ou pedir para tirar, sem custo, pela <a href="<?= $base ?>/busca.php">busca do site</a>.</li>
+    <li>No plano Grátis, o dono entra com a conta Google, declara ser o responsável pelo comércio e pode corrigir nome, telefone,
+    WhatsApp, endereço, bairro, site e horário. A página ganha o selo "Dados confirmados pelo dono". Quem se cadastrar como dono
+    de um comércio que não é seu perde o acesso, e a página volta para o responsável de verdade.</li>
     <li>Você é responsável pelas informações, fotos e textos da sua página, e garante que tem direito de usá-los.</li>
     <li>Todo cadastro passa pela aprovação da equipe do Acha Fácil, que pode recusar ou retirar cadastros falsos, enganosos,
     ilegais ou que recebam reclamações graves.</li>
-    <li>O plano Básico é pago uma vez só, pelo Mercado Pago, e não tem mensalidade: a página fica no app enquanto seguir estes termos.
+    <li>O plano Básico é pago uma vez só, pelo Mercado Pago, e não tem mensalidade: libera logo, fotos, descrição, produtos e serviços
+    e Instagram, e a página fica no app enquanto seguir estes termos.
     O plano Destaque é uma assinatura mensal no cartão, pelo Mercado Pago, que pode ser cancelada a qualquer momento e vale até
     o fim do mês já pago. O plano Destaque + Site é uma assinatura mensal do mesmo jeito, com tudo do Destaque e um site
     próprio (landing page) feito pela equipe do Acha Fácil, com domínio incluso; o site e o domínio ficam no ar enquanto a assinatura estiver em dia. Com o Destaque em atraso ou cancelado, a página perde os recursos do Destaque; se o Básico foi pago,

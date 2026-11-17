@@ -657,3 +657,20 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 77. ✅ Relatório do comércio cabe numa folha (17/11, pedido do usuário). /admin/relatorio.php: @page A4 margem 8 mm; ao
    imprimir/salvar PDF o script liga a classe .imprimindo (versão compacta, colunas lado a lado), mede a altura e, se ainda
    passar de uma folha, aplica zoom até caber.
+78. ✅ Plano Grátis (17/11, pedido do usuário). O dono assume a ficha com a conta Google, sem pagar e sem esperar o admin,
+   e corrige o que já vem do Google: nome, telefone, WhatsApp, endereço, bairro, site, horário, atende em casa
+   (CAMPOS_GRATIS em inc/moderacao.php). Básico (R$ 9,90 único) libera logo, fotos, descrição, produtos e Instagram
+   (CAMPOS_SO_BASICO). Destaque continua igual. **Sem mudança no banco**: Grátis = pedido 'assumir' sem plano (status feito)
+   + acessos_dono (assumir_gratis()). Toda MUDANÇA continua passando pela conferência do admin.
+   - perfil.php?acao=assumir&id= sem plano = cadastro grátis (login Google, nome + telefone) → painel na hora; aviso aos
+     admins "Comércio assumido (grátis)". Ficha com dono bloqueia outras contas ("Este comércio já tem responsável").
+   - painel/: entra sozinho pela conta Google (acesso_da_conta(), pelo pedidos.usuario_id); no Grátis mostra só os campos
+     liberados e um quadro trancado "Liberar no Básico"; ao enviar, campos do Básico ficam como estão.
+   - Selos: ficha = "✓ Dados confirmados pelo dono" (quem assumiu, sem Destaque; Destaque mantém o Verificado); listas =
+     Destaque / "Ficha completa" (Básico pago) / "Confirmado pelo dono" (Grátis). API: fichaCompleta, donoConfirmado.
+   - planos.php (4 cartões: Grátis, Básico, Destaque, + Site), inicial, busca ("É meu: cadastrar grátis"), ficha ("Cadastrar
+     grátis"), termos e relatório do comércio atualizados.
+   - App 1.9.0 (falta gerar): tela de planos com o Grátis, selos novos, convite "Cadastre-se grátis". Apps antigos mostram
+     "Ficha completa" também para quem assumiu grátis (usam `cadastrado`), até atualizar.
+   Testado numa cópia isolada (banco de teste): cadastro, painel Grátis, envio só do WhatsApp, volta pela conta Google,
+   sair/entrar, outra conta bloqueada, Básico pago com painel completo, selos e API.

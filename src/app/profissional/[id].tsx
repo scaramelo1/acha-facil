@@ -9,7 +9,7 @@ import { Cabecalho } from '../../componentes/Cabecalho';
 import { CapaComercio } from '../../componentes/CapaComercio';
 import { Horarios } from '../../componentes/Horarios';
 import { Trancado } from '../../componentes/Trancado';
-import { Botao, Estrelas, Falha, Carregando, SeloVerificado, estilos as ui, useCarregar } from '../../componentes/ui';
+import { Botao, Estrelas, Etiqueta, Falha, Carregando, SeloVerificado, estilos as ui, useCarregar } from '../../componentes/ui';
 import { useConta } from '../../conta';
 import { cartao, cores, fonte, RAIO } from '../../tema';
 
@@ -72,6 +72,7 @@ export default function TelaProfissional() {
             <Text style={estilos.tipo}>{p.tipo}</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
               {p.verificado && <SeloVerificado compacto />}
+              {!p.verificado && !p.destaque && p.donoConfirmado && <Etiqueta texto="Dados confirmados pelo dono" icone="check-circle-outline" />}
               {p.avaliacoes > 0 && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <Estrelas nota={p.nota} tamanho={18} />
@@ -174,7 +175,7 @@ export default function TelaProfissional() {
             <MaterialCommunityIcons name="storefront-outline" size={40} color={cores.verde} />
             <View style={{ flex: 1 }}>
               <Text style={estilos.donoTitulo}>Este comércio é seu?</Text>
-              <Text style={estilos.donoTexto}>Reivindique esta página e mantenha as informações sempre atualizadas.</Text>
+              <Text style={estilos.donoTexto}>Cadastre-se grátis e corrija o telefone, o WhatsApp, o endereço e o horário.</Text>
             </View>
             <MaterialCommunityIcons name="chevron-right" size={28} color={cores.verde} />
           </Pressable>

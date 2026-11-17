@@ -79,7 +79,10 @@ function texto_cidades(): string {
 }
 
 // Planos do dono do comércio (ver inc/mercadopago.php):
-//   Básico: pagamento único (corrigir os dados, fotos, descrição e o que vende; vale para sempre)
+//   Grátis (17/11, passo 78, pedido do usuário): assume a ficha com a conta Google, sem pagar, e corrige o que já vem do
+//             Google (CAMPOS_GRATIS em inc/moderacao.php: nome, telefone, WhatsApp, endereço, bairro, site, horário).
+//             Não é um plano no banco: é o acesso do dono (acessos_dono) sem Básico nem Destaque. Selo "Dados confirmados pelo dono".
+//   Básico: pagamento único (logo, fotos, descrição, produtos e serviços, Instagram; vale para sempre)
 //   Destaque: assinatura mensal no cartão (tudo do Básico + selo "Verificado", responder avaliações, números da página
 //             e o topo da tela inicial e da área)
 //   Destaque + Site (10/11, mudança 018): assinatura mensal no cartão com tudo do Destaque + landing page própria feita
@@ -143,13 +146,18 @@ function semente_dia(): int { return (int)date('Ymd'); }
 // "Este comércio é seu?" e ninguém mais pede para assumir ou tirar pelo site/app.
 const SQL_TEM_DONO = '(p.importado = 0 OR p.basico_pago_em IS NOT NULL OR ' . SQL_DESTAQUE . '
     OR EXISTS (SELECT 1 FROM acessos_dono ad WHERE ad.profissional_id = p.id AND ad.ativo = 1))';
+/** Pagou o Básico ou se cadastrou sozinho (não veio da lista pública). */
+function ficha_paga(array $p): bool {
+    if (array_key_exists('ficha_paga', $p)) return (bool)$p['ficha_paga'];
+    return !$p['importado'] || !empty($p['basico_pago_em']);
+}
 function tem_dono(array $p): bool {
     if (array_key_exists('tem_dono', $p)) return (bool)$p['tem_dono'];
     return (bool)valor('SELECT ' . SQL_TEM_DONO . ' FROM profissionais p WHERE p.id = ?', [(int)$p['id']]);
 }
 
 const CAMPOS_RESUMO = 'p.id, p.nome, p.tipo, p.cidade, p.importado, p.servicos, p.bairro, p.atende_em_casa, p.foto, p.fotos, p.verificado, p.plano,
-    ' . SQL_DESTAQUE . ' AS destaque_pago, ' . SQL_TEM_DONO . ' AS tem_dono,
+    ' . SQL_DESTAQUE . ' AS destaque_pago, ' . SQL_TEM_DONO . ' AS tem_dono, ' . SQL_FICHA_PAGA . ' AS ficha_paga,
     p.nota_media, p.total_avaliacoes, p.whatsapp, p.telefone, c.id AS categoria_id, c.nome AS categoria, c.icone, c.cor';
 
 require_once __DIR__ . '/horarios.php';
@@ -184,6 +192,10 @@ function prof_resumo(array $p): array {
         'temWhatsapp' => (bool)$p['whatsapp'],
         'temTelefone' => (bool)$p['telefone'],
         'cadastrado' => !$p['importado'] || tem_dono($p),   // false = veio da lista pública, o dono ainda não assumiu
+        // 17/11 (plano Grátis, passo 78): selos sem ser o Destaque. fichaCompleta = pagou o Básico (ou se cadastrou sozinho);
+        // donoConfirmado = o dono assumiu (grátis ou pago): "Dados confirmados pelo dono". Apps antes do 1.9.0 não leem.
+        'fichaCompleta' => ficha_paga($p),
+        'donoConfirmado' => !$p['importado'] || tem_dono($p),
     ];
 }
 

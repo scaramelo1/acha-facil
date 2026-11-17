@@ -14,11 +14,18 @@ type NomeIcone = keyof typeof MaterialCommunityIcons.glyphMap;
 // Sem preço nem botão de contratar no app (regra das lojas de apps): os preços e a assinatura ficam só no site.
 const PLANOS: { chave: string; nome: string; sub: string; icone: NomeIcone; itens: string[] }[] = [
   {
+    chave: 'gratis',
+    nome: 'Grátis',
+    sub: 'Assuma a sua ficha com a conta Google.',
+    icone: 'account-check-outline',
+    itens: ['Corrigir nome, telefone, WhatsApp e endereço', 'Informar o horário e o site', 'Selo "Dados confirmados pelo dono"'],
+  },
+  {
     chave: 'basico',
     nome: 'Básico',
-    sub: 'Seu perfil completo e sempre atualizado.',
+    sub: 'Sua ficha completa, com fotos.',
     icone: 'storefront-outline',
-    itens: ['Corrigir nome, telefone, WhatsApp, endereço e horário', 'Colocar fotos do lugar e dos produtos', 'Descrição e o que você vende ou faz'],
+    itens: ['Tudo o que tem no Grátis', 'Colocar o logo e fotos do lugar e dos produtos', 'Descrição e o que você vende ou faz', 'Instagram na sua página'],
   },
   {
     chave: 'destaque',
@@ -61,9 +68,9 @@ export default function TelaParaComercios() {
         <View style={{ padding: 16, gap: 14 }}>
           <Text style={estilos.intro}>Assuma o perfil do seu comércio no Acha Fácil para manter as informações certas e ser encontrado por mais clientes.</Text>
           {PLANOS.map((p) => (
-            <View key={p.chave} style={[estilos.plano, p.chave !== 'basico' && { borderColor: cores.amarelo, borderWidth: 2 }]}>
+            <View key={p.chave} style={[estilos.plano, p.chave === 'destaque' && { borderColor: cores.amarelo, borderWidth: 2 }]}>
               <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center' }}>
-                <View style={[estilos.icone, p.chave !== 'basico' && { backgroundColor: cores.fundoSuave }]}>
+                <View style={[estilos.icone, p.chave === 'destaque' && { backgroundColor: cores.fundoSuave }]}>
                   <MaterialCommunityIcons name={p.icone} size={36} color={cores.verde} />
                 </View>
                 <View style={{ flex: 1 }}>
@@ -85,7 +92,7 @@ export default function TelaParaComercios() {
         </View>
       </ScrollView>
       <View style={estilos.rodape}>
-        <Botao titulo="Saiba mais no site" icone="open-in-new" tipo="amarelo" onPress={saibaMais} />
+        <Botao titulo="Cadastrar grátis no site" icone="open-in-new" tipo="amarelo" onPress={saibaMais} />
       </View>
     </View>
   );

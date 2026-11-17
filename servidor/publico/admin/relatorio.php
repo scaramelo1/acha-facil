@@ -152,15 +152,19 @@ for ($i = 0; $i < 4; $i++) { $t = strtotime(date('Y-m-01') . " -$i month"); $mes
     </div>
 
     <?php if (!$p['destaque_pago']):
-      $sem_basico = empty($p['basico_pago_em']);   // 17/11 (pedido do usuário): o Básico, o mais barato, também aparece ?>
+      $sem_basico = empty($p['basico_pago_em']);   // 17/11 (pedido do usuário): o Básico, o mais barato, também aparece
+      if ($p['importado'] && !tem_dono($p)): // passo 78: o Grátis primeiro, para quem ainda não assumiu ?>
+    <p class="posicao" style="background:#E8F3EE;margin-top:16px"><strong>Grátis:</strong> entre com a sua conta Google em
+      <?= h(preg_replace('#^https?://#', '', url_publica('planos.php'))) ?> e corrija telefone, WhatsApp, endereço e horário, sem pagar nada.</p>
+    <?php endif ?>
     <div class="planos<?= $sem_basico ? ' duas' : '' ?>">
     <?php if ($sem_basico): ?>
     <div class="chamada basico">
       <strong>Com o plano Básico (<?= h(preco_plano_texto('basico')) ?>):</strong>
       <ul>
-        <li>Corrigir nome, telefone, WhatsApp, endereço e horário</li>
-        <li>Colocar seu logo e fotos do lugar e dos produtos</li>
+        <li>Colocar seu logo e até 10 fotos do lugar e dos produtos</li>
         <li>Descrição e lista do que você vende ou faz</li>
+        <li>Instagram na sua página</li>
         <li>Pagamento único: vale para sempre, sem mensalidade</li>
       </ul>
     </div>
@@ -171,7 +175,7 @@ for ($i = 0; $i < 4; $i++) { $t = strtotime(date('Y-m-01') . " -$i month"); $mes
         <?php if ($sem_basico): ?><li>Tudo do Básico</li><?php endif ?>
         <li>Seu comércio no topo da tela inicial e da sua categoria</li>
         <li>Selo "Verificado pelo Acha Fácil"</li>
-        <?php if (!$sem_basico): ?><li>Logo, fotos, horário e dados corrigidos por você</li><?php endif ?>
+        <?php if (!$sem_basico): ?><li>Logo, fotos e dados corrigidos por você</li><?php endif ?>
         <li>Responder às avaliações e acompanhar estes números todo mês</li>
       </ul>
     </div>

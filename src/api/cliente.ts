@@ -66,6 +66,10 @@ export interface ProfissionalResumo {
   temTelefone: boolean;
   /** false = veio da lista pública de comércios; o dono ainda não assumiu o perfil. */
   cadastrado: boolean;
+  /** Pagou o Básico (ou se cadastrou sozinho): "Ficha completa". Servidor antigo não manda. */
+  fichaCompleta?: boolean;
+  /** O dono assumiu a ficha (plano Grátis ou pago): "Dados confirmados pelo dono". */
+  donoConfirmado?: boolean;
 }
 
 export interface TipoNegocio {

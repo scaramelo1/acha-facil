@@ -35,18 +35,34 @@ if (isset($_GET['c'])) {
     }
     ir('painel/');
 }
-if (isset($_GET['sair'])) { unset($_SESSION['dono_acesso']); session_regenerate_id(true); ir('painel/'); }
+if (isset($_GET['sair'])) { unset($_SESSION['dono_acesso']); $_SESSION['dono_saiu'] = 1; session_regenerate_id(true); ir('painel/'); }
+if (isset($_GET['entrar'])) { unset($_SESSION['dono_saiu']); ir('painel/'); }
+
+// 17/11 (passo 78): quem entrou com a conta Google e assumiu um comércio volta ao painel sem link
+require_once __DIR__ . '/../../inc/conta-web.php';
+if (empty($_SESSION['dono_acesso']) && empty($_SESSION['dono_saiu']) && ($conta = usuario_web()) && ($ja = acesso_da_conta((int)$conta['id']))) {
+    session_regenerate_id(true);
+    $_SESSION['dono_acesso'] = $ja;
+}
 
 $p = dono_atual();
 $em_dia = $p && (int)valor('SELECT COUNT(*) FROM profissionais p WHERE p.id = ? AND ' . SQL_EM_DIA, [$p['id']]) > 0;
+// plano Grátis (passo 78): com acesso e sem Básico/Destaque, edita só CAMPOS_GRATIS; o resto fica trancado
+$gratis = $p && !$em_dia;
+$pode = fn(string $c) => !$gratis || in_array($c, CAMPOS_GRATIS, true);
 $destaque = $p && (int)valor('SELECT COUNT(*) FROM profissionais p WHERE p.id = ? AND ' . SQL_DESTAQUE, [$p['id']]) > 0;
 // números da ficha (passo 20): Destaque vê os últimos 30 dias completos; os outros, o total do mês
 $numeros = $p && numeros_prontos() ? numeros_ficha((int)$p['id'], $destaque ? desde_dias(30) : date('Y-m-01')) : null;
 $erro = null;
 
-if ($p && $em_dia && e_post()) {
+if ($p && e_post()) {
     exigir_post();
     [$valores, $erro] = limpar_campos_dono($_POST);
+    if ($gratis) {   // campos do Básico: ficam como estão no app (o formulário nem mostra)
+        foreach (CAMPOS_SO_BASICO as $c) if (array_key_exists($c, $valores)) $valores[$c] = $p[$c] === null ? null : (string)$p[$c];
+        $_FILES = [];
+        $_POST['tirar'] = [];
+    }
     if (!$erro) [$valores['horarios'], $erro] = horarios_do_post((array)($_POST['hor'] ?? []));
     $foto = null;      // logo novo
     $enviadas = [];    // fotos novas da galeria (apagadas se der erro)
@@ -68,6 +84,7 @@ if ($p && $em_dia && e_post()) {
         }
     }
     $galeria = array_merge($galeria, $enviadas);
+    if ($gratis) $galeria = lista_fotos($p['fotos']);
     if (!$erro && (int)valor('SELECT COUNT(*) FROM alteracoes WHERE profissional_id = ? AND criado_em > NOW() - INTERVAL 1 DAY', [$p['id']]) >= 20) {
         $erro = 'Muitos envios hoje. Tente amanhã.';
     }
@@ -101,9 +118,15 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
 <?php mostrar_flash(); ?>
 <?php if (!$p): ?>
   <h1>Painel do comércio</h1>
-  <p>O painel abre depois que você assina um plano: na página da sua assinatura, toque em <strong>Editar os dados do
-    meu comércio</strong>. Tudo o que você mudar aparece no app depois da conferência da equipe.</p>
-  <p><a class="botao amarelo" href="<?= h(config()['url']) ?>/busca.php">Procurar meu negócio</a></p>
+  <p>Procure o seu comércio e toque em <strong>Cadastrar grátis</strong> (com a sua conta Google). Já se cadastrou? Entre com a
+    mesma conta Google. Quem assinou um plano também entra pela página da assinatura. Tudo o que você mudar aparece no app
+    depois da conferência da equipe.</p>
+  <p><?php $conta = usuario_web(); if ($conta && acesso_da_conta((int)$conta['id'])): ?>
+      <a class="botao amarelo" href="?entrar=1">Abrir o painel do meu comércio</a>
+    <?php else: ?>
+      <a class="botao amarelo" href="<?= h(config()['url']) ?>/busca.php">Procurar meu negócio</a>
+      <?php if (!$conta): ?><?= botao_google('/painel/?entrar=1', 'Entrar com o Google') ?><?php endif ?>
+    <?php endif ?></p>
 <?php else: ?>
   <h1><?= h($p['nome']) ?></h1>
   <p class="discreto">Olá, <?= h($p['dono_nome']) ?> · <a href="?sair=1">Sair</a></p>
@@ -148,25 +171,33 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
     <div class="aviso erro">Seu último pedido não foi aprovado: <?= h($recusada['motivo']) ?></div>
   <?php endif ?>
 
-  <?php if (!$em_dia): ?>
-    <p>Para corrigir os dados e colocar o logo e as fotos, o comércio precisa de um plano ativo.</p>
-    <p><a class="botao amarelo" href="<?= h(config()['url']) ?>/planos.php?id=<?= (int)$p['id'] ?>">Conferir os planos</a></p>
-  <?php else: ?>
+  <?php if ($gratis): ?>
+    <div class="quadro"><strong>Seu plano: Grátis.</strong> Você pode corrigir o nome, o telefone, o WhatsApp, o endereço, o site e
+      o horário. Para colocar o <strong>logo, fotos, descrição, produtos e Instagram</strong>, passe para o
+      <strong>Básico (<?= h(preco_plano_texto('basico')) ?>)</strong>.
+      <br><a class="botao amarelo" href="<?= h(config()['url']) ?>/perfil.php?acao=assumir&amp;plano=basico&amp;id=<?= (int)$p['id'] ?>">Quero o Básico</a>
+      <a class="botao contorno" href="<?= h(config()['url']) ?>/planos.php?id=<?= (int)$p['id'] ?>">Ver todos os planos</a></div>
+  <?php endif ?>
+  <?php if (true): ?>
     <?php if ($erro): ?><div class="aviso erro"><?= h($erro) ?></div><?php endif ?>
     <form method="post" enctype="multipart/form-data">
       <?= campo_csrf() ?>
       <label for="nome">Nome do comércio</label>
       <input id="nome" name="nome" required maxlength="120" value="<?= $val('nome') ?>">
+      <?php if ($pode('descricao')): ?>
       <label for="descricao">Sobre o comércio</label>
       <textarea id="descricao" name="descricao" rows="4" maxlength="2000"><?= $val('descricao') ?></textarea>
       <label for="servicos">Produtos e serviços (separe por vírgula)</label>
       <input id="servicos" name="servicos" maxlength="500" value="<?= $val('servicos') ?>">
+      <?php endif ?>
       <label for="whatsapp">WhatsApp (com DDD)</label>
       <input id="whatsapp" name="whatsapp" inputmode="tel" maxlength="20" value="<?= h(telefone_formatado($f['whatsapp'] ?? null) ?: '') ?>">
       <label for="telefone">Telefone (com DDD)</label>
       <input id="telefone" name="telefone" inputmode="tel" maxlength="20" value="<?= h(telefone_formatado($f['telefone'] ?? null) ?: '') ?>">
+      <?php if ($pode('instagram')): ?>
       <label for="instagram">Instagram</label>
       <input id="instagram" name="instagram" maxlength="60" placeholder="@seucomercio" value="<?= $val('instagram') ?>">
+      <?php endif ?>
       <label for="site">Site</label>
       <input id="site" name="site" maxlength="200" inputmode="url" value="<?= $val('site') ?>">
       <label for="endereco">Endereço</label>
@@ -176,6 +207,14 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
       <?= horarios_form(horarios_ler($f['horarios'] ?? null)) ?>
       <?php if (empty($f['horarios']) && !empty($f['horario'])): ?><p class="dica">Hoje no app: <?= h($f['horario']) ?></p><?php endif ?>
       <label class="marcar"><input type="checkbox" name="atende_em_casa" value="1"<?= ($f['atende_em_casa'] ?? '0') == '1' ? ' checked' : '' ?>> Atende em casa / faz entrega</label>
+      <?php if ($gratis): ?>
+      <div class="trancado"><p class="trancado-titulo"><span aria-hidden="true">🔒</span> Logo, fotos, descrição, produtos e Instagram</p>
+        <p class="trancado-texto">Disponível no plano Básico (<?= h(preco_plano_texto('basico')) ?>): pagamento único, vale para sempre.</p>
+        <a class="botao amarelo" href="<?= h(config()['url']) ?>/perfil.php?acao=assumir&amp;plano=basico&amp;id=<?= (int)$p['id'] ?>">Liberar no Básico</a></div>
+      <p><button class="botao">Enviar para conferência</button></p>
+      <p class="discreto">Nada muda no app até a equipe aprovar.</p>
+    </form>
+      <?php else: ?>
       <h2>Logo</h2>
       <p class="dica">Aparece nas listas do app e no círculo da página do comércio (como a foto de perfil). Use uma imagem
         <strong>quadrada, de pelo menos 500 x 500 pixels</strong>, com o logo no meio. Se a sua for de outro formato, depois de
@@ -299,6 +338,7 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
       });
     });
     </script>
+      <?php endif ?>
   <?php endif ?>
 <?php endif ?>
 </main>
