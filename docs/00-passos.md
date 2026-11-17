@@ -638,3 +638,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (ao lado de Números; no celular, em "Mais"). Saiu de /admin/numeros.php. Filtros de cidade, plano e período; CSV junto.
    As datas NÃO ficam na tabela: ficam em /admin/quem-pediu.php, seção nova "Datas dos pedidos" (data, o que pediu, app/site,
    vezes), tirada da contagem por dia (pedidos_info), por isso mostra também os pedidos de antes de 16/11. Sem mudança no banco.
+73. ✅ Botões da ficha incompleta com "Pedir" (17/11, pedido do usuário: "Quero" dava a impressão de que era só tocar para aparecer).
+   Pedir o WhatsApp / fotos / detalhes / o horário **ao comércio** + linha embaixo "Vamos avisar o dono que você quer essa
+   informação." (some depois do toque). Site: inc/web.php (a linha é criada pelo JS, como as mensagens do passo 70) + site.css v32,
+   cache limpo. App: src/app/profissional/[id].tsx + src/componentes/Trancado.tsx, vai no APK 1.8.0.

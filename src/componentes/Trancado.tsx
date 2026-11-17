@@ -17,7 +17,7 @@ const TEXTO_AVISO: Record<TipoPedidoInfo, string> = {
 };
 
 /**
- * Espaço trancado na ficha incompleta (passo 59): mostra o que falta e o botão "Quero saber...".
+ * Espaço trancado na ficha incompleta (passo 59): mostra o que falta e o botão "Pedir ... ao comércio" (antes "Quero saber...", trocado em 17/11).
  * O pedido é contado no servidor (api/quero.php) e vira argumento para o dono completar a ficha.
  * Passo 65: depois do pedido, pergunta se a pessoa quer ser avisada quando a informação entrar
  * (precisa da conta; sem conta, vai para Entrar e o pedido de aviso é feito ao voltar).
@@ -101,10 +101,13 @@ export function Trancado({ id, tipo, titulo, texto, botao }: { id: number; tipo:
           <Text style={[estilos.ok, { flex: 1 }]}>Pedido anotado! Quando o comércio completar a ficha, a informação aparece aqui.</Text>
         </View>
       ) : (
-        <Pressable accessibilityRole="button" onPress={pedir} style={({ pressed }) => [estilos.botao, pressed && { opacity: 0.85 }]}>
-          <MaterialCommunityIcons name="hand-wave-outline" size={20} color={cores.verde} />
-          <Text style={estilos.botaoTexto}>{botao}</Text>
-        </Pressable>
+        <>
+          <Pressable accessibilityRole="button" onPress={pedir} style={({ pressed }) => [estilos.botao, pressed && { opacity: 0.85 }]}>
+            <MaterialCommunityIcons name="hand-wave-outline" size={20} color={cores.verde} />
+            <Text style={estilos.botaoTexto}>{botao}</Text>
+          </Pressable>
+          <Text style={estilos.nota}>Vamos avisar o dono que você quer essa informação.</Text>
+        </>
       )}
       {feito && avisado && (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -140,6 +143,7 @@ const estilos = StyleSheet.create({
   caixa: { borderWidth: 2, borderStyle: 'dashed', borderColor: cores.borda, borderRadius: 16, padding: 14, gap: 8, marginTop: 12 },
   titulo: { fontSize: fonte.normal, fontWeight: '900', color: cores.texto },
   texto: { fontSize: fonte.pequena, color: cores.textoSuave },
+  nota: { fontSize: fonte.pequena - 1, color: cores.textoSuave },
   botao: {
     flexDirection: 'row',
     alignItems: 'center',

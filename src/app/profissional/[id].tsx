@@ -106,10 +106,10 @@ export default function TelaProfissional() {
           </View>
         )}
         {!p.whatsapp && (
-          <Trancado id={p.id} tipo="whatsapp" titulo="WhatsApp" texto="O comércio ainda não informou o WhatsApp." botao="Quero o WhatsApp" />
+          <Trancado id={p.id} tipo="whatsapp" titulo="WhatsApp" texto="O comércio ainda não informou o WhatsApp." botao="Pedir o WhatsApp ao comércio" />
         )}
         {!p.fotos?.length && (
-          <Trancado id={p.id} tipo="fotos" titulo="Fotos" texto="Ainda sem fotos do lugar, dos produtos ou do cardápio." botao="Quero ver fotos" />
+          <Trancado id={p.id} tipo="fotos" titulo="Fotos" texto="Ainda sem fotos do lugar, dos produtos ou do cardápio." botao="Pedir fotos ao comércio" />
         )}
         {!p.descricao && p.servicos.length === 0 && (
           <Trancado
@@ -117,7 +117,7 @@ export default function TelaProfissional() {
             tipo="sobre"
             titulo="O que faz ou vende"
             texto="O comércio ainda não contou o que vende ou faz."
-            botao="Quero saber mais"
+            botao="Pedir detalhes ao comércio"
           />
         )}
 
@@ -161,7 +161,7 @@ export default function TelaProfissional() {
             tipo="horario"
             titulo="Horário de funcionamento"
             texto="O comércio ainda não informou o horário."
-            botao="Quero saber o horário"
+            botao="Pedir o horário ao comércio"
           />
         )}
 

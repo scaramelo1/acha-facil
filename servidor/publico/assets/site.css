@@ -355,6 +355,7 @@ a.area:hover { border-color: var(--verde); }
 .trancado-titulo { margin: 0; font-weight: 900; color: var(--texto); }
 .trancado-texto { margin: 2px 0 10px; color: var(--texto2); font-size: .95rem; }
 .trancado .botao { margin: 0; }
+.trancado-nota { margin: 6px 0 0; font-size: .85rem; color: var(--texto2); }
 .quero-ok { margin: 0; font-weight: 800; color: var(--verde2); font-size: .95rem; }
 .quero-avisar { margin-top: 10px; padding: 10px 12px; border-radius: 14px; background: var(--amarelo-claro); }
 .quero-avisar p { margin: 0 0 8px; font-weight: 800; font-size: .95rem; }

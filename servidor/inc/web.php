@@ -433,8 +433,8 @@ function web_pagina_ficha(array $p): void {
 
       <?php if (!$c['whatsapp'] || !$fotos): // passo 59: o que falta, com o botão de pedir ?>
         <div class="trancados">
-          <?php if (!$c['whatsapp']): ?><?= web_trancado('whatsapp', 'WhatsApp', 'O comércio ainda não informou o WhatsApp.', 'Quero o WhatsApp') ?><?php endif ?>
-          <?php if (!$fotos): ?><?= web_trancado('fotos', 'Fotos', 'Ainda sem fotos do lugar, dos produtos ou do cardápio.', 'Quero ver fotos') ?><?php endif ?>
+          <?php if (!$c['whatsapp']): ?><?= web_trancado('whatsapp', 'WhatsApp', 'O comércio ainda não informou o WhatsApp.', 'Pedir o WhatsApp ao comércio') ?><?php endif ?>
+          <?php if (!$fotos): ?><?= web_trancado('fotos', 'Fotos', 'Ainda sem fotos do lugar, dos produtos ou do cardápio.', 'Pedir fotos ao comércio') ?><?php endif ?>
         </div>
       <?php endif ?>
 
@@ -448,7 +448,7 @@ function web_pagina_ficha(array $p): void {
         <div>
           <?php if ($p['descricao']): ?><h2>Sobre</h2><p><?= nl2br(h($p['descricao'])) ?></p><?php endif ?>
           <?php if ($c['servicos']): ?><h2>O que faz ou vende</h2><p class="chips chips-texto"><?php foreach ($c['servicos'] as $s): ?><span><?= h($s) ?></span><?php endforeach ?></p><?php endif ?>
-          <?php if (!$tem_sobre): ?><h2>O que faz ou vende</h2><?= web_trancado('sobre', 'Produtos e serviços', 'O comércio ainda não contou o que vende ou faz.', 'Quero saber mais') ?><?php endif ?>
+          <?php if (!$tem_sobre): ?><h2>O que faz ou vende</h2><?= web_trancado('sobre', 'Produtos e serviços', 'O comércio ainda não contou o que vende ou faz.', 'Pedir detalhes ao comércio') ?><?php endif ?>
           <h2>Endereço</h2>
           <p><?= $p['endereco'] ? h($p['endereco']) : 'Endereço não informado.' ?><?= $p['bairro'] && !str_contains((string)$p['endereco'], $p['bairro']) ? '<br>Bairro ' . h($p['bairro']) : '' ?><br><?= h("$nome_cidade - $uf") ?></p>
           <?php if ($p['atende_em_casa']): ?><p class="selo-verificado">🏠 Atende em casa</p><?php endif ?>
@@ -464,7 +464,7 @@ function web_pagina_ficha(array $p): void {
           <?php elseif ($p['horario']): ?>
             <p><?= h($p['horario']) ?></p>
           <?php else: ?>
-            <?= web_trancado('horario', 'Horário de funcionamento', 'O comércio ainda não informou o horário.', 'Quero saber o horário') ?>
+            <?= web_trancado('horario', 'Horário de funcionamento', 'O comércio ainda não informou o horário.', 'Pedir o horário ao comércio') ?>
           <?php endif ?>
         </div>
       </div>
@@ -571,7 +571,10 @@ function lerLocal(k) { try { return localStorage.getItem(k); } catch (e) { retur
 function gravarLocal(k) { try { localStorage.setItem(k, '1'); } catch (e) {} }
 // mensagens que aparecem depois do toque (passo 70: fora do HTML, para as fichas não ficarem iguais para o Google)
 document.querySelectorAll('[data-quero]').forEach(function (b) {
-  var cx = b.parentNode, p = document.createElement('p');
+  var cx = b.parentNode, p = document.createElement('p'), nota = document.createElement('p');
+  // 17/11 (pedido do usuário): o botão diz "Pedir..." e esta linha deixa claro que a informação ainda não existe
+  nota.className = 'trancado-nota'; nota.textContent = 'Vamos avisar o dono que você quer essa informação.';
+  b.insertAdjacentElement('afterend', nota);
   p.className = 'quero-ok'; p.hidden = true; p.textContent = '✓ Pedido anotado! Quando o comércio completar a ficha, a informação aparece aqui.';
   cx.appendChild(p);
   if (!b.dataset.avisoTexto) return;
@@ -594,7 +597,7 @@ function pedirAviso(tipo, caixa) {
 document.querySelectorAll('[data-quero]').forEach(function (b) {
   var chave = 'af_quero_<?= (int)$p['id'] ?>_' + b.dataset.quero, caixa = b.parentNode, ok = caixa.querySelector('.quero-ok'),
       perg = caixa.querySelector('.quero-avisar'), jaAvisa = lerLocal('af_avisar_<?= (int)$p['id'] ?>_' + b.dataset.quero);
-  function feito(perguntar) { b.hidden = true; ok.hidden = false; if (jaAvisa) avisoFeito(caixa); else if (perg && perguntar) perg.hidden = false; }
+  function feito(perguntar) { b.hidden = true; if (b.nextElementSibling && b.nextElementSibling.className === 'trancado-nota') b.nextElementSibling.hidden = true; ok.hidden = false; if (jaAvisa) avisoFeito(caixa); else if (perg && perguntar) perg.hidden = false; }
   if (lerLocal(chave)) feito(false);
   if (perg) {
     perg.querySelector('[data-avisar]').addEventListener('click', function () { pedirAviso(b.dataset.quero, caixa); });
@@ -612,7 +615,7 @@ document.querySelectorAll('[data-quero]').forEach(function (b) {
   var m = location.search.match(/[?&]avisar=(horario|fotos|sobre|whatsapp)/);
   if (!m || !logado) return;
   var b = document.querySelector('[data-quero="' + m[1] + '"]');
-  if (b) { b.hidden = true; b.parentNode.querySelector('.quero-ok').hidden = false; pedirAviso(m[1], b.parentNode); b.parentNode.scrollIntoView({ block: 'center' }); }
+  if (b) { b.hidden = true; var nt = b.parentNode.querySelector('.trancado-nota'); if (nt) nt.hidden = true; b.parentNode.querySelector('.quero-ok').hidden = false; pedirAviso(m[1], b.parentNode); b.parentNode.scrollIntoView({ block: 'center' }); }
   history.replaceState(null, '', location.pathname + location.hash);
 })();
 document.querySelectorAll('[data-contato]').forEach(function (a) {
