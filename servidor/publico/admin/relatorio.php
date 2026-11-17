@@ -65,6 +65,9 @@ for ($i = 0; $i < 4; $i++) { $t = strtotime(date('Y-m-01') . " -$i month"); $mes
   ul { margin: 6px 0 0; padding-left: 20px; } li { margin: 3px 0; }
   .duas { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   .chamada { margin-top: 22px; border: 2px solid var(--verde); border-radius: 14px; padding: 14px 16px; }
+  .planos { margin-top: 22px; } .planos .chamada { margin-top: 0; }
+  .chamada.basico { border-color: var(--amarelo); background: #FFFBE6; }
+  .chamada-site { margin-top: 10px; }
   .rodape { color: var(--texto2); font-size: .85rem; margin-top: 18px; }
   .acoes { max-width: 760px; margin: 0 auto; padding: 0 16px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .acoes a, .acoes button { font: inherit; font-weight: 800; background: var(--verde); color: #fff; border: 0; border-radius: 10px; padding: 8px 14px; cursor: pointer; text-decoration: none; }
@@ -119,15 +122,32 @@ for ($i = 0; $i < 4; $i++) { $t = strtotime(date('Y-m-01') . " -$i month"); $mes
       </div>
     </div>
 
-    <?php if (!$p['destaque_pago']): ?>
+    <?php if (!$p['destaque_pago']):
+      $sem_basico = empty($p['basico_pago_em']);   // 17/11 (pedido do usuário): o Básico, o mais barato, também aparece ?>
+    <div class="planos<?= $sem_basico ? ' duas' : '' ?>">
+    <?php if ($sem_basico): ?>
+    <div class="chamada basico">
+      <strong>Com o plano Básico (<?= h(preco_plano_texto('basico')) ?>):</strong>
+      <ul>
+        <li>Corrigir nome, telefone, WhatsApp, endereço e horário</li>
+        <li>Colocar seu logo e fotos do lugar e dos produtos</li>
+        <li>Descrição e lista do que você vende ou faz</li>
+        <li>Pagamento único: vale para sempre, sem mensalidade</li>
+      </ul>
+    </div>
+    <?php endif ?>
     <div class="chamada">
       <strong>Com o plano Destaque (<?= h(preco_plano_texto('destaque')) ?>):</strong>
       <ul>
+        <?php if ($sem_basico): ?><li>Tudo do Básico</li><?php endif ?>
         <li>Seu comércio no topo da tela inicial e da sua categoria</li>
         <li>Selo "Verificado pelo Acha Fácil"</li>
-        <li>Logo, fotos, horário e dados corrigidos por você</li>
+        <?php if (!$sem_basico): ?><li>Logo, fotos, horário e dados corrigidos por você</li><?php endif ?>
         <li>Responder às avaliações e acompanhar estes números todo mês</li>
       </ul>
+    </div>
+    </div>
+    <div class="chamada-site">
       <?php if (plano_site_pronto()): ?><p style="margin:.4em 0 0">Quer também um site próprio com domínio? <strong>Destaque + Site (<?= h(preco_plano_texto('site')) ?>)</strong>: tudo do Destaque e uma página do seu negócio feita pela equipe do Acha Fácil.</p><?php endif ?>
     </div>
     <?php endif ?>

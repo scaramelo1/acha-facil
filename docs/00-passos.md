@@ -651,3 +651,6 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    "feito pela equipe do Acha Fácil". App (vai no próximo APK): Sobre sem "Feito pela FSA Designer", planos.tsx. Cache web limpo.
    🟡 Falta: e-mail e Instagram de contato ainda são os da FSA (fsadesignerbr@gmail.com, @fsa.designer) em
    /etc/acha-facil/config.php (contato_email, instagram) e em src/api/cliente.ts. Trocar quando o usuário tiver os do Acha Fácil.
+76. ✅ Plano Básico no relatório do comércio (17/11, pedido do usuário: "o mais atrativo é o de 9,90"). /admin/relatorio.php
+   mostra Básico (quadro amarelo, "uma vez só, vale para sempre") e Destaque lado a lado (um embaixo do outro no celular);
+   Básico some se basico_pago_em; tudo some com Destaque em dia. Linha do Destaque + Site continua embaixo.
