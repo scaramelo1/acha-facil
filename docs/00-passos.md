@@ -642,3 +642,6 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Pedir o WhatsApp / fotos / detalhes / o horário **ao comércio** + linha embaixo "Vamos avisar o dono que você quer essa
    informação." (some depois do toque). Site: inc/web.php (a linha é criada pelo JS, como as mensagens do passo 70) + site.css v32,
    cache limpo. App: src/app/profissional/[id].tsx + src/componentes/Trancado.tsx, vai no APK 1.8.0.
+74. ✅ "Horários de chegada" comparativo em /admin/entradas.php (17/11, pedido do usuário: "hoje 10, ontem 9, barras lado a
+   lado"). Barra amarela = período atual (Hoje / últimos N dias), verde = anterior (ontem inteiro / N dias anteriores), na mesma
+   hora, com legenda e totais. Sem mudança no banco nem no CSS (reaproveita .aparicoes/.vistas). A hora existe desde 14/11.

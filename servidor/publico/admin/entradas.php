@@ -145,7 +145,7 @@ $dd_ini = max(ENTRADAS_DESDE, desde_dias(max(7, $dias)));
 $dia_a_dia = $totais_por_dia(date('Y-m-d', strtotime("$dd_ini -1 day")), $hoje_d);
 
 // relatório (passo 43): cidades, áreas, comércios, dias e horários mais procurados por quem veio desta origem
-$rel = ['cidades' => [], 'areas' => [], 'comercios' => [], 'dias' => [], 'horas' => array_fill(0, 24, 0)];
+$rel = ['cidades' => [], 'areas' => [], 'comercios' => [], 'dias' => [], 'horas' => array_fill(0, 24, 0), 'horas_antes' => array_fill(0, 24, 0)];
 if (entradas_prontas()) {
     $pe = array_merge([$origem, $desde], $cidade !== '' ? [$cidade] : []);
     $we = $cidade !== '' ? ' AND cidade = ?' : '';
@@ -197,11 +197,15 @@ if (entradas_prontas()) {
     try {
         foreach (linhas("SELECT HOUR(quando) AS h, COUNT(*) AS t FROM entradas_hora WHERE origem = ? AND quando >= ?$we GROUP BY h",
                 array_merge([$origem, "$desde 00:00:00"], $cidade !== '' ? [$cidade] : [])) as $l) $rel['horas'][(int)$l['h']] = (int)$l['t'];
+        // 17/11 (pedido do usuário): mesmas horas no período anterior (ontem inteiro; N dias anteriores), barra verde ao lado
+        foreach (linhas("SELECT HOUR(quando) AS h, COUNT(*) AS t FROM entradas_hora WHERE origem = ? AND quando BETWEEN ? AND ?$we GROUP BY h",
+                array_merge([$origem, "$ant_ini 00:00:00", "$ant_fim 23:59:59"], $cidade !== '' ? [$cidade] : [])) as $l) $rel['horas_antes'][(int)$l['h']] = (int)$l['t'];
     } catch (PDOException) {}
 }
 $rel_total = array_sum(array_column($rel['cidades'], 'entradas'));
 $maior_dia = max([1, ...array_values($rel['dias'])]);
-$maior_hora = max([1, ...$rel['horas']]);
+$maior_hora = max([1, ...$rel['horas'], ...$rel['horas_antes']]);
+const HORAS_DESDE = '2026-11-14';   // hora de cada entrada gravada desde aqui (mudança 023)
 
 admin_inicio(ORIGENS[$origem], $admin);
 ?>
@@ -311,13 +315,19 @@ admin_inicio(ORIGENS[$origem], $admin);
   <?php $top = array_search(max($rel['dias']), $rel['dias'], true); ?><?= h(data_br((string)$top)) ?> (<?= num(max($rel['dias'])) ?>)</p>
 <?php endif ?>
 
-<?php if (array_sum($rel['horas'])): ?>
+<?php if (array_sum($rel['horas']) || array_sum($rel['horas_antes'])):
+  $rot_agora = $dias === 1 ? 'Hoje' : "Últimos $dias dias";
+  $rot_antes = $dias === 1 ? 'Ontem' : "$dias dias anteriores"; ?>
 <h3>Horários de chegada</h3>
-<div class="barras-dias" role="img" aria-label="Entradas por hora do dia">
-  <?php foreach ($rel['horas'] as $h => $n): ?><div class="dia" title="<?= $h ?>h: <?= $n ?> entradas"><span class="aparicoes" style="height:<?= round(100 * $n / $maior_hora) ?>%"></span></div><?php endforeach ?>
+<p class="discreto"><span class="barra-legenda aparicoes"></span> <?= h($rot_agora) ?> (<?= num(array_sum($rel['horas'])) ?>)
+  · <span class="barra-legenda vistas"></span> <?= h($rot_antes) ?> (<?= num(array_sum($rel['horas_antes'])) ?>)</p>
+<div class="barras-dias" role="img" aria-label="Entradas por hora do dia, <?= h(mb_strtolower($rot_agora)) ?> x <?= h(mb_strtolower($rot_antes)) ?>">
+  <?php foreach ($rel['horas'] as $h => $n): $a = $rel['horas_antes'][$h]; ?><div class="dia" title="<?= $h ?>h: <?= h(mb_strtolower($rot_agora)) ?> <?= $n ?>, <?= h(mb_strtolower($rot_antes)) ?> <?= $a ?>"><span class="aparicoes" style="height:<?= round(100 * $n / $maior_hora) ?>%"></span><span class="vistas" style="height:<?= round(100 * $a / $maior_hora) ?>%"></span></div><?php endforeach ?>
 </div>
 <div class="barras-rotulos" aria-hidden="true"><?php foreach (array_keys($rel['horas']) as $h): ?><span><?= $h ?>h</span><?php endforeach ?></div>
-<p class="discreto">0h a 23h (horário de Brasília) · horário com mais entradas: <?= array_search(max($rel['horas']), $rel['horas'], true) ?>h</p>
+<p class="discreto">0h a 23h (horário de Brasília) · horário com mais entradas: <?= array_search(max($rel['horas']), $rel['horas'], true) ?>h
+  <?php if (array_sum($rel['horas_antes'])): ?>(<?= h(mb_strtolower($rot_antes)) ?>: <?= array_search(max($rel['horas_antes']), $rel['horas_antes'], true) ?>h)<?php endif ?>
+  <?php if ($ant_ini < HORAS_DESDE): ?>· a hora conta desde 14/11/2026, o período anterior pode estar incompleto<?php endif ?></p>
 <?php endif ?>
 <?php endif ?>
 
