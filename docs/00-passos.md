@@ -711,3 +711,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 86. ✅ Caixinhas e bolinhas no tamanho normal no site inteiro (17/11, pedido do usuário). A regra geral de input (100% de
    largura, 58 px) pegava checkbox/radio: agora 20 px, cor verde (accent-color). site.css v33, cache limpo. As estrelas da
    avaliação continuam escondidas (regra própria vem depois).
+87. 🟡 Pagamento do psicólogo não ligou o Básico (17/11). Pix 190189997312 (R$ 9,90, pedido 17) aprovado 17:19, mas o
+   mp-webhook.php recusou os 5 avisos do Mercado Pago com 401: "assinatura não bate" (mp_webhook_secret do config não confere
+   com a do painel do MP; avisos novos vêm como "payments_via_orders"). Aplicado à mão pela API (mp_conferir_pagamento):
+   basico_pago_em 17:19, pedido 17 feito, pedido 18 (repetido, sem pagamento) recusado; backup em
+   /var/lib/acha-facil/backups/antes-ativar-pedido17.*. Aceitar aviso sem assinatura foi NEGADO ao Claude pelo modo
+   automático. Falta: o usuário conferir a chave secreta dos Webhooks no Mercado Pago e trocar no /etc/acha-facil/config.php.
