@@ -282,6 +282,21 @@ admin_inicio(ORIGENS[$origem], $admin);
 </table></div>
 <p class="discreto">* Visualizações e toques por origem contam desde 14/11/2026 (o registro do servidor não mostra quem abriu a ficha de novo nem os toques).</p>
 
+<?php if (array_sum($rel['horas']) || array_sum($rel['horas_antes'])):
+  $rot_agora = $dias === 1 ? 'Hoje' : "Últimos $dias dias";
+  $rot_antes = $dias === 1 ? 'Ontem' : "$dias dias anteriores"; ?>
+<h3>Horários de chegada</h3>
+<p class="discreto"><span class="barra-legenda vistas"></span> <?= h($rot_antes) ?> (<?= num(array_sum($rel['horas_antes'])) ?>)
+  · <span class="barra-legenda aparicoes"></span> <?= h($rot_agora) ?> (<?= num(array_sum($rel['horas'])) ?>)</p>
+<div class="barras-dias" style="gap:clamp(3px, 1vw, 10px)" role="img" aria-label="Entradas por hora do dia, <?= h(mb_strtolower($rot_agora)) ?> x <?= h(mb_strtolower($rot_antes)) ?>">
+  <?php foreach ($rel['horas'] as $h => $n): $a = $rel['horas_antes'][$h]; ?><div class="dia" title="<?= $h ?>h: <?= h(mb_strtolower($rot_antes)) ?> <?= $a ?>, <?= h(mb_strtolower($rot_agora)) ?> <?= $n ?>"><span class="vistas" style="height:<?= round(100 * $a / $maior_hora) ?>%"></span><span class="aparicoes" style="height:<?= round(100 * $n / $maior_hora) ?>%"></span></div><?php endforeach ?>
+</div>
+<div class="barras-rotulos" style="gap:clamp(3px, 1vw, 10px)" aria-hidden="true"><?php foreach (array_keys($rel['horas']) as $h): ?><span><?= $h ?>h</span><?php endforeach ?></div>
+<p class="discreto">0h a 23h (horário de Brasília) · horário com mais entradas: <?= array_search(max($rel['horas']), $rel['horas'], true) ?>h
+  <?php if (array_sum($rel['horas_antes'])): ?>(<?= h(mb_strtolower($rot_antes)) ?>: <?= array_search(max($rel['horas_antes']), $rel['horas_antes'], true) ?>h)<?php endif ?>
+  <?php if ($ant_ini < HORAS_DESDE): ?>· a hora conta desde 14/11/2026, o período anterior pode estar incompleto<?php endif ?></p>
+<?php endif ?>
+
 <?php if ($rel['areas']): ?>
 <h3>Áreas mais procuradas</h3>
 <div class="tabela"><table>
@@ -315,20 +330,6 @@ admin_inicio(ORIGENS[$origem], $admin);
   <?php $top = array_search(max($rel['dias']), $rel['dias'], true); ?><?= h(data_br((string)$top)) ?> (<?= num(max($rel['dias'])) ?>)</p>
 <?php endif ?>
 
-<?php if (array_sum($rel['horas']) || array_sum($rel['horas_antes'])):
-  $rot_agora = $dias === 1 ? 'Hoje' : "Últimos $dias dias";
-  $rot_antes = $dias === 1 ? 'Ontem' : "$dias dias anteriores"; ?>
-<h3>Horários de chegada</h3>
-<p class="discreto"><span class="barra-legenda vistas"></span> <?= h($rot_antes) ?> (<?= num(array_sum($rel['horas_antes'])) ?>)
-  · <span class="barra-legenda aparicoes"></span> <?= h($rot_agora) ?> (<?= num(array_sum($rel['horas'])) ?>)</p>
-<div class="barras-dias" style="gap:clamp(3px, 1vw, 10px)" role="img" aria-label="Entradas por hora do dia, <?= h(mb_strtolower($rot_agora)) ?> x <?= h(mb_strtolower($rot_antes)) ?>">
-  <?php foreach ($rel['horas'] as $h => $n): $a = $rel['horas_antes'][$h]; ?><div class="dia" title="<?= $h ?>h: <?= h(mb_strtolower($rot_antes)) ?> <?= $a ?>, <?= h(mb_strtolower($rot_agora)) ?> <?= $n ?>"><span class="vistas" style="height:<?= round(100 * $a / $maior_hora) ?>%"></span><span class="aparicoes" style="height:<?= round(100 * $n / $maior_hora) ?>%"></span></div><?php endforeach ?>
-</div>
-<div class="barras-rotulos" style="gap:clamp(3px, 1vw, 10px)" aria-hidden="true"><?php foreach (array_keys($rel['horas']) as $h): ?><span><?= $h ?>h</span><?php endforeach ?></div>
-<p class="discreto">0h a 23h (horário de Brasília) · horário com mais entradas: <?= array_search(max($rel['horas']), $rel['horas'], true) ?>h
-  <?php if (array_sum($rel['horas_antes'])): ?>(<?= h(mb_strtolower($rot_antes)) ?>: <?= array_search(max($rel['horas_antes']), $rel['horas_antes'], true) ?>h)<?php endif ?>
-  <?php if ($ant_ini < HORAS_DESDE): ?>· a hora conta desde 14/11/2026, o período anterior pode estar incompleto<?php endif ?></p>
-<?php endif ?>
 <?php endif ?>
 
 <h2>1. Páginas onde entraram</h2>
