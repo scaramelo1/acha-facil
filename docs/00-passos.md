@@ -646,3 +646,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    lado"). Barra amarela = período atual (Hoje / últimos N dias), verde = anterior (ontem inteiro / N dias anteriores), na mesma
    hora, com legenda e totais. Sem mudança no banco nem no CSS (reaproveita .aparicoes/.vistas). A hora existe desde 14/11.
    Ordem (pedido do usuário, 17/11): verde (anterior) à esquerda, amarela (atual) à direita.
+75. ✅ Nome "FSA Designer" fora do Acha Fácil (17/11, pedido do usuário: "não quero misturar os dois projetos"). Rodapé
+   ("Acha Fácil · ano"), Termos, Privacidade (o controlador agora é "o Acha Fácil"), planos (site, index, relatório do comércio):
+   "feito pela equipe do Acha Fácil". App (vai no próximo APK): Sobre sem "Feito pela FSA Designer", planos.tsx. Cache web limpo.
+   🟡 Falta: e-mail e Instagram de contato ainda são os da FSA (fsadesignerbr@gmail.com, @fsa.designer) em
+   /etc/acha-facil/config.php (contato_email, instagram) e em src/api/cliente.ts. Trocar quando o usuário tiver os do Acha Fácil.

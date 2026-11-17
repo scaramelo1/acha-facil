@@ -16,7 +16,7 @@ pagina_inicio('Termos de uso · Acha Fácil', 'Regras de uso do app Acha Fácil,
   </div>
 
   <h2>1. O que é o Acha Fácil</h2>
-  <p>O Acha Fácil, mantido pela <strong>FSA Designer</strong>, é um aplicativo e site que reúne profissionais e comércios de <?= h(texto_cidades()) ?>.
+  <p>O Acha Fácil é um aplicativo e site que reúne profissionais e comércios de <?= h(texto_cidades()) ?>.
   Ele mostra informações de contato, serviços e avaliações.
   Ao usar o app ou o site, você concorda com estes termos e com a <a href="<?= $base ?>/privacidade.php">Política de Privacidade</a>.</p>
 
@@ -54,7 +54,7 @@ pagina_inicio('Termos de uso · Acha Fácil', 'Regras de uso do app Acha Fácil,
     <li>O plano Básico é pago uma vez só, pelo Mercado Pago, e não tem mensalidade: a página fica no app enquanto seguir estes termos.
     O plano Destaque é uma assinatura mensal no cartão, pelo Mercado Pago, que pode ser cancelada a qualquer momento e vale até
     o fim do mês já pago. O plano Destaque + Site é uma assinatura mensal do mesmo jeito, com tudo do Destaque e um site
-    próprio (landing page) feito pela FSA Designer, com domínio incluso; o site e o domínio ficam no ar enquanto a assinatura estiver em dia. Com o Destaque em atraso ou cancelado, a página perde os recursos do Destaque; se o Básico foi pago,
+    próprio (landing page) feito pela equipe do Acha Fácil, com domínio incluso; o site e o domínio ficam no ar enquanto a assinatura estiver em dia. Com o Destaque em atraso ou cancelado, a página perde os recursos do Destaque; se o Básico foi pago,
     continua no app com o Básico, e se não foi, sai do ar até a regularização.</li>
     <li>A ordem em que os profissionais aparecem muda todos os dias. Quem assina o plano Destaque aparece também no carrossel
     do topo da tela inicial. Avaliações não podem ser compradas, trocadas nem apagadas a pedido.</li>

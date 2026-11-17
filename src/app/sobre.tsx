@@ -9,7 +9,7 @@ import { Cabecalho } from '../componentes/Cabecalho';
 import { LinhaMenu } from '../componentes/ui';
 import { cores, fonte, RAIO } from '../tema';
 
-// "Sobre o Acha Fácil!": o que é, as cidades atendidas, termos, privacidade e como falar com a FSA Designer
+// "Sobre o Acha Fácil!": o que é, as cidades atendidas, termos, privacidade e como falar com o Acha Fácil
 export default function TelaSobre() {
   const cidades = useCidade().cidades.map((c) => c.nome);
   const lista = cidades.length > 1 ? `${cidades.slice(0, -1).join(', ')} e ${cidades[cidades.length - 1]}` : cidades[0];
@@ -30,7 +30,7 @@ export default function TelaSobre() {
           O Acha Fácil! é o guia do comércio local de {lista}: você acha produtos, serviços e empresas da sua cidade e fala direto com
           eles, sem precisar de conta.
         </Text>
-        <Text style={[estilos.texto, { marginBottom: 18 }]}>Feito pela FSA Designer.</Text>
+        <View style={{ marginBottom: 18 }} />
 
         <LinhaMenu icone="file-document-outline" texto="Termos de uso" onPress={() => WebBrowser.openBrowserAsync(URL_TERMOS)} />
         <LinhaMenu icone="shield-check-outline" texto="Política de Privacidade" onPress={() => WebBrowser.openBrowserAsync(URL_PRIVACIDADE)} />

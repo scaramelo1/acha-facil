@@ -9,7 +9,7 @@ export const URL_PRIVACIDADE = 'https://achafacilapp.com.br/privacidade.php';
 /** Planos para o dono (corrigir dados, fotos, aparecer em destaque). */
 export const URL_PLANOS = 'https://achafacilapp.com.br/planos.php';
 export const URL_MEU_NEGOCIO = 'https://achafacilapp.com.br/busca.php';
-/** Contato da FSA Designer, responsável pelo Acha Fácil (iguais aos do site, /etc/acha-facil/config.php). */
+/** Contato do Acha Fácil (iguais aos do site, /etc/acha-facil/config.php). */
 export const EMAIL_CONTATO = 'fsadesignerbr@gmail.com';
 export const URL_INSTAGRAM = 'https://instagram.com/fsa.designer';
 

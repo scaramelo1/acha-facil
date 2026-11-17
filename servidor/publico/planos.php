@@ -25,9 +25,9 @@ $planos = [
         'Aparece em "Em destaque" no topo da tela inicial',
         'Aparece na frente dos outros na sua área e na busca',
     ]],
-    'site' => ['Destaque + Site', 'O Destaque e um site só seu, feito pela FSA', [
+    'site' => ['Destaque + Site', 'O Destaque e um site só seu, feito por nós', [
         'Tudo o que tem no Destaque',
-        'Site próprio do seu negócio (landing page) feito pela FSA Designer',
+        'Site próprio do seu negócio (landing page) feito pela equipe do Acha Fácil',
         'Domínio incluso (ex.: seunegocio.com.br), registro e renovação por nossa conta',
         'Botões de WhatsApp, mapa e horário no site, ligado à sua página no app',
         'Mudanças de texto e fotos do site quando você precisar',

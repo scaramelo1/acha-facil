@@ -83,7 +83,7 @@ function texto_cidades(): string {
 //   Destaque: assinatura mensal no cartão (tudo do Básico + selo "Verificado", responder avaliações, números da página
 //             e o topo da tela inicial e da área)
 //   Destaque + Site (10/11, mudança 018): assinatura mensal no cartão com tudo do Destaque + landing page própria feita
-//             pela FSA e domínio incluso (a FSA faz o site depois do pagamento; o endereço vai no campo `site` da ficha)
+//             pela equipe do Acha Fácil e domínio incluso (a equipe faz o site depois do pagamento; o endereço vai no campo `site` da ficha)
 const PLANOS_PRECO = ['basico' => 9.90, 'destaque' => 29.90, 'site' => 89.90];
 const PLANOS_NOME = ['basico' => 'Básico', 'destaque' => 'Destaque', 'site' => 'Destaque + Site'];
 const PLANOS_DESTAQUE = ['destaque', 'site'];   // planos que dão os recursos do Destaque

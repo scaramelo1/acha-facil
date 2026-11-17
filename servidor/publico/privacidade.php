@@ -17,7 +17,7 @@ pagina_inicio('Privacidade · Acha Fácil', 'Quais dados o Acha Fácil usa, para
   </div>
 
   <h2>1. Quem cuida dos seus dados</h2>
-  <p>O Acha Fácil é mantido pela <strong>FSA Designer</strong>, responsável (controladora) pelos dados tratados no app e neste site,
+  <p>O <strong>Acha Fácil</strong> é o responsável (controlador) pelos dados tratados no app e neste site,
   conforme a Lei Geral de Proteção de Dados (LGPD, Lei 13.709/2018). Fale com a gente sobre privacidade: <?= contatos_html() ?>.</p>
 
   <h2>2. Quais dados usamos e para quê</h2>

@@ -37,11 +37,11 @@ const PLANOS: { chave: string; nome: string; sub: string; icone: NomeIcone; iten
   {
     chave: 'site',
     nome: 'Destaque + Site',
-    sub: 'O Destaque e um site só seu, feito pela FSA.',
+    sub: 'O Destaque e um site só seu, feito por nós.',
     icone: 'web',
     itens: [
       'Tudo o que tem no Destaque',
-      'Site próprio do seu negócio feito pela FSA Designer',
+      'Site próprio do seu negócio feito pela equipe do Acha Fácil',
       'Domínio incluso (ex.: seunegocio.com.br)',
       'Botões de WhatsApp, mapa e horário no site',
       'Mudanças de texto e fotos do site quando precisar',
