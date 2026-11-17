@@ -99,7 +99,7 @@ pagina_inicio("$titulo · Acha Fácil!", 'Pedido do dono do comércio para o Ach
   <?php else: ?>
     <p><?= $gratis
         ? 'É o responsável por este comércio? Cadastre-se de graça e corrija o nome, o telefone, o WhatsApp, o endereço, o site e o horário. '
-          . 'Logo, fotos, descrição e produtos ficam no plano Básico (' . preco_plano_texto('basico') . ').'
+          . 'Logo, fotos, descrição, produtos e "atende em casa / entrega" ficam no plano Básico (' . preco_plano_texto('basico') . ').'
         : ($acao === 'remover'
         ? 'É o responsável por este comércio e não quer que ele apareça no Acha Fácil? Deixe seu contato para confirmarmos.'
         : ($p ? ($com_assinatura

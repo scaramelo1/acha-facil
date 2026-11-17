@@ -51,6 +51,7 @@ $em_dia = $p && (int)valor('SELECT COUNT(*) FROM profissionais p WHERE p.id = ? 
 $gratis = $p && !$em_dia;
 $pode = fn(string $c) => !$gratis || in_array($c, CAMPOS_GRATIS, true);
 $destaque = $p && (int)valor('SELECT COUNT(*) FROM profissionais p WHERE p.id = ? AND ' . SQL_DESTAQUE, [$p['id']]) > 0;
+$max_fotos = $destaque ? MAX_FOTOS : MAX_FOTOS_BASICO;   // 17/11: Básico 2 fotos, Destaque 10
 // números da ficha (passo 20): Destaque vê os últimos 30 dias completos; os outros, o total do mês
 $numeros = $p && numeros_prontos() ? numeros_ficha((int)$p['id'], $destaque ? desde_dias(30) : date('Y-m-01')) : null;
 $erro = null;
@@ -78,7 +79,7 @@ if ($p && e_post()) {
     if (!$erro && $novas && is_array($novas['error'])) {
         foreach ($novas['error'] as $i => $e) {
             if ($e === UPLOAD_ERR_NO_FILE) continue;
-            if (count($galeria) + count($enviadas) >= MAX_FOTOS) { $erro = 'São no máximo ' . MAX_FOTOS . ' fotos. Tire alguma antes de colocar outras.'; break; }
+            if (count($galeria) + count($enviadas) >= $max_fotos) { $erro = 'São no máximo ' . $max_fotos . ' fotos' . ($destaque ? '' : ' no Básico (no Destaque, até ' . MAX_FOTOS . ')') . '. Tire alguma antes de colocar outras.'; break; }
             $um = ['error' => $e, 'size' => $novas['size'][$i], 'tmp_name' => $novas['tmp_name'][$i]];
             try { $enviadas[] = salvar_foto_enviada($um, (int)$p['id'], 1600); } catch (RuntimeException $ex) { $erro = 'Foto ' . ($i + 1) . ': ' . $ex->getMessage(); break; }
         }
@@ -143,6 +144,10 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
     </div>
     <?php if ($numeros['origens']): ?><p class="discreto">De onde abriram:
       <?= h(implode(' · ', array_map(fn($o, $t) => (ORIGENS[$o] ?? $o) . ' ' . num($t), array_keys($numeros['origens']), $numeros['origens']))) ?></p><?php endif ?>
+  <?php elseif ($gratis): // 17/11 (pedido do usuário): o Grátis não vê números ?>
+    <div class="trancado"><p class="trancado-titulo"><span aria-hidden="true">🔒</span> Quantas pessoas viram a sua ficha?</p>
+      <p class="trancado-texto">Disponível no Básico (<?= h(preco_plano_texto('basico')) ?>): veja quantas vezes abriram a sua ficha e quantas pessoas diferentes, todo mês.</p>
+      <a class="botao amarelo" href="<?= h(config()['url']) ?>/perfil.php?acao=assumir&amp;plano=basico&amp;id=<?= (int)$p['id'] ?>">Liberar no Básico</a></div>
   <?php else: ?>
     <div class="numeros-resumo">
       <div><strong><?= num($numeros['visualizacoes']) ?></strong><span>vezes que abriram a sua ficha neste mês</span></div>
@@ -173,7 +178,7 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
 
   <?php if ($gratis): ?>
     <div class="quadro"><strong>Seu plano: Grátis.</strong> Você pode corrigir o nome, o telefone, o WhatsApp, o endereço, o site e
-      o horário. Para colocar o <strong>logo, fotos, descrição, produtos e Instagram</strong>, passe para o
+      o horário. Para colocar o <strong>logo, fotos, descrição, produtos, Instagram, "atende em casa / faz entrega"</strong> e ver os números, passe para o
       <strong>Básico (<?= h(preco_plano_texto('basico')) ?>)</strong>.
       <br><a class="botao amarelo" href="<?= h(config()['url']) ?>/perfil.php?acao=assumir&amp;plano=basico&amp;id=<?= (int)$p['id'] ?>">Quero o Básico</a>
       <a class="botao contorno" href="<?= h(config()['url']) ?>/planos.php?id=<?= (int)$p['id'] ?>">Ver todos os planos</a></div>
@@ -206,9 +211,9 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
       <input id="bairro" name="bairro" maxlength="80" value="<?= $val('bairro') ?>">
       <?= horarios_form(horarios_ler($f['horarios'] ?? null)) ?>
       <?php if (empty($f['horarios']) && !empty($f['horario'])): ?><p class="dica">Hoje no app: <?= h($f['horario']) ?></p><?php endif ?>
-      <label class="marcar"><input type="checkbox" name="atende_em_casa" value="1"<?= ($f['atende_em_casa'] ?? '0') == '1' ? ' checked' : '' ?>> Atende em casa / faz entrega</label>
+      <?php if ($pode('atende_em_casa')): ?><label class="marcar"><input type="checkbox" name="atende_em_casa" value="1"<?= ($f['atende_em_casa'] ?? '0') == '1' ? ' checked' : '' ?>> Atende em casa / faz entrega</label><?php endif ?>
       <?php if ($gratis): ?>
-      <div class="trancado"><p class="trancado-titulo"><span aria-hidden="true">🔒</span> Logo, fotos, descrição, produtos e Instagram</p>
+      <div class="trancado"><p class="trancado-titulo"><span aria-hidden="true">🔒</span> Logo, fotos, descrição, produtos, Instagram e entrega</p>
         <p class="trancado-texto">Disponível no plano Básico (<?= h(preco_plano_texto('basico')) ?>): pagamento único, vale para sempre.</p>
         <a class="botao amarelo" href="<?= h(config()['url']) ?>/perfil.php?acao=assumir&amp;plano=basico&amp;id=<?= (int)$p['id'] ?>">Liberar no Básico</a></div>
       <p><button class="botao">Enviar para conferência</button></p>
@@ -232,7 +237,7 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
       </div>
 
       <h2>Fotos do comércio</h2>
-      <p class="dica">Até <?= MAX_FOTOS ?> fotos: fachada, ambiente, produtos. Elas passam uma a uma no alto da página do
+      <p class="dica">Até <?= $max_fotos ?> fotos<?= $destaque ? '' : ' no Básico' ?>: fachada, ambiente, produtos. Elas passam uma a uma no alto da página do
         comércio no app; a primeira também aparece na faixa de destaque. Use fotos <strong>deitadas (horizontais), de pelo menos
         1200 x 750 pixels</strong>: o app mostra nesse formato e corta um pouco das bordas se a foto for em pé.</p>
       <?php if ($galeria_form): ?>
@@ -245,12 +250,13 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
           <?php endforeach ?>
         </div>
       <?php endif ?>
-      <?php if (count($galeria_form) < MAX_FOTOS): ?>
+      <?php if (count($galeria_form) < $max_fotos): ?>
         <label for="fotos_novas">Colocar fotos (pode escolher várias de uma vez)</label>
-        <input id="fotos_novas" name="fotos_novas[]" type="file" multiple accept="image/jpeg,image/png,image/webp" data-lado="1600" data-max="<?= MAX_FOTOS - count($galeria_form) ?>">
+        <input id="fotos_novas" name="fotos_novas[]" type="file" multiple accept="image/jpeg,image/png,image/webp" data-lado="1600" data-max="<?= $max_fotos - count($galeria_form) ?>">
       <?php else: ?>
-        <p class="dica">A galeria está cheia. Marque "Tirar esta foto" nas que quiser trocar e envie; depois coloque as novas.</p>
+        <p class="dica">A galeria está cheia<?= count($galeria_form) > $max_fotos ? ': no Básico aparecem só as ' . $max_fotos . ' primeiras' : '' ?>. Marque "Tirar esta foto" nas que quiser trocar e envie; depois coloque as novas.</p>
       <?php endif ?>
+      <?php if (!$destaque): ?><p class="dica">🔒 Quer até <?= MAX_FOTOS ?> fotos e aparecer no topo? <a href="<?= h(config()['url']) ?>/perfil.php?acao=assumir&amp;plano=destaque&amp;id=<?= (int)$p['id'] ?>">Passe para o Destaque</a>.</p><?php endif ?>
       <p><button class="botao">Enviar para conferência</button></p>
       <p class="discreto">Nada muda no app até a equipe aprovar.</p>
     </form>

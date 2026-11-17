@@ -54,8 +54,10 @@ pagina_inicio('Termos de uso · Acha Fácil', 'Regras de uso do app Acha Fácil,
     <li>Você é responsável pelas informações, fotos e textos da sua página, e garante que tem direito de usá-los.</li>
     <li>Todo cadastro passa pela aprovação da equipe do Acha Fácil, que pode recusar ou retirar cadastros falsos, enganosos,
     ilegais ou que recebam reclamações graves.</li>
-    <li>O plano Básico é pago uma vez só, pelo Mercado Pago, e não tem mensalidade: libera logo, fotos, descrição, produtos e serviços
-    e Instagram, e a página fica no app enquanto seguir estes termos.
+    <li>O plano Básico é pago uma vez só, pelo Mercado Pago, e não tem mensalidade: libera logo, até 2 fotos, descrição, produtos e
+    serviços, Instagram, "atende em casa / faz entrega" e os números da página no mês, e a página fica no app enquanto seguir estes termos.
+    O plano Destaque permite até 10 fotos; com o Destaque vencido, a página volta a mostrar só as 2 primeiras.
+    Fichas do Grátis e do Básico podem mostrar anúncios do Google; fichas do Destaque, não.
     O plano Destaque é uma assinatura mensal no cartão, pelo Mercado Pago, que pode ser cancelada a qualquer momento e vale até
     o fim do mês já pago. O plano Destaque + Site é uma assinatura mensal do mesmo jeito, com tudo do Destaque e um site
     próprio (landing page) feito pela equipe do Acha Fácil, com domínio incluso; o site e o domínio ficam no ar enquanto a assinatura estiver em dia. Com o Destaque em atraso ou cancelado, a página perde os recursos do Destaque; se o Básico foi pago,

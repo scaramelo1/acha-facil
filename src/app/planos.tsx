@@ -25,7 +25,13 @@ const PLANOS: { chave: string; nome: string; sub: string; icone: NomeIcone; iten
     nome: 'Básico',
     sub: 'Sua ficha completa, com fotos.',
     icone: 'storefront-outline',
-    itens: ['Tudo o que tem no Grátis', 'Colocar o logo e fotos do lugar e dos produtos', 'Descrição e o que você vende ou faz', 'Instagram na sua página'],
+    itens: [
+      'Tudo o que tem no Grátis',
+      'Colocar o logo e 2 fotos do lugar ou dos produtos',
+      'Descrição e o que você vende ou faz',
+      'Instagram e "atende em casa / faz entrega"',
+      'Ver quantas pessoas abriram sua ficha no mês',
+    ],
   },
   {
     chave: 'destaque',
@@ -34,6 +40,7 @@ const PLANOS: { chave: string; nome: string; sub: string; icone: NomeIcone; iten
     icone: 'star-outline',
     itens: [
       'Tudo o que tem no Básico',
+      'Até 10 fotos na sua página',
       'Selo "Verificado pelo Acha Fácil"',
       'Responder as avaliações dos clientes',
       'Ver quantas pessoas abriram sua página e chamaram no WhatsApp',

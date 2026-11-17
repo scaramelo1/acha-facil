@@ -65,7 +65,7 @@ pagina_inicio('Privacidade · Acha Fácil', 'Quais dados o Acha Fácil usa, para
     <li><strong>Ninguém compra seus dados.</strong> Não vendemos nem alugamos dados.</li>
     <li>Hospedagem: os dados ficam em servidor contratado pelo Acha Fácil, com acesso protegido.</li>
     <li>Mercado Pago: apenas para as assinaturas dos profissionais.</li>
-    <li><strong>Anúncios do Google (só no site):</strong> algumas páginas do site (inicial, listas, eventos e fichas de comércios sem plano)
+    <li><strong>Anúncios do Google (só no site):</strong> algumas páginas do site (inicial, listas, eventos e fichas de comércios sem o plano Destaque)
       mostram anúncios do Google AdSense. O Google e seus parceiros podem usar cookies para mostrar anúncios com base nas suas visitas
       a este e a outros sites. O Acha Fácil não envia ao Google o seu nome, e-mail nem dados da sua conta. Você pode desligar os anúncios
       personalizados em <a href="https://adssettings.google.com" target="_blank" rel="noopener">Configurações de anúncios do Google</a>

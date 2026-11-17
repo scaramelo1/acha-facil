@@ -24,10 +24,12 @@ const CAMPOS_DONO = [
     'foto' => ['Logo', 120],
     'fotos' => ['Fotos do comércio', 2000],   // lista JSON dos arquivos da galeria (carrossel da capa)
 ];
-const MAX_FOTOS = 10;   // fotos na galeria de cada comércio
+const MAX_FOTOS = 10;   // fotos na galeria de cada comércio (Destaque)
+const MAX_FOTOS_BASICO = 2;   // 17/11 (pedido do usuário): Básico até 2 fotos, Destaque até 10 (max_fotos_plano() em inc/guia.php)
 // Plano Grátis (17/11, passo 78): o dono sem Básico/Destaque só muda o que já vem do Google. O resto é do Básico.
-const CAMPOS_GRATIS = ['nome', 'telefone', 'whatsapp', 'site', 'endereco', 'bairro', 'horario', 'horarios', 'atende_em_casa'];
-const CAMPOS_SO_BASICO = ['descricao', 'servicos', 'instagram', 'foto', 'fotos'];
+// 17/11: "Atende em casa / faz entrega" saiu do Grátis (pedido do usuário): fica no Básico e no Destaque
+const CAMPOS_GRATIS = ['nome', 'telefone', 'whatsapp', 'site', 'endereco', 'bairro', 'horario', 'horarios'];
+const CAMPOS_SO_BASICO = ['descricao', 'servicos', 'instagram', 'foto', 'fotos', 'atende_em_casa'];
 
 // ---------- registro ----------
 function registrar(?int $admin_id, string $acao, ?int $profissional_id = null, ?string $detalhe = null): void {

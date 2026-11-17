@@ -397,7 +397,7 @@ function web_pagina_ficha(array $p): void {
         . ($p['endereco'] ? 'Endereço: ' . $p['endereco'] . '. ' : '') . 'Veja horário, telefone e WhatsApp no Acha Fácil.';
     pagina_inicio($nome . ' - ' . ($tipo ? "$tipo em " : '') . "$nome_cidade | Acha Fácil!", mb_substr($descricao, 0, 300), 'web',
         ['canonica' => $url, 'imagem' => $imagem, 'head' => web_json_ld($ld, $ld_trilha), 'noindex' => !ficha_no_google($p),
-            'anuncios' => $p['importado'] && !$p['basico_pago_em'] && !$p['destaque_pago']]);   // anúncio só em ficha de quem não paga plano
+            'anuncios' => $p['importado'] && !$p['destaque_pago']]);   // 17/11 (pedido do usuário): anúncio também no Básico; só o Destaque fica sem
     [$parecidos, $mesmo_tipo] = web_parecidos($p);
     $sem_dono = $p['importado'] && !tem_dono($p);
     $link_dono = $sem_dono ? $c['linkAssumir'] : null;

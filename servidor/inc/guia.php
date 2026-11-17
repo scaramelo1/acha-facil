@@ -165,6 +165,8 @@ require_once __DIR__ . '/horarios.php';
 function foto_url(?string $foto): ?string { return $foto ? url_publica('foto.php?f=' . rawurlencode($foto)) : null; }
 
 /** Galeria do comércio (coluna fotos, lista JSON de arquivos) -> nomes dos arquivos, na ordem. */
+/** Quantas fotos da galeria aparecem: Destaque em dia 10, os outros 2 (17/11). Fotos a mais ficam guardadas, só não aparecem. */
+function max_fotos_plano(array $p): int { return !empty($p['destaque_pago']) ? 10 : 2; }
 function lista_fotos(?string $json): array {
     $l = $json ? json_decode($json, true) : null;
     return is_array($l) ? array_values(array_filter($l, fn($f) => is_string($f) && preg_match('/^[a-z0-9-]{8,80}\.(jpg|png|webp)$/', $f))) : [];
@@ -322,7 +324,7 @@ function prof_completo(array $p, ?int $usuario_id): array {
         'linkRemover' => $p['importado'] && !tem_dono($p) ? url_publica('perfil.php?id=' . $p['id'] . '&acao=remover') : null,
         'horario' => $p['horario'],
         'horarios' => horarios_api(horarios_ler($p['horarios'] ?? null)),   // um campo por linha (Segunda a sexta, Sábado...)
-        'fotos' => array_map('foto_url', lista_fotos($p['fotos'] ?? null)),   // carrossel da capa
+        'fotos' => array_map('foto_url', array_slice(lista_fotos($p['fotos'] ?? null), 0, max_fotos_plano($p))),   // carrossel da capa (Básico 2, Destaque 10)
         'favorito' => $usuario_id ? (bool)valor('SELECT 1 FROM favoritos WHERE usuario_id = ? AND profissional_id = ?', [$usuario_id, $p['id']]) : false,
         'minhaAvaliacao' => null,
         'comentarios' => array_map(fn($a) => [

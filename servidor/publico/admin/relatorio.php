@@ -162,7 +162,7 @@ for ($i = 0; $i < 4; $i++) { $t = strtotime(date('Y-m-01') . " -$i month"); $mes
     <div class="chamada basico">
       <strong>Com o plano Básico (<?= h(preco_plano_texto('basico')) ?>):</strong>
       <ul>
-        <li>Colocar seu logo e até 10 fotos do lugar e dos produtos</li>
+        <li>Colocar seu logo e 2 fotos do lugar ou dos produtos</li>
         <li>Descrição e lista do que você vende ou faz</li>
         <li>Instagram na sua página</li>
         <li>Pagamento único: vale para sempre, sem mensalidade</li>
@@ -172,7 +172,7 @@ for ($i = 0; $i < 4; $i++) { $t = strtotime(date('Y-m-01') . " -$i month"); $mes
     <div class="chamada">
       <strong>Com o plano Destaque (<?= h(preco_plano_texto('destaque')) ?>):</strong>
       <ul>
-        <?php if ($sem_basico): ?><li>Tudo do Básico</li><?php endif ?>
+        <?php if ($sem_basico): ?><li>Tudo do Básico e até 10 fotos</li><?php endif ?>
         <li>Seu comércio no topo da tela inicial e da sua categoria</li>
         <li>Selo "Verificado pelo Acha Fácil"</li>
         <?php if (!$sem_basico): ?><li>Logo, fotos e dados corrigidos por você</li><?php endif ?>

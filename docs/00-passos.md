@@ -695,3 +695,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    + Site (domínio), incluir e tirar do app têm texto. admin/pedido.php: plano não pago não tem mais "liberar o painel"
    (bloqueado também no POST; cortesia = cupom de 100%), mostra "Já é dono pelo Grátis desde..." e marca a mensagem como
    "escrita antes do pagamento". avisar-sem-pagamento.php: "Troca de plano sem pagamento ... já é dono pelo Grátis ... Nada para ativar".
+83. ✅ Ajuste dos planos (17/11, pedido do usuário). "Atende em casa / faz entrega" sai do Grátis (fica no Básico e no Destaque;
+   CAMPOS_GRATIS / CAMPOS_SO_BASICO). Fotos: Básico até 2 (MAX_FOTOS_BASICO), Destaque até 10; a ficha mostra só as 2
+   primeiras fora do Destaque (max_fotos_plano() em inc/guia.php; as outras ficam guardadas). Anúncios do Google também na ficha
+   do Básico (só o Destaque fica sem). Painel do Grátis sem números (quadro "Liberar no Básico"). Textos: planos.php, inicial,
+   termos, privacidade (anúncios), relatório, cadastro grátis e app 1.9.0 (planos.tsx). Testado numa cópia nos 3 planos.
