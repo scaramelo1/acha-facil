@@ -46,6 +46,14 @@ if (empty($_SESSION['dono_acesso']) && empty($_SESSION['dono_saiu']) && ($conta 
 }
 
 $p = dono_atual();
+// 17/11 (pedido do usuário): admin vê o painel como o dono vê (?ver=<id do comércio>). Só olhar: não entra como o dono,
+// não muda a sessão dele e nada é enviado (bloqueado aqui e no POST).
+$so_ver = false;
+if (isset($_GET['ver']) && admin_atual()) {
+    $p = linha("SELECT a.id AS acesso_id, COALESCE(a.nome, '(sem dono)') AS dono_nome, p.* FROM profissionais p
+        LEFT JOIN acessos_dono a ON a.profissional_id = p.id AND a.ativo = 1 WHERE p.id = ? ORDER BY a.id DESC LIMIT 1", [(int)$_GET['ver']]);
+    $so_ver = (bool)$p;
+}
 $em_dia = $p && (int)valor('SELECT COUNT(*) FROM profissionais p WHERE p.id = ? AND ' . SQL_EM_DIA, [$p['id']]) > 0;
 // plano Grátis (passo 78): com acesso e sem Básico/Destaque, edita só CAMPOS_GRATIS; o resto fica trancado
 $gratis = $p && !$em_dia;
@@ -56,7 +64,7 @@ $max_fotos = $destaque ? MAX_FOTOS : MAX_FOTOS_BASICO;   // 17/11: Básico 2 fot
 $numeros = $p && numeros_prontos() ? numeros_ficha((int)$p['id'], $destaque ? desde_dias(30) : date('Y-m-01')) : null;
 $erro = null;
 
-if ($p && e_post()) {
+if ($p && !$so_ver && e_post()) {
     exigir_post();
     [$valores, $erro] = limpar_campos_dono($_POST);
     if ($gratis) {   // campos do Básico: ficam como estão no app (o formulário nem mostra)
@@ -130,7 +138,12 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
     <?php endif ?></p>
 <?php else: ?>
   <h1><?= h($p['nome']) ?></h1>
-  <p class="discreto">Olá, <?= h($p['dono_nome']) ?> · <a href="?sair=1">Sair</a></p>
+  <?php if ($so_ver): ?>
+  <div class="aviso erro"><strong>👁 Visualização do administrador.</strong> É assim que <?= h($p['dono_nome']) ?> vê o painel
+    (plano <?= $destaque ? 'Destaque' : ($em_dia ? 'Básico' : 'Grátis') ?>). Os botões estão desligados: nada é enviado daqui.
+    <a href="<?= h(config()['url']) ?>/admin/comercio.php?id=<?= (int)$p['id'] ?>">Editar como admin</a></div>
+  <?php endif ?>
+  <p class="discreto">Olá, <?= h($p['dono_nome']) ?><?= $so_ver ? '' : ' · <a href="?sair=1">Sair</a>' ?></p>
 
   <?php if ($numeros): ?>
   <h2>Números do seu comércio</h2>
@@ -348,4 +361,8 @@ pagina_inicio('Painel do comércio · Acha Fácil!', 'Painel do dono do comérci
   <?php endif ?>
 <?php endif ?>
 </main>
+<?php if ($so_ver): ?><script>document.querySelectorAll('main form').forEach(function (f) {
+  f.addEventListener('submit', function (e) { e.preventDefault(); });
+  f.querySelectorAll('input, textarea, select, button').forEach(function (e) { e.disabled = true; });
+});</script><?php endif ?>
 <?php pagina_fim();

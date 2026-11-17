@@ -103,6 +103,7 @@ $ja_dono = $p ? linha('SELECT a.criado_em, pe2.plano FROM acessos_dono a LEFT JO
   </div>
 <?php endif ?>
 
+<?php if ($p && $pe['tipo'] === 'assumir'): ?><p><a class="botao pequeno contorno" href="<?= h(url('painel/?ver=' . (int)$p['id'])) ?>" target="_blank" rel="noopener">👁 Ver o painel como o dono</a></p><?php endif ?>
 <div class="tabela"><table>
   <tr><th>Situação</th><td><?= h(['novo' => 'Novo', 'feito' => 'Resolvido', 'recusado' => 'Recusado'][$pe['status']] ?? $pe['status']) ?></td></tr>
   <tr><th>Comércio</th><td><?= $p ? '<strong>' . h($p['nome']) . '</strong><br>' . h($p['endereco'] ?? '') . ' · ' . h(nome_cidade($p['cidade']))

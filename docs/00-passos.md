@@ -700,3 +700,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    primeiras fora do Destaque (max_fotos_plano() em inc/guia.php; as outras ficam guardadas). Anúncios do Google também na ficha
    do Básico (só o Destaque fica sem). Painel do Grátis sem números (quadro "Liberar no Básico"). Textos: planos.php, inicial,
    termos, privacidade (anúncios), relatório, cadastro grátis e app 1.9.0 (planos.tsx). Testado numa cópia nos 3 planos.
+84. ✅ Admin vê o painel como o dono (17/11, pedido do usuário). /painel/?ver=<id do comércio> só com sessão de admin: mostra o
+   painel do plano atual (Grátis/Básico/Destaque) com aviso "Visualização do administrador", botões e campos desligados e POST
+   bloqueado; não entra como o dono nem mexe na sessão dele. Sem admin, o ?ver= é ignorado. Botão "👁 Ver o painel como o dono"
+   em /admin/pedido.php.
