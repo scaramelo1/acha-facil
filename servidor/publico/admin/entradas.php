@@ -319,10 +319,10 @@ admin_inicio(ORIGENS[$origem], $admin);
   $rot_agora = $dias === 1 ? 'Hoje' : "Últimos $dias dias";
   $rot_antes = $dias === 1 ? 'Ontem' : "$dias dias anteriores"; ?>
 <h3>Horários de chegada</h3>
-<p class="discreto"><span class="barra-legenda aparicoes"></span> <?= h($rot_agora) ?> (<?= num(array_sum($rel['horas'])) ?>)
-  · <span class="barra-legenda vistas"></span> <?= h($rot_antes) ?> (<?= num(array_sum($rel['horas_antes'])) ?>)</p>
+<p class="discreto"><span class="barra-legenda vistas"></span> <?= h($rot_antes) ?> (<?= num(array_sum($rel['horas_antes'])) ?>)
+  · <span class="barra-legenda aparicoes"></span> <?= h($rot_agora) ?> (<?= num(array_sum($rel['horas'])) ?>)</p>
 <div class="barras-dias" role="img" aria-label="Entradas por hora do dia, <?= h(mb_strtolower($rot_agora)) ?> x <?= h(mb_strtolower($rot_antes)) ?>">
-  <?php foreach ($rel['horas'] as $h => $n): $a = $rel['horas_antes'][$h]; ?><div class="dia" title="<?= $h ?>h: <?= h(mb_strtolower($rot_agora)) ?> <?= $n ?>, <?= h(mb_strtolower($rot_antes)) ?> <?= $a ?>"><span class="aparicoes" style="height:<?= round(100 * $n / $maior_hora) ?>%"></span><span class="vistas" style="height:<?= round(100 * $a / $maior_hora) ?>%"></span></div><?php endforeach ?>
+  <?php foreach ($rel['horas'] as $h => $n): $a = $rel['horas_antes'][$h]; ?><div class="dia" title="<?= $h ?>h: <?= h(mb_strtolower($rot_antes)) ?> <?= $a ?>, <?= h(mb_strtolower($rot_agora)) ?> <?= $n ?>"><span class="vistas" style="height:<?= round(100 * $a / $maior_hora) ?>%"></span><span class="aparicoes" style="height:<?= round(100 * $n / $maior_hora) ?>%"></span></div><?php endforeach ?>
 </div>
 <div class="barras-rotulos" aria-hidden="true"><?php foreach (array_keys($rel['horas']) as $h): ?><span><?= $h ?>h</span><?php endforeach ?></div>
 <p class="discreto">0h a 23h (horário de Brasília) · horário com mais entradas: <?= array_search(max($rel['horas']), $rel['horas'], true) ?>h

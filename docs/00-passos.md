@@ -645,3 +645,4 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 74. ✅ "Horários de chegada" comparativo em /admin/entradas.php (17/11, pedido do usuário: "hoje 10, ontem 9, barras lado a
    lado"). Barra amarela = período atual (Hoje / últimos N dias), verde = anterior (ontem inteiro / N dias anteriores), na mesma
    hora, com legenda e totais. Sem mudança no banco nem no CSS (reaproveita .aparicoes/.vistas). A hora existe desde 14/11.
+   Ordem (pedido do usuário, 17/11): verde (anterior) à esquerda, amarela (atual) à direita.
