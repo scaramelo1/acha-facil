@@ -42,6 +42,8 @@ function sitemaps_quadro(string $slug): string {
         . ' <a class="botao pequeno contorno" href="' . h($indice) . '" target="_blank" rel="noopener">Abrir</a></p>'
         . '<p class="discreto" style="margin:.4em 0">Ele junta estes (o sitemap.xml geral também já lista a cidade):</p><ul>';
     foreach ($partes as [, $n, $url, $qtd]) $html .= '<li><a href="' . h($url) . '" target="_blank" rel="noopener">' . h($n) . '</a>: ' . num($qtd) . ' ' . ($qtd === 1 ? 'página' : 'páginas') . '</li>';
-    return $html . '</ul><p class="discreto" style="margin:0">Dica: no Search Console, em "Inspeção de URL", peça também a indexação da página da cidade: '
-        . '<a href="' . h(web_absoluta(url_cidade($slug))) . '" target="_blank" rel="noopener">' . h(web_absoluta(url_cidade($slug))) . '</a></p></div>';
+    // 17/11: a página da cidade foi enviada como sitemap por engano ("O sitemap está em HTML"): deixar claro que ela é outra coisa
+    return $html . '</ul><p class="discreto" style="margin:0">Depois, à parte: no Search Console, em <strong>Inspeção de URL</strong> (barra do topo, '
+        . '<strong>não</strong> em Sitemaps), cole a página da cidade e peça a indexação: <code>' . h(web_absoluta(url_cidade($slug))) . '</code>. '
+        . 'Em Sitemaps vai só o endereço que termina em <strong>.xml</strong>.</p></div>';
 }
