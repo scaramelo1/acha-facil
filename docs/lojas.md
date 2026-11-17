@@ -15,7 +15,7 @@ Pacote/bundle: `br.com.fsadesigner.achafacil` · Projeto EAS: `scaramelo/acha-fa
    - Anúncios: não · Público-alvo: 18+ · Classificação: questionário IARC (marcar que usuários interagem: comentários)
    - Segurança dos dados: seção 4 · Excluir conta: link da seção 1
    - Apps governamentais / financeiros / saúde / notícias: não
-   - Categoria: Estilo de vida · e-mail fsadesignerbr@gmail.com
+   - Categoria: Estilo de vida · e-mail achafacilcontato@gmail.com
 4. **Página da loja**: nome, descrição curta e completa (seção 2), ícone 512, imagem de destaque 1024×500 e 2 a 8 capturas
    (seção 3).
 5. **Teste fechado** (obrigatório em conta pessoal nova): Testar → Teste fechado → criar faixa → enviar o .aab → lista
@@ -44,7 +44,7 @@ continua).
 - Política de privacidade: https://achafacilapp.com.br/privacidade.php
 - Excluir conta (Play Store): https://achafacilapp.com.br/privacidade.php#excluir-conta
 - Termos: https://achafacilapp.com.br/termos.php
-- Site / suporte: https://achafacilapp.com.br/ · e-mail fsadesignerbr@gmail.com
+- Site / suporte: https://achafacilapp.com.br/ · e-mail achafacilcontato@gmail.com
 
 ## 2. Textos da ficha
 

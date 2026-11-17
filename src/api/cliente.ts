@@ -10,7 +10,7 @@ export const URL_PRIVACIDADE = 'https://achafacilapp.com.br/privacidade.php';
 export const URL_PLANOS = 'https://achafacilapp.com.br/planos.php';
 export const URL_MEU_NEGOCIO = 'https://achafacilapp.com.br/busca.php';
 /** Contato do Acha Fácil (iguais aos do site, /etc/acha-facil/config.php). */
-export const EMAIL_CONTATO = 'fsadesignerbr@gmail.com';
+export const EMAIL_CONTATO = 'achafacilcontato@gmail.com';
 export const URL_INSTAGRAM = 'https://instagram.com/fsa.designer';
 
 export interface Cidade {

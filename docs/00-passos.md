@@ -22,7 +22,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 - Uma avaliação por pessoa por profissional (pode mudar depois). O comentário mostra só "Maria S.".
 - O profissional aparece se estiver **aprovado** e com a **assinatura em dia** (ou cortesia dada pelo admin).
 - Ordem justa: destaques primeiro, depois quem tem avaliação; dentro de cada grupo a ordem muda uma vez por dia.
-- Responsável: **FSA Designer** (termos e privacidade); contatos fsadesignerbr@gmail.com e Instagram @fsa.designer
+- Responsável: **FSA Designer** (termos e privacidade); contatos achafacilcontato@gmail.com (desde 17/11) e Instagram @fsa.designer
   em `/etc/acha-facil/config.php`.
 - Selo "Verificado pelo Acha Fácil" é do plano Destaque (08/11): o admin marca `verificado`, mas o selo só aparece com o Destaque em dia.
 - Os comércios vêm da **lista de leads** (fsadesigners.com.br/leads, coleta do Google Maps): `importado = 1`, aparecem
@@ -649,7 +649,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 75. ✅ Nome "FSA Designer" fora do Acha Fácil (17/11, pedido do usuário: "não quero misturar os dois projetos"). Rodapé
    ("Acha Fácil · ano"), Termos, Privacidade (o controlador agora é "o Acha Fácil"), planos (site, index, relatório do comércio):
    "feito pela equipe do Acha Fácil". App (vai no próximo APK): Sobre sem "Feito pela FSA Designer", planos.tsx. Cache web limpo.
-   🟡 Falta: e-mail e Instagram de contato ainda são os da FSA (fsadesignerbr@gmail.com, @fsa.designer) em
+   17/11: e-mail trocado para achafacilcontato@gmail.com (config + src/api/cliente.ts, app 1.9.0).
+   🟡 Falta: Instagram de contato ainda é o da FSA (@fsa.designer) em
    /etc/acha-facil/config.php (contato_email, instagram) e em src/api/cliente.ts. Trocar quando o usuário tiver os do Acha Fácil.
 76. ✅ Plano Básico no relatório do comércio (17/11, pedido do usuário: "o mais atrativo é o de 9,90"). /admin/relatorio.php
    mostra Básico (quadro amarelo, "uma vez só, vale para sempre") e Destaque lado a lado (um embaixo do outro no celular);
