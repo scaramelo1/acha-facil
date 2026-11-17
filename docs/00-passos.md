@@ -731,3 +731,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    pago sai da contagem do menu Pendências, da lista "Pedidos de donos" e da Administração do app (api/admin.php); fica em
    "Vistos, aguardando retorno" (recolhido) em /admin/ com "Voltar às pendências". Se for pago, volta a contar sozinho.
    Botão na lista de /admin/ e no topo de /admin/pedido.php; registro_admin pedido_visto / pedido_visto_desfeito.
+90. ✅ "Em destaque" antes das áreas (17/11, pedido do usuário: "tem que aparecer em cima das categorias"). Site: página da
+   cidade (web_pagina_cidade em inc/web.php) mostra Em destaque logo abaixo da busca, depois Escolha a área e Conhecidos
+   (cache limpo). App (src/app/(abas)/index.tsx): Vitrine com Destaque pago antes de "Explore por categoria"; sem Destaque
+   pago, o convite continua depois das categorias. App vai no próximo APK.

@@ -252,6 +252,13 @@ function web_pagina_cidade(string $cidade): void {
     <?= function_exists('web_abas_cidade') ? web_abas_cidade($cidade, 'comercios') : '' ?>
   </div></section>
 
+  <?php if ($destaques): // 17/11 (pedido do usuário): Destaque ANTES das áreas, para ficar em destaque de verdade ?>
+  <section><div class="conteudo">
+    <h2>Em destaque em <?= h($nome) ?></h2>
+    <?= web_cartoes($destaques) ?>
+  </div></section>
+  <?php endif ?>
+
   <section class="branco"><div class="conteudo">
     <h2>Escolha a área</h2>
     <div class="areas">
@@ -261,15 +268,8 @@ function web_pagina_cidade(string $cidade): void {
     </div>
   </div></section>
 
-  <?php if ($destaques): ?>
-  <section><div class="conteudo">
-    <h2>Em destaque em <?= h($nome) ?></h2>
-    <?= web_cartoes($destaques) ?>
-  </div></section>
-  <?php endif ?>
-
   <?php if ($populares): ?>
-  <section<?= $destaques ? ' class="branco"' : '' ?>><div class="conteudo">
+  <section><div class="conteudo">
     <h2>Conhecidos na cidade</h2>
     <p class="intro">Uma seleção, que muda todo dia, dos lugares mais procurados de <?= h($nome) ?>.</p>
     <?= web_cartoes($populares) ?>

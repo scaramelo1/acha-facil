@@ -53,6 +53,13 @@ export default function TelaInicio() {
           </View>
         ) : dados ? (
           <>
+            {/* 17/11 (pedido do usuario): Destaque antes das categorias; sem Destaque pago, o convite fica depois delas */}
+            {dados.destaques.length > 0 && (
+              <View style={{ marginBottom: 8 }}>
+                <Vitrine itens={dados.destaques} />
+              </View>
+            )}
+
             <Titulo acao="Ver todas" aoTocarAcao={() => router.push('/explorar')}>
               Explore por categoria
             </Titulo>
@@ -70,9 +77,12 @@ export default function TelaInicio() {
               ))}
             </ScrollView>
 
-            <View style={{ marginTop: 18 }}>
-              <Vitrine itens={dados.destaques} />
-            </View>
+
+            {dados.destaques.length === 0 && (
+              <View style={{ marginTop: 18 }}>
+                <Vitrine itens={dados.destaques} />
+              </View>
+            )}
 
             {dados.populares.length > 0 && (
               <>
