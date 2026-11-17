@@ -83,12 +83,13 @@ foreach (linhas("SELECT a.*, d.nome AS dono, d.telefone AS dono_tel, d.pedido_id
     ];
 }
 
+require_once __DIR__ . '/../../inc/pedidos-vistos.php';   // vistos e não pagos não aparecem no app (passo 89)
 $pedidos = array_map(fn($pe) => [
     'id' => (int)$pe['id'], 'tipo' => $pe['tipo'], 'plano' => $pe['plano'] ? PLANOS_NOME[$pe['plano']] ?? null : null,
     'pago' => in_array($pe['mp_status'] ?? '', ['authorized', 'approved'], true), 'comercio' => $pe['comercio'], 'nome' => $pe['nome'],
     'telefone' => telefone_formatado($pe['telefone']), 'quando' => datahora_br($pe['criado_em']),
-], linhas("SELECT pe.*, p.nome AS comercio FROM pedidos pe LEFT JOIN profissionais p ON p.id = pe.profissional_id
-    WHERE pe.status = 'novo' ORDER BY pe.criado_em DESC LIMIT 50"));
+], array_slice(array_values(array_filter(linhas("SELECT pe.*, p.nome AS comercio FROM pedidos pe LEFT JOIN profissionais p ON p.id = pe.profissional_id
+    WHERE pe.status = 'novo' ORDER BY pe.criado_em DESC LIMIT 100"), 'pedido_pendente')), 0, 50));
 
 $cidades = array_map(fn($c) => ['cidade' => $c['cidade'], 'uf' => $c['uf'], 'total' => (int)$c['total'], 'ultimo' => datahora_br($c['ultimo'])],
     linhas('SELECT MIN(cidade) AS cidade, uf, COUNT(*) AS total, MAX(criado_em) AS ultimo FROM cidades_pedidas

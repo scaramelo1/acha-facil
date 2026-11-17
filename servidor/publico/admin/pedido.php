@@ -12,6 +12,13 @@ $p = $pe['profissional_id'] ? linha('SELECT * FROM profissionais WHERE id = ?', 
 if (e_post()) {
     exigir_post();
     $acao = (string)($_POST['acao'] ?? '');
+    if (in_array($acao, ['visto', 'desfazer_visto'], true) && $pe['status'] === 'novo') {   // passo 89
+        require_once __DIR__ . '/../../inc/pedidos-vistos.php';
+        pedido_marcar_visto($id, $acao === 'visto');
+        registrar((int)$admin['id'], $acao === 'visto' ? 'pedido_visto' : 'pedido_visto_desfeito', $p ? (int)$p['id'] : null, 'pedido ' . $id);
+        flash($acao === 'visto' ? 'Marcado como visto: saiu da contagem de pendências (volta sozinho se for pago).' : 'Pedido voltou para as pendências.');
+        ir($acao === 'visto' ? 'admin/' : 'admin/pedido.php?id=' . $id);
+    }
     if ($pe['status'] !== 'novo' && $acao !== 'novo_link') { flash('Este pedido já foi resolvido.', 'erro'); ir('admin/pedido.php?id=' . $id); }
     if ($acao === 'liberar' && $pe['plano'] && !pedido_pago($pe)) { flash('Plano não pago: não dá para liberar por aqui (use um cupom de 100% para cortesia).', 'erro'); ir('admin/pedido.php?id=' . $id); }
     if ($acao === 'liberar' && $p && $pe['tipo'] === 'assumir') {
@@ -60,6 +67,15 @@ if (($_SESSION['link_novo'][0] ?? null) === $id) { $link = $_SESSION['link_novo'
 admin_inicio('Pedido', $admin);
 ?>
 <p><a href="./">&larr; Pendências</a></p>
+<?php require_once __DIR__ . '/../../inc/pedidos-vistos.php';
+if ($pe['status'] === 'novo' && !in_array($pe['mp_status'], ['authorized', 'approved'], true)): $visto_em = pedidos_vistos()[$id] ?? null; ?>
+  <form method="post" style="float:right;margin:0 0 8px 8px"><?= campo_csrf() ?><input type="hidden" name="id" value="<?= $id ?>">
+    <?php if ($visto_em): ?><span class="discreto">Visto em <?= h(datahora_br($visto_em)) ?> · </span>
+      <input type="hidden" name="acao" value="desfazer_visto"><button class="botao pequeno contorno">Voltar às pendências</button>
+    <?php else: ?><input type="hidden" name="acao" value="visto">
+      <button class="botao pequeno contorno" title="Já vi; estou esperando retorno da pessoa. Sai da contagem de pendências.">✓ Visto, aguardando retorno</button>
+    <?php endif ?></form>
+<?php endif ?>
 <h1><?= h(TIPO_PEDIDO[$pe['tipo']] ?? $pe['tipo']) ?><?= $pe['plano'] ? ' · plano ' . h(PLANOS_NOME[$pe['plano']] ?? $pe['plano']) : '' ?></h1>
 <?php // 17/11: plano escolhido e não pago NÃO se libera por aqui (o plano só vale com o pagamento ou cupom de 100%)
 $sem_pagar = $pe['plano'] && !pedido_pago($pe) && $pe['status'] === 'novo';

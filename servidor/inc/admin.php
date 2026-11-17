@@ -7,7 +7,8 @@ function admin_inicio(string $titulo, ?array $admin): void {
     $base = config()['url'];
     header('Cache-Control: no-store');
     $pend = $admin ? (int)valor("SELECT COUNT(*) FROM alteracoes WHERE status = 'pendente'") : 0;
-    $novos = $admin ? (int)valor("SELECT COUNT(*) FROM pedidos WHERE status = 'novo'") : 0;
+    require_once __DIR__ . '/pedidos-vistos.php';   // pedido marcado "visto, aguardando retorno" não conta (passo 89)
+    $novos = $admin ? count(array_filter(linhas("SELECT id, status, mp_status FROM pedidos WHERE status = 'novo'"), 'pedido_pendente')) : 0;
     require_once __DIR__ . '/eventos.php';
     $ev = $admin ? eventos_pendentes_contar() : 0;   // eventos enviados pelo público esperando autorização
     $novos += $ev;

@@ -726,3 +726,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Avisos que ficam: "Novo plano pago" (Mercado Pago aprovado/assinatura autorizada), "Cupom de cortesia usado",
    "Comércio assumido (grátis)", incluir/tirar do app. Escolher plano e abrir o pagamento não avisa. O pedido segue em
    /admin como "não pago" para consulta.
+89. ✅ Botão "✓ Visto, aguardando retorno" nos pedidos (17/11, pedido do usuário: pendência já vista continuava contando).
+   inc/pedidos-vistos.php guarda {id: data} em <dados_dir>/pedidos-vistos.json (sem mudança no banco). Pedido visto e não
+   pago sai da contagem do menu Pendências, da lista "Pedidos de donos" e da Administração do app (api/admin.php); fica em
+   "Vistos, aguardando retorno" (recolhido) em /admin/ com "Voltar às pendências". Se for pago, volta a contar sozinho.
+   Botão na lista de /admin/ e no topo de /admin/pedido.php; registro_admin pedido_visto / pedido_visto_desfeito.
