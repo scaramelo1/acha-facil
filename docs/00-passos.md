@@ -721,3 +721,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    página da assinatura). Causa: mp_webhook_secret do config era de outra chave (ef7f…); trocado pela "Assinatura secreta" da
    aplicação 6833461186412723 (ff62…), backup em /root/config.php.antes-webhook.*. Teste com aviso assinado: certa = 200,
    errada = 401. Pix pago no app do banco (sem voltar ao site) agora liga o plano sozinho.
+88. ✅ Notificação só quando paga ou assume no Grátis (17/11, pedido do usuário: "se a pessoa entrar em pagamento, não
+   aparecesse a notificação"). avisar-sem-pagamento.php desligado (exit no topo; o cron continua mas não faz nada).
+   Avisos que ficam: "Novo plano pago" (Mercado Pago aprovado/assinatura autorizada), "Cupom de cortesia usado",
+   "Comércio assumido (grátis)", incluir/tirar do app. Escolher plano e abrir o pagamento não avisa. O pedido segue em
+   /admin como "não pago" para consulta.
