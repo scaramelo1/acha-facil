@@ -128,10 +128,11 @@ function chave(string $nome): string {
 define('NOMES_NO_ENDERECO', implode('|', array_map(function ($c) {
     $t = preg_quote($c[0], '/');
     return strtr($t, ['á' => '[áa]', 'à' => '[àa]', 'â' => '[âa]', 'ã' => '[ãa]', 'é' => '[ée]', 'ê' => '[êe]', 'í' => '[íi]', 'ó' => '[óo]', 'ô' => '[ôo]', 'õ' => '[õo]', 'ú' => '[úu]', 'ç' => '[çc]', 'Á' => '[ÁA]', 'É' => '[ÉE]', 'Í' => '[ÍI]', 'Ó' => '[ÓO]', 'Ú' => '[ÚU]']);
-}, TODAS_CIDADES)));
+}, TODAS_CIDADES)) . '|Camanducaia');   // 17/11: Monte Verde é distrito de Camanducaia (MG), o Google escreve as duas
 // "Rua X, 410 - Jardim São Paulo, São João da Boa Vista - SP, 13875-089, Brasil" → ["Rua X, 410", "Jardim São Paulo"]
 function endereco_e_bairro(string $e): array {
-    $e = preg_replace('/,?\s*(' . NOMES_NO_ENDERECO . ')\b.*$/iu', '', $e);
+    // 17/11: só corta quando o nome da cidade abre um pedaço do endereço ("..., Monte Verde"), não no meio da rua ("Av. Monte Verde, 100")
+    $e = preg_replace('/(?:^|,|\s-)\s*(' . NOMES_NO_ENDERECO . ')\b.*$/iu', '', $e);
     $e = trim(preg_replace('/,?\s*\d{5}-?\d{3}.*$/', '', $e), " ,-");
     $endereco = null; $bairro = null;
     foreach (array_map('trim', explode(' - ', $e)) as $parte) {

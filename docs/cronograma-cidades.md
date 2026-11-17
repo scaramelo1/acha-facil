@@ -7,7 +7,7 @@ Nenhuma estava na tabela `cidades` em 17/11.
 | Leva | Semana | Região | Cidades (ordem) |
 |---|---|---|---|
 | 1 | 18 a 21/11 | Circuito das Águas (perto da base) | Monte Alegre do Sul (SP), Águas de Lindóia (SP), Pedreira (SP), Socorro (SP) |
-| 2 | 24 a 28/11 | Serra da Mantiqueira | Santo Antônio do Pinhal (SP), São Thomé das Letras (MG), Joanópolis (SP), Monte Verde (MG) |
+| 2 | 24 a 28/11 | Serra da Mantiqueira | Santo Antônio do Pinhal (SP), São Tomé das Letras (MG), Joanópolis (SP), Monte Verde (MG) |
 | 3 | 01 a 05/12 | Interior turístico | Águas de São Pedro (SP), Brotas (SP), Boituva (SP), Itu (SP) |
 | 4 | 08 a 12/12 | Grande SP e arredores | Guararema (SP), Atibaia (SP), Santana de Parnaíba (SP), Embu das Artes (SP) |
 
@@ -15,15 +15,23 @@ Porte (para planejar o tempo): pequenas = Monte Alegre do Sul, Águas de São Pe
 São Thomé das Letras, Joanópolis, Águas de Lindóia; médias = Pedreira, Socorro, Brotas, Boituva, Guararema;
 grandes (vários milhares de comércios) = Atibaia, Itu, Santana de Parnaíba, Embu das Artes.
 
+## Cadastro (17/11, pedido do usuário) ✅
+As 16 estão na tabela `cidades`, **desligadas**, com o centro pelo OpenStreetMap (backup da tabela em
+/var/lib/acha-facil/backups/cidades.antes-16-novas.*.sql). Slugs: monte-alegre-do-sul, aguas-de-lindoia, pedreira,
+socorro, santo-antonio-do-pinhal, sao-tome-das-letras, joanopolis, monte-verde, aguas-de-sao-pedro, brotas, boituva, itu,
+guararema, atibaia, santana-de-parnaiba, embu-das-artes.
+- São Thomé das Letras: o IBGE escreve **São Tomé das Letras** (nome oficial usado).
+- **Monte Verde** (decisão do usuário): cadastrada com esse nome, UF MG, centro do distrito (-22.872, -46.067). Importador
+  corta "Camanducaia" do endereço, e só corta o nome da cidade quando ele abre um pedaço do endereço ("Av. Monte Verde, 100"
+  fica inteira).
+
 ## Atenção
-- **Monte Verde não é município**: é distrito de **Camanducaia (MG)**. Decidir antes da leva 2: cadastrar como
-  "Monte Verde" (slug próprio, coordenadas do distrito, CAIXA do Nominatim só do distrito) ou como Camanducaia inteira.
-  Sugestão: "Monte Verde" com o nome que o turista procura no Google.
+- Monte Verde não é município (distrito de Camanducaia): no robô, raspar "Monte Verde, Camanducaia - MG".
 - Cidades grandes da leva 4 são longe da base (região metropolitana): conferir a CAIXA do geocodificador e o raio de
   "Cidade atual" (25 km) para não confundir com cidades vizinhas.
 
 ## Passos de cada cidade (sem mexer em código desde o passo 19)
-1. /admin/cidades.php: cadastrar **desligada** (nome, UF, lat/lng).
+1. ~~Cadastrar desligada~~ (feito para as 16 em 17/11).
 2. PC: robô raspa a cidade → /admin/importar.php (ou Novidades) → conferência (--teste); se muita coisa em "Outros",
    chamar o Claude para ajustar PALAVRAS_AREA / NAO_COMERCIO.
 3. Importar de verdade (backup automático) → geocodificar em segundo plano (log em /var/lib/acha-facil/geocodificar.log).

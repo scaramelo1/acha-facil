@@ -676,4 +676,6 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Testado numa cópia isolada (banco de teste): cadastro, painel Grátis, envio só do WhatsApp, volta pela conta Google,
    sair/entrar, outra conta bloqueada, Básico pago com painel completo, selos e API.
 79. 🟡 Cronograma das próximas 16 cidades (17/11, pedido do usuário): docs/cronograma-cidades.md, 4 levas de 18/11 a 12/12.
-   Começa quando o usuário pedir. Monte Verde é distrito de Camanducaia (MG): decidir antes da leva 2.
+   Começa quando o usuário pedir. 17/11: as 16 cadastradas DESLIGADAS em `cidades` (Monte Verde com esse nome, decisão do
+   usuário; "São Tomé das Letras" pela grafia do IBGE). importar-leads.php: corta "Camanducaia" e só corta o nome da cidade
+   no começo de um pedaço do endereço ("Av. Monte Verde, 100" e "Av. Itu, 300" ficam inteiras).
