@@ -119,12 +119,16 @@ pagina_inicio("$titulo · Acha Fácil!", 'Pedido do dono do comércio para o Ach
         <label for="email"><?= plano_unico($plano) || mp_public_key() !== '' ? 'Seu e-mail' : 'E-mail (o mesmo da sua conta do Mercado Pago)' ?></label>
         <input id="email" name="email" type="email" required maxlength="160" autocomplete="email" value="<?= h($_POST['email'] ?? '') ?>">
       <?php endif ?>
-      <?php if ($plano === 'site'): ?>
+      <?php // 17/11 (pedido do usuário): nada de dados do comércio antes do pagamento; Grátis e planos pagos preenchem no painel
+      $sem_texto = $gratis || ($p && $acao === 'assumir' && $plano !== null && $plano !== 'site'); ?>
+      <?php if ($sem_texto): ?>
+        <p class="dica"><?= $gratis ? 'Logo depois do cadastro' : 'Depois do pagamento' ?>, você preenche os dados<?= $gratis ? '' : ', a descrição e as fotos' ?> no painel do comércio.</p>
+      <?php elseif ($plano === 'site'): ?>
         <label for="mensagem">Que endereço você quer para o site? (opcional, ex.: padariadojoao.com.br)</label>
       <?php else: ?>
         <label for="mensagem"><?= $p ? 'Algo a mais? (opcional)' : 'Nome, endereço e o que o seu negócio faz' ?></label>
       <?php endif ?>
-      <textarea id="mensagem" name="mensagem" rows="4" maxlength="1000"<?= $p ? '' : ' required' ?>><?= h($_POST['mensagem'] ?? '') ?></textarea>
+      <?php if (!$sem_texto): ?><textarea id="mensagem" name="mensagem" rows="4" maxlength="1000"<?= $p ? '' : ' required' ?>><?= h($_POST['mensagem'] ?? '') ?></textarea><?php endif ?>
       <p><button class="botao<?= $acao === 'remover' ? ' contorno' : '' ?>"><?= $acao === 'remover' ? 'Pedir para tirar' : ($com_assinatura ? 'Continuar para o pagamento' : ($gratis ? 'Cadastrar grátis' : 'Enviar pedido')) ?></button></p>
       <?php if ($gratis): ?><p class="discreto">Ao se cadastrar, você declara ser o responsável pelo comércio. Cadastro falso é removido
         e a página volta para o dono de verdade (<a href="<?= h(config()['url']) ?>/termos.php">termos</a>).</p><?php endif ?>

@@ -16,6 +16,8 @@ $pedidos = linhas("SELECT pe.*, p.nome AS comercio, p.cidade FROM pedidos pe LEF
     ORDER BY pe.id");
 foreach ($pedidos as $pe) {
     q('UPDATE pedidos SET aviso_sem_pagamento_em = NOW() WHERE id = ?', [$pe['id']]);
-    avisar_admins('Cadastro sem pagamento', $pe['nome'] . ' escolheu o plano ' . (PLANOS_NOME[$pe['plano']] ?? $pe['plano'])
-        . ($pe['comercio'] ? ' (' . $pe['comercio'] . ')' : '') . ' e não pagou. Toque para mandar mensagem.', ['pedido' => (int)$pe['id']]);
+    // 17/11: dono pelo Grátis que escolheu um plano pago = troca de plano, não cadastro novo
+    $ja_dono = $pe['profissional_id'] && valor('SELECT 1 FROM acessos_dono WHERE profissional_id = ? AND ativo = 1', [$pe['profissional_id']]);
+    avisar_admins($ja_dono ? 'Troca de plano sem pagamento' : 'Cadastro sem pagamento', $pe['nome'] . ' escolheu o plano ' . (PLANOS_NOME[$pe['plano']] ?? $pe['plano'])
+        . ($pe['comercio'] ? ' (' . $pe['comercio'] . ')' : '') . ($ja_dono ? ', já é dono pelo Grátis,' : '') . ' e não pagou. Nada para ativar. Toque para mandar mensagem.', ['pedido' => (int)$pe['id']]);
 }

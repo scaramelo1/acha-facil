@@ -13,6 +13,7 @@ if (e_post()) {
     exigir_post();
     $acao = (string)($_POST['acao'] ?? '');
     if ($pe['status'] !== 'novo' && $acao !== 'novo_link') { flash('Este pedido já foi resolvido.', 'erro'); ir('admin/pedido.php?id=' . $id); }
+    if ($acao === 'liberar' && $pe['plano'] && !pedido_pago($pe)) { flash('Plano não pago: não dá para liberar por aqui (use um cupom de 100% para cortesia).', 'erro'); ir('admin/pedido.php?id=' . $id); }
     if ($acao === 'liberar' && $p && $pe['tipo'] === 'assumir') {
         $_SESSION['link_novo'] = [$id, liberar_acesso((int)$p['id'], $id, $pe['nome'], $pe['telefone'], (int)$admin['id'])];
         q("UPDATE pedidos SET status = 'feito' WHERE id = ?", [$id]);
@@ -60,9 +61,18 @@ admin_inicio('Pedido', $admin);
 ?>
 <p><a href="./">&larr; Pendências</a></p>
 <h1><?= h(TIPO_PEDIDO[$pe['tipo']] ?? $pe['tipo']) ?><?= $pe['plano'] ? ' · plano ' . h(PLANOS_NOME[$pe['plano']] ?? $pe['plano']) : '' ?></h1>
-<?php if ($pe['plano'] && !pedido_pago($pe) && $pe['status'] === 'novo'): ?>
+<?php // 17/11: plano escolhido e não pago NÃO se libera por aqui (o plano só vale com o pagamento ou cupom de 100%)
+$sem_pagar = $pe['plano'] && !pedido_pago($pe) && $pe['status'] === 'novo';
+$ja_dono = $p ? linha('SELECT a.criado_em, pe2.plano FROM acessos_dono a LEFT JOIN pedidos pe2 ON pe2.id = a.pedido_id
+    WHERE a.profissional_id = ? AND a.ativo = 1 ORDER BY a.id DESC LIMIT 1', [$p['id']]) : null; ?>
+<?php if ($ja_dono && $pe['status'] === 'novo'): ?>
+  <div class="aviso ok"><strong>Já é dono deste comércio</strong> pelo plano <?= h($ja_dono['plano'] ? (PLANOS_NOME[$ja_dono['plano']] ?? $ja_dono['plano']) : 'Grátis') ?>
+    desde <?= h(datahora_br($ja_dono['criado_em'])) ?>. Este pedido é para <strong>mudar de plano</strong>.</div>
+<?php endif ?>
+<?php if ($sem_pagar): ?>
   <div class="aviso erro"><strong>Pagamento não feito.</strong> A pessoa escolheu o plano <?= h(PLANOS_NOME[$pe['plano']] ?? $pe['plano']) ?>
-    mas não terminou o pagamento. Quem paga entra no painel sozinho; libere por aqui só se combinou cortesia com ela.
+    mas não terminou o pagamento. <strong>Não há nada para ativar:</strong> quando ela pagar, o plano libera sozinho. Para dar de cortesia,
+    crie um <a href="cupons.php">cupom de 100%</a> e mande o link da assinatura abaixo para ela usar.
     <?php if ($p && $pe['tipo'] === 'assumir'): ?>O comércio <strong><?= h($p['nome']) ?></strong> <em>já estava no app</em> (veio da lista do Google), não é um negócio novo.<?php endif ?></div>
   <?php if (!empty($pe['codigo'])):
       $msg_pag = "Olá, {$pe['nome']}! Aqui é do Acha Fácil. Vimos que você escolheu o plano " . (PLANOS_NOME[$pe['plano']] ?? $pe['plano'])
@@ -107,7 +117,7 @@ admin_inicio('Pedido', $admin);
       Horário: <?= h($p['horario'] ?? '-') ?><?= $p['instagram'] ? ' · Instagram @' . h($p['instagram']) : '' ?>
     </td></tr>
   <?php endif ?>
-  <?php if ($pe['mensagem']): ?><tr><th>Mensagem</th><td><?= nl2br(h($pe['mensagem'])) ?></td></tr><?php endif ?>
+  <?php if ($pe['mensagem']): ?><tr><th>Mensagem<?= $pe['plano'] ? '<br><small class="discreto">escrita antes do pagamento, não é alteração da ficha</small>' : '' ?></th><td><?= nl2br(h($pe['mensagem'])) ?></td></tr><?php endif ?>
   <tr><th>Quando</th><td><?= h(datahora_br($pe['criado_em'])) ?> · IP <?= h($pe['ip'] ?? '?') ?></td></tr>
 </table></div>
 
@@ -127,7 +137,9 @@ admin_inicio('Pedido', $admin);
   </div>
   <div class="decidir">
     <form method="post"><?= campo_csrf() ?><input type="hidden" name="id" value="<?= $id ?>">
-      <?php if ($pe['tipo'] === 'assumir' && $p): ?>
+      <?php if ($pe['tipo'] === 'assumir' && $p && $sem_pagar): ?>
+        <p class="discreto">Esperando o pagamento. Se a pessoa desistir, encerre o pedido em "Recusar" (motivo: não pagou).</p>
+      <?php elseif ($pe['tipo'] === 'assumir' && $p): ?>
         <button class="botao" name="acao" value="liberar">Confirmei: liberar o painel</button>
       <?php elseif ($pe['tipo'] === 'incluir' && $p): ?>
         <button class="botao" name="acao" value="publicar">Conferi: publicar no app</button>

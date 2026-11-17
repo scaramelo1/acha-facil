@@ -690,3 +690,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    "Fichas de comércio abertas" e "Toques em ..." sem 1./2./3.; elas e "Comércios mais procurados" (antes só os 20 primeiros,
    agora todos) mostram 15 por página, cada uma com a sua página (?pg_paginas=, pg_fichas=, pg_toques=, pg_comercios=,
    volta para a lista pela âncora #lista-...).
+82. ✅ Nada de dados antes do pagamento (17/11, pedido do usuário; caso do psicólogo, pedidos 16 Grátis + 17 Básico não pago).
+   perfil.php: Básico/Destaque e Grátis sem o campo de texto ("Depois do pagamento, você preenche ... no painel"); só o
+   + Site (domínio), incluir e tirar do app têm texto. admin/pedido.php: plano não pago não tem mais "liberar o painel"
+   (bloqueado também no POST; cortesia = cupom de 100%), mostra "Já é dono pelo Grátis desde..." e marca a mensagem como
+   "escrita antes do pagamento". avisar-sem-pagamento.php: "Troca de plano sem pagamento ... já é dono pelo Grátis ... Nada para ativar".
