@@ -191,7 +191,6 @@ if (entradas_prontas()) {
     uasort($rel['cidades'], fn($a, $b) => $b['entradas'] <=> $a['entradas'] ?: $b['visualizacoes'] <=> $a['visualizacoes']);
     arsort($rel['areas']);
     uasort($rel['comercios'], fn($a, $b) => $b['total'] <=> $a['total']);
-    $rel['comercios'] = array_slice($rel['comercios'], 0, 20, true);
     for ($d = $desde; $d <= hoje(); $d = date('Y-m-d', strtotime("$d +1 day"))) $rel['dias'][$d] = 0;
     foreach (linhas("SELECT dia, SUM(total) AS t FROM entradas WHERE origem = ? AND dia >= ?$we GROUP BY dia", $pe) as $l) $rel['dias'][$l['dia']] = (int)$l['t'];
     try {
@@ -206,6 +205,30 @@ $rel_total = array_sum(array_column($rel['cidades'], 'entradas'));
 $maior_dia = max([1, ...array_values($rel['dias'])]);
 $maior_hora = max([1, ...$rel['horas'], ...$rel['horas_antes']]);
 const HORAS_DESDE = '2026-11-14';   // hora de cada entrada gravada desde aqui (mudança 023)
+
+// paginação das listas (17/11, pedido do usuário): 15 por página, cada lista com a sua página (?pg_<lista>=)
+const ENTRADAS_POR_PAGINA = 15;
+/** [itens da página, html da navegação, posição do 1º]. */
+$paginar = function (array $lista, string $nome) : array {
+    $total = count($lista);
+    $paginas = max(1, (int)ceil($total / ENTRADAS_POR_PAGINA));
+    $pag = min($paginas, max(1, (int)($_GET["pg_$nome"] ?? 1)));
+    $ini = ($pag - 1) * ENTRADAS_POR_PAGINA;
+    $itens = array_slice($lista, $ini, ENTRADAS_POR_PAGINA, true);
+    if ($paginas < 2) return [$itens, '', $ini];
+    $ir = fn(int $n) => '?' . h(http_build_query(array_filter(array_merge($_GET, ["pg_$nome" => $n > 1 ? $n : null]), fn($v) => $v !== '' && $v !== null))) . "#lista-$nome";
+    $html = '<nav class="paginacao" aria-label="Páginas">' . ($pag > 1 ? '<a class="botao pequeno contorno" href="' . $ir($pag - 1) . '">‹ Anterior</a>' : '');
+    $ultima = 0;
+    for ($n = 1; $n <= $paginas; $n++) {   // primeira, última e 2 de cada lado da atual
+        if ($n !== 1 && $n !== $paginas && abs($n - $pag) > 2) continue;
+        if ($ultima && $n - $ultima > 1) $html .= '<span>…</span>';
+        $html .= $n === $pag ? '<strong>' . $n . '</strong>' : '<a href="' . $ir($n) . '">' . $n . '</a>';
+        $ultima = $n;
+    }
+    $html .= ($pag < $paginas ? '<a class="botao pequeno contorno" href="' . $ir($pag + 1) . '">Próxima ›</a>' : '')
+        . '<span class="discreto">' . num($ini + 1) . '–' . num(min($total, $ini + ENTRADAS_POR_PAGINA)) . ' de ' . num($total) . '</span></nav>';
+    return [$itens, $html, $ini];
+};
 
 admin_inicio(ORIGENS[$origem], $admin);
 ?>
@@ -306,10 +329,11 @@ admin_inicio(ORIGENS[$origem], $admin);
 <?php endif ?>
 
 <?php if ($rel['comercios']): ?>
-<h3>Comércios mais procurados</h3>
+<h3 id="lista-comercios">Comércios mais procurados</h3>
+<?php [$itens, $nav, $i] = $paginar($rel['comercios'], 'comercios'); ?>
 <div class="tabela"><table>
   <tr><th>#</th><th>Comércio</th><th>Entradas</th><th></th></tr>
-  <?php $i = 0; foreach ($rel['comercios'] as $id => $r): $i++; ?><tr>
+  <?php foreach ($itens as $id => $r): $i++; ?><tr>
     <td><?= $i ?></td>
     <td><strong><?= h($r['p']['nome']) ?></strong><br><span class="discreto"><?= h($r['p']['tipo'] ?: $r['p']['categoria']) ?> · <?= h(nome_cidade($r['p']['cidade'], true)) ?></span></td>
     <td><?= num($r['total']) ?></td>
@@ -317,6 +341,7 @@ admin_inicio(ORIGENS[$origem], $admin);
       <a class="botao pequeno contorno" href="<?= h(url_publica(ltrim($r['caminho'], '/'))) ?>" target="_blank" rel="noopener">Abrir</a></td>
   </tr><?php endforeach ?>
 </table></div>
+<?= $nav ?>
 <?php endif ?>
 
 <?php if (count($rel['dias']) > 1): ?>
@@ -332,7 +357,7 @@ admin_inicio(ORIGENS[$origem], $admin);
 
 <?php endif ?>
 
-<h2>1. Páginas onde entraram</h2>
+<h2 id="lista-paginas">Páginas onde entraram</h2>
 <?php if (!entradas_prontas()): ?>
 <p class="aviso">Começa a contar depois de aplicar a mudança 022 (bash servidor/instalar.sh, como root).</p>
 <?php elseif (!$paginas): ?>
@@ -342,35 +367,38 @@ admin_inicio(ORIGENS[$origem], $admin);
   : '<a href="' . h($link(['ordem' => null])) . '">mais recentes</a> · <strong>mais entradas</strong>' ?>. Horário de Brasília; a hora conta desde 14/11/2026.</p>
 <div class="tabela"><table>
   <tr><th>Página</th><th>Tipo</th><th>Quando</th><th>Entradas</th><th>%</th></tr>
-  <?php foreach ($paginas as $l): ?><tr>
+  <?php [$itens, $nav] = $paginar($paginas, 'paginas'); foreach ($itens as $l): ?><tr>
     <td><a href="<?= h(url_publica(ltrim($l['caminho'], '/'))) ?>" target="_blank" rel="noopener"><?= h($l['caminho']) ?></a></td>
     <td><?= h(PAGINAS_ENTRADA[$l['pagina']] ?? $l['pagina']) ?><?= $l['cidade'] ? ' · ' . h(nome_cidade($l['cidade'], true)) : '' ?></td>
     <td style="white-space:nowrap"><?php $q = $quando[$l['caminho']] ?? []; ?><?= implode('<br>', array_slice($q, 0, 5)) ?: '—' ?><?= count($q) > 5 ? '<br><span class="discreto">e mais ' . (count($q) - 5) . '</span>' : '' ?></td>
     <td><?= num((int)$l['total']) ?></td><td><?= pct((int)$l['total'], $total_entradas) ?></td>
   </tr><?php endforeach ?>
 </table></div>
+<?= $nav ?>
 <?php endif ?>
 
-<h2>2. Fichas de comércio abertas</h2>
+<h2 id="lista-fichas">Fichas de comércio abertas</h2>
 <?php if (!$abertas): ?><p class="discreto">Nenhuma ficha aberta por quem veio desta origem no período.</p><?php else: ?>
 <div class="tabela"><table>
   <tr><th>Comércio</th><th>Visualizações</th><th>Pessoas</th><th>Toques</th><th></th></tr>
-  <?php foreach ($abertas as $l): ?><tr>
+  <?php [$itens, $nav] = $paginar($abertas, 'fichas'); foreach ($itens as $l): ?><tr>
     <td><?= $comercio($l) ?></td><td><?= num((int)$l['visualizacoes']) ?></td><td><?= num((int)$l['pessoas']) ?></td>
     <td><?= num((int)$l['toques']) ?></td><td><?= $ver($l) ?></td>
   </tr><?php endforeach ?>
 </table></div>
+<?= $nav ?>
 <?php endif ?>
 
-<h2>3. Toques em WhatsApp, Ligar, Mapa, Site e Instagram</h2>
+<h2 id="lista-toques">Toques em WhatsApp, Ligar, Mapa, Site e Instagram</h2>
 <?php if (!$tocadas): ?><p class="discreto">Nenhum toque de quem veio desta origem no período.</p><?php else: ?>
 <div class="tabela"><table>
   <tr><th>Comércio</th><th>WhatsApp</th><th>Ligar</th><th>Mapa</th><th>Site</th><th>Instagram</th><th>Total</th><th></th></tr>
-  <?php foreach ($tocadas as $l): ?><tr>
+  <?php [$itens, $nav] = $paginar($tocadas, 'toques'); foreach ($itens as $l): ?><tr>
     <td><?= $comercio($l) ?></td>
     <?php foreach (['whatsapp', 'ligar', 'mapa', 'site_t', 'instagram'] as $k): ?><td><?= num((int)$l[$k]) ?></td><?php endforeach ?>
     <td><strong><?= num((int)$l['toques']) ?></strong></td><td><?= $ver($l) ?></td>
   </tr><?php endforeach ?>
 </table></div>
+<?= $nav ?>
 <?php endif ?>
 <?php admin_fim();

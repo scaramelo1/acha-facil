@@ -686,3 +686,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    /admin/cidades.php ao LIGAR a cidade e no botão "🗺️ Sitemaps" de cada cidade ligada. Cidade desligada: o quadro avisa
    para ligar (web.php só serve sitemap de cidade ligada). Monte Verde (842 comércios, ligada): 1 + 81 + 650 páginas,
    https://achafacilapp.com.br/sitemap-monte-verde.xml.
+81. ✅ Listas de /admin/entradas.php sem número e com páginas (17/11, pedido do usuário). Títulos "Páginas onde entraram",
+   "Fichas de comércio abertas" e "Toques em ..." sem 1./2./3.; elas e "Comércios mais procurados" (antes só os 20 primeiros,
+   agora todos) mostram 15 por página, cada uma com a sua página (?pg_paginas=, pg_fichas=, pg_toques=, pg_comercios=,
+   volta para a lista pela âncora #lista-...).
