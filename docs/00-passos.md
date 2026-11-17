@@ -708,3 +708,6 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    app com avisos ligados na conta), quadro com título e texto, "Marcar todas com 📱", contador e confirmação; manda com
    avisar_usuario() para cada uma (máx. 200 por vez) e diz quem não recebeu. Registro: notificou_pessoas. Testado no banco de
    teste (aparelho falso não recebe, como esperado).
+86. ✅ Caixinhas e bolinhas no tamanho normal no site inteiro (17/11, pedido do usuário). A regra geral de input (100% de
+   largura, 58 px) pegava checkbox/radio: agora 20 px, cor verde (accent-color). site.css v33, cache limpo. As estrelas da
+   avaliação continuam escondidas (regra própria vem depois).
