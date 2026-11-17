@@ -73,9 +73,38 @@ for ($i = 0; $i < 4; $i++) { $t = strtotime(date('Y-m-01') . " -$i month"); $mes
   .acoes a, .acoes button { font: inherit; font-weight: 800; background: var(--verde); color: #fff; border: 0; border-radius: 10px; padding: 8px 14px; cursor: pointer; text-decoration: none; }
   .acoes a.claro { background: #fff; color: var(--verde); }
   @media (max-width: 600px) { .grandes { grid-template-columns: repeat(2, 1fr); } .duas { grid-template-columns: 1fr; } .folha { margin: 12px; } .corpo { padding: 20px 16px; } }
-  @media print { body { background: #fff; } .acoes { display: none; } .folha { box-shadow: none; margin: 0; max-width: none; border-radius: 0; }
-    .topo, .grandes div, .posicao { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+  /* impressão / PDF: tudo numa folha A4 só (17/11, pedido do usuário). Mais compacto e, se ainda passar, o script reduz (zoom). */
+  @page { size: A4; margin: 8mm; }
+  @media print { body { background: #fff; } .acoes { display: none; }
+    .folha { box-shadow: none; margin: 0; max-width: none; border-radius: 0; overflow: visible; }
+    .topo, .grandes div, .posicao, .chamada.basico { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+  /* modo compacto: o script liga a classe antes de imprimir (e mede com ela) */
+  .imprimindo .topo { padding: 12px 18px; } .imprimindo .topo img { width: 38px; height: 38px; } .imprimindo .topo .marca { font-size: 1.25rem; }
+  .imprimindo .corpo { padding: 14px 18px 10px; } .imprimindo h1 { font-size: 1.35rem; } .imprimindo .sub { margin-bottom: 10px; }
+  .imprimindo h2 { margin: 12px 0 4px; font-size: 1rem; }
+  .imprimindo .grandes div { padding: 8px 6px; } .imprimindo .grandes strong { font-size: 1.6rem; }
+  .imprimindo .posicao { margin-top: 8px; padding: 7px 12px; } .imprimindo li { margin: 1px 0; }
+  .imprimindo .planos { margin-top: 12px; } .imprimindo .chamada { padding: 9px 12px; } .imprimindo .chamada-site p { margin: 4px 0 0; }
+  .imprimindo .rodape { margin-top: 8px; }
+  .imprimindo .duas { grid-template-columns: 1fr 1fr !important; gap: 12px; } .imprimindo .grandes { grid-template-columns: repeat(4, 1fr) !important; }
+  .imprimindo .folha, .imprimindo .chamada, .imprimindo .posicao, .imprimindo .grandes { break-inside: avoid; }
 </style>
+<script>
+  // se mesmo compacto passar de uma folha, diminui tudo até caber (A4 com margem de 8 mm = 194 x 281 mm)
+  (function () {
+    const MM = 96 / 25.4, ALTURA = 281 * MM, LARGURA = 194 * MM;
+    addEventListener('beforeprint', () => {
+      document.body.classList.add('imprimindo');
+      const f = document.querySelector('.folha');
+      f.style.zoom = '';
+      f.style.width = LARGURA + 'px';   // mede na largura da folha
+      const h = f.scrollHeight;
+      f.style.width = '';
+      if (h > ALTURA) f.style.zoom = (ALTURA / h * 0.97).toFixed(3);
+    });
+    addEventListener('afterprint', () => { document.body.classList.remove('imprimindo'); document.querySelector('.folha').style.zoom = ''; });
+  })();
+</script>
 </head>
 <body>
 <div class="acoes" style="padding-top:16px">

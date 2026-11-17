@@ -654,3 +654,6 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 76. ✅ Plano Básico no relatório do comércio (17/11, pedido do usuário: "o mais atrativo é o de 9,90"). /admin/relatorio.php
    mostra Básico (quadro amarelo, "uma vez só, vale para sempre") e Destaque lado a lado (um embaixo do outro no celular);
    Básico some se basico_pago_em; tudo some com Destaque em dia. Linha do Destaque + Site continua embaixo.
+77. ✅ Relatório do comércio cabe numa folha (17/11, pedido do usuário). /admin/relatorio.php: @page A4 margem 8 mm; ao
+   imprimir/salvar PDF o script liga a classe .imprimindo (versão compacta, colunas lado a lado), mede a altura e, se ainda
+   passar de uma folha, aplica zoom até caber.
