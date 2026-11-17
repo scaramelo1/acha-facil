@@ -735,3 +735,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    cidade (web_pagina_cidade em inc/web.php) mostra Em destaque logo abaixo da busca, depois Escolha a área e Conhecidos
    (cache limpo). App (src/app/(abas)/index.tsx): Vitrine com Destaque pago antes de "Explore por categoria"; sem Destaque
    pago, o convite continua depois das categorias. App vai no próximo APK.
+91. ✅ Fotos da ficha em janela com carrossel (17/11, pedido do usuário: tocar na foto abria outra aba). web_pagina_ficha
+   (inc/web.php): links das fotos com data-foto, janela #foto-janela (fundo escuro, setas, arrastar com o dedo, teclado
+   ← → Esc, contador "1 de N", fecha no X ou tocando fora); imagens grandes só carregam ao abrir. CSS .foto-janela/.fj-*
+   em site.css (v=34). Sem JS o link ainda abre a imagem. App já tinha carrossel na capa (CapaComercio), sem mudança.

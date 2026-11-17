@@ -518,3 +518,21 @@ a.area:hover { border-color: var(--verde); }
 .form-admin-comercio .salvar-fixo { position: sticky; bottom: 0; background: var(--creme); padding: 12px 0; margin: 24px 0 0; }
 .busca-admin { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .busca-admin input { flex: 1 1 260px; }
+
+/* Janela de fotos da ficha (17/11): carrossel por cima da página */
+.ficha-fotos a { cursor: zoom-in; }
+html.fj-aberta, html.fj-aberta body { overflow: hidden; }
+.foto-janela { position: fixed; inset: 0; z-index: 1000; background: rgba(0, 0, 0, .92); }
+.foto-janela[hidden] { display: none; }
+.fj-trilho { display: flex; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior: contain; }
+.fj-trilho::-webkit-scrollbar { display: none; }
+.fj-item { flex: 0 0 100%; height: 100%; display: flex; align-items: center; justify-content: center; scroll-snap-align: center; padding: 56px 12px; box-sizing: border-box; }
+.fj-item img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; user-select: none; }
+.fj-fechar, .fj-seta { position: absolute; border: 0; background: rgba(255, 255, 255, .16); color: #fff; border-radius: 50%; cursor: pointer; line-height: 1; display: flex; align-items: center; justify-content: center; }
+.fj-fechar:hover, .fj-seta:hover, .fj-fechar:focus-visible, .fj-seta:focus-visible { background: rgba(255, 255, 255, .3); outline: 2px solid var(--amarelo); }
+.fj-fechar { top: 10px; right: 10px; width: 44px; height: 44px; font-size: 30px; }
+.fj-seta { top: 50%; transform: translateY(-50%); width: 48px; height: 48px; font-size: 40px; padding-bottom: 4px; }
+.fj-ant { left: 10px; }
+.fj-prox { right: 10px; }
+.fj-conta { position: absolute; top: 18px; left: 0; right: 0; text-align: center; color: #fff; font-weight: 800; pointer-events: none; }
+@media (max-width: 640px) { .fj-seta { width: 40px; height: 40px; font-size: 32px; background: rgba(0, 0, 0, .35); } .fj-item { padding: 56px 0; } .fj-item img { border-radius: 0; } }

@@ -443,7 +443,16 @@ function web_pagina_ficha(array $p): void {
 
       <?php if ($fotos): ?>
         <div class="ficha-fotos">
-          <?php foreach ($fotos as $i => $f): ?><a href="<?= h($f) ?>" target="_blank" rel="noopener"><img src="<?= h($f) ?>" alt="<?= h($p['nome']) ?>, foto <?= $i + 1 ?>" loading="<?= $i ? 'lazy' : 'eager' ?>" height="200"></a><?php endforeach ?>
+          <?php foreach ($fotos as $i => $f): // 17/11: abre na janela de fotos (JS abaixo); o link é reserva sem JS ?><a href="<?= h($f) ?>" data-foto="<?= $i ?>"><img src="<?= h($f) ?>" alt="<?= h($p['nome']) ?>, foto <?= $i + 1 ?>" loading="<?= $i ? 'lazy' : 'eager' ?>" height="200"></a><?php endforeach ?>
+        </div>
+        <div class="foto-janela" id="foto-janela" role="dialog" aria-modal="true" aria-label="Fotos de <?= h($p['nome']) ?>" hidden>
+          <button type="button" class="fj-fechar" aria-label="Fechar">&times;</button>
+          <div class="fj-trilho"><?php foreach ($fotos as $i => $f): ?><div class="fj-item"><img data-src="<?= h($f) ?>" alt="<?= h($p['nome']) ?>, foto <?= $i + 1 ?>"></div><?php endforeach ?></div>
+          <?php if (count($fotos) > 1): ?>
+          <button type="button" class="fj-seta fj-ant" aria-label="Foto anterior">&lsaquo;</button>
+          <button type="button" class="fj-seta fj-prox" aria-label="Próxima foto">&rsaquo;</button>
+          <?php endif ?>
+          <div class="fj-conta" aria-live="polite"></div>
         </div>
       <?php endif ?>
 
@@ -622,6 +631,43 @@ document.querySelectorAll('[data-quero]').forEach(function (b) {
   var b = document.querySelector('[data-quero="' + m[1] + '"]');
   if (b) { b.hidden = true; var nt = b.parentNode.querySelector('.trancado-nota'); if (nt) nt.hidden = true; b.parentNode.querySelector('.quero-ok').hidden = false; pedirAviso(m[1], b.parentNode); b.parentNode.scrollIntoView({ block: 'center' }); }
   history.replaceState(null, '', location.pathname + location.hash);
+})();
+// 17/11 (pedido do usuário): fotos abrem numa janela por cima da página, em carrossel (setas, dedo, teclado)
+(function () {
+  var j = document.getElementById('foto-janela');
+  if (!j) return;
+  var trilho = j.querySelector('.fj-trilho'), itens = trilho.children, conta = j.querySelector('.fj-conta'), total = itens.length, voltarFoco = null;
+  function carregar(i) { var im = itens[i] && itens[i].querySelector('img'); if (im && !im.src) im.src = im.dataset.src; }
+  function atual() { return Math.round(trilho.scrollLeft / (trilho.clientWidth || 1)); }
+  function ir(i, suave) {
+    i = (i + total) % total;
+    carregar(i); carregar((i + 1) % total); carregar((i - 1 + total) % total);
+    trilho.scrollTo({ left: i * trilho.clientWidth, behavior: suave ? 'smooth' : 'auto' });
+    conta.textContent = total > 1 ? (i + 1) + ' de ' + total : '';
+  }
+  function abrir(i) {
+    voltarFoco = document.activeElement;
+    j.hidden = false; document.documentElement.classList.add('fj-aberta');
+    ir(i, false); j.querySelector('.fj-fechar').focus();
+  }
+  function fechar() { j.hidden = true; document.documentElement.classList.remove('fj-aberta'); if (voltarFoco) voltarFoco.focus(); }
+  document.querySelectorAll('[data-foto]').forEach(function (a) {
+    a.addEventListener('click', function (e) { e.preventDefault(); abrir(+a.dataset.foto); });
+  });
+  j.querySelector('.fj-fechar').addEventListener('click', fechar);
+  var ant = j.querySelector('.fj-ant'), prox = j.querySelector('.fj-prox');
+  if (ant) ant.addEventListener('click', function () { ir(atual() - 1, true); });
+  if (prox) prox.addEventListener('click', function () { ir(atual() + 1, true); });
+  j.addEventListener('click', function (e) { if (e.target === j || e.target.classList.contains('fj-item')) fechar(); });
+  var t;
+  trilho.addEventListener('scroll', function () { clearTimeout(t); t = setTimeout(function () { var i = atual(); carregar(i); carregar(i + 1 < total ? i + 1 : i); conta.textContent = total > 1 ? (i + 1) + ' de ' + total : ''; }, 80); });
+  document.addEventListener('keydown', function (e) {
+    if (j.hidden) return;
+    if (e.key === 'Escape') fechar();
+    else if (e.key === 'ArrowRight') ir(atual() + 1, true);
+    else if (e.key === 'ArrowLeft') ir(atual() - 1, true);
+  });
+  window.addEventListener('resize', function () { if (!j.hidden) ir(atual(), false); });
 })();
 document.querySelectorAll('[data-contato]').forEach(function (a) {
   a.addEventListener('click', function () {
