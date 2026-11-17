@@ -48,31 +48,15 @@ $sql = "SELECT p.id, p.nome, p.tipo, p.cidade, p.bairro, p.whatsapp AS fone_what
 $lista = linhas($sql, $params);
 
 $nome_plano = ['sem' => 'Sem plano', 'basico' => 'Básico', 'destaque' => 'Destaque'];
-// Pedidos de informação (passo 59; seção própria desde 16/11): só as fichas que receberam "Quero saber..." no período
-$pedidos = [];
+// Pedidos de informação (passo 59): desde 17/11 a lista fica em pedidos-info.php (pedido do usuário); aqui só o resumo
+$pedidos_resumo = null;
 if (pedidos_info_prontos()) {
     $wp = array_values(array_filter($where, fn($w) => !str_contains($w, 'k.') && !str_contains($w, 'a.aparicoes')));
-    $pedidos = linhas("SELECT p.id, p.nome, p.tipo, p.cidade, p.bairro, p.whatsapp AS fone_whatsapp, p.telefone, c.nome AS categoria, $plano_sql AS plano_atual,
-            SUM(IF(pi.tipo = 'horario', pi.total, 0)) AS horario, SUM(IF(pi.tipo = 'fotos', pi.total, 0)) AS fotos,
-            SUM(IF(pi.tipo = 'sobre', pi.total, 0)) AS sobre, SUM(IF(pi.tipo = 'whatsapp', pi.total, 0)) AS whatsapp, SUM(pi.total) AS total
-        FROM pedidos_info pi JOIN profissionais p ON p.id = pi.profissional_id JOIN categorias c ON c.id = p.categoria_id
-        WHERE pi.dia >= ? AND " . implode(' AND ', $wp) . "
-        GROUP BY p.id ORDER BY total DESC, p.nome LIMIT 500", [$desde, ...array_slice($params, $filtro_params_ini)]);
+    $pedidos_resumo = linha("SELECT COUNT(DISTINCT p.id) AS comercios, COALESCE(SUM(pi.total), 0) AS total, MAX(pi.dia) AS ultimo
+        FROM pedidos_info pi JOIN profissionais p ON p.id = pi.profissional_id
+        WHERE pi.dia >= ? AND " . implode(' AND ', $wp), [$desde, ...array_slice($params, $filtro_params_ini)]);
 }
-if (($_GET['csv'] ?? '') === 'pedidos') {
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename="acha-facil-pedidos-' . ($cidade ?: 'todas') . '-' . $dias . 'd-' . date('Ymd') . '.csv"');
-    $out = fopen('php://output', 'w');
-    fwrite($out, "\xEF\xBB\xBF");
-    fputcsv($out, ['ID', 'Comércio', 'Tipo', 'Área', 'Cidade', 'Bairro', 'Plano', 'WhatsApp do comércio', 'Telefone', ...array_values(TIPOS_PEDIDO_INFO), 'Total', 'Relatório para o comerciante'], ';');
-    foreach ($pedidos as $l) {
-        fputcsv($out, [$l['id'], $l['nome'], $l['tipo'], $l['categoria'], nome_cidade($l['cidade']), $l['bairro'], $nome_plano[$l['plano_atual']],
-            telefone_formatado($l['fone_whatsapp']), telefone_formatado($l['telefone']),
-            ...array_map(fn($k) => (int)$l[$k], array_keys(TIPOS_PEDIDO_INFO)), (int)$l['total'],
-            url_publica('admin/relatorio.php?id=' . $l['id'] . '&dias=' . $dias)], ';');
-    }
-    exit;
-}
+$link_pedidos = 'pedidos-info.php?' . http_build_query(array_filter(['cidade' => $cidade, 'categoria' => $cat ?: null, 'tipo' => $tipo, 'dias' => $dias, 'plano' => $plano]));
 
 $soma = array_fill_keys(array_keys(COLUNAS), 0);
 foreach ($lista as $l) foreach ($soma as $k => $_) $soma[$k] += (int)$l[$k];
@@ -228,32 +212,19 @@ admin_inicio('Números', $admin);
 <?php endif ?>
 
 <h2 id="pedidos">Pedidos de informação</h2>
-<?php if (!pedidos_info_prontos()): ?>
+<?php if ($pedidos_resumo === null): ?>
 <p class="aviso">Os pedidos ("Quero saber o horário", "Quero ver fotos"...) começam a contar depois de aplicar a mudança 028
   (bash servidor/instalar.sh, como root).</p>
-<?php elseif (!$pedidos): ?>
-<p class="discreto">Ninguém pediu informação no período<?= $cidade !== '' ? ' nesta cidade' : '' ?>. Aparecem aqui as fichas em que alguém
-  tocou em "Quero saber o horário", "Quero ver fotos", "Quero saber mais" ou "Quero o WhatsApp".</p>
+<?php elseif (!(int)$pedidos_resumo['total']): ?>
+<p class="discreto">Ninguém pediu informação no período<?= $cidade !== '' ? ' nesta cidade' : '' ?>.
+  <a href="<?= h($link_pedidos) ?>">Abrir a página dos pedidos</a></p>
 <?php else: ?>
-<p class="discreto">Fichas em que alguém tocou em "Quero saber..." (1 por pessoa, por dia). São os comércios para chamar primeiro:
-  abra o <strong>Relatório</strong> e mande para o dono. <a href="<?= h($link(['csv' => 'pedidos'])) ?>">Baixar CSV</a>
-  · <a href="quem-pediu.php"><strong>Ver quem pediu</strong></a> (com cadastro ou anônimo)</p>
-<div class="tabela"><table>
-  <tr><th>Comércio</th><th>Plano</th><th>Contato do comércio</th>
-    <?php foreach (TIPOS_PEDIDO_INFO as $n): ?><th><?= $n ?></th><?php endforeach ?><th>Total</th><th></th></tr>
-  <?php foreach ($pedidos as $l): ?>
-  <tr>
-    <td><strong><?= h($l['nome']) ?></strong><br><span class="discreto"><?= h($l['tipo'] ?: $l['categoria']) ?> · <?= h(nome_cidade($l['cidade'], true)) ?><?= $l['bairro'] ? ' · ' . h($l['bairro']) : '' ?></span></td>
-    <td><?= $nome_plano[$l['plano_atual']] ?></td>
-    <td><?= h(telefone_formatado($l['fone_whatsapp'] ?: $l['telefone']) ?: '—') ?></td>
-    <?php foreach (TIPOS_PEDIDO_INFO as $k => $n): ?><td><?= (int)$l[$k] ? num((int)$l[$k]) : '' ?></td><?php endforeach ?>
-    <td><strong><?= num((int)$l['total']) ?></strong></td>
-    <td><a class="botao pequeno" href="relatorio.php?id=<?= (int)$l['id'] ?>&amp;dias=<?= $dias ?>" target="_blank">Relatório</a>
-      <a class="botao pequeno contorno" href="numeros-ficha.php?id=<?= (int)$l['id'] ?>&amp;dias=<?= $dias ?>">Ver</a>
-      <a class="botao pequeno contorno" href="quem-pediu.php?id=<?= (int)$l['id'] ?>">Quem pediu</a></td>
-  </tr>
-  <?php endforeach ?>
-</table></div>
+<div class="numeros-resumo">
+  <div><strong><?= num((int)$pedidos_resumo['comercios']) ?></strong><span>comércios com pedidos</span></div>
+  <div><strong><?= num((int)$pedidos_resumo['total']) ?></strong><span>pedidos (último em <?= h(data_br($pedidos_resumo['ultimo'])) ?>)</span></div>
+</div>
+<p><a class="botao pequeno" href="<?= h($link_pedidos) ?>">Ver</a>
+  <span class="discreto">lista dos comércios, o que pediram e em que data, com Relatório e Quem pediu</span></p>
 <?php endif ?>
 
 <h2>Fichas</h2>
