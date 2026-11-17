@@ -675,3 +675,5 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
      "Ficha completa" também para quem assumiu grátis (usam `cadastrado`), até atualizar.
    Testado numa cópia isolada (banco de teste): cadastro, painel Grátis, envio só do WhatsApp, volta pela conta Google,
    sair/entrar, outra conta bloqueada, Básico pago com painel completo, selos e API.
+79. 🟡 Cronograma das próximas 16 cidades (17/11, pedido do usuário): docs/cronograma-cidades.md, 4 levas de 18/11 a 12/12.
+   Começa quando o usuário pedir. Monte Verde é distrito de Camanducaia (MG): decidir antes da leva 2.
