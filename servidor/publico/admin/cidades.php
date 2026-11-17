@@ -53,6 +53,7 @@ if (e_post()) {
             web_cache_limpar();
             registrar((int)$admin['id'], $c['ativa'] ? 'desligou_cidade' : 'ligou_cidade', null, $c['nome']);
             flash($c['nome'] . ($c['ativa'] ? ' desligada: some do app.' : ' ligada: já aparece no app.'));
+            if (!$c['ativa']) ir('admin/cidades.php?sitemaps=' . rawurlencode($c['slug']) . '#sitemaps');   // passo 80
         }
     } elseif ($acao === 'editar') {
         $c = linha('SELECT * FROM cidades WHERE slug = ?', [(string)($_POST['slug'] ?? '')]);
@@ -82,6 +83,11 @@ admin_inicio('Cidades', $admin);
 <p class="discreto">O app baixa esta lista sempre que abre: cidade ligada aqui aparece no app na hora, <strong>sem APK novo</strong>.
   Cidade nova nasce desligada: primeiro entram os comércios (a lista do robô, importada na VPS com o código da cidade), depois você liga.</p>
 
+<?php if (isset($_GET['sitemaps']) && isset(TODAS_CIDADES[$_GET['sitemaps']])):   // passo 80: sitemaps gerados na hora
+  require_once __DIR__ . '/../../inc/sitemaps.php'; ?>
+<?= sitemaps_quadro((string)$_GET['sitemaps']) ?>
+<?php endif ?>
+
 <div class="tabela"><table>
   <tr><th>Cidade</th><th>Código</th><th>Comércios</th><th>No app</th><th>Nome curto e centro</th></tr>
   <?php foreach ($cidades as $c): ?>
@@ -91,7 +97,8 @@ admin_inicio('Cidades', $admin);
     <td><?= number_format((int)$c['comercios'], 0, ',', '.') ?><br><small><?= number_format((int)$c['localizados'], 0, ',', '.') ?> com localização</small></td>
     <td><form method="post"<?= $c['ativa'] ? " onsubmit=\"return confirm('Desligar " . h($c['nome']) . "? Ela some do app.')\"" : '' ?>><?= campo_csrf() ?>
       <input type="hidden" name="acao" value="ativa"><input type="hidden" name="slug" value="<?= h($c['slug']) ?>">
-      <?= $c['ativa'] ? '✅ Ligada ' : '⏸️ Desligada ' ?><button class="botao contorno"><?= $c['ativa'] ? 'Desligar' : 'Ligar' ?></button></form></td>
+      <?= $c['ativa'] ? '✅ Ligada ' : '⏸️ Desligada ' ?><button class="botao contorno"><?= $c['ativa'] ? 'Desligar' : 'Ligar' ?></button></form>
+      <?php if ($c['ativa'] && (int)$c['comercios'] > 0): ?><a class="botao pequeno contorno" href="?sitemaps=<?= h(rawurlencode($c['slug'])) ?>#sitemaps" style="margin-top:6px">🗺️ Sitemaps</a><?php endif ?></td>
     <td><form method="post" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><?= campo_csrf() ?>
       <input type="hidden" name="acao" value="editar"><input type="hidden" name="slug" value="<?= h($c['slug']) ?>">
       <input name="curto" value="<?= h($c['curto']) ?>" maxlength="30" style="width:11em" aria-label="Nome curto">

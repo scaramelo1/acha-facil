@@ -679,3 +679,10 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Começa quando o usuário pedir. 17/11: as 16 cadastradas DESLIGADAS em `cidades` (Monte Verde com esse nome, decisão do
    usuário; "São Tomé das Letras" pela grafia do IBGE). importar-leads.php: corta "Camanducaia" e só corta o nome da cidade
    no começo de um pedaço do endereço ("Av. Monte Verde, 100" e "Av. Itu, 300" ficam inteiras).
+80. ✅ Sitemaps da cidade ao importar (17/11, pedido do usuário: "assim que adicionar uma cidade, gerar os sitemaps e me
+   mostrar"). inc/sitemaps.php: sitemaps_gerar_cidade() troca no cache e gera na hora sitemap-<cidade>.xml e os por tipo
+   (+ sitemap.xml e os índices por tipo); sitemaps_quadro() mostra o link para o Search Console com a contagem de páginas.
+   Aparece: em /admin/novidades.php logo depois de Importar (e botão "Gerar os sitemaps" nas listas importadas), em
+   /admin/cidades.php ao LIGAR a cidade e no botão "🗺️ Sitemaps" de cada cidade ligada. Cidade desligada: o quadro avisa
+   para ligar (web.php só serve sitemap de cidade ligada). Monte Verde (842 comércios, ligada): 1 + 81 + 650 páginas,
+   https://achafacilapp.com.br/sitemap-monte-verde.xml.

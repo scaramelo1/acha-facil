@@ -18,6 +18,7 @@ if (e_post()) {
             $m = nov_importar($m, (int)$admin['id']);
             nov_descartar_antigas($m['cidade'], $m['id']);
             flash(strtok($m['saida_importacao'], "\n") . ' A localização dos novos está sendo procurada.');
+            $_SESSION['sitemaps_cidade'] = $m['cidade'];   // passo 80: mostra os sitemaps da cidade logo abaixo
         } catch (RuntimeException $e) {
             flash($e->getMessage(), 'erro');
         }
@@ -55,6 +56,14 @@ if (isset($_GET['id'])) {
 <p class="discreto">Recebida em <?= $quando($m['recebido']) ?> · <?= h($m['origem']) ?> · <?= number_format($m['linhas'], 0, ',', '.') ?> linhas
   · <strong><?= $STATUS[$m['status']] ?? h($m['status']) ?></strong>
   <?php if (!empty($m['importada_em'])): ?> em <?= $quando($m['importada_em']) ?> (<?= h($m['importada_por']) ?>)<?php endif ?></p>
+
+<?php if ($m['status'] === 'importada' && (($_SESSION['sitemaps_cidade'] ?? '') === $m['cidade'] || isset($_GET['sitemaps']))):
+    unset($_SESSION['sitemaps_cidade']);
+    require_once __DIR__ . '/../../inc/sitemaps.php'; ?>
+<?= sitemaps_quadro($m['cidade']) ?>
+<?php elseif ($m['status'] === 'importada'): ?>
+<p><a class="botao pequeno contorno" href="?id=<?= h(rawurlencode($m['id'])) ?>&amp;sitemaps=1#sitemaps">🗺️ Gerar os sitemaps de <?= h(nome_cidade($m['cidade'])) ?></a></p>
+<?php endif ?>
 
 <?php if ($m['status'] === 'aguardando'): ?>
 <div class="quadro">
