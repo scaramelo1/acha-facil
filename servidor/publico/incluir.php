@@ -11,17 +11,9 @@ require_once __DIR__ . '/../inc/conta-web.php';
 $conta = exigir_login_web('Incluir meu negócio', 'Inclua o seu negócio no Acha Fácil de graça.');
 
 $areas = linhas("SELECT id, nome FROM categorias WHERE ativa = 1 ORDER BY ordem, nome");
-// 17/11 (passo 94, pedido do usuário): o tipo sai da lista da área (tipos já usados por 3+ comércios), para não criar
-// tipos repetidos. Fora da lista só marcando "Não achei o tipo" (a equipe confere ao publicar).
-$tipos_area = [];
-foreach (linhas("SELECT categoria_id, tipo FROM profissionais WHERE status = 'ativo' AND tipo IS NOT NULL AND tipo <> ''
-    GROUP BY categoria_id, tipo HAVING COUNT(*) >= 3 ORDER BY tipo") as $t) $tipos_area[(int)$t['categoria_id']][] = $t['tipo'];
-/** Tipo da lista da área igual ao digitado (sem ligar para acento, maiúscula e espaços), ou null. */
-$tipo_da_lista = function (int $area, string $tipo) use ($tipos_area): ?string {
-    $k = sem_acento(trim(preg_replace('/\s+/u', ' ', $tipo)));
-    foreach ($tipos_area[$area] ?? [] as $t) if (sem_acento($t) === $k) return $t;
-    return null;
-};
+// 17/11 (passos 94–96): tipo na caixa de seleção da área (inc/tipos.php), para não criar tipos repetidos
+require_once __DIR__ . '/../inc/tipos.php';
+$tipos_area = tipos_por_area();
 $pronto = valor("SELECT 1 FROM migracoes WHERE nome = '012-pedido-incluir.sql'");
 $erro = null;
 $enviado = false;
@@ -39,17 +31,8 @@ if (e_post() && $pronto) {
     $d['horario'] = horarios_texto(horarios_ler($d['horarios']));
     $nome = txt('nome', 120);
     $contato = telefone_normalizado(txt('contato', 20));
-    // tipo: o da lista da área (grafia oficial); fora da lista só com "Não achei o tipo"
-    $tipo_novo = false;
-    if (!empty($_POST['tipo_novo'])) {   // passo 95: "Não encontrei o tipo na lista" → o que ela digitou no campo que aparece
-        $d['tipo'] = txt('tipo_outro', 80);
-        if (!$d['tipo']) $erro_tipo = 'Escreva qual é o tipo do seu negócio no campo que apareceu.';
-        elseif ($d['categoria_id'] && ($t = $tipo_da_lista($d['categoria_id'], $d['tipo']))) $d['tipo'] = $t;   // já existia
-        else { $tipo_novo = true; $d['tipo'] = mb_strtoupper(mb_substr($d['tipo'], 0, 1)) . mb_substr($d['tipo'], 1); }
-    } elseif ($d['tipo'] && $d['categoria_id']) {
-        if ($t = $tipo_da_lista($d['categoria_id'], $d['tipo'])) $d['tipo'] = $t;
-        else $erro_tipo = 'Escolha o tipo na caixa. Se o seu não estiver lá, marque "Não encontrei o tipo na lista".';
-    }
+    // tipo: o da caixa da área; fora da lista só com "Não encontrei o tipo na lista" (o admin confere)
+    [$d['tipo'], $tipo_novo, $erro_tipo] = tipo_do_post($tipos_area, $d['categoria_id']);
     if ($erro_hor) $erro = $erro_hor;
     elseif (!empty($erro_tipo)) $erro = $erro_tipo;
     elseif (!$d['nome'] || !$d['tipo'] || !$d['endereco']) $erro = 'Preencha o nome do negócio, o que ele é e o endereço.';
@@ -100,40 +83,7 @@ pagina_inicio('Incluir meu negócio · Acha Fácil!', 'Inclua o seu negócio no 
         <option value="">Escolha</option>
         <?php foreach ($areas as $a): ?><option value="<?= (int)$a['id'] ?>"<?= $sel('area', $a['id']) ?>><?= h($a['nome']) ?></option><?php endforeach ?>
       </select>
-      <label for="tipo">Tipo do negócio</label>
-      <select id="tipo" name="tipo" required data-valor="<?= h(empty($f['tipo_novo']) ? ($f['tipo'] ?? '') : '') ?>">
-        <option value="">Escolha a área primeiro</option>
-      </select>
-      <label class="marcar"><input type="checkbox" id="tipo_novo" name="tipo_novo" value="1"<?= !empty($f['tipo_novo']) ? ' checked' : '' ?>> Não encontrei o tipo na lista</label>
-      <div id="tipo-outro-caixa"<?= empty($f['tipo_novo']) ? ' hidden' : '' ?>>
-        <label for="tipo_outro">Qual é o tipo do seu negócio? (a equipe confere)</label>
-        <input id="tipo_outro" name="tipo_outro" maxlength="80" value="<?= h($f['tipo_outro'] ?? '') ?>">
-      </div>
-      <script>
-      (function () {   // passos 94/95: a caixa de tipos se monta sozinha com os tipos da área escolhida
-        var tipos = <?= json_encode($tipos_area, JSON_UNESCAPED_UNICODE) ?>, area = document.getElementById('area'),
-            sel = document.getElementById('tipo'), novo = document.getElementById('tipo_novo'),
-            caixa = document.getElementById('tipo-outro-caixa'), outro = document.getElementById('tipo_outro');
-        function montar(manter) {
-          var t = tipos[area.value] || [], antes = manter ? sel.dataset.valor : '';
-          sel.innerHTML = '';
-          var o = document.createElement('option'); o.value = '';
-          o.textContent = area.value ? (t.length ? 'Escolha o tipo' : 'Nenhum tipo nesta área: marque abaixo') : 'Escolha a área primeiro';
-          sel.appendChild(o);
-          t.forEach(function (n) { var op = document.createElement('option'); op.value = n; op.textContent = n; if (n === antes) op.selected = true; sel.appendChild(op); });
-          estado();
-        }
-        function estado() {
-          var n = novo.checked;
-          caixa.hidden = !n; outro.required = n;
-          sel.disabled = n || !area.value; sel.required = !n;
-          if (n) sel.value = '';
-        }
-        area.addEventListener('change', function () { montar(false); });
-        novo.addEventListener('change', function () { estado(); if (novo.checked) outro.focus(); });
-        montar(true);
-      })();
-      </script>
+      <?= tipo_campos_html($tipos_area, 'area', empty($f['tipo_novo']) ? (string)($f['tipo'] ?? '') : '', !empty($f['tipo_novo']), (string)($f['tipo_outro'] ?? '')) ?>
       <label for="cidade">Cidade</label>
       <select id="cidade" name="cidade" required>
         <option value="">Escolha</option>

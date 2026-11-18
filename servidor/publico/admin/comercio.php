@@ -12,6 +12,8 @@ if (!$p) { http_response_code(404); admin_inicio('Comércio', $admin); echo '<h1
 const STATUS_NOME = ['ativo' => 'No app (ativo)', 'pausado' => 'Fora do app (pausado)', 'pendente' => 'Esperando aprovação', 'recusado' => 'Recusado'];
 const ASSINATURA_NOME = ['sem' => 'Sem assinatura', 'ativa' => 'Ativa (paga)', 'atrasada' => 'Atrasada', 'cancelada' => 'Cancelada (vale até a data)', 'cortesia' => 'Cortesia (grátis, sem data)'];
 $categorias = linhas('SELECT id, nome, ativa FROM categorias WHERE ativa = 1 OR id = ? ORDER BY ordem, nome', [$p['categoria_id']]);
+require_once __DIR__ . '/../../inc/tipos.php';   // passo 96: tipo na caixa da área, como no "Incluir meu negócio"
+$tipos_area = tipos_por_area();
 $erro = null;
 $valores = [];
 
@@ -20,9 +22,11 @@ if (e_post()) {
     [$valores, $erro] = limpar_campos_dono($_POST);   // nome, descrição, telefones, Instagram, site, endereço... (mesmas regras do painel)
     if (!$erro) [$valores['horarios'], $erro] = horarios_do_post((array)($_POST['hor'] ?? []));
     // o que só o admin muda
-    $valores['tipo'] = txt('tipo', 80);
     $valores['responsavel'] = txt('responsavel', 120);
     $cat = (int)($_POST['categoria_id'] ?? 0);
+    // tipo: da caixa da área; o tipo atual do comércio continua valendo mesmo fora da lista; novo só com "Não encontrei"
+    [$valores['tipo'], , $erro_tipo] = tipo_do_post($tipos_area, $cat, (string)$p['tipo']);
+    if (!$erro && $erro_tipo) $erro = $erro_tipo;
     if (!$erro && !in_array($cat, array_map('intval', array_column($categorias, 'id')), true)) $erro = 'Escolha a área.';
     $valores['categoria_id'] = (string)$cat;
     $cid = (string)($_POST['cidade'] ?? '');
@@ -149,8 +153,9 @@ admin_inicio('Editar ' . $p['nome'], $admin);
   <select id="categoria_id" name="categoria_id">
     <?php foreach ($categorias as $c): ?><option value="<?= (int)$c['id'] ?>"<?= (int)$f['categoria_id'] === (int)$c['id'] ? ' selected' : '' ?>><?= h($c['nome']) ?><?= $c['ativa'] ? '' : ' (inativa)' ?></option><?php endforeach ?>
   </select>
-  <label for="tipo">Tipo (ex.: Pizzaria, Salão de beleza)</label>
-  <input id="tipo" name="tipo" maxlength="80" value="<?= $val('tipo') ?>">
+  <?php $tipo_form_novo = $erro && !empty($_POST['tipo_novo']);
+  echo tipo_campos_html($tipos_area, 'categoria_id', $tipo_form_novo ? '' : (string)($f['tipo'] ?? ''), $tipo_form_novo, (string)($_POST['tipo_outro'] ?? ''),
+      [(int)$p['categoria_id'] => (string)$p['tipo']], 'Tipo novo (aparece para todos depois que 3 comércios usarem)'); ?>
   <label for="responsavel">Responsável</label>
   <input id="responsavel" name="responsavel" maxlength="120" value="<?= $val('responsavel') ?>">
   <label for="descricao">Sobre o comércio</label>

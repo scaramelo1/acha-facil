@@ -759,3 +759,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    sozinho com os tipos da área escolhida (desligado até escolher a área). Caixinha "Não encontrei o tipo na lista" desliga a
    caixa e mostra o campo tipo_outro (obrigatório); se o digitado já existir na área, grava o oficial; senão vai como
    "TIPO NOVO (fora da lista)" na mensagem do pedido. Valor que não é da lista é recusado no servidor.
+96. ✅ Tipo em caixa de seleção também na edição do admin (17/11, pedido do usuário). inc/tipos.php (tipos_por_area,
+   tipo_da_lista, tipo_do_post, tipo_campos_html) usado por /incluir.php e /admin/comercio.php. No admin o tipo atual do
+   comércio entra na lista da área dele (continua valendo mesmo com menos de 3 usos); tipo novo só por "Não encontrei o
+   tipo na lista". Testado em cópia isolada (lista, forjado, vazio, novo, salvar sem mexer).
