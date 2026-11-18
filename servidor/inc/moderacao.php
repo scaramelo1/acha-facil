@@ -139,6 +139,38 @@ function assumir_gratis(array $prof, ?int $usuario_id, string $nome, string $tel
     return $id;
 }
 
+/**
+ * Negócio incluído pelo próprio dono (/incluir.php) e publicado pela equipe: cria o acesso ao painel ligado ao pedido
+ * (17/11, passo 93). Se a equipe cortou um acesso desse pedido, não recria. Devolve o id do acesso ou null.
+ */
+function acesso_do_incluir(array $pe): ?int {
+    if (($pe['tipo'] ?? '') !== 'incluir' || empty($pe['profissional_id']) || empty($pe['usuario_id'])) return null;
+    $a = linha('SELECT id, ativo FROM acessos_dono WHERE pedido_id = ? ORDER BY id DESC LIMIT 1', [$pe['id']]);
+    if ($a) return (int)$a['ativo'] ? (int)$a['id'] : null;
+    $id = inserir('acessos_dono', ['profissional_id' => $pe['profissional_id'], 'pedido_id' => $pe['id'], 'nome' => mb_substr((string)$pe['nome'], 0, 120),
+        'telefone' => $pe['telefone'], 'token_hash' => hash('sha256', random_bytes(32))]);
+    registrar(null, 'acesso_incluir', (int)$pe['profissional_id'], $pe['nome'] . ' (incluiu o negócio)');
+    web_cache_limpar();
+    return $id;
+}
+
+/** Link de uso único (2 min) do app para o painel do dono, já entrado (17/11, passo 93). */
+function link_painel_app(int $usuario_id): string {
+    $dir = config()['dados_dir'] . '/links-painel';
+    if (!is_dir($dir)) @mkdir($dir, 0750, true);
+    foreach (glob("$dir/*") ?: [] as $f) if (filemtime($f) < time() - 600) @unlink($f);
+    $c = bin2hex(random_bytes(24));
+    file_put_contents("$dir/" . hash('sha256', $c), json_encode(['u' => $usuario_id, 'ate' => time() + 120]));
+    return url_publica('painel/do-app.php?c=' . $c);
+}
+function usar_link_painel_app(string $c): ?int {
+    if (!preg_match('/^[a-f0-9]{48}$/', $c)) return null;
+    $f = config()['dados_dir'] . '/links-painel/' . hash('sha256', $c);
+    $d = is_file($f) ? json_decode((string)file_get_contents($f), true) : null;
+    @unlink($f);
+    return is_array($d) && ($d['ate'] ?? 0) >= time() ? (int)$d['u'] : null;
+}
+
 /** Acesso ativo ligado à conta Google (pelo pedido que ela fez), para voltar ao painel sem link. */
 function acesso_da_conta(int $usuario_id): ?int {
     try {
@@ -150,6 +182,12 @@ function acesso_da_conta(int $usuario_id): ?int {
             $cod = valor("SELECT codigo FROM pedidos WHERE usuario_id = ? AND tipo = 'assumir' AND profissional_id IS NOT NULL
                 AND codigo IS NOT NULL AND mp_status IN ('authorized','approved') ORDER BY id DESC LIMIT 1", [$usuario_id]);
             if ($cod) $id = acesso_pelo_pagamento((string)$cod);
+        }
+        // 17/11 (passo 93): quem incluiu o próprio negócio e a equipe publicou também é dono (caso Agnes Veterinária)
+        if (!$id) {
+            $pe = linha("SELECT pe.* FROM pedidos pe JOIN profissionais p ON p.id = pe.profissional_id WHERE pe.usuario_id = ?
+                AND pe.tipo = 'incluir' AND pe.status = 'feito' AND p.status = 'ativo' ORDER BY pe.id DESC LIMIT 1", [$usuario_id]);
+            if ($pe) $id = acesso_do_incluir($pe);
         }
     } catch (PDOException) { return null; }   // antes da mudança 024 (pedidos.usuario_id)
     return $id ? (int)$id : null;

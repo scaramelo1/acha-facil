@@ -35,6 +35,7 @@ if (e_post()) {
         q("UPDATE profissionais SET status = 'ativo', geo_tentado = NULL WHERE id = ? AND status = 'pendente'", [$p['id']]);
         q("UPDATE pedidos SET status = 'feito' WHERE id = ?", [$id]);
         registrar((int)$admin['id'], 'incluiu', (int)$p['id'], 'pedido ' . $id);
+        acesso_do_incluir(['status' => 'feito'] + $pe);   // passo 93: quem incluiu já entra no painel com a conta Google
         web_cache_limpar();
         $n = avisar_usuario(isset($pe['usuario_id']) ? (int)$pe['usuario_id'] : null, 'Seu comércio foi aceito!',
             "{$p['nome']} já aparece no Acha Fácil. Toque para ver.", ['tela' => 'profissional', 'id' => (int)$p['id']]);

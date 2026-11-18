@@ -744,3 +744,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    o login com o Google não achava o painel. acesso_da_conta() (inc/moderacao.php) agora cria o acesso pelo pedido pago da
    conta (acesso_pelo_pagamento). /minha-conta.php mostra "Seu comércio: X" + botão "Painel do meu comércio" (/painel/?entrar=1).
    Testado em cópia isolada.
+93. ✅ Dono edita pelo app e quem incluiu o negócio vira dono (17/11, caso Agnes Veterinária id 103614, conta
+   vet.clinica4patas@gmail.com: incluiu o negócio (pedido 24), admin publicou e deu Destaque cortesia direto na ficha, mas
+   o "incluir" nunca criava acessos_dono → nenhum caminho para o painel). acesso_do_incluir() (inc/moderacao.php): publicar
+   em /admin/pedido.php já cria o acesso; acesso_da_conta() cria para incluídos antigos ao entrar. App: Meu perfil mostra
+   "Editar meu comércio" (nome do comércio) para quem é dono → api/dono.php (GET comercio / POST link_painel) →
+   /painel/do-app.php?c= (uso único, 2 min) entra no site e abre o painel. App vai no próximo APK; site já no ar.

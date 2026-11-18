@@ -1,10 +1,11 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
+import { useCallback, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { URL_PRIVACIDADE, URL_TERMOS } from '../../api/cliente';
+import { chamar, URL_PRIVACIDADE, URL_TERMOS } from '../../api/cliente';
 import { useCidade } from '../../cidade';
 import { Cabecalho } from '../../componentes/Cabecalho';
 import { CartaoDono } from '../../componentes/CartaoDono';
@@ -17,6 +18,36 @@ export default function TelaPerfil() {
   const router = useRouter();
   const { usuario, sair, excluirConta } = useConta();
   const { cidade, trocarCidade } = useCidade();
+  // 17/11 (passo 93): conta que cuida de um comercio (pago, cortesia, Gratis ou incluido) edita pelo painel do site
+  const [meuComercio, setMeuComercio] = useState<{ id: number; nome: string } | null>(null);
+  const [abrindoPainel, setAbrindoPainel] = useState(false);
+  const idConta = usuario?.id ?? null;
+  useFocusEffect(
+    useCallback(() => {
+      if (!idConta) {
+        setMeuComercio(null);
+        return;
+      }
+      let cancelado = false;
+      chamar<{ comercio: { id: number; nome: string } | null }>('dono.php')
+        .then((r) => !cancelado && setMeuComercio(r.comercio))
+        .catch(() => {});
+      return () => {
+        cancelado = true;
+      };
+    }, [idConta]),
+  );
+  const abrirPainel = async () => {
+    setAbrindoPainel(true);
+    try {
+      const r = await chamar<{ url: string }>('dono.php', 'POST', { acao: 'link_painel' });
+      await WebBrowser.openBrowserAsync(r.url);
+    } catch (e) {
+      Alert.alert('Não foi possível abrir o painel', e instanceof Error ? e.message : '');
+    } finally {
+      setAbrindoPainel(false);
+    }
+  };
 
   const confirmarSaida = () =>
     Alert.alert('Sair da conta?', 'Você pode entrar de novo quando quiser.', [
@@ -70,7 +101,16 @@ export default function TelaPerfil() {
             {usuario.admin && <LinhaMenu icone="shield-account-outline" texto="Administração" detalhe="Aprovar alterações" onPress={() => router.push('/admin')} />}
             <LinhaMenu icone="heart-outline" texto="Meus favoritos" onPress={() => router.push('/salvos')} />
             {linhaCidade}
-            <LinhaMenu icone="storefront-outline" texto="Meu negócio" onPress={() => router.push('/meu-negocio')} />
+            {meuComercio ? (
+              <LinhaMenu
+                icone="pencil-outline"
+                texto={abrindoPainel ? 'Abrindo o painel...' : 'Editar meu comércio'}
+                detalhe={meuComercio.nome}
+                onPress={() => !abrindoPainel && abrirPainel()}
+              />
+            ) : (
+              <LinhaMenu icone="storefront-outline" texto="Meu negócio" onPress={() => router.push('/meu-negocio')} />
+            )}
             <LinhaMenu icone="star-outline" texto="Para o seu comércio" onPress={() => router.push('/planos')} />
             {sobre}
             {termos}
