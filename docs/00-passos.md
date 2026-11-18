@@ -755,3 +755,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    por 3+ comércios ativos; o servidor aceita só tipo da lista (sem ligar para acento/maiúscula, grava a grafia oficial).
    Fora da lista: caixinha "Não achei o tipo na lista" → pedido com "TIPO NOVO (fora da lista): X" na mensagem para o admin
    conferir ao publicar. App não tem formulário próprio (abre o site), sem APK.
+95. ✅ Tipo como caixa de seleção (17/11, pedido do usuário: "não poderia digitar"). /incluir.php: <select id="tipo"> se monta
+   sozinho com os tipos da área escolhida (desligado até escolher a área). Caixinha "Não encontrei o tipo na lista" desliga a
+   caixa e mostra o campo tipo_outro (obrigatório); se o digitado já existir na área, grava o oficial; senão vai como
+   "TIPO NOVO (fora da lista)" na mensagem do pedido. Valor que não é da lista é recusado no servidor.

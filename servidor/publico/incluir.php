@@ -41,10 +41,14 @@ if (e_post() && $pronto) {
     $contato = telefone_normalizado(txt('contato', 20));
     // tipo: o da lista da área (grafia oficial); fora da lista só com "Não achei o tipo"
     $tipo_novo = false;
-    if ($d['tipo'] && $d['categoria_id']) {
+    if (!empty($_POST['tipo_novo'])) {   // passo 95: "Não encontrei o tipo na lista" → o que ela digitou no campo que aparece
+        $d['tipo'] = txt('tipo_outro', 80);
+        if (!$d['tipo']) $erro_tipo = 'Escreva qual é o tipo do seu negócio no campo que apareceu.';
+        elseif ($d['categoria_id'] && ($t = $tipo_da_lista($d['categoria_id'], $d['tipo']))) $d['tipo'] = $t;   // já existia
+        else { $tipo_novo = true; $d['tipo'] = mb_strtoupper(mb_substr($d['tipo'], 0, 1)) . mb_substr($d['tipo'], 1); }
+    } elseif ($d['tipo'] && $d['categoria_id']) {
         if ($t = $tipo_da_lista($d['categoria_id'], $d['tipo'])) $d['tipo'] = $t;
-        elseif (!empty($_POST['tipo_novo'])) { $tipo_novo = true; $d['tipo'] = mb_strtoupper(mb_substr($d['tipo'], 0, 1)) . mb_substr($d['tipo'], 1); }
-        else $erro_tipo = 'Escolha o tipo na lista que aparece ao digitar. Se o seu não estiver lá, marque "Não achei o tipo na lista".';
+        else $erro_tipo = 'Escolha o tipo na caixa. Se o seu não estiver lá, marque "Não encontrei o tipo na lista".';
     }
     if ($erro_hor) $erro = $erro_hor;
     elseif (!empty($erro_tipo)) $erro = $erro_tipo;
@@ -97,21 +101,37 @@ pagina_inicio('Incluir meu negócio · Acha Fácil!', 'Inclua o seu negócio no 
         <?php foreach ($areas as $a): ?><option value="<?= (int)$a['id'] ?>"<?= $sel('area', $a['id']) ?>><?= h($a['nome']) ?></option><?php endforeach ?>
       </select>
       <label for="tipo">Tipo do negócio</label>
-      <input id="tipo" name="tipo" required maxlength="80" list="tipos-lista" autocomplete="off" placeholder="Escolha a área e comece a digitar (ex.: Padaria)" value="<?= h($f['tipo'] ?? '') ?>">
-      <datalist id="tipos-lista"></datalist>
-      <p class="dica" id="tipo-dica">Escolha a área acima para ver os tipos.</p>
-      <label class="marcar"><input type="checkbox" name="tipo_novo" value="1"<?= !empty($f['tipo_novo']) ? ' checked' : '' ?>> Não achei o tipo na lista (a equipe confere)</label>
+      <select id="tipo" name="tipo" required data-valor="<?= h(empty($f['tipo_novo']) ? ($f['tipo'] ?? '') : '') ?>">
+        <option value="">Escolha a área primeiro</option>
+      </select>
+      <label class="marcar"><input type="checkbox" id="tipo_novo" name="tipo_novo" value="1"<?= !empty($f['tipo_novo']) ? ' checked' : '' ?>> Não encontrei o tipo na lista</label>
+      <div id="tipo-outro-caixa"<?= empty($f['tipo_novo']) ? ' hidden' : '' ?>>
+        <label for="tipo_outro">Qual é o tipo do seu negócio? (a equipe confere)</label>
+        <input id="tipo_outro" name="tipo_outro" maxlength="80" value="<?= h($f['tipo_outro'] ?? '') ?>">
+      </div>
       <script>
-      (function () {   // passo 94: tipos da área escolhida
+      (function () {   // passos 94/95: a caixa de tipos se monta sozinha com os tipos da área escolhida
         var tipos = <?= json_encode($tipos_area, JSON_UNESCAPED_UNICODE) ?>, area = document.getElementById('area'),
-            lista = document.getElementById('tipos-lista'), dica = document.getElementById('tipo-dica'), campo = document.getElementById('tipo');
-        function montar() {
-          var t = tipos[area.value] || []; lista.innerHTML = '';
-          t.forEach(function (n) { var o = document.createElement('option'); o.value = n; lista.appendChild(o); });
-          dica.textContent = area.value ? 'Comece a digitar e toque no tipo da lista (' + t.length + ' tipos nesta área).' : 'Escolha a área acima para ver os tipos.';
+            sel = document.getElementById('tipo'), novo = document.getElementById('tipo_novo'),
+            caixa = document.getElementById('tipo-outro-caixa'), outro = document.getElementById('tipo_outro');
+        function montar(manter) {
+          var t = tipos[area.value] || [], antes = manter ? sel.dataset.valor : '';
+          sel.innerHTML = '';
+          var o = document.createElement('option'); o.value = '';
+          o.textContent = area.value ? (t.length ? 'Escolha o tipo' : 'Nenhum tipo nesta área: marque abaixo') : 'Escolha a área primeiro';
+          sel.appendChild(o);
+          t.forEach(function (n) { var op = document.createElement('option'); op.value = n; op.textContent = n; if (n === antes) op.selected = true; sel.appendChild(op); });
+          estado();
         }
-        area.addEventListener('change', function () { montar(); if (campo.value) campo.value = ''; });
-        montar();
+        function estado() {
+          var n = novo.checked;
+          caixa.hidden = !n; outro.required = n;
+          sel.disabled = n || !area.value; sel.required = !n;
+          if (n) sel.value = '';
+        }
+        area.addEventListener('change', function () { montar(false); });
+        novo.addEventListener('change', function () { estado(); if (novo.checked) outro.focus(); });
+        montar(true);
       })();
       </script>
       <label for="cidade">Cidade</label>
