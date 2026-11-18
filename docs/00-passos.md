@@ -750,3 +750,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    em /admin/pedido.php já cria o acesso; acesso_da_conta() cria para incluídos antigos ao entrar. App: Meu perfil mostra
    "Editar meu comércio" (nome do comércio) para quem é dono → api/dono.php (GET comercio / POST link_painel) →
    /painel/do-app.php?c= (uso único, 2 min) entra no site e abre o painel. App vai no próximo APK; site já no ar.
+94. ✅ Tipo do negócio pela lista da área no "Incluir meu negócio" (17/11, pedido do usuário: tipo era texto livre e ia
+   criar tipos repetidos). /incluir.php: Área vem primeiro; o campo Tipo sugere (datalist) só os tipos daquela área usados
+   por 3+ comércios ativos; o servidor aceita só tipo da lista (sem ligar para acento/maiúscula, grava a grafia oficial).
+   Fora da lista: caixinha "Não achei o tipo na lista" → pedido com "TIPO NOVO (fora da lista): X" na mensagem para o admin
+   conferir ao publicar. App não tem formulário próprio (abre o site), sem APK.
