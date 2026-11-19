@@ -39,7 +39,7 @@ guararema, atibaia, santana-de-parnaiba, embu-das-artes.
 5. Marcar aqui ✅ e na lista de passos.
 
 ## Andamento
-- [ ] Monte Alegre do Sul · [x] Águas de Lindóia (774 comércios, todos com mapa, ligada) · [x] Pedreira (19/11, 1262 comércios, todos com mapa, ligada, sitemap no ar; só 14 em "Outros") · [ ] Socorro
+- [ ] Monte Alegre do Sul · [x] Águas de Lindóia (774 comércios, todos com mapa, ligada) · [x] Pedreira (19/11, 1262 comércios, todos com mapa, ligada, sitemap no ar; só 14 em "Outros") · [x] Socorro (19/11, 1661 comércios, todos com mapa, ligada)
 - [ ] Santo Antônio do Pinhal · [ ] São Tomé das Letras · [ ] Joanópolis · [x] Monte Verde (17/11, 842 comércios, ligada, sitemap no Search Console)
 - [ ] Águas de São Pedro · [x] Brotas (19/11, 970 importados, todos com mapa, ligada, sitemap no ar; 19 bairros com tipo "Brotas - SP" pausados → 951 no ar) · [ ] Boituva · [ ] Itu
 - [ ] Guararema · [ ] Atibaia · [ ] Santana de Parnaíba · [ ] Embu das Artes
