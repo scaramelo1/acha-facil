@@ -841,3 +841,18 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    'compartilhar' quando a pessoa de fato compartilha.
    (4) Aviso do relatório mensal abre o relatório no navegador (dados.url, passo 104).
    Falta: `npx tsc --noEmit` e `npx expo lint` no PC, testar no emulador, build (EAS volta em 01/12 ou no PC, passo 37) e enviar à Play.
+106. ✅ Busca melhor, "O que procuram" e página sem resultado (19/11, pedido do usuário, itens 1, 2 e 6 da 2ª avaliação):
+   (1) **Busca nova** (inc/busca.php, a mesma no site, no app e em "Procure seu negócio", sem APK novo): cada palavra
+   procurada separada, pela raiz ("mecanico" acha mecânica), como começo de palavra ("unha" não acha "Cunha"), palavra curta
+   só inteira ("bar" não acha barbearia), sinônimos (BUSCA_SINONIMOS/BUSCA_FRASES: "lava jato" = lava-rápido, "conserto
+   celular" = assistência/reparo) e correção de digitação pelos tipos cadastrados ("pizaria" → "Mostrando resultados para
+   pizzaria"; vocabulário em cache por 1 dia em <dados_dir>/cache/busca-vocabulario.json). Sem nada com todas as palavras:
+   mostra quem tem parte delas ("farmácia de plantão" → farmácias). Antes: pizaria 0, lava jato 0, conserto celular 0,
+   mecanico 3; agora 43, 49, 30 e 60. A API manda também `corrigido` e `parcial` (o app ainda não mostra o aviso).
+   (2) **O que procuram** (/admin/buscas.php, menu Mais): sem resultado, corrigidas e mais procuradas, por cidade, período e
+   site/app. Tabela buscas (**mudança 033, o usuário aplica com instalar.sh**; até lá nada é guardado e a página avisa).
+   No app, o que a pessoa digita aos poucos ("piz", "pizza") vira 1 linha; repetida em 30 min não conta; robôs não contam.
+   Termo sem resultado = pedir ao Claude o sinônimo ou é comércio que falta na cidade (chance de venda).
+   (3) **Página sem resultado** do site: dica, "Tem em outras cidades" (com quantos), "O pessoal de <cidade> procura"
+   (buscas que deram certo, com 2+ pessoas, completadas por uma lista fixa), áreas e "Incluir um negócio de graça"
+   (/incluir.php?cidade= já vem com a cidade escolhida). CSS v=37.

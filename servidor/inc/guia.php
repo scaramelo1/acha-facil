@@ -301,15 +301,10 @@ function da_categoria(int $categoria_id, string $cidade): array {
 }
 
 // $cidade null = todas (busca do site, para o dono achar o negócio)
+/** Busca do app (19/11, passo 106: regras em inc/busca.php, a mesma do site). */
 function buscar(string $termo, ?string $cidade, int $limite = 50, bool $so_com_horario = false): array {
-    $termo = trim(mb_substr($termo, 0, 60));
-    if (mb_strlen($termo) < 2) return [];
-    $like = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $termo) . '%';
-    return array_map('prof_resumo', linhas('SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
-        WHERE ' . visivel($cidade) . ' AND (p.nome LIKE ? OR p.tipo LIKE ? OR p.servicos LIKE ? OR p.descricao LIKE ? OR p.bairro LIKE ? OR c.nome LIKE ?)'
-        . ($so_com_horario ? " AND p.horarios IS NOT NULL AND p.horarios NOT IN ('', '[]', '{}')" : '') . '
-        ORDER BY (c.nome LIKE ? OR p.tipo LIKE ? OR p.nome LIKE ?) DESC, ' . SQL_DESTAQUE . ' DESC, ' . SQL_FICHA_PAGA . ' DESC, RAND(?) LIMIT ' . $limite,
-        [$like, $like, $like, $like, $like, $like, $like, $like, $like, semente_dia()]));
+    require_once __DIR__ . '/busca.php';
+    return array_map('prof_resumo', busca_executar($termo, $cidade, $limite, $so_com_horario)['lista']);
 }
 
 function profissional_visivel(int $id): ?array {

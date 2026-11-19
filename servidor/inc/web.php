@@ -728,20 +728,20 @@ document.querySelectorAll('[data-contato]').forEach(function (a) {
     pagina_fim();
 }
 
-/** Busca dentro da cidade (não vai para o Google): mesma regra da busca do app (inc/guia.php buscar()). */
+/** Busca dentro da cidade (não vai para o Google): mesma regra da busca do app (inc/busca.php busca_executar()). */
 function web_pagina_busca(string $cidade, string $termo, bool $aberto = false): void {
+    require_once __DIR__ . '/busca.php';
     [$nome_cidade, , $uf] = CIDADES[$cidade];
     $achados = [];
+    $r = ['lista' => [], 'corrigido' => null, 'parcial' => false];
     if (mb_strlen($termo) >= 2) {
-        $like = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $termo) . '%';
-        $achados = linhas('SELECT ' . CAMPOS_RESUMO . ', p.horarios FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
-            WHERE ' . visivel($cidade) . ' AND (p.nome LIKE ? OR p.tipo LIKE ? OR p.servicos LIKE ? OR p.descricao LIKE ? OR p.bairro LIKE ? OR c.nome LIKE ?)'
-            . ($aberto ? " AND p.horarios IS NOT NULL AND p.horarios NOT IN ('', '[]', '{}')" : '') . '
-            ORDER BY (c.nome LIKE ? OR p.tipo LIKE ? OR p.nome LIKE ?) DESC, ' . SQL_DESTAQUE . ' DESC, ' . SQL_FICHA_PAGA . ' DESC, RAND(?) LIMIT 60',
-            [...array_fill(0, 9, $like), semente_dia()]);
+        $r = busca_executar($termo, $cidade, 60, $aberto);
+        $achados = $r['lista'];
         // 19/11: "Aberto agora" (só quem informou o horário)
         if ($aberto) $achados = array_values(array_filter($achados, fn($p) => aberto_agora(horarios_ler($p['horarios'])) === true));
+        registrar_busca($termo, $cidade, count($achados), $r['corrigido'], 'site');   // 19/11 (passo 106): /admin/buscas.php
     }
+    $url_busca = url(cidade_web($cidade) . '/buscar');
     [$trilha] = web_trilha([["$nome_cidade - $uf", url_cidade($cidade)], ['Busca', null]]);
     pagina_inicio("Procurar em $nome_cidade | Acha Fácil!", "Procure comércios e serviços em $nome_cidade ($uf).", 'web',
         ['canonica' => web_absoluta(url_cidade($cidade)), 'noindex' => true, 'anuncios' => true]);
@@ -755,22 +755,70 @@ function web_pagina_busca(string $cidade, string $termo, bool $aberto = false): 
   <section class="branco"><div class="conteudo">
     <?php if ($termo !== '' && mb_strlen($termo) < 2): ?>
       <p class="aviso erro">Escreva pelo menos 2 letras.</p>
-    <?php elseif ($termo !== '' && !$achados): ?>
-      <p class="aviso erro">Nada encontrado com "<?= h($termo) ?>" em <?= h($nome_cidade) ?>. Tente outra palavra ou <a href="<?= h(url_cidade($cidade)) ?>">veja as áreas</a>.</p>
-    <?php elseif ($aberto && mb_strlen($termo) >= 2): ?>
-      <p class="filtros-linha"><?= web_botao_aberto(url(cidade_web($cidade) . '/buscar'), true, ['q' => $termo]) ?></p>
-      <?= web_aviso_aberto(count($achados)) ?>
+    <?php elseif ($termo !== '' && !$achados && !$aberto): ?>
+      <?= web_busca_sem_resultado($cidade, $termo) ?>
+    <?php elseif ($termo !== ''): ?>
+      <?php if ($r['corrigido'] !== null && !$r['parcial']): ?>
+        <p class="aviso-busca">Não achamos “<?= h($termo) ?>”. Mostrando resultados para <b>“<?= h($r['corrigido']) ?>”</b>.</p>
+      <?php elseif ($r['parcial']): ?>
+        <p class="aviso-busca">Nenhum lugar tem tudo de “<?= h($termo) ?>”. Mostrando os que têm <b>parte das palavras</b>.</p>
+      <?php endif ?>
+      <p class="filtros-linha"><?= web_botao_aberto($url_busca, $aberto, ['q' => $termo]) ?></p>
+      <?php if ($aberto): ?>
+        <?= web_aviso_aberto(count($achados)) ?>
+      <?php else: ?>
+        <p><?= web_qtd(count($achados), 'resultado', 'resultados') ?> para "<?= h($termo) ?>"<?= count($achados) >= 60 ? ' (os 60 primeiros)' : '' ?>.</p>
+      <?php endif ?>
       <?= $achados ? web_cartoes($achados) : '' ?>
-    <?php elseif ($achados): ?>
-      <p class="filtros-linha"><?= web_botao_aberto(url(cidade_web($cidade) . '/buscar'), false, ['q' => $termo]) ?></p>
-      <p><?= web_qtd(count($achados), 'resultado', 'resultados') ?> para "<?= h($termo) ?>"<?= count($achados) >= 60 ? ' (os 60 primeiros)' : '' ?>.</p>
-      <?= web_cartoes($achados) ?>
     <?php endif ?>
   </div></section>
   <?= web_baixe_app($cidade) ?>
 </main>
 <?php
     pagina_fim();
+}
+
+/**
+ * Página da busca sem nenhum resultado (19/11, passo 106): em vez de só "tente outra palavra", mostra o que tem em outras
+ * cidades, buscas que deram certo na cidade, as áreas e o convite para incluir o negócio de graça.
+ */
+function web_busca_sem_resultado(string $cidade, string $termo): string {
+    [$nome_cidade] = CIDADES[$cidade];
+    $outras = busca_outras_cidades($termo, $cidade);
+    $sugestoes = buscas_populares($cidade);
+    if (count($sugestoes) < 6) {
+        foreach (['pizzaria', 'farmácia', 'mecânica', 'supermercado', 'dentista', 'barbearia', 'padaria', 'pet shop'] as $s)
+            if (count($sugestoes) < 8 && !in_array($s, $sugestoes, true)) $sugestoes[] = $s;
+    }
+    $url_busca = url(cidade_web($cidade) . '/buscar');
+    ob_start();
+    ?>
+<div class="sem-resultado">
+  <p class="aviso erro">Nada encontrado com “<?= h($termo) ?>” em <?= h($nome_cidade) ?>.</p>
+  <p class="discreto">Dica: escreva só o principal, como <b>pizzaria</b>, <b>mecânica</b> ou <b>farmácia</b>.</p>
+
+  <?php if ($outras): ?>
+  <h2>Tem em outras cidades</h2>
+  <p class="chips"><?php foreach ($outras as $s => $n): ?><a href="<?= h(url(cidade_web($s) . '/buscar') . '?' . http_build_query(['q' => $termo])) ?>" rel="nofollow"><?= h(nome_cidade($s, true)) ?> · <?= web_num($n) ?></a><?php endforeach ?></p>
+  <?php endif ?>
+
+  <h2>O pessoal de <?= h($nome_cidade) ?> procura</h2>
+  <p class="chips"><?php foreach ($sugestoes as $s): ?><a href="<?= h($url_busca . '?' . http_build_query(['q' => $s])) ?>" rel="nofollow"><?= h($s) ?></a><?php endforeach ?></p>
+
+  <h2>Ou veja por área</h2>
+  <div class="areas">
+    <?php foreach (web_areas($cidade) as $a): ?>
+      <a class="area" href="<?= h(url_area($cidade, $a['slug'])) ?>"><i style="background:<?= h($a['cor']) ?>"><?= emoji_area($a['icone']) ?></i><span><b><?= h($a['nome']) ?></b><small><?= web_qtd($a['total'], 'lugar', 'lugares') ?></small></span></a>
+    <?php endforeach ?>
+  </div>
+
+  <div class="convite-incluir">
+    <p><b>Conhece um lugar assim em <?= h($nome_cidade) ?>?</b> Inclua o negócio no Acha Fácil de graça. Pode ser o seu ou de alguém que você indica.</p>
+    <a class="botao" href="<?= h(url('incluir.php') . '?' . http_build_query(['cidade' => $cidade])) ?>" rel="nofollow">Incluir um negócio de graça</a>
+  </div>
+</div>
+<?php
+    return (string)ob_get_clean();
 }
 
 /** Página não encontrada (404 de verdade, sem ir para o Google). */

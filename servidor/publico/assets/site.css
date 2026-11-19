@@ -588,3 +588,10 @@ html.fj-aberta, html.fj-aberta body { overflow: hidden; }
 .painel-atalho span { color: var(--texto2); font-size: .92rem; }
 .painel-atalho.amarelo { border-color: var(--amarelo); background: var(--amarelo-claro); }
 .painel-atalho:hover { border-color: var(--verde2); }
+
+/* 19/11 (passo 106): busca corrigida/parcial e página sem resultado */
+.aviso-busca { margin: 0 0 14px; padding: 10px 14px; border-radius: 14px; background: var(--amarelo-claro); color: var(--verde); font-size: .95rem; }
+.sem-resultado h2 { font-size: 1.15rem; margin: 22px 0 10px; }
+.sem-resultado .areas { margin-bottom: 8px; }
+.convite-incluir { margin: 24px 0 8px; padding: 16px 18px; border-radius: 16px; background: var(--verde-claro); }
+.convite-incluir p { margin: 0 0 12px; }

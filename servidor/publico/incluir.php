@@ -17,7 +17,7 @@ $tipos_area = tipos_por_area();
 $pronto = valor("SELECT 1 FROM migracoes WHERE nome = '012-pedido-incluir.sql'");
 $erro = null;
 $enviado = false;
-$f = $_POST;
+$f = e_post() ? $_POST : ['cidade' => (string)($_GET['cidade'] ?? '')];   // 19/11: ?cidade= vem da busca sem resultado
 
 if (e_post() && $pronto) {
     exigir_post();
