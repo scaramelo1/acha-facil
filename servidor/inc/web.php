@@ -132,23 +132,7 @@ function web_parecidos(array $p, int $limite = 6): array {
 }
 
 // ---------- horário ----------
-/** Aberto agora? true/false, ou null se o horário de hoje não foi informado (feriado o site não sabe: usa o dia da semana). */
-function aberto_agora(array $h, ?int $agora = null): ?bool {
-    $agora ??= time();
-    $campo = fn(int $dia) => $dia === 6 ? 'sab' : ($dia === 7 ? 'dom' : 'semana');
-    $dia = (int)date('N', $agora);
-    $min = (int)date('G', $agora) * 60 + (int)date('i', $agora);
-    $m = fn(string $hora) => (int)substr($hora, 0, 2) * 60 + (int)substr($hora, 3, 2);
-    // ontem aberto até depois da meia-noite?
-    $ontem = $h[$campo($dia === 1 ? 7 : $dia - 1)] ?? null;
-    if ($ontem && $ontem['sit'] === 'aberto' && $m($ontem['fecha']) < $m($ontem['abre']) && $min < $m($ontem['fecha'])) return true;
-    $hoje = $h[$campo($dia)] ?? null;
-    if (!$hoje) return null;
-    if ($hoje['sit'] === '24h') return true;
-    if ($hoje['sit'] === 'fechado') return false;
-    [$a, $f] = [$m($hoje['abre']), $m($hoje['fecha'])];
-    return $f > $a ? ($min >= $a && $min < $f) : $min >= $a;
-}
+// aberto_agora() foi para inc/horarios.php (19/11)
 function campo_de_hoje(?int $agora = null): string {
     $dia = (int)date('N', $agora ?? time());
     return $dia === 6 ? 'sab' : ($dia === 7 ? 'dom' : 'semana');

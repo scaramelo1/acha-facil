@@ -1,7 +1,8 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { chamar, type Categoria, type ProfissionalResumo } from '../../api/cliente';
+import { chamar, reais, type Categoria, type OfertaInicio, type ProfissionalResumo } from '../../api/cliente';
 import { useCidade } from '../../cidade';
 import { Cabecalho } from '../../componentes/Cabecalho';
 import { CartaoDono } from '../../componentes/CartaoDono';
@@ -14,6 +15,8 @@ interface Inicio {
   destaques: ProfissionalResumo[];
   categorias: Categoria[];
   populares: ProfissionalResumo[];
+  /** 19/11: Ofertas da semana da cidade (servidor antigo nao manda). */
+  ofertas?: OfertaInicio[];
   total: number;
 }
 
@@ -53,6 +56,37 @@ export default function TelaInicio() {
           </View>
         ) : dados ? (
           <>
+            {/* 19/11: Ofertas da semana (beneficio pago do Destaque), so quando tem alguma no ar */}
+            {(dados.ofertas?.length ?? 0) > 0 && (
+              <>
+                <Titulo>Ofertas da semana</Titulo>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}>
+                  {dados.ofertas!.map((o) => (
+                    <Pressable
+                      key={o.id}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Oferta: ${o.titulo}, ${o.nome}`}
+                      onPress={() => router.push(`/profissional/${o.id}?origem=inicio`)}
+                      style={({ pressed }) => [estilos.oferta, pressed && { opacity: 0.85 }]}
+                    >
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                        <MaterialCommunityIcons name="tag-outline" size={16} color={cores.verde} />
+                        <Text style={estilos.ofertaValidade} numberOfLines={1}>{o.validade}</Text>
+                      </View>
+                      <Text style={estilos.ofertaTitulo} numberOfLines={3}>{o.titulo}</Text>
+                      {o.precoPor != null && (
+                        <Text style={estilos.ofertaPreco}>
+                          {o.precoDe != null && <Text style={estilos.ofertaDe}>{reais(o.precoDe)}  </Text>}
+                          {reais(o.precoPor)}
+                        </Text>
+                      )}
+                      <Text style={estilos.miniTipo} numberOfLines={1}>{o.nome}</Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </>
+            )}
+
             {/* 17/11 (pedido do usuario): Destaque antes das categorias; sem Destaque pago, o convite fica depois delas */}
             {dados.destaques.length > 0 && (
               <View style={{ marginTop: 20, marginBottom: 12 }}>
@@ -131,5 +165,10 @@ const estilos = StyleSheet.create({
   mini: { ...cartao, width: 140, overflow: 'hidden', paddingBottom: 2 },
   miniNome: { fontSize: fonte.pequena, fontWeight: '900', color: cores.texto, lineHeight: 20 },
   miniTipo: { fontSize: 14, color: cores.textoSuave, marginTop: 2 },
+  oferta: { ...cartao, width: 220, padding: 12, gap: 4, borderWidth: 2, borderColor: cores.amarelo, backgroundColor: cores.fundoSuave },
+  ofertaValidade: { fontSize: 13, fontWeight: '900', color: cores.verde, flex: 1 },
+  ofertaTitulo: { fontSize: fonte.pequena, fontWeight: '900', color: cores.texto, lineHeight: 21 },
+  ofertaPreco: { fontSize: fonte.media, fontWeight: '900', color: cores.verde },
+  ofertaDe: { fontSize: 14, fontWeight: '700', color: cores.textoSuave, textDecorationLine: 'line-through' },
   rodape: { textAlign: 'center', color: cores.textoSuave, fontSize: 14, marginTop: 20 },
 });

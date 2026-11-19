@@ -6,7 +6,7 @@ import { FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, Vi
 import { chamar, type ProfissionalResumo } from '../api/cliente';
 import { useCidade } from '../cidade';
 import { Cabecalho } from '../componentes/Cabecalho';
-import { Botao, CartaoProfissional, Carregando, Pilula, Vazio } from '../componentes/ui';
+import { AVISO_ABERTO, Botao, CartaoProfissional, Carregando, Pilula, Vazio } from '../componentes/ui';
 import { cartao, cores, fonte } from '../tema';
 
 interface Filtros {
@@ -27,6 +27,7 @@ export default function TelaBusca() {
   const [tipo, setTipo] = useState<string | null>(null);
   const [filtros, setFiltros] = useState<Filtros>(SEM_FILTRO);
   const [abrirFiltros, setAbrirFiltros] = useState(false);
+  const [aberto, setAberto] = useState(false);   // 19/11: "Aberto agora" 
 
   // busca enquanto digita, esperando a pessoa parar por meio segundo; termo novo zera os filtros
   useEffect(() => {
@@ -59,12 +60,13 @@ export default function TelaBusca() {
     const l = (itens ?? []).filter(
       (p) =>
         (!tipo || p.tipo === tipo) &&
+        (!aberto || p.abertoAgora === true) &&
         (!filtros.categoria || p.categoria === filtros.categoria) &&
         (!filtros.bairro || p.bairro === filtros.bairro) &&
         (!filtros.comTelefone || p.temTelefone || p.temWhatsapp),
     );
     return filtros.ordem === 'az' ? [...l].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')) : l;
-  }, [itens, tipo, filtros]);
+  }, [itens, tipo, filtros, aberto]);
   const nFiltros = Number(!!filtros.categoria) + Number(!!filtros.bairro) + Number(filtros.ordem === 'az') + Number(filtros.comTelefone);
 
   return (
@@ -125,19 +127,23 @@ export default function TelaBusca() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32, flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
           ListHeaderComponent={
-            tipos.length > 1 ? (
+            <View>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 14, gap: 8 }}>
-                <Pilula texto="Todos" ativo={tipo === null} onPress={() => setTipo(null)} />
-                {tipos.map(([nome]) => (
-                  <Pilula key={nome} texto={nome} ativo={tipo === nome} onPress={() => setTipo(tipo === nome ? null : nome)} />
-                ))}
+                <Pilula texto="Aberto agora" ativo={aberto} onPress={() => setAberto(!aberto)} />
+                {tipos.length > 1 && <Pilula texto="Todos" ativo={tipo === null} onPress={() => setTipo(null)} />}
+                {tipos.length > 1 &&
+                  tipos.map(([nome]) => <Pilula key={nome} texto={nome} ativo={tipo === nome} onPress={() => setTipo(tipo === nome ? null : nome)} />)}
               </ScrollView>
-            ) : (
-              <View style={{ height: 14 }} />
-            )
+              {aberto && <Text style={[estilos.sub, { marginTop: -4, marginBottom: 10 }]}>{AVISO_ABERTO}</Text>}
+            </View>
           }
           renderItem={({ item }) => <CartaoProfissional p={item} origem="busca" />}
-          ListEmptyComponent={<Vazio icone="store-search-outline" texto={nFiltros || tipo ? 'Nada encontrado com esses filtros.' : 'Nada encontrado. Tente outra palavra.'} />}
+          ListEmptyComponent={
+            <Vazio
+              icone="store-search-outline"
+              texto={aberto ? 'Nenhum lugar com horário informado está aberto agora.' : nFiltros || tipo ? 'Nada encontrado com esses filtros.' : 'Nada encontrado. Tente outra palavra.'}
+            />
+          }
         />
       )}
 

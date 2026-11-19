@@ -1,11 +1,12 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, ScrollView, View } from 'react-native';
+import { FlatList, ScrollView, Text, View } from 'react-native';
 
 import { chamar, type ProfissionalResumo, type TipoNegocio } from '../../api/cliente';
 import { useCidade } from '../../cidade';
 import { Cabecalho } from '../../componentes/Cabecalho';
-import { CartaoProfissional, Carregando, Falha, Pilula, Vazio, useCarregar } from '../../componentes/ui';
+import { AVISO_ABERTO, CartaoProfissional, Carregando, Falha, Pilula, Vazio, useCarregar } from '../../componentes/ui';
+import { cores } from '../../tema';
 
 interface Resposta {
   categoria: { id: number; nome: string; icone: string; cor: string };
@@ -25,11 +26,12 @@ export default function TelaCategoria() {
   const { dados, erro, carregando, recarregar } = useCarregar(() => chamar<Resposta>(`categoria.php?id=${id}`), `categoria-${id}-${cidade.slug}`);
   const [tipo, setTipo] = useState<string | null>(null);
   const [termo, setTermo] = useState('');
+  const [aberto, setAberto] = useState(false);
 
   const c = dados?.categoria;
   const t = simples(termo.trim());
   const lista = (dados?.profissionais ?? []).filter(
-    (p) => (!tipo || p.tipo === tipo) && (!t || simples(`${p.nome} ${p.tipo} ${p.bairro ?? ''}`).includes(t)),
+    (p) => (!tipo || p.tipo === tipo) && (!aberto || p.abertoAgora === true) && (!t || simples(`${p.nome} ${p.tipo} ${p.bairro ?? ''}`).includes(t)),
   );
   // só mostra filtros que valem a pena (tipos com pelo menos 2 lugares)
   const tipos = (dados?.tipos ?? []).filter((x) => x.total >= 2);
@@ -53,14 +55,13 @@ export default function TelaCategoria() {
             subtitulo={dados ? `${total.toLocaleString('pt-BR')} ${total === 1 ? 'lugar' : 'lugares'} em ${cidade.curto}` : undefined}
             busca={{ texto: 'Buscar comércios ou serviços', valor: termo, aoMudar: setTermo }}
           />
-          {tipos.length > 1 && (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, gap: 8 }}>
-              <Pilula texto="Todos" ativo={tipo === null} onPress={() => setTipo(null)} />
-              {tipos.map((x) => (
-                <Pilula key={x.nome} texto={x.nome} ativo={tipo === x.nome} onPress={() => setTipo(tipo === x.nome ? null : x.nome)} />
-              ))}
-            </ScrollView>
-          )}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, gap: 8 }}>
+            <Pilula texto="Aberto agora" ativo={aberto} onPress={() => setAberto(!aberto)} />
+            {tipos.length > 1 && <Pilula texto="Todos" ativo={tipo === null} onPress={() => setTipo(null)} />}
+            {tipos.length > 1 &&
+              tipos.map((x) => <Pilula key={x.nome} texto={x.nome} ativo={tipo === x.nome} onPress={() => setTipo(tipo === x.nome ? null : x.nome)} />)}
+          </ScrollView>
+          {aberto && <Text style={{ paddingHorizontal: 16, paddingTop: 10, fontSize: 15, color: cores.textoSuave }}>{AVISO_ABERTO}</Text>}
         </View>
       }
       renderItem={({ item }) => (
@@ -74,7 +75,10 @@ export default function TelaCategoria() {
         ) : erro && !dados ? (
           <Falha mensagem={erro} tentar={recarregar} />
         ) : (
-          <Vazio icone="store-search-outline" texto={termo || tipo ? 'Nada encontrado com esse filtro.' : 'Ainda não há lugares nesta área. Volte em breve!'} />
+          <Vazio
+            icone="store-search-outline"
+            texto={aberto ? 'Nenhum lugar com horário informado está aberto agora.' : termo || tipo ? 'Nada encontrado com esse filtro.' : 'Ainda não há lugares nesta área. Volte em breve!'}
+          />
         )
       }
     />

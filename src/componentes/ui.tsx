@@ -246,6 +246,7 @@ export function CartaoProfissional({ p, distancia, origem }: { p: ProfissionalRe
               <Text style={estilos.distanciaTexto}>{textoDistancia(distancia)}</Text>
             </View>
           )}
+          {p.abertoAgora === true && <Etiqueta texto="Aberto agora" icone="clock-outline" />}
           {p.destaque && <Etiqueta texto="Destaque" icone="star-four-points" amarela />}
           {!p.destaque && (p.fichaCompleta ?? p.cadastrado) && <Etiqueta texto="Ficha completa" icone="check-circle-outline" />}
           {!p.destaque && p.fichaCompleta === false && p.donoConfirmado && <Etiqueta texto="Confirmado pelo dono" icone="check-circle-outline" />}
@@ -458,3 +459,6 @@ export const estilos = StyleSheet.create({
   },
   rotulo: { fontSize: fonte.normal, fontWeight: '800', color: cores.texto, marginBottom: 6, marginTop: 16 },
 });
+
+/** 19/11: aviso do filtro "Aberto agora" (so entra quem informou o horario no painel do site). */
+export const AVISO_ABERTO = 'Só aparecem os comércios que informaram o horário. Muitos ainda não informaram.';

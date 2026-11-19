@@ -831,3 +831,13 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (inicio.php) e `oferta` (profissional.php); o app ainda não mostra (falta tela no app).
    Testado em 19/11: oferta de teste no ar (ficha, cidade, API) e apagada; fluxo pago → recusa → correção → aprovação →
    encerrar simulado no servidor (sem avisos de verdade); link de pagamento do Mercado Pago criado (não pago).
+105. 🟡 App 1.12.0: oferta, "Aberto agora" e compartilhar (19/11, pedido do usuário; código feito, falta testar no PC e gerar o build):
+   (1) Ficha: quadro amarelo "Oferta da semana · até domingo, 22/11" com foto, detalhes e preço de/por (`oferta` da API).
+   Início: faixa "Ofertas da semana" antes do Destaque, só quando tem oferta no ar (`ofertas` de inicio.php).
+   (2) Pílula "Aberto agora" na busca e na categoria (filtra `abertoAgora === true`, com o aviso "Só aparecem os comércios que
+   informaram o horário") e etiqueta "Aberto agora" nos cartões. O servidor manda `abertoAgora` em todas as listas
+   (prof_resumo; aberto_agora() foi para inc/horarios.php) e a busca da API aceita ?aberto=1.
+   (3) Compartilhar: "Olha esse lugar: Nome (tipo), em Cidade" + link da ficha no site (`linkSite` da API); conta como
+   'compartilhar' quando a pessoa de fato compartilha.
+   (4) Aviso do relatório mensal abre o relatório no navegador (dados.url, passo 104).
+   Falta: `npx tsc --noEmit` e `npx expo lint` no PC, testar no emulador, build (EAS volta em 01/12 ou no PC, passo 37) e enviar à Play.

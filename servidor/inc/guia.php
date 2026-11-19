@@ -158,7 +158,7 @@ function tem_dono(array $p): bool {
 
 const CAMPOS_RESUMO = 'p.id, p.nome, p.tipo, p.cidade, p.importado, p.servicos, p.bairro, p.atende_em_casa, p.foto, p.fotos, p.verificado, p.plano,
     ' . SQL_DESTAQUE . ' AS destaque_pago, ' . SQL_TEM_DONO . ' AS tem_dono, ' . SQL_FICHA_PAGA . ' AS ficha_paga,
-    p.nota_media, p.total_avaliacoes, p.whatsapp, p.telefone, c.id AS categoria_id, c.nome AS categoria, c.icone, c.cor';
+    p.nota_media, p.total_avaliacoes, p.whatsapp, p.telefone, p.horarios, c.id AS categoria_id, c.nome AS categoria, c.icone, c.cor';
 
 require_once __DIR__ . '/horarios.php';
 
@@ -208,6 +208,8 @@ function prof_resumo(array $p): array {
         // donoConfirmado = o dono assumiu (grátis ou pago): "Dados confirmados pelo dono". Apps antes do 1.9.0 não leem.
         'fichaCompleta' => ficha_paga($p),
         'donoConfirmado' => !$p['importado'] || tem_dono($p),
+        // 19/11: true/false pelo horário do painel; null = horário não informado (filtro "Aberto agora" do app 1.12.0)
+        'abertoAgora' => aberto_agora(horarios_ler($p['horarios'] ?? null)),
     ];
 }
 
@@ -299,12 +301,13 @@ function da_categoria(int $categoria_id, string $cidade): array {
 }
 
 // $cidade null = todas (busca do site, para o dono achar o negócio)
-function buscar(string $termo, ?string $cidade, int $limite = 50): array {
+function buscar(string $termo, ?string $cidade, int $limite = 50, bool $so_com_horario = false): array {
     $termo = trim(mb_substr($termo, 0, 60));
     if (mb_strlen($termo) < 2) return [];
     $like = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $termo) . '%';
     return array_map('prof_resumo', linhas('SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
-        WHERE ' . visivel($cidade) . ' AND (p.nome LIKE ? OR p.tipo LIKE ? OR p.servicos LIKE ? OR p.descricao LIKE ? OR p.bairro LIKE ? OR c.nome LIKE ?)
+        WHERE ' . visivel($cidade) . ' AND (p.nome LIKE ? OR p.tipo LIKE ? OR p.servicos LIKE ? OR p.descricao LIKE ? OR p.bairro LIKE ? OR c.nome LIKE ?)'
+        . ($so_com_horario ? " AND p.horarios IS NOT NULL AND p.horarios NOT IN ('', '[]', '{}')" : '') . '
         ORDER BY (c.nome LIKE ? OR p.tipo LIKE ? OR p.nome LIKE ?) DESC, ' . SQL_DESTAQUE . ' DESC, ' . SQL_FICHA_PAGA . ' DESC, RAND(?) LIMIT ' . $limite,
         [$like, $like, $like, $like, $like, $like, $like, $like, $like, semente_dia()]));
 }
@@ -328,6 +331,7 @@ function prof_completo(array $p, ?int $usuario_id): array {
         'endereco' => $p['endereco'],
         'mapa' => $p['mapa'] ?: ($p['endereco'] ? 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($p['endereco'] . ', ' . nome_cidade($p['cidade']) . ' - ' . uf_cidade($p['cidade'])) : null),
         'site' => $p['site'],
+        'linkSite' => url_publica(caminho_ficha((int)$p['id'], (string)$p['nome'], (string)$p['cidade'])),   // 19/11: compartilhar no app
         'linkAssumir' => $p['importado'] && !tem_dono($p) ? url_publica('planos.php?id=' . $p['id']) : null,
         'linkRemover' => $p['importado'] && !tem_dono($p) ? url_publica('perfil.php?id=' . $p['id'] . '&acao=remover') : null,
         'horario' => $p['horario'],

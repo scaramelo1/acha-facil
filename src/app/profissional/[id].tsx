@@ -2,9 +2,9 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useCallback, useRef, useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 
-import { chamar, ORIGENS, registrarContato, type Origem, type Profissional } from '../../api/cliente';
+import { chamar, ORIGENS, reais, registrarContato, type Oferta, type Origem, type Profissional } from '../../api/cliente';
 import { Cabecalho } from '../../componentes/Cabecalho';
 import { CapaComercio } from '../../componentes/CapaComercio';
 import { Horarios } from '../../componentes/Horarios';
@@ -56,8 +56,16 @@ export default function TelaProfissional() {
   };
   // passo 59: o convite ao dono fica só no cartao "Este comércio é seu?", logo abaixo dos espaços trancados
   const temHorario = !!(p.horarios?.length || p.horario);
-  const compartilhar = () =>
-    Share.share({ message: `${p.nome} (${p.tipo}) no Acha Fácil${p.telefoneFormatado ? `: ${p.telefoneFormatado}` : ''}` });
+  // 19/11: "Olha esse lugar" com o link da ficha no site (abre para quem nao tem o app); conta como 'compartilhar'
+  const compartilhar = async () => {
+    const link = p.linkSite ?? 'https://achafacilapp.com.br/';
+    try {
+      const r = await Share.share({ message: `Olha esse lugar: ${p.nome}${p.tipo ? ` (${p.tipo})` : ''}, em ${p.cidade}\n${link}` });
+      if (r.action === Share.sharedAction) registrarContato(p.id, 'compartilhar');
+    } catch {
+      // cancelou ou o celular nao deixou: nada a fazer
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 48 }}>
@@ -88,6 +96,8 @@ export default function TelaProfissional() {
             {usuario?.admin && <BotaoEditar id={p.id} aoVoltar={recarregar} />}
           </View>
         </View>
+
+        {p.oferta ? <QuadroOferta oferta={p.oferta} /> : null}
 
         <View style={estilos.acoes}>
           {p.mapa && <Botao titulo="Como chegar" icone="navigation-variant" tipo="amarelo" onPress={() => abrir('mapa', p.mapa!)} estilo={{ flex: 1, paddingHorizontal: 8 }} />}
@@ -223,6 +233,27 @@ export default function TelaProfissional() {
   );
 }
 
+/** Oferta da semana (so Destaque): titulo, detalhes, preco de/por, foto e ate quando vale. */
+function QuadroOferta({ oferta: o }: { oferta: Oferta }) {
+  return (
+    <View style={estilos.oferta}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+        <MaterialCommunityIcons name="tag-outline" size={20} color={cores.verde} />
+        <Text style={estilos.ofertaSelo}>Oferta da semana · {o.validade}</Text>
+      </View>
+      {o.foto ? <Image source={{ uri: o.foto }} style={estilos.ofertaFoto} resizeMode="cover" accessibilityIgnoresInvertColors /> : null}
+      <Text style={estilos.ofertaTitulo}>{o.titulo}</Text>
+      {o.texto ? <Text style={ui.texto}>{o.texto}</Text> : null}
+      {o.precoPor != null && (
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 10, marginTop: 4 }}>
+          {o.precoDe != null && <Text style={estilos.ofertaDe}>{reais(o.precoDe)}</Text>}
+          <Text style={estilos.ofertaPor}>{reais(o.precoPor)}</Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
 /** "https://www.exemplo.com.br/pagina" -> "exemplo.com.br" */
 function siteCurto(url: string) {
   return url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/.*$/, '');
@@ -310,6 +341,12 @@ const estilos = StyleSheet.create({
   salvar: { width: 56, height: 56, borderRadius: 16, borderWidth: 1.5, borderColor: cores.borda, backgroundColor: cores.cartao, alignItems: 'center', justifyContent: 'center' },
   editar: { backgroundColor: cores.amarelo, borderColor: cores.amarelo },
   acoes: { flexDirection: 'row', gap: 10, marginTop: 16 },
+  oferta: { backgroundColor: cores.fundoSuave, borderWidth: 2, borderColor: cores.amarelo, borderRadius: RAIO, padding: 14, marginTop: 16, gap: 6 },
+  ofertaSelo: { fontSize: fonte.pequena - 1, fontWeight: '900', color: cores.verde },
+  ofertaFoto: { width: '100%', height: 170, borderRadius: 14 },
+  ofertaTitulo: { fontSize: fonte.media, fontWeight: '900', color: cores.texto },
+  ofertaDe: { fontSize: fonte.normal - 1, color: cores.textoSuave, textDecorationLine: 'line-through' },
+  ofertaPor: { fontSize: fonte.grande, fontWeight: '900', color: cores.verde },
   whats: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, minHeight: 56, borderRadius: 28, backgroundColor: cores.whatsapp, marginTop: 12 },
   whatsTexto: { color: '#fff', fontSize: fonte.media, fontWeight: '800' },
   aviso: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: cores.verdeClaro, borderRadius: 14, paddingHorizontal: 14, minHeight: 56, marginTop: 12 },

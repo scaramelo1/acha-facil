@@ -70,6 +70,8 @@ export interface ProfissionalResumo {
   fichaCompleta?: boolean;
   /** O dono assumiu a ficha (plano Grátis ou pago): "Dados confirmados pelo dono". */
   donoConfirmado?: boolean;
+  /** Aberto agora pelo horário do painel (null = horário não informado). Servidor de 19/11 em diante. */
+  abertoAgora?: boolean | null;
 }
 
 export interface TipoNegocio {
@@ -97,6 +99,32 @@ export interface HorarioCampo {
   fecha: string | null;
 }
 
+/** Oferta da semana (beneficio pago do Destaque, servidor 19/11). Precos em reais; validade ja escrita ("até domingo, 22/11"). */
+export interface Oferta {
+  titulo: string;
+  texto: string | null;
+  precoDe: number | null;
+  precoPor: number | null;
+  foto: string | null;
+  validade: string;
+}
+
+/** Oferta na faixa "Ofertas da semana" da tela inicial: a oferta e o comercio (id = comercio). */
+export interface OfertaInicio {
+  id: number;
+  nome: string;
+  titulo: string;
+  precoDe: number | null;
+  precoPor: number | null;
+  foto: string | null;
+  validade: string;
+}
+
+/** "R$ 49,90" */
+export function reais(v: number): string {
+  return 'R$ ' + v.toFixed(2).replace('.', ',');
+}
+
 export interface Profissional extends ProfissionalResumo {
   responsavel: string | null;
   descricao: string | null;
@@ -117,6 +145,10 @@ export interface Profissional extends ProfissionalResumo {
   /** Fotos do comércio: o carrossel da capa do perfil. */
   fotos?: string[];
   favorito: boolean;
+  /** Pagina da ficha no site (para compartilhar). Servidor antigo nao manda. */
+  linkSite?: string | null;
+  /** Oferta da semana no ar (so Destaque). */
+  oferta?: Oferta | null;
   minhaAvaliacao: { estrelas: number; comentario: string | null } | null;
   comentarios: Comentario[];
 }
@@ -280,7 +312,7 @@ export async function chamar<T>(caminho: string, metodo: 'GET' | 'POST' | 'DELET
 }
 
 /** Conta toques em WhatsApp, ligar etc. (estatística para o profissional). Falha em silêncio. */
-export function registrarContato(id: number, tipo: 'whatsapp' | 'ligar' | 'instagram' | 'mapa' | 'site') {
+export function registrarContato(id: number, tipo: 'whatsapp' | 'ligar' | 'instagram' | 'mapa' | 'site' | 'compartilhar') {
   chamar('contato.php', 'POST', { id, tipo, origem: 'app' }).catch(() => {});
 }
 
