@@ -68,6 +68,34 @@ try {
 } catch (PDOException) {}
 $max_hora = max(1, max($horas));
 
+// 19/11 (passo 112): tabela por hora completa. Entradas vêm de entradas_hora; visualizações e toques de contatos_hora
+// (mudança 034, só a partir de quando ela foi aplicada; antes disso essas colunas ficam com "—").
+$h0 = ['entradas' => 0, 'pre' => 0, 'gente' => 0, 'fichas' => 0, 'vis' => 0, 'pessoas' => 0, 'whatsapp' => 0, 'ligar' => 0, 'mapa' => 0, 'outros' => 0, 'compartilhar' => 0];
+$por_hora = array_fill(0, 24, $h0);
+foreach ($lista_entradas as $l) {
+    $hh = (int)date('G', strtotime($l['quando']));
+    $por_hora[$hh]['entradas']++;
+    if ((int)$l['pre'] === 1) $por_hora[$hh]['pre']++; else $por_hora[$hh]['gente']++;
+}
+$tem_hora_contatos = false;
+if (contatos_hora_prontos()) {
+    try {
+        $primeiro = valor('SELECT MIN(quando) FROM contatos_hora');
+        $tem_hora_contatos = $primeiro !== null && substr((string)$primeiro, 0, 10) <= $dia;
+        $wh = ($origem !== '' ? ' AND k.origem = ?' : '') . ($cidade !== '' ? ' AND p.cidade = ?' : '');
+        foreach (linhas("SELECT HOUR(k.quando) AS h, COUNT(DISTINCT IF(k.tipo = 'perfil', k.profissional_id, NULL)) AS fichas,
+                SUM(k.tipo = 'perfil') AS vis, SUM(k.tipo = 'perfil' AND k.pessoa = 1) AS pessoas,
+                SUM(k.tipo = 'whatsapp') AS whatsapp, SUM(k.tipo = 'ligar') AS ligar, SUM(k.tipo = 'mapa') AS mapa,
+                SUM(k.tipo IN ('site', 'instagram')) AS outros, SUM(k.tipo = 'compartilhar') AS compartilhar
+            FROM contatos_hora k JOIN profissionais p ON p.id = k.profissional_id
+            WHERE k.quando BETWEEN ? AND ?$wh GROUP BY HOUR(k.quando)", array_merge(["$dia 00:00:00", "$dia 23:59:59"], $pe)) as $l)
+            foreach (['fichas', 'vis', 'pessoas', 'whatsapp', 'ligar', 'mapa', 'outros', 'compartilhar'] as $k) $por_hora[(int)$l['h']][$k] = (int)$l[$k];
+    } catch (PDOException) {}
+}
+$tot_hora = $h0;
+foreach ($por_hora as $l) foreach ($h0 as $k => $_) $tot_hora[$k] += $l[$k];
+$max_gente = max(1, max(array_column($por_hora, 'gente')));
+
 // 4. cidades: entradas e fichas/toques
 $cidades = [];
 if (entradas_prontas()) foreach (linhas("SELECT cidade, SUM(total) AS t FROM entradas WHERE dia = ?$we GROUP BY cidade", array_merge([$dia], $pe)) as $l)
@@ -120,15 +148,33 @@ admin_inicio('Relatório do dia ' . date('d/m', strtotime($dia)), $admin);
 </table></div>
 <?php endif ?>
 
-<?php if (array_sum($horas)): ?>
-<h2>Entradas por hora</h2>
-<p class="discreto">Só quem entrou no site com hora registrada, sem o pré-carregamento do Chrome.</p>
-<div class="horas-dia">
-  <?php foreach ($horas as $hh => $n): ?>
-  <div class="hora-linha"><span><?= sprintf('%02dh', $hh) ?></span><i style="width:<?= round(100 * $n / $max_hora) ?>%"></i><b><?= $n ?: '' ?></b></div>
-  <?php endforeach ?>
-</div>
-<?php endif ?>
+<h2>Por hora</h2>
+<p class="discreto">Entradas no site com a hora registrada; "pré" é o Chrome baixando a página antes do clique.
+  <?php if (!$tem_hora_contatos): ?>Visualizações e toques por hora só existem a partir da mudança 034 (antes disso só o total do dia, lá em cima).<?php else: ?>Fichas abertas, visualizações e toques contam site e app<?= $origem !== '' ? ' (só desta origem)' : '' ?>.<?php endif ?></p>
+<div class="tabela"><table class="por-hora">
+  <tr><th>Hora</th><th>Entradas</th><th>De pessoas</th><th>Pré</th><th>Fichas abertas</th><th>Visualizações</th><th>Pessoas</th><th>WhatsApp</th><th>Ligar</th><th>Mapa</th><th>Site/Insta</th><th>Toques</th><th>Compart.</th></tr>
+  <?php foreach ($por_hora as $hh => $l):
+    $toq = $l['whatsapp'] + $l['ligar'] + $l['mapa'] + $l['outros'];
+    $vazia = !$l['entradas'] && !$l['vis'] && !$toq && !$l['compartilhar'];
+    $cel = fn(string $k) => !$tem_hora_contatos ? '<span class="discreto">—</span>' : ($l[$k] ? num($l[$k]) : '<span class="discreto">0</span>'); ?>
+  <tr<?= $vazia ? ' class="discreto"' : '' ?><?= $dia === $hoje_d && $hh === (int)date('G') ? ' style="background:var(--amarelo-claro)"' : '' ?>>
+    <td><strong><?= sprintf('%02dh', $hh) ?></strong></td>
+    <td><?= $l['entradas'] ? num($l['entradas']) : '<span class="discreto">0</span>' ?></td>
+    <td class="com-barra"><i style="width:<?= round(60 * $l['gente'] / $max_gente) ?>px"></i><?= $l['gente'] ? '<strong>' . num($l['gente']) . '</strong>' : '<span class="discreto">0</span>' ?></td>
+    <td><?= $l['pre'] ? num($l['pre']) : '<span class="discreto">0</span>' ?></td>
+    <td><?= $cel('fichas') ?></td><td><?= $cel('vis') ?></td><td><?= $cel('pessoas') ?></td>
+    <td><?= $cel('whatsapp') ?></td><td><?= $cel('ligar') ?></td><td><?= $cel('mapa') ?></td><td><?= $cel('outros') ?></td>
+    <td><?= !$tem_hora_contatos ? '<span class="discreto">—</span>' : ($toq ? '<strong>' . num($toq) . '</strong>' : '<span class="discreto">0</span>') ?></td>
+    <td><?= $cel('compartilhar') ?></td>
+  </tr>
+  <?php endforeach;
+  $tt = $tot_hora['whatsapp'] + $tot_hora['ligar'] + $tot_hora['mapa'] + $tot_hora['outros'];
+  $ct = fn(string $k) => $tem_hora_contatos ? '<strong>' . num($tot_hora[$k]) . '</strong>' : '—'; ?>
+  <tr class="total-semana"><td><strong>Dia</strong></td><td><strong><?= num($tot_hora['entradas']) ?></strong></td><td><strong><?= num($tot_hora['gente']) ?></strong></td>
+    <td><strong><?= num($tot_hora['pre']) ?></strong></td><td><?= $ct('fichas') ?> <small class="discreto">(soma das horas)</small></td><td><?= $ct('vis') ?></td><td><?= $ct('pessoas') ?></td>
+    <td><?= $ct('whatsapp') ?></td><td><?= $ct('ligar') ?></td><td><?= $ct('mapa') ?></td><td><?= $ct('outros') ?></td>
+    <td><?= $tem_hora_contatos ? '<strong>' . num($tt) . '</strong>' : '—' ?></td><td><?= $ct('compartilhar') ?></td></tr>
+</table></div>
 
 <?php if ($cidades): ?>
 <h2>Cidades</h2>
@@ -171,6 +217,10 @@ admin_inicio('Relatório do dia ' . date('d/m', strtotime($dia)), $admin);
   .hora-linha { display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; gap: 8px; font-size: .85rem; }
   .hora-linha i { display: block; height: 12px; border-radius: 6px; background: var(--verde); min-width: 2px; }
   .hora-linha b { text-align: right; }
+  .por-hora td, .por-hora th { text-align: right; white-space: nowrap; }
+  .por-hora td:first-child, .por-hora th:first-child { text-align: left; }
+  .por-hora .com-barra i { display: inline-block; height: 10px; border-radius: 5px; background: var(--verde); margin-right: 6px; vertical-align: middle; }
+  .por-hora tr.total-semana td { border-top: 2px solid var(--verde); }
 </style>
 <?php
 admin_fim();

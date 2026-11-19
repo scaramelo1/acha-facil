@@ -912,3 +912,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (?dia=&origem=&cidade=; origem vazia = todas, site e app): resumo (entradas, de pessoas, pré-carregadas, fichas, vistas,
    toques por tipo), de onde vieram, entradas por hora, cidades, fichas abertas com toques por comércio e páginas onde
    entraram com a hora; navega para o dia anterior/seguinte. Conferido com os dados de 18/11.
+112. 🟡 Relatório do dia: tabela "Por hora" completa (19/11, pedido do usuário): no lugar das barrinhas, tabela de 00h a 23h com
+   Entradas, De pessoas (com barrinha), Pré, Fichas abertas, Visualizações, Pessoas, WhatsApp, Ligar, Mapa, Site/Insta, Toques e
+   Compartilhar, mais a linha "Dia" com os totais; a hora atual fica destacada. Entradas por hora já existiam (entradas_hora);
+   visualizações e toques por hora são novos: tabela contatos_hora (**mudança 034, o usuário aplica com instalar.sh**), gravada
+   por contar_hora() em inc/numeros.php. Dias antes da 034 mostram "—" nessas colunas. Testado em cópia.

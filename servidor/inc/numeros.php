@@ -151,6 +151,7 @@ function contar_visita_017(int $profissional_id, string $origem): void {
     $pessoa = $n === 1 ? 1 : 0;
     q("INSERT INTO contatos (profissional_id, tipo, dia, origem, total, pessoas) VALUES (?, 'perfil', CURDATE(), ?, 1, ?)
         ON DUPLICATE KEY UPDATE total = total + 1, pessoas = pessoas + ?", [$profissional_id, origem_valida($origem), $pessoa, $pessoa]);
+    contar_hora($profissional_id, 'perfil', origem_valida($origem), $pessoa);
     // de vez em quando apaga o que não serve mais (só o dia de hoje importa para separar as pessoas)
     if (random_int(1, 300) === 1) q('DELETE FROM vistas WHERE dia < CURDATE() - INTERVAL 1 DAY');
 }
@@ -161,7 +162,24 @@ function contar_contato(int $profissional_id, string $tipo, string $origem = 'ap
     try {
         q('INSERT INTO contatos (profissional_id, tipo, dia, origem, total) VALUES (?, ?, CURDATE(), ?, 1) ON DUPLICATE KEY UPDATE total = total + 1',
             [$profissional_id, $tipo, in_array($origem, ORIGENS_SITE, true) ? $origem : 'app']);
+        contar_hora($profissional_id, $tipo, in_array($origem, ORIGENS_SITE, true) ? $origem : 'app');
     } catch (PDOException $e) { contar_sem_017($profissional_id, $tipo, $e); }
+}
+
+/** 19/11 (passo 112, mudança 034): a hora de cada visualização e toque, para a tabela "Por hora" do relatório do dia. */
+function contatos_hora_prontos(): bool {
+    static $ok = null;
+    if ($ok === null) {
+        try { $ok = (bool)valor("SELECT 1 FROM migracoes WHERE nome = '034-contatos-hora.sql'"); }
+        catch (PDOException) { $ok = false; }
+    }
+    return $ok;
+}
+function contar_hora(int $profissional_id, string $tipo, string $origem, int $pessoa = 0): void {
+    if (!contatos_hora_prontos()) return;
+    try {
+        q('INSERT INTO contatos_hora (profissional_id, tipo, origem, pessoa) VALUES (?, ?, ?, ?)', [$profissional_id, $tipo, $origem, $pessoa]);
+    } catch (PDOException $e) { error_log('Acha Fácil contatos_hora: ' . $e->getMessage()); }
 }
 
 /** Banco ainda sem a mudança 017 (ou falha qualquer): conta do jeito antigo, sem origem nem pessoas, e anota no log. */
