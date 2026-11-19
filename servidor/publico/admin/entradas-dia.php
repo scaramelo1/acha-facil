@@ -78,10 +78,11 @@ foreach ($lista_entradas as $l) {
     if ((int)$l['pre'] === 1) $por_hora[$hh]['pre']++; else $por_hora[$hh]['gente']++;
 }
 $tem_hora_contatos = false;
+$inicio_hora = null;   // hora em que a 034 foi aplicada: antes dela, no mesmo dia, as colunas ficam "—"
 if (contatos_hora_prontos()) {
     try {
-        $primeiro = valor('SELECT MIN(quando) FROM contatos_hora');
-        $tem_hora_contatos = $primeiro !== null && substr((string)$primeiro, 0, 10) <= $dia;
+        $inicio_hora = (string)valor("SELECT aplicada_em FROM migracoes WHERE nome = '034-contatos-hora.sql'");
+        $tem_hora_contatos = $inicio_hora !== '' && substr($inicio_hora, 0, 10) <= $dia;
         $wh = ($origem !== '' ? ' AND k.origem = ?' : '') . ($cidade !== '' ? ' AND p.cidade = ?' : '');
         foreach (linhas("SELECT HOUR(k.quando) AS h, COUNT(DISTINCT IF(k.tipo = 'perfil', k.profissional_id, NULL)) AS fichas,
                 SUM(k.tipo = 'perfil') AS vis, SUM(k.tipo = 'perfil' AND k.pessoa = 1) AS pessoas,
@@ -128,12 +129,12 @@ admin_inicio('Relatório do dia ' . date('d/m', strtotime($dia)), $admin);
 </div>
 
 <div class="numeros-resumo">
-  <div><b><?= num($entradas) ?></b><span>entradas no site</span></div>
-  <div><b><?= num(max(0, $entradas - $pre)) ?></b><span>de pessoas<?= $pre ? ' (' . num($pre) . ' pré-carregadas pelo Chrome)' : '' ?></span></div>
-  <div><b><?= num($abertas) ?></b><span>fichas abertas</span></div>
-  <div><b><?= num($tot['vis']) ?></b><span>visualizações</span></div>
-  <div><b><?= num($toques) ?></b><span>toques em <?= num($tocados) ?> comércios</span></div>
-  <div><b><?= num($tot['whatsapp']) ?> · <?= num($tot['ligar']) ?> · <?= num($tot['mapa']) ?></b><span>WhatsApp · Ligar · Mapa</span></div>
+  <div><strong><?= num($entradas) ?></strong><span>entradas no site</span></div>
+  <div><strong><?= num(max(0, $entradas - $pre)) ?></strong><span>entradas de pessoas<?= $pre ? ' (' . num($pre) . ' pré-carregadas pelo Chrome)' : '' ?></span></div>
+  <div><strong><?= num($abertas) ?></strong><span>fichas abertas</span></div>
+  <div><strong><?= num($tot['vis']) ?></strong><span>visualizações</span></div>
+  <div><strong><?= num($toques) ?></strong><span>toques em <?= num($tocados) ?> comércios</span></div>
+  <div><strong><?= num($tot['whatsapp']) ?> · <?= num($tot['ligar']) ?> · <?= num($tot['mapa']) ?></strong><span>WhatsApp · Ligar · Mapa</span></div>
 </div>
 <?php if ($origem === ''): ?><p class="discreto">"Todas" junta o site (Google, direto, redes...) e o app (busca, categoria, perto...). Entradas são só do site.</p><?php endif ?>
 
@@ -150,30 +151,41 @@ admin_inicio('Relatório do dia ' . date('d/m', strtotime($dia)), $admin);
 
 <h2>Por hora</h2>
 <p class="discreto">Entradas no site com a hora registrada; "pré" é o Chrome baixando a página antes do clique.
-  <?php if (!$tem_hora_contatos): ?>Visualizações e toques por hora só existem a partir da mudança 034 (antes disso só o total do dia, lá em cima).<?php else: ?>Fichas abertas, visualizações e toques contam site e app<?= $origem !== '' ? ' (só desta origem)' : '' ?>.<?php endif ?></p>
+  <?php if ($tem_hora_contatos): ?>Fichas abertas, visualizações e toques contam site e app<?= $origem !== '' ? ' (só desta origem)' : '' ?>.<?php endif ?></p>
+<?php $ini_txt = $inicio_hora ? date('d/m \à\s H:i', strtotime($inicio_hora)) : null;
+if (!$tem_hora_contatos): ?>
+<p class="aviso erro">Neste dia o servidor guardou <strong>só o total</strong> de fichas abertas, visualizações e toques (os quadros lá em cima),
+  não a hora de cada um. Por isso a tabela abaixo mostra só as entradas. A hora começou a ser guardada <?= $ini_txt ? "em $ini_txt" : 'quando a mudança 034 for aplicada' ?>.
+  Entradas no site já tinham hora e aparecem normalmente.</p>
+<?php elseif ($inicio_hora && $dia === substr($inicio_hora, 0, 10)): ?>
+<p class="aviso ok">A hora de cada visualização e toque começou a ser guardada hoje <?= h(date('\à\s H:i', strtotime($inicio_hora))) ?>: antes disso essas colunas ficam com "—"
+  e os totais da última linha são só a partir daí (o total do dia todo está nos quadros lá em cima).</p>
+<?php endif ?>
 <div class="tabela"><table class="por-hora">
-  <tr><th>Hora</th><th>Entradas</th><th>De pessoas</th><th>Pré</th><th>Fichas abertas</th><th>Visualizações</th><th>Pessoas</th><th>WhatsApp</th><th>Ligar</th><th>Mapa</th><th>Site/Insta</th><th>Toques</th><th>Compart.</th></tr>
+  <tr><th>Hora</th><th>Entradas</th><th>De pessoas</th><th>Pré</th><?php if ($tem_hora_contatos): ?><th>Fichas abertas</th><th>Visualizações</th><th title="Pessoas diferentes que abriram fichas">Pessoas nas fichas</th><th>WhatsApp</th><th>Ligar</th><th>Mapa</th><th>Site/Insta</th><th>Toques</th><th>Compart.</th><?php endif ?></tr>
   <?php foreach ($por_hora as $hh => $l):
     $toq = $l['whatsapp'] + $l['ligar'] + $l['mapa'] + $l['outros'];
     $vazia = !$l['entradas'] && !$l['vis'] && !$toq && !$l['compartilhar'];
-    $cel = fn(string $k) => !$tem_hora_contatos ? '<span class="discreto">—</span>' : ($l[$k] ? num($l[$k]) : '<span class="discreto">0</span>'); ?>
+    // hora antes do início do registro (no dia em que a 034 entrou) também não tem dado: "—" em vez de 0
+    $sem_dado = !$tem_hora_contatos || ($inicio_hora && $dia === substr($inicio_hora, 0, 10) && $hh < (int)substr($inicio_hora, 11, 2));
+    $cel = fn(string $k) => $sem_dado ? '<span class="discreto">—</span>' : ($l[$k] ? num($l[$k]) : '<span class="discreto">0</span>'); ?>
   <tr<?= $vazia ? ' class="discreto"' : '' ?><?= $dia === $hoje_d && $hh === (int)date('G') ? ' style="background:var(--amarelo-claro)"' : '' ?>>
     <td><strong><?= sprintf('%02dh', $hh) ?></strong></td>
     <td><?= $l['entradas'] ? num($l['entradas']) : '<span class="discreto">0</span>' ?></td>
     <td class="com-barra"><i style="width:<?= round(60 * $l['gente'] / $max_gente) ?>px"></i><?= $l['gente'] ? '<strong>' . num($l['gente']) . '</strong>' : '<span class="discreto">0</span>' ?></td>
     <td><?= $l['pre'] ? num($l['pre']) : '<span class="discreto">0</span>' ?></td>
-    <td><?= $cel('fichas') ?></td><td><?= $cel('vis') ?></td><td><?= $cel('pessoas') ?></td>
+    <?php if ($tem_hora_contatos): ?><td><?= $cel('fichas') ?></td><td><?= $cel('vis') ?></td><td><?= $cel('pessoas') ?></td>
     <td><?= $cel('whatsapp') ?></td><td><?= $cel('ligar') ?></td><td><?= $cel('mapa') ?></td><td><?= $cel('outros') ?></td>
-    <td><?= !$tem_hora_contatos ? '<span class="discreto">—</span>' : ($toq ? '<strong>' . num($toq) . '</strong>' : '<span class="discreto">0</span>') ?></td>
-    <td><?= $cel('compartilhar') ?></td>
+    <td><?= $sem_dado ? '<span class="discreto">—</span>' : ($toq ? '<strong>' . num($toq) . '</strong>' : '<span class="discreto">0</span>') ?></td>
+    <td><?= $cel('compartilhar') ?></td><?php endif ?>
   </tr>
   <?php endforeach;
   $tt = $tot_hora['whatsapp'] + $tot_hora['ligar'] + $tot_hora['mapa'] + $tot_hora['outros'];
   $ct = fn(string $k) => $tem_hora_contatos ? '<strong>' . num($tot_hora[$k]) . '</strong>' : '—'; ?>
   <tr class="total-semana"><td><strong>Dia</strong></td><td><strong><?= num($tot_hora['entradas']) ?></strong></td><td><strong><?= num($tot_hora['gente']) ?></strong></td>
-    <td><strong><?= num($tot_hora['pre']) ?></strong></td><td><?= $ct('fichas') ?> <small class="discreto">(soma das horas)</small></td><td><?= $ct('vis') ?></td><td><?= $ct('pessoas') ?></td>
+    <td><strong><?= num($tot_hora['pre']) ?></strong></td><?php if ($tem_hora_contatos): ?><td><?= $ct('fichas') ?> <small class="discreto">(soma das horas)</small></td><td><?= $ct('vis') ?></td><td><?= $ct('pessoas') ?></td>
     <td><?= $ct('whatsapp') ?></td><td><?= $ct('ligar') ?></td><td><?= $ct('mapa') ?></td><td><?= $ct('outros') ?></td>
-    <td><?= $tem_hora_contatos ? '<strong>' . num($tt) . '</strong>' : '—' ?></td><td><?= $ct('compartilhar') ?></td></tr>
+    <td><?= $tem_hora_contatos ? '<strong>' . num($tt) . '</strong>' : '—' ?></td><td><?= $ct('compartilhar') ?></td><?php endif ?></tr>
 </table></div>
 
 <?php if ($cidades): ?>

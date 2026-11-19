@@ -917,3 +917,6 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Compartilhar, mais a linha "Dia" com os totais; a hora atual fica destacada. Entradas por hora já existiam (entradas_hora);
    visualizações e toques por hora são novos: tabela contatos_hora (**mudança 034, o usuário aplica com instalar.sh**), gravada
    por contar_hora() em inc/numeros.php. Dias antes da 034 mostram "—" nessas colunas. Testado em cópia.
+   19/11 (2): dias antes da 034 (aplicada 19/11 14:51) não têm hora de visualização/toque (só o total do dia; o registro do
+   Apache também não tem id nem tipo, são POST): a tabela mostra só Entradas/De pessoas/Pré com aviso explicando; no dia 19/11
+   as horas antes das 14h ficam "—". Quadros do topo arrumados (número em cima do texto) e coluna "Pessoas nas fichas".
