@@ -618,3 +618,8 @@ html.fj-aberta, html.fj-aberta body { overflow: hidden; }
 .foto-previa[hidden] { display: none; }
 .foto-previa img { width: 140px; height: 140px; object-fit: cover; border-radius: 14px; border: 2px solid var(--amarelo); }
 .foto-previa small { color: var(--texto2); }
+
+/* 19/11 (pedido do usuário): Ofertas da semana mais perto do Destaque logo abaixo */
+section.secao-ofertas { padding-bottom: 8px; }
+section.secao-ofertas .ofertas-lista { margin-bottom: 0; }
+section.secao-ofertas + section { padding-top: 32px; }

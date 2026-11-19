@@ -284,7 +284,7 @@ function web_pagina_cidade(string $cidade): void {
   </div></section>
 
   <?php if ($ofertas = ofertas_da_cidade($cidade)): // 19/11: Ofertas da semana (benefício pago do Destaque), antes de tudo ?>
-  <section><div class="conteudo">
+  <section class="secao-ofertas"><div class="conteudo">
     <h2>🏷️ Ofertas da semana em <?= h($nome) ?></h2>
     <?= web_cartoes_ofertas($ofertas) ?>
   </div></section>
