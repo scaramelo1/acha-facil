@@ -10,8 +10,8 @@ import { chamar } from './api/cliente';
 // - Instalado pela Play Store (extra.loja = 'play', vindo do app.config.js): pergunta direto para a Play
 //   (atualização no app do Google, biblioteca expo-in-app-updates). Só avisa quando a versão nova já está liberada
 //   para aquele celular, sem ninguém precisar informar nada; "Atualizar" abre a tela de atualização da própria Play.
-//   Se a Play não responder (app instalado por fora, celular sem a loja), usa a versão informada em /admin/app.php e
-//   abre a página do app na loja. Até a 1.6.0 a versão da Play não avisava nada.
+//   Se a Play não responder ou ainda não mostrar a versão nova (a Play do celular demora a atualizar), usa a versão
+//   informada em /admin/app.php e abre a página do app na loja (desde a 1.10.0; antes só quando a Play falhava). Até a 1.6.0 a versão da Play não avisava nada.
 
 export const VERSAO_INSTALADA = Constants.expoConfig?.version ?? null;
 export const DA_PLAY_STORE = Constants.expoConfig?.extra?.loja === 'play';
@@ -49,16 +49,19 @@ async function abrirPlayStore(pacote: string, pagina: string) {
 }
 
 /**
- * Pergunta para a Play se há atualização liberada para este celular. Devolve true quando a Play respondeu (com ou
- * sem atualização: aí não precisa perguntar ao servidor) e false quando não deu para perguntar.
+ * Pergunta para a Play se há atualização liberada para este celular.
+ * Devolve 'avisou' quando a Play disse que tem versão nova (e o aviso já apareceu nesta abertura) e 'sem' quando a Play
+ * disse que não tem ou não respondeu. Com 'sem' o app ainda confere a versão informada no /admin/app.php: a Play do
+ * celular pode levar horas ou dias para "ver" a versão nova e, antes da 1.10.0, isso deixava o aviso mudo.
  * O módulo é carregado só aqui (versão da Play), para o modo de desenvolvimento não precisar dele.
  */
 let avisouPlay = false;
-async function avisoPelaPlay(): Promise<boolean> {
+async function avisoPelaPlay(): Promise<'avisou' | 'sem'> {
   try {
     const Play = await import('expo-in-app-updates');
     const info = await Play.checkForUpdate();
-    if (!info.updateAvailable || avisouPlay) return true;
+    if (avisouPlay) return 'avisou';
+    if (!info.updateAvailable) return 'sem';
     avisouPlay = true;
     Alert.alert('Nova versão do Acha Fácil', 'Tem uma versão nova na Play Store. Atualize agora: seus favoritos e sua conta continuam.', [
       { text: 'Depois', style: 'cancel' },
@@ -72,9 +75,9 @@ async function avisoPelaPlay(): Promise<boolean> {
         },
       },
     ]);
-    return true;
+    return 'avisou';
   } catch {
-    return false;
+    return 'sem';
   }
 }
 
@@ -90,7 +93,7 @@ export function useAvisoDeVersao() {
       if (Date.now() - ultimaConsulta.current < INTERVALO_MS) return;
       ultimaConsulta.current = Date.now();
       try {
-        if (DA_PLAY_STORE && Platform.OS === 'android' && (await avisoPelaPlay())) return;
+        if (DA_PLAY_STORE && Platform.OS === 'android' && (await avisoPelaPlay()) === 'avisou') return;
         const r = await chamar<RespostaVersao>('versao.php');
         const versao = DA_PLAY_STORE ? (r.play?.versao ?? null) : r.versao;
         if (!versao || !precisaAtualizar(VERSAO_INSTALADA, versao) || jaAvisou.current === versao) return;

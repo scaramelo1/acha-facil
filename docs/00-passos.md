@@ -767,3 +767,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    ICONES_TIPO em inc/guia.php trocam o ícone da área pelo do tipo (barbear -> content-cut); usado em prof_resumo (app,
    todas as listas) e web_logo (site, emoji ✂️ em EMOJI_AREAS). Vale na hora, sem APK novo. Cache da web limpo.
    Ajuste 19/11 (usuário: fundo rosa não combinava): fundo marrom #8B5A3C (cor_comercio(); ICONES_TIPO = tipo => [ícone, cor]).
+98. ✅ Aviso de versão nova da Play não aparecia (19/11, pedido do usuário). Causas: (1) quando a Play do celular dizia
+   "sem atualização" (ela leva horas ou dias para ver a versão nova, e no teste fechado só aparece para testadores) o
+   app parava ali e nunca olhava a reserva do servidor; (2) a reserva (/admin/app.php, versao-play.txt) estava vazia.
+   src/versao.ts: avisoPelaPlay() devolve 'avisou'|'sem'; com 'sem' confere a versão do /admin/app.php. App 1.10.0.
+   Depois de liberar cada versão na Play: pôr o número em /admin/app.php. Obs.: APK do site parado na 1.7.1 (12/11).

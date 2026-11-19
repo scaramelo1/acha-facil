@@ -66,7 +66,7 @@ admin_inicio('App e downloads', $admin);
   <p><strong>Automático:</strong> a partir da 1.7.0, o app instalado pela Play pergunta direto para a Play Store se há
     versão nova liberada para aquele celular e mostra o aviso sozinho, com a tela de atualização da própria loja.
     Não precisa preencher nada aqui.</p>
-  <p class="discreto">Reserva (opcional): só é usado quando a Play não responde (ex.: app instalado por fora da loja).
+  <p class="discreto">Reserva: usada quando a Play não responde ou ainda não mostra a versão nova no celular (a Play demora horas ou dias; a partir da 1.10.0). Depois de liberar uma versão na Play, coloque o número dela aqui.
     Se for usar, preencha depois que a versão estiver disponível na loja.</p>
   <form method="post"><?= campo_csrf() ?>
     <label for="v">Versão disponível na Play Store</label>
