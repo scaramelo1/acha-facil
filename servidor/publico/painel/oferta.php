@@ -60,7 +60,7 @@ if (e_post()) {
         [$dados, $erro] = oferta_do_post($_POST);
         $foto = null;
         if (!$erro && ($_FILES['foto']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
-            try { $foto = salvar_foto_enviada($_FILES['foto'], $pid, 1200); } catch (RuntimeException $e) { $erro = 'Foto: ' . $e->getMessage(); }
+            try { $foto = salvar_foto_oferta($_FILES['foto'], $pid); } catch (RuntimeException $e) { $erro = 'Foto: ' . $e->getMessage(); }
         }
         if (!$erro && (int)valor('SELECT COUNT(*) FROM ofertas WHERE profissional_id = ? AND criado_em > NOW() - INTERVAL 1 DAY', [$pid]) >= 10) $erro = 'Muitas tentativas hoje. Tente amanhã.';
         if (!$erro) {
@@ -141,10 +141,10 @@ $pode_escrever = !$o || in_array($o['status'], ['aguardando_pagamento', 'recusad
   <form method="post" enctype="multipart/form-data">
     <?= campo_csrf() ?>
     <input type="hidden" name="acao" value="salvar">
-    <label for="titulo">Título da oferta</label>
-    <input id="titulo" name="titulo" required minlength="4" maxlength="80" value="<?= $v('titulo') ?>" placeholder="Ex.: Pizza grande + refri 2 L">
-    <label for="texto">Detalhes (opcional)</label>
-    <textarea id="texto" name="texto" rows="3" maxlength="400" placeholder="Ex.: De segunda a quinta, só para retirada. Não vale com outras promoções."><?= $v('texto') ?></textarea>
+    <label for="titulo">Título da oferta <small class="discreto">(até <?= OFERTA_TITULO_MAX ?> letras: curto e direto, o que é a oferta)</small></label>
+    <input id="titulo" name="titulo" required minlength="4" maxlength="<?= OFERTA_TITULO_MAX ?>" data-contar value="<?= $v('titulo') ?>" placeholder="Ex.: Pizza grande + refri 2 L">
+    <label for="texto">Detalhes (opcional) <small class="discreto">(até <?= OFERTA_TEXTO_MAX ?> letras: dias, regras, como pedir)</small></label>
+    <textarea id="texto" name="texto" rows="3" maxlength="<?= OFERTA_TEXTO_MAX ?>" data-contar placeholder="Ex.: De segunda a quinta, só para retirada. Não vale com outras promoções."><?= $v('texto') ?></textarea>
     <div class="duas-colunas">
       <div><label for="preco_de">Preço normal, "de" (opcional)</label>
         <input id="preco_de" name="preco_de" inputmode="decimal" maxlength="12" placeholder="59,90" value="<?= $preco_campo('preco_de') ?>"></div>
@@ -154,12 +154,16 @@ $pode_escrever = !$o || in_array($o['status'], ['aguardando_pagamento', 'recusad
     <label for="dias">Quantos dias no ar</label>
     <select id="dias" name="dias"><?php for ($d = 1; $d <= OFERTA_MAX_DIAS; $d++): ?><option value="<?= $d ?>"<?= (int)($dados['dias'] ?? OFERTA_MAX_DIAS) === $d ? ' selected' : '' ?>><?= $d ?> dia<?= $d > 1 ? 's' : '' ?></option><?php endfor ?></select>
     <label for="foto">Foto da oferta (opcional)</label>
+    <p class="discreto" style="margin:0 0 6px">📐 Foto <strong>quadrada, 800 x 800 pixels</strong> (mínimo <?= OFERTA_FOTO_MIN ?> x <?= OFERTA_FOTO_MIN ?>). JPG, PNG ou WEBP até 8 MB.
+      Se mandar deitada ou em pé, cortamos o meio para ficar quadrada: deixe o produto no centro e evite texto nas bordas.</p>
     <input id="foto" name="foto" type="file" accept="image/jpeg,image/png,image/webp">
+    <div id="foto-previa" class="foto-previa" hidden><img alt="Prévia de como a foto vai aparecer"><small></small></div>
     <?php if (!empty($dados['foto'])): ?><label class="marcar"><input type="checkbox" name="tirar_foto" value="1"> Tirar a foto atual</label><?php endif ?>
     <p><button class="botao amarelo"><?= $o && $o['pago_em'] ? 'Enviar de novo para a conferência' : 'Continuar para o pagamento (' . h(oferta_preco_texto()) . ')' ?></button></p>
     <p class="discreto">Os dias contam a partir de quando a equipe aprovar. Sem links e sem telefone no texto: os botões de
       WhatsApp, ligar e site já ficam na sua ficha.</p>
   </form>
+  <?= oferta_campos_ajuda_js() ?>
 <?php endif ?>
 </main>
 <?php pagina_fim();

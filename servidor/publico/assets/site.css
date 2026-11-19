@@ -563,7 +563,7 @@ html.fj-aberta, html.fj-aberta body { overflow: hidden; }
 .oferta-selo { font-weight: 900; color: var(--verde); font-size: .9rem; }
 .oferta-precos s { color: var(--texto2); font-weight: 700; }
 .oferta-precos b { color: var(--verde); font-size: 1.2rem; font-weight: 900; }
-@media (max-width: 520px) { .oferta-ficha { flex-direction: column; } .oferta-ficha img { width: 100%; height: 180px; } }
+@media (max-width: 520px) { .oferta-ficha { flex-direction: column; } .oferta-ficha img { width: 100%; max-width: 320px; height: auto; aspect-ratio: 1 / 1; } }   /* 19/11: foto da oferta é sempre quadrada */
 
 .ofertas-lista { list-style: none; padding: 0; margin: 0 0 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
 .oferta-cartao { display: flex; gap: 12px; align-items: center; padding: 12px; border-radius: 18px; background: var(--branco);
@@ -610,3 +610,11 @@ html.fj-aberta, html.fj-aberta body { overflow: hidden; }
 /* 19/11 (passo 109): no admin, nome do comércio e da cidade abrem o site (nova aba) */
 .adm-link { color: inherit; text-decoration: underline dotted; text-underline-offset: 3px; }
 .adm-link:hover { color: var(--verde2, #0a7a4b); text-decoration-style: solid; }
+
+/* 19/11: contador de letras e prévia quadrada da foto da oferta */
+.contador-letras { display: block; margin: -6px 0 10px; color: var(--texto2); font-size: .85rem; text-align: right; }
+.contador-letras.perto { color: #c0392b; font-weight: 800; }
+.foto-previa { display: flex; align-items: center; gap: 12px; margin: 8px 0 14px; }
+.foto-previa[hidden] { display: none; }
+.foto-previa img { width: 140px; height: 140px; object-fit: cover; border-radius: 14px; border: 2px solid var(--amarelo); }
+.foto-previa small { color: var(--texto2); }

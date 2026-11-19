@@ -926,3 +926,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    "✏️ Editar" em todas as situações (?editar=ID: título, texto, preços, dias, foto; editar_oferta_admin(); no ar, mudar os dias
    refaz o fim a partir do início). Oferta da Agnes Veterinária (nº 3, "Vacinação para cães e gatos") no ar sem pagamento para
    teste, de 19/11 18:31 até 26/11 18:31 (ficha, página de São João e API conferidas).
+114. ✅ Tamanhos da oferta (19/11, pedido do usuário): título até 50 letras (OFERTA_TITULO_MAX, era 80), detalhes até 250
+   (OFERTA_TEXTO_MAX, era 400), com contador "x de 50 letras" (vermelho perto do limite) no painel do dono e no admin.
+   Foto sempre QUADRADA 800 x 800 (salvar_foto_oferta(): mínimo 400 x 400, corta o meio se vier deitada ou em pé), com a
+   orientação escrita no formulário e prévia quadrada antes de enviar. Site no celular e app (1.13.0) mostram a foto quadrada.

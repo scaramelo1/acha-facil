@@ -14,7 +14,7 @@ if (e_post() && ($_POST['acao'] ?? '') === 'salvar') {
     $pid = (int)valor('SELECT profissional_id FROM ofertas WHERE id = ?', [$id]);
     $foto = null;
     if (!$erro && $pid && ($_FILES['foto']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
-        try { $foto = salvar_foto_enviada($_FILES['foto'], $pid, 1200); } catch (RuntimeException $e) { $erro = 'Foto: ' . $e->getMessage(); }
+        try { $foto = salvar_foto_oferta($_FILES['foto'], $pid); } catch (RuntimeException $e) { $erro = 'Foto: ' . $e->getMessage(); }
     }
     if ($erro) { flash($erro, 'erro'); ir('admin/ofertas.php?editar=' . $id); }
     try { editar_oferta_admin($id, (int)$admin['id'], $d, $foto, !empty($_POST['tirar_foto'])); flash('Oferta salva. Já vale no site e no app.'); }
@@ -58,18 +58,20 @@ admin_inicio('Ofertas da semana', $admin);
   <h2 style="margin-top:0">✏️ Editar oferta de <?= adm_comercio((int)$editar['profissional_id'], $editar['comercio'], $editar['cidade']) ?></h2>
   <p class="discreto">Situação: <?= h(OFERTA_STATUS[$editar['status']] ?? $editar['status']) ?><?= $editar['status'] === 'no_ar' ? ' · ' . h(oferta_validade($editar)) . ' (mudar os dias refaz o prazo a partir de quando entrou no ar)' : '' ?></p>
   <form method="post" enctype="multipart/form-data"><?= campo_csrf() ?><input type="hidden" name="id" value="<?= (int)$editar['id'] ?>">
-    <label for="titulo">Título</label><input id="titulo" name="titulo" maxlength="80" required value="<?= h($editar['titulo']) ?>">
-    <label for="texto">Texto</label><textarea id="texto" name="texto" maxlength="400" rows="4"><?= h((string)$editar['texto']) ?></textarea>
+    <label for="titulo">Título <small class="discreto">(até <?= OFERTA_TITULO_MAX ?> letras)</small></label><input id="titulo" name="titulo" maxlength="<?= OFERTA_TITULO_MAX ?>" data-contar required value="<?= h($editar['titulo']) ?>">
+    <label for="texto">Texto <small class="discreto">(até <?= OFERTA_TEXTO_MAX ?> letras)</small></label><textarea id="texto" name="texto" maxlength="<?= OFERTA_TEXTO_MAX ?>" data-contar rows="4"><?= h((string)$editar['texto']) ?></textarea>
     <div class="linha-botoes">
       <span><label for="preco_de">Preço "de" (opcional)</label><input id="preco_de" name="preco_de" inputmode="decimal" value="<?= h($fd($editar['preco_de'])) ?>" placeholder="59,90"></span>
       <span><label for="preco_por">Preço "por" (opcional)</label><input id="preco_por" name="preco_por" inputmode="decimal" value="<?= h($fd($editar['preco_por'])) ?>" placeholder="49,90"></span>
       <span><label for="dias">Dias no ar</label><select id="dias" name="dias"><?php for ($i = 1; $i <= OFERTA_MAX_DIAS; $i++): ?><option value="<?= $i ?>"<?= $i === (int)$editar['dias'] ? ' selected' : '' ?>><?= $i ?></option><?php endfor ?></select></span>
     </div>
-    <label for="foto">Foto (opcional)</label><input id="foto" name="foto" type="file" accept="image/jpeg,image/png,image/webp">
+    <label for="foto">Foto (opcional) <small class="discreto">quadrada 800 x 800 px, mínimo <?= OFERTA_FOTO_MIN ?> (o servidor corta o meio)</small></label><input id="foto" name="foto" type="file" accept="image/jpeg,image/png,image/webp">
+    <div id="foto-previa" class="foto-previa" hidden><img alt=""><small></small></div>
     <?php if ($editar['foto']): ?><p><img src="<?= h(foto_url($editar['foto'])) ?>" alt="" style="max-width:220px;border-radius:12px"></p>
       <label class="marcar"><input type="checkbox" name="tirar_foto" value="1"> Tirar a foto atual</label><?php endif ?>
     <p class="linha-botoes"><button class="botao" name="acao" value="salvar">Salvar</button> <a class="botao contorno" href="ofertas.php">Cancelar</a></p>
   </form>
+  <?= oferta_campos_ajuda_js() ?>
 </div>
 <?php endif ?>
 

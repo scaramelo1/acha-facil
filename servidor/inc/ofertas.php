@@ -13,6 +13,11 @@ require_once __DIR__ . '/guia.php';
 
 const OFERTA_PRECO = 9.90;
 const OFERTA_MAX_DIAS = 7;
+// 19/11 (pedido do usuário): tamanhos fixos para a oferta ficar bonita e fácil de ler em todo lugar (ficha, cidade, app)
+const OFERTA_TITULO_MAX = 50;    // letras: cabe em 2 linhas no cartão do celular
+const OFERTA_TEXTO_MAX = 250;
+const OFERTA_FOTO_LADO = 800;    // foto sempre quadrada 800 x 800 (o servidor corta o meio se vier deitada ou em pé)
+const OFERTA_FOTO_MIN = 400;
 const OFERTA_STATUS = ['aguardando_pagamento' => 'Esperando o pagamento', 'em_analise' => 'Esperando a conferência',
     'no_ar' => 'No ar', 'recusada' => 'Recusada', 'cancelada' => 'Cancelada'];
 
@@ -62,7 +67,7 @@ function oferta_do_post(array $post): array {
         $v = str_contains($v, ',') ? str_replace(',', '.', str_replace('.', '', $v)) : $v;
         return is_numeric($v) && (float)$v > 0 && (float)$v < 1000000 ? number_format((float)$v, 2, '.', '') : 'erro';
     };
-    $d = ['titulo' => $t('titulo', 80), 'texto' => $t('texto', 400), 'preco_de' => $preco('preco_de'), 'preco_por' => $preco('preco_por'),
+    $d = ['titulo' => $t('titulo', OFERTA_TITULO_MAX), 'texto' => $t('texto', OFERTA_TEXTO_MAX), 'preco_de' => $preco('preco_de'), 'preco_por' => $preco('preco_por'),
         'dias' => max(1, min(OFERTA_MAX_DIAS, (int)($post['dias'] ?? OFERTA_MAX_DIAS)))];
     if (!$d['titulo'] || mb_strlen($d['titulo']) < 4) return [$d, 'Escreva o título da oferta (ex.: "Pizza grande + refri por R$ 49,90").'];
     if ($d['preco_de'] === 'erro' || $d['preco_por'] === 'erro') return [$d, 'Preço inválido. Use só números, ex.: 49,90.'];
@@ -70,6 +75,31 @@ function oferta_do_post(array $post): array {
     if ($d['preco_de'] && (float)$d['preco_por'] >= (float)$d['preco_de']) return [$d, 'O preço "por" tem que ser menor que o preço "de".'];
     if (preg_match('#https?://|www\.#i', $d['titulo'] . ' ' . $d['texto'])) return [$d, 'Não coloque links na oferta: o botão do WhatsApp e do site já ficam na ficha.'];
     return [$d, null];
+}
+
+/** Foto da oferta: salva e corta o meio para ficar quadrada, 800 x 800. Foto pequena demais (menos de 400) não entra. */
+function salvar_foto_oferta(array $f, int $profissional_id): string {
+    $info = @getimagesize((string)($f['tmp_name'] ?? ''));
+    if ($info && min($info[0], $info[1]) < OFERTA_FOTO_MIN)
+        throw new RuntimeException('A foto é pequena demais (' . $info[0] . ' x ' . $info[1] . '). Use pelo menos ' . OFERTA_FOTO_MIN . ' x ' . OFERTA_FOTO_MIN . ' pixels.');
+    require_once __DIR__ . '/moderacao.php';
+    $nome = salvar_foto_enviada($f, $profissional_id, 2000);
+    $arq = config()['dados_dir'] . '/fotos/' . $nome;
+    $l = OFERTA_FOTO_LADO;
+    exec('convert ' . escapeshellarg($arq) . ' -resize ' . escapeshellarg("{$l}x{$l}^") . ' -gravity center -extent ' . escapeshellarg("{$l}x{$l}")
+        . ' -quality 84 ' . escapeshellarg('jpg:' . $arq) . ' 2>&1', $saida, $codigo);
+    if ($codigo !== 0) { apagar_foto($nome); throw new RuntimeException('Não deu para preparar essa foto. Tente outra.'); }
+    return $nome;
+}
+
+/** Ajuda e contador dos campos da oferta (painel do dono e admin). */
+function oferta_campos_ajuda_js(): string {
+    return '<script>document.querySelectorAll("[data-contar]").forEach(function(c){var s=document.createElement("small");s.className="contador-letras";'
+        . 'c.insertAdjacentElement("afterend",s);function f(){var n=c.value.length,m=+c.getAttribute("maxlength");s.textContent=n+" de "+m+" letras"+(m-n<=5?" (quase no limite)":"");'
+        . 's.classList.toggle("perto",m-n<=5);}c.addEventListener("input",f);f();});'
+        . 'var fo=document.getElementById("foto"),pv=document.getElementById("foto-previa");if(fo&&pv)fo.addEventListener("change",function(){var a=fo.files&&fo.files[0];'
+        . 'if(!a){pv.hidden=true;return;}var u=URL.createObjectURL(a),i=new Image();i.onload=function(){var m=Math.min(i.width,i.height);pv.hidden=false;pv.querySelector("img").src=u;'
+        . 'pv.querySelector("small").textContent=i.width+" x "+i.height+" px"+(m<' . OFERTA_FOTO_MIN . '?" - pequena demais, use pelo menos ' . OFERTA_FOTO_MIN . ' x ' . OFERTA_FOTO_MIN . '":(i.width!==i.height?" - vamos cortar o meio, como na prévia":" - ótimo!"));};i.src=u;});</script>';
 }
 
 /** Checkout do Mercado Pago da oferta (pagamento único). Devolve o endereço para pagar. */
