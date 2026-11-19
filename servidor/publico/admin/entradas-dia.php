@@ -150,7 +150,7 @@ admin_inicio('Relatório do dia ' . date('d/m', strtotime($dia)), $admin);
 <?php endif ?>
 
 <h2>Por hora</h2>
-<p class="discreto">Entradas no site com a hora registrada; "Chegadas" tira o Chrome baixando a página antes do clique (a diferença para Entradas é o pré-carregamento); "Pessoas" conta 1 por pessoa em cada ficha aberta. Hora sem movimento fica em branco.
+<p class="discreto">Entradas no site com a hora registrada; "Chegadas" tira o Chrome baixando a página antes do clique (a diferença para Entradas é o pré-carregamento); "Pessoas" conta 1 por pessoa em cada ficha aberta. Onde não teve movimento aparece "—".
   <?php if ($tem_hora_contatos): ?>Fichas abertas, visualizações e toques contam site e app<?= $origem !== '' ? ' (só desta origem)' : '' ?>.<?php endif ?></p>
 <?php $ini_txt = $inicio_hora ? date('d/m \à\s H:i', strtotime($inicio_hora)) : null;
 if (!$tem_hora_contatos): ?>
@@ -165,23 +165,23 @@ if (!$tem_hora_contatos): ?>
     $vazia = !$l['entradas'] && !$l['vis'] && !$toq && !$l['compartilhar'];
     // hora antes do início do registro (no dia em que a 034 entrou) também não tem dado: "—" em vez de 0
     $sem_dado = !$tem_hora_contatos || ($inicio_hora && $dia === substr($inicio_hora, 0, 10) && $hh < (int)substr($inicio_hora, 11, 2));
-    $cel = fn(string $k) => $sem_dado ? '<span class="discreto">—</span>' : ($l[$k] ? num($l[$k]) : ''); ?>
+    $cel = fn(string $k) => $sem_dado ? '<span class="discreto">—</span>' : ($l[$k] ? num($l[$k]) : '<span class="discreto">—</span>'); ?>
   <tr<?= $vazia ? ' class="discreto"' : '' ?><?= $dia === $hoje_d && $hh === (int)date('G') ? ' style="background:var(--amarelo-claro)"' : '' ?>>
     <td><strong><?= sprintf('%02dh', $hh) ?></strong></td>
-    <td class="com-barra"><span class="barra" aria-hidden="true"><i style="width:<?= $l['entradas'] ? max(3, round(100 * $l['entradas'] / $max_entradas)) : 0 ?>%"></i></span><span class="n"><?= $l['entradas'] ? '<strong>' . num($l['entradas']) . '</strong>' : '' ?></span></td>
-    <td><?= $l['gente'] ? num($l['gente']) : '' ?></td>
+    <td class="com-barra"><span class="barra" aria-hidden="true"><i style="width:<?= $l['entradas'] ? max(3, round(100 * $l['entradas'] / $max_entradas)) : 0 ?>%"></i></span><span class="n"><?= $l['entradas'] ? '<strong>' . num($l['entradas']) . '</strong>' : '<span class="discreto">—</span>' ?></span></td>
+    <td><?= $l['gente'] ? num($l['gente']) : '<span class="discreto">—</span>' ?></td>
     <?php if ($tem_hora_contatos): ?><td><?= $cel('fichas') ?></td><td><?= $cel('vis') ?></td><td><?= $cel('pessoas') ?></td>
     <td><?= $cel('whatsapp') ?></td><td><?= $cel('ligar') ?></td><td><?= $cel('mapa') ?></td><td><?= $cel('outros') ?></td>
-    <td><?= $sem_dado ? '<span class="discreto">—</span>' : ($toq ? '<strong>' . num($toq) . '</strong>' : '') ?></td>
+    <td><?= $sem_dado ? '<span class="discreto">—</span>' : ($toq ? '<strong>' . num($toq) . '</strong>' : '<span class="discreto">—</span>') ?></td>
     <td><?= $cel('compartilhar') ?></td><?php endif ?>
   </tr>
   <?php endforeach;
   $tt = $tot_hora['whatsapp'] + $tot_hora['ligar'] + $tot_hora['mapa'] + $tot_hora['outros'];
-  $ct = fn(string $k) => $tem_hora_contatos ? ($tot_hora[$k] ? '<strong>' . num($tot_hora[$k]) . '</strong>' : '') : '—'; ?>
+  $ct = fn(string $k) => $tem_hora_contatos ? ($tot_hora[$k] ? '<strong>' . num($tot_hora[$k]) . '</strong>' : '—') : '—'; ?>
   <tr class="total-semana"><td><strong>Dia</strong></td><td><strong><?= num($tot_hora['entradas']) ?></strong></td><td><strong><?= num($tot_hora['gente']) ?></strong></td>
 <?php if ($tem_hora_contatos): ?><td><?= $ct('fichas') ?></td><td><?= $ct('vis') ?></td><td><?= $ct('pessoas') ?></td>
     <td><?= $ct('whatsapp') ?></td><td><?= $ct('ligar') ?></td><td><?= $ct('mapa') ?></td><td><?= $ct('outros') ?></td>
-    <td><?= $tem_hora_contatos ? ($tt ? '<strong>' . num($tt) . '</strong>' : '') : '—' ?></td><td><?= $ct('compartilhar') ?></td><?php endif ?></tr>
+    <td><?= $tem_hora_contatos ? ($tt ? '<strong>' . num($tt) . '</strong>' : '—') : '—' ?></td><td><?= $ct('compartilhar') ?></td><?php endif ?></tr>
 </table></div>
 
 <?php if ($cidades): ?>
@@ -196,11 +196,11 @@ if (!$tem_hora_contatos): ?>
 
 <h2>Fichas abertas e toques (<?= num(count($fichas)) ?> comércios)</h2>
 <?php if (!$fichas): ?><p class="discreto">Nenhuma ficha aberta neste dia<?= $origem !== '' ? ' por esta origem' : '' ?>.</p><?php else: ?>
-<div class="tabela"><table>
+<div class="tabela"><table class="fichas-dia">
   <tr><th>Comércio</th><th>Vistas</th><th>Pessoas</th><th>WhatsApp</th><th>Ligar</th><th>Mapa</th><th>Site/Insta</th><th>Compart.</th><th></th></tr>
   <?php foreach ($fichas as $f): ?>
   <tr><td><strong><?= adm_comercio((int)$f['id'], $f['nome'], $f['cidade']) ?></strong><br><span class="discreto"><?= h($f['tipo'] ?: $f['categoria']) ?> · <?= adm_cidade($f['cidade'], null, true) ?><?= $f['bairro'] ? ' · ' . h($f['bairro']) : '' ?></span></td>
-    <?php foreach (['vis', 'pessoas', 'whatsapp', 'ligar', 'mapa', 'outros', 'compartilhar'] as $k): ?><td><?= (int)$f[$k] ? '<strong>' . num((int)$f[$k]) . '</strong>' : '' ?></td><?php endforeach ?>
+    <?php foreach (['vis', 'pessoas', 'whatsapp', 'ligar', 'mapa', 'outros', 'compartilhar'] as $k): ?><td><?= (int)$f[$k] ? '<strong>' . num((int)$f[$k]) . '</strong>' : '<span class="discreto">—</span>' ?></td><?php endforeach ?>
     <td><a class="botao pequeno contorno" href="numeros-ficha.php?id=<?= (int)$f['id'] ?>">Números</a></td></tr>
   <?php endforeach ?>
 </table></div>
@@ -225,8 +225,8 @@ if (!$tem_hora_contatos): ?>
   .hora-linha { display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; gap: 8px; font-size: .85rem; }
   .hora-linha i { display: block; height: 12px; border-radius: 6px; background: var(--verde); min-width: 2px; }
   .hora-linha b { text-align: right; }
-  .por-hora td, .por-hora th { text-align: right; white-space: nowrap; }
-  .por-hora td:first-child, .por-hora th:first-child { text-align: left; }
+  .por-hora td, .por-hora th { text-align: center; white-space: nowrap; }
+  .fichas-dia td, .fichas-dia th { text-align: center; } .fichas-dia td:first-child, .fichas-dia th:first-child { text-align: left; }
   /* barra de tamanho fixo (60px): a hora com mais pessoas enche 100%, as outras proporcionais; o número fica sempre no mesmo lugar */
   .por-hora .com-barra .barra { display: inline-block; width: 60px; height: 10px; border-radius: 5px; background: rgba(0, 92, 56, .1); margin-right: 8px; vertical-align: middle; overflow: hidden; text-align: left; }
   .por-hora .com-barra .n { display: inline-block; width: 36px; text-align: right; }   /* "9" e "12" ocupam o mesmo espaço: as barras não andam */
