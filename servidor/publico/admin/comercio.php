@@ -100,7 +100,11 @@ if (e_post()) {
         apagar_fotos_sobrando(arquivos_dos_campos($p), array_merge(arquivos_dos_campos($agora), arquivos_dos_campos($pend['novos'] ?? [])));
         registrar((int)$admin['id'], 'editou_comercio', $id, implode(', ', array_keys($dados)));
         web_cache_limpar();
-        flash('Salvo. Já está no app e no site.');
+        // 19/11: quem pediu "Quer saber quando colocarem...?" é avisado também quando o admin completa a ficha
+        $avisados = 0;
+        try { require_once __DIR__ . '/../../inc/avisos-info.php'; $avisados = avisar_infos_completas([$id]); }
+        catch (Throwable $e) { error_log('acha-facil avisos-info admin: ' . $e->getMessage()); }
+        flash('Salvo. Já está no app e no site.' . ($avisados ? " $avisados pessoa(s) que pediram a informação foram avisadas." : ''));
         ir('admin/comercio.php?id=' . $id);
     }
 }

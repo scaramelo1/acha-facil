@@ -70,6 +70,28 @@ if (pedidos_info_pessoas_prontos()):
       <td><?= pct($ac, (int)$l['pedidos']) ?></td></tr>
   <?php endforeach ?>
   </tbody></table></div>
+  <?php // 19/11 (pedido do usuário): quem aceitou o aviso, de qual comércio e de qual informação
+  $inscritos = [];
+  try {
+      $inscritos = linhas("SELECT ai.id, ai.tipo, ai.criado_em, ai.avisado_em, u.id AS uid, u.nome AS pessoa, u.email,
+              p.id AS pid, p.nome AS comercio, p.cidade
+          FROM avisos_info ai JOIN usuarios u ON u.id = ai.usuario_id JOIN profissionais p ON p.id = ai.profissional_id
+          ORDER BY ai.avisado_em IS NULL DESC, ai.criado_em DESC LIMIT 200");
+  } catch (PDOException) {}
+  if ($inscritos): ?>
+  <h3 style="margin-top:18px">Quem aceitou o aviso (<?= num(count($inscritos)) ?>)</h3>
+  <p class="discreto">O aviso no celular sai <strong>sozinho</strong>, uma vez, quando a informação entra na ficha (alteração do dono
+    aprovada, edição pelo admin ou lista nova). Para falar antes com a pessoa, abra o nome dela: lá dá para mandar um aviso só para ela.</p>
+  <div class="tabela"><table><thead><tr><th>Pessoa</th><th>Comércio</th><th>Quer saber</th><th>Pediu em</th><th>Situação</th></tr></thead><tbody>
+  <?php foreach ($inscritos as $i): ?>
+    <tr><td><a href="pessoa.php?id=<?= (int)$i['uid'] ?>"><strong><?= h($i['pessoa']) ?></strong></a><br><span class="discreto"><?= h($i['email']) ?></span></td>
+      <td><?= adm_comercio((int)$i['pid'], $i['comercio'], $i['cidade']) ?><br><span class="discreto"><?= adm_cidade($i['cidade'], null, true) ?></span></td>
+      <td><?= h(TIPOS_PEDIDO_INFO[$i['tipo']] ?? $i['tipo']) ?></td>
+      <td><?= h(datahora_br($i['criado_em'])) ?></td>
+      <td><?= $i['avisado_em'] ? '✅ Avisado em ' . h(datahora_br($i['avisado_em'])) : '⏳ Esperando o comércio informar' ?></td></tr>
+  <?php endforeach ?>
+  </tbody></table></div>
+  <?php endif ?>
 </details>
 <?php endif; endif ?>
 

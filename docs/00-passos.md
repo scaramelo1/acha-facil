@@ -890,3 +890,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    comerciante (relatorio.php) não muda. Testado em cópia: 25 páginas sem erro.
    **App (Administração, vai no 1.13.0):** comércio abre a ficha no app, cidade abre a página da cidade no navegador
    (api/admin.php manda profissionalId e linkCidade).
+110. ✅ Quem aceitou o aviso "Quer saber quando colocarem...?" (19/11, pedido do usuário): em /admin/pedidos-info.php, dentro do
+   quadro do convite, tabela "Quem aceitou o aviso" (avisos_info): pessoa (link para /admin/pessoa.php, onde dá para mandar
+   aviso só para ela), comércio e cidade (links), o que quer saber, quando pediu e situação (⏳ esperando o comércio informar
+   / ✅ avisado em). O aviso sai sozinho quando a informação entra; agora também quando o ADMIN edita a ficha em
+   /admin/comercio.php (antes só alteração do dono aprovada e lista nova). Em 19/11 havia 1 inscrito, já avisado em 17/11.
