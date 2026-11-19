@@ -236,9 +236,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Agora é só acompanhar: Páginas (indexação) na 1ª semana e Desempenho (buscas) depois de 2 a 8 semanas
 22. ⬜ Prospecção Saúde e Veículos: 2 semanas de dados do passo 20 → CSV → grupos A/B/C → WhatsApp manual
    (15–20/dia) com cupom por nicho → metas de 30 dias
-23. ⬜ "Recomendados" só com plano Básico e só perto (10/11, pedido do usuário): hoje a faixa "Recomendados em <cidade>"
+23. ⬜ "Recomendados" só com plano Básico e Destaque (10/11, pedido do usuário; 19/11: entram quem pagou o Básico e quem assina o Destaque): hoje a faixa "Recomendados em <cidade>"
    da tela inicial sorteia entre os 80 mais procurados (populares() em inc/guia.php), com ou sem plano. Vai passar a mostrar
-   **só quem pagou o Básico** (`basico_pago_em`; quem tem Destaque já está na faixa dele) e **só os que estão perto da
+   **só quem pagou o Básico ou assina o Destaque** (`basico_pago_em` ou Destaque em dia) e **só os que estão perto da
    pessoa** (localização do celular, como no "Perto de você"), não sempre, para a seção não ficar lotada. Sem localização
    ou sem ninguém do Básico por perto, a faixa não aparece. "Comércios em destaque" continua **só com quem assina o Destaque**
    (passo 4g). Decidir: raio (sugestão 2 km) e quantos no máximo (sugestão 10). Precisa de APK novo (a tela inicial passa a
@@ -262,7 +262,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    textos e docs. Exceção: retorno do Google = `google_retorno()` em inc/google.php, que segue no endereço antigo (cadastrado
    no Google; ele redireciona). Falta: cadastrar https://achafacilapp.com.br/google/retorno.php no Google Cloud e pôr
    `'google_retorno' => 'https://achafacilapp.com.br/google/retorno.php',` no config.
-26. 🟡 Plano **Destaque + Site** e Básico a R$ 9,90 (10/11, pedido do usuário): 3º plano, chave `site`, R$ 89,90/mês
+26. ✅ Plano **Destaque + Site** e Básico a R$ 9,90 (10/11, pedido do usuário): 3º plano, chave `site`, R$ 89,90/mês
    (assinatura como o Destaque): tudo do Destaque + landing page própria feita pela FSA + domínio incluso, para o site virar
    receita recorrente da FSA. Preços em PLANOS_PRECO (inc/guia.php); SQL_DESTAQUE conta `destaque` e `site`. Site: card em
    /planos.php, na inicial, no relatório e nos termos; perfil.php pede o endereço desejado do site; aviso de pagamento aos
@@ -279,7 +279,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    confere, publica pelo mesmo caminho da moderação; com dúvida, avisa os admins (push + e-mail) dizendo qual é a dúvida.
    Começa em **modo sombra** (só sugere, admin aprova como hoje). Custo estimado ~R$ 0,85 por verificação (Opus 5.5 com
    fotos). Plano completo, custos e decisões pendentes em `docs/plano-agente-ia.md`
-29. 🟡 Notificações para os usuários (11/11, pedido do usuário): os administradores mandam uma notificação no celular de
+29. ✅ Notificações para os usuários (11/11, pedido do usuário): os administradores mandam uma notificação no celular de
    quem tem o app, **pelo site** (/admin/notificacoes.php, menu "Notificações") e **pelo app** (Administração → "Enviar
    notificação aos usuários", tela src/app/notificar.tsx). Escolhe: título (60) e texto (178), cidade (ou todas), quem
    recebe (todos os aparelhos ou só quem entrou com o Google) e, se quiser, a ficha que o toque abre (número ou link da
@@ -308,7 +308,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    app (pausado). instalar.sh --leads usa leads/sao-joao.html quando existe. Testado numa cópia com o banco de teste (lista
    de São João de 11/11: 1.716 novos, 1.915 atualizados, 48 fechados). Cidade nova: cadastrar desligada em Cidades → importar
    → ligar
-32. 🟡 Agenda de eventos por cidade (12/11, pedido do usuário): no site, aba **📅 Eventos** ao lado de "🏪 Comércios" no
+32. ✅ Agenda de eventos por cidade (12/11, pedido do usuário): no site, aba **📅 Eventos** ao lado de "🏪 Comércios" no
    topo da página da cidade e linha "Agenda de eventos" com todas as cidades no rodapé. `/<cidade>/eventos/` mostra os
    eventos que ainda não terminaram em ordem de data, agrupados por mês ("Acontecendo agora" no topo), cada um num cartão
    com a folhinha do calendário (dia da semana, dia, mês), nome, data/horário, local, entrada e miniatura do cartaz.
@@ -320,7 +320,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    limpa o cache do site. Código em inc/eventos.php, tabela `eventos` (**mudança 020**). Testado numa cópia com o banco de
    teste (12/11). Falta (usuário): aplicar a 020 (`bash servidor/instalar.sh`) — até lá a aba e o rodapé não aparecem
    e /eventos/ dá 404. Ideia para depois: mostrar os eventos também no app
-33. 🟡 Eventos no app (12/11, pedido do usuário): aba **Eventos** na barra de baixo (entre Categorias e Favoritos; com 5
+33. ✅ Eventos no app (12/11, pedido do usuário): aba **Eventos** na barra de baixo (entre Categorias e Favoritos; com 5
    abas os nomes ficaram em 13 px e encolhem se não couberem). `src/app/(abas)/eventos.tsx`: agenda da cidade escolhida
    em ordem de data, separada por mês ("Acontecendo agora" primeiro), cartões com a folhinha (src/componentes/Folhinha.tsx),
    nome, data/horário, local, entrada e miniatura do cartaz; puxar para baixo atualiza. Tocar abre `src/app/evento/[id].tsx`:
@@ -366,13 +366,13 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (autorizar_evento / recusar_evento; dois admins ao mesmo tempo: o segundo recebe "já foi decidido"). O aviso com
    e-mail e Instagram saiu da inicial e da agenda: no lugar, "Vai ter um evento? Divulgar um evento". Testado no
    banco de teste (12/11). App **1.7.1**. Falta (usuário): aplicar a 021 e gerar o app novo
-37. 🟡 Gerar o app no PC, sem a cota do EAS (12/11: a cota grátis de builds Android acabou, volta em 01/12; usuário
+37. ✅ Gerar o app no PC, sem a cota do EAS (12/11: a cota grátis de builds Android acabou, volta em 01/12; usuário
    escolheu gerar no PC). `scripts/gerar-local.ps1 -Tipo play|apk` (prebuild + Gradle do Android Studio, saída em
    saida\), assinado com a chave do EAS pelo plugin `plugins/assinatura-local.js` (credentials.json baixado com
    `npx eas credentials`, fora do git); versionCode = último do EAS + 1 (`ACHAFACIL_VERSION_CODE` no app.config.js).
    Passo a passo em docs/build-local.md. Plugin testado na VPS com o build.gradle do modelo do Expo 58; o script
    PowerShell só roda no PC (não testado aqui). Falta (usuário): baixar a chave e gerar a 1.7.1
-38. 🟡 De onde vêm as pessoas do site (14/11, pedido do usuário: "as pesquisas que vêm pelo Google aparecem em
+38. ✅ De onde vêm as pessoas do site (14/11, pedido do usuário: "as pesquisas que vêm pelo Google aparecem em
    numeros.php?"). A origem "Site" foi separada em Google, outro buscador, redes sociais e WhatsApp, link de outro
    site e endereço digitado (origem_do_referer() em inc/numeros.php, pelo Referer; cookie af_origem de 30 min, sem dado
    pessoal, guarda a origem para a ficha e os toques em WhatsApp/ligar). **Entradas no site** (mudança 022, tabela
@@ -476,13 +476,13 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    plano não é pago em 30 min (coluna pedidos.aviso_sem_pagamento_em, mudança 026 aplicada 15/11). /admin/pedido.php
    tem "Lembrar do pagamento" (WhatsApp com o link da assinatura) e /admin/pessoa.php tem "Mandar notificação para esta
    pessoa" (avisar_usuario, só os celulares dela). Testado no banco de teste. instalar.sh rodado (cron ligado).
-55. 🟡 Entradas com e sem pré-carregamento do Chrome (15/11, pedido do usuário). e_pre_carregamento() em inc/numeros.php
+55. ✅ Entradas com e sem pré-carregamento do Chrome (15/11, pedido do usuário). e_pre_carregamento() em inc/numeros.php
    (cabeçalho Sec-Purpose/Purpose prefetch, ou IP 162.120./193.186./72.14. com nome *.googlezip.net); coluna
    entradas_hora.pre (**mudança 027 — usuário aplica**). /admin/entradas.php ganhou a caixa "entradas sem
    pré-carregamento" e a explicação; /admin/numeros.php, "pelo Google sem pré-carregamento". marcar-pre-carregamento.php
    (rodado pelo instalar.sh) marca as entradas antigas pelo registro do Apache. Testado no banco de teste com os dados
    de produção: hoje 61 de 77 entradas do Google foram pré-carregamento. Falta: rodar o instalar.sh.
-56. 🟡 Robô automático + Novidades (15/11, pedido do usuário: "sistema que atualize as listagens para ver se tem algo
+56. ✅ Robô automático + Novidades (15/11, pedido do usuário: "sistema que atualize as listagens para ver se tem algo
    novo", opção A = robô no PC). Servidor: inc/novidades.php, /admin/novidades.php (menu "Novidades" com contador) e
    /admin/robo-enviar.php (recebe a lista do PC com a chave do robô no cabeçalho X-Chave-Robo; sem login). Cada lista é
    conferida em modo TESTE (importar-leads.php --detalhes=) e mostra os comércios **novos**, os que **mudaram**
@@ -494,13 +494,13 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    todo dia 03:00). Guia em docs/robo-automatico.md. Testado numa cópia com o banco de teste (envio por HTTP, chave
    errada, aprovar, automático). Parte do PC adiada (15/11, pedido do usuário): falta achar a pasta do robô no PC
    (D:\leads-sem-site não existe) e o comando dele para o robo-config.json; depois -Testar, -Cidade e robo-agendar.ps1.
-57. 🟡 Sitemap dividido por cidade e por tipo (16/11, pedido do usuário: ver no Search Console qual grupo indexa melhor).
+57. ✅ Sitemap dividido por cidade e por tipo (16/11, pedido do usuário: ver no Search Console qual grupo indexa melhor).
    /sitemap.xml continua sendo o índice, agora com um arquivo por cidade × tipo: sitemap-<cidade>-cidades.xml (página
    da cidade), -categorias.xml (áreas e tipos com 3+), -comercios.xml (fichas) e -eventos.xml (agenda). Índices extras:
    sitemap-cidades.xml / sitemap-categorias.xml / sitemap-comercios.xml / sitemap-eventos.xml (um tipo em todas as
    cidades) e sitemap-<cidade>.xml (os tipos de uma cidade; endereço antigo continua valendo). Cache 6 h. No ar e
    conferido (Poços: 8.375 fichas e 489 áreas/tipos). Falta (usuário): enviar os 4 índices de tipo no Search Console.
-58. 🟡 Busca de verdade no topo da inicial do site (16/11, pedido do usuário). No lugar do celular desenhado: [Cidade ▾]
+58. ✅ Busca de verdade no topo da inicial do site (16/11, pedido do usuário). No lugar do celular desenhado: [Cidade ▾]
    [O que você procura?] [🔍 Buscar] → /<cidade>/buscar?q= (sem texto → página da cidade; sem JavaScript passa por
    /?cidade=&q=, que redireciona). Última cidade guardada no navegador (localStorage af_cidade, também ao tocar numa
    cidade da lista); cidade com 0 comércios não entra na lista. O celular desenhado e os botões de baixar foram para o
@@ -576,7 +576,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (api/admin.php acao link_editar → /admin/do-app.php, código de uso único de 2 min em dados_dir/links-admin).
    Comércio editado pelo admin não é mais mudado pela importação das listas nem pela limpeza (editados_pelo_admin()).
    Sem mudança no banco. Testado em cópia isolada (salvar, erro de telefone, logo/fotos, link do app, não-admin barrado).
-65. 🟡 "Quer ser avisado?" depois do "Quero saber" (16/11, pedido do usuário, opção A). Depois do toque, aparece a pergunta
+65. ✅ "Quer ser avisado?" depois do "Quero saber" (16/11, pedido do usuário, opção A). Depois do toque, aparece a pergunta
    [Sim, me avise] / [Não, obrigado]; o pedido continua contando sem conta. Sim → precisa da conta Google (site: entra e
    volta com ?avisar=TIPO e o aviso é gravado sozinho; app: "Entrar e me avisar", e ao voltar logado o aviso é pedido).
    Mudança 029 (avisos_info) — USUÁRIO APLICA; antes dela a pergunta não aparece. inc/avisos-info.php
@@ -600,7 +600,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    entrada como entradas_hora.pre = 2 (pré-carregada e vista; 1 = só baixada; 0 = clique normal). /admin/entradas.php:
    "entradas de pessoas" = total − só baixadas. Testado na cópia (pré-carregada sem abrir: 0 visitas; aberta: 1 visita e
    pre 2; sinal falso recusado; clique normal conta direto). Dias antes de 16/11 continuam com os downloads somados.
-68. 🟡 Ver quem pediu no "Quero saber" (16/11, pedido do usuário). Antes só havia a contagem por dia, sem a pessoa.
+68. ✅ Ver quem pediu no "Quero saber" (16/11, pedido do usuário). Antes só havia a contagem por dia, sem a pessoa.
    Mudança 030 (pedidos_info_pessoas: comércio, tipo, usuario_id ou NULL = anônimo, origem app/site, data). api/quero.php
    guarda a conta de quem pediu (X-Token no app; no site o botão agora manda o cookie + X-AF-Web). Telas: /admin/quem-pediu.php
    (todos ou ?id= um comércio; filtro "só com cadastro"; embaixo quem pediu para ser avisado, da avisos_info), link "Quem pediu"
