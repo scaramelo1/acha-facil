@@ -146,7 +146,7 @@ function LinkComercio({ id, nome }: { id?: number | null; nome: string }) {
   const router = useRouter();
   if (!id) return <Text>{nome}</Text>;
   return (
-    <Text accessibilityRole="link" onPress={() => router.push(`/profissional/${id}`)} style={estilos.link}>
+    <Text accessibilityRole="link" onPress={() => router.push(`/profissional/${id}`)} style={estilos.linkNome}>
       {nome}
     </Text>
   );
@@ -156,7 +156,7 @@ function LinkComercio({ id, nome }: { id?: number | null; nome: string }) {
 function LinkCidade({ nome, link }: { nome: string; link?: string | null }) {
   if (!link) return <Text>{nome}</Text>;
   return (
-    <Text accessibilityRole="link" onPress={() => WebBrowser.openBrowserAsync(link).catch(() => Linking.openURL(link))} style={estilos.link}>
+    <Text accessibilityRole="link" onPress={() => WebBrowser.openBrowserAsync(link).catch(() => Linking.openURL(link))} style={estilos.linkNome}>
       {nome}
     </Text>
   );
@@ -329,7 +329,7 @@ function Valor({ campo, texto }: { campo: string; texto: string | null }) {
 }
 
 const estilos = StyleSheet.create({
-  link: { textDecorationLine: 'underline', color: cores.verde },
+  linkNome: { textDecorationLine: 'underline', color: cores.verde },
   secao: { fontSize: fonte.grande, fontWeight: '900', color: cores.texto, marginTop: 14, marginBottom: 10 },
   vazio: { fontSize: fonte.pequena, color: cores.textoSuave, marginBottom: 8 },
   cartao: { ...cartao, padding: 14, marginBottom: 12 },
