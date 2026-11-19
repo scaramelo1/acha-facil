@@ -358,3 +358,38 @@ function contar_visita_adiada(int $id, string $origem, string $caminho): void {
             [mb_substr($caminho, 0, 190)]);
     } catch (PDOException) {}
 }
+
+/**
+ * 19/11 (passo 116): números de verdade dos últimos 30 dias para mostrar aos donos ("Seu negócio" na inicial e planos).
+ * Guardados por 1 hora em <dados_dir>/cache/numeros-publicos.json. Pessoas = entradas no site sem o pré-carregamento do Chrome.
+ */
+function numeros_publicos(): array {
+    $arq = config()['dados_dir'] . '/cache/numeros-publicos.json';
+    if (is_file($arq) && filemtime($arq) > time() - 3600 && ($j = json_decode((string)file_get_contents($arq), true))) return $j;
+    $n = ['pessoas' => 0, 'vistas' => 0, 'contatos' => 0];
+    try {
+        $entradas = (int)(valor('SELECT SUM(total) FROM entradas WHERE dia >= CURDATE() - INTERVAL 29 DAY') ?? 0);
+        $pre = 0;
+        try { $pre = (int)valor("SELECT COUNT(*) FROM entradas_hora WHERE quando >= CURDATE() - INTERVAL 29 DAY AND pre = 1"); } catch (PDOException) {}
+        $n['pessoas'] = max(0, $entradas - $pre);
+        $l = linha("SELECT SUM(IF(tipo = 'perfil', total, 0)) AS v, SUM(IF(tipo IN ('whatsapp','ligar','mapa','site','instagram'), total, 0)) AS c
+            FROM contatos WHERE dia >= CURDATE() - INTERVAL 29 DAY");
+        $n['vistas'] = (int)($l['v'] ?? 0);
+        $n['contatos'] = (int)($l['c'] ?? 0);
+    } catch (PDOException) {}
+    @mkdir(dirname($arq), 0775, true);
+    @file_put_contents($arq, json_encode($n));
+    return $n;
+}
+
+/** Bloco com os números (só mostra quando já tem movimento). */
+function numeros_publicos_html(): string {
+    $n = numeros_publicos();
+    if ($n['vistas'] < 100) return '';
+    $f = fn(int $v) => number_format($v, 0, ',', '.');
+    return '<div class="numeros-blocos" aria-label="Números do Acha Fácil nos últimos 30 dias">'
+        . ($n['pessoas'] ? '<div><strong>' . $f($n['pessoas']) . '</strong><span>visitas de pessoas ao site</span></div>' : '')
+        . '<div><strong>' . $f($n['vistas']) . '</strong><span>páginas de comércio abertas</span></div>'
+        . '<div><strong>' . $f($n['contatos']) . '</strong><span>toques em WhatsApp, ligar e "como chegar"</span></div>'
+        . '</div><p class="discreto" style="margin-top:-6px">Números reais dos últimos 30 dias, no site e no app.</p>';
+}

@@ -113,6 +113,8 @@ const SQL_EM_DIA = '(p.basico_pago_em IS NOT NULL OR ' . SQL_ASSINATURA_EM_DIA .
 const SQL_DESTAQUE = "(p.plano IN ('destaque','site') AND " . SQL_ASSINATURA_EM_DIA . ')';
 // Ficha paga (passo 59): pagou o Básico (ou se cadastrou sozinha). Nas listas vem logo depois do Destaque.
 const SQL_FICHA_PAGA = '(p.importado = 0 OR p.basico_pago_em IS NOT NULL)';
+/** 19/11 (passo 116): quem informou o horário (de graça) sobe nas listas, logo depois das fichas pagas, e ganha o selo. */
+const SQL_COM_HORARIO = "(p.horarios IS NOT NULL AND p.horarios NOT IN ('', '[]', '{}'))";
 // Ficha no Google (16/11, pedido do usuário): só com telefone ou WhatsApp. Sem nenhum dos dois, a ficha continua no
 // site e no app, mas sai com noindex e fica fora do sitemap; volta sozinha quando ganhar um telefone ou WhatsApp.
 const SQL_TEM_CONTATO = "(COALESCE(p.telefone, '') <> '' OR COALESCE(p.whatsapp, '') <> '')";
@@ -296,7 +298,7 @@ function tipos_da_categoria(int $categoria_id, string $cidade): array {
 function da_categoria(int $categoria_id, string $cidade): array {
     return array_map('prof_resumo', linhas('SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
         WHERE ' . visivel($cidade) . " AND p.categoria_id = ?
-        ORDER BY " . SQL_DESTAQUE . " DESC, " . SQL_FICHA_PAGA . " DESC, p.total_avaliacoes > 0 DESC, RAND(?)",
+        ORDER BY " . SQL_DESTAQUE . " DESC, " . SQL_FICHA_PAGA . " DESC, " . SQL_COM_HORARIO . " DESC, p.total_avaliacoes > 0 DESC, RAND(?)",
         [$categoria_id, semente_dia()]));
 }
 

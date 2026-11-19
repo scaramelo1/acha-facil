@@ -80,7 +80,7 @@ function web_contar(string $cidade, int $categoria_id, ?string $tipo, ?string $b
 function web_lista(string $cidade, int $categoria_id, ?string $tipo, ?string $bairro, int $pagina): array {
     [$sql, $par] = web_filtro($cidade, $categoria_id, $tipo, $bairro);
     return linhas('SELECT ' . CAMPOS_RESUMO . ", p.endereco FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
-        WHERE $sql ORDER BY " . SQL_DESTAQUE . ' DESC, ' . SQL_FICHA_PAGA . ' DESC, p.total_avaliacoes > 0 DESC, RAND(?)
+        WHERE $sql ORDER BY " . SQL_DESTAQUE . ' DESC, ' . SQL_FICHA_PAGA . ' DESC, ' . SQL_COM_HORARIO . ' DESC, p.total_avaliacoes > 0 DESC, RAND(?)
         LIMIT ' . WEB_POR_PAGINA . ' OFFSET ' . (max(1, $pagina) - 1) * WEB_POR_PAGINA, [...$par, semente_dia()]);
 }
 /**
@@ -125,7 +125,7 @@ function web_ficha(int $id): ?array {
 /** "Outros dentistas em São João": do mesmo tipo (ou da mesma área, se o tipo tiver poucos). Devolve [lista, do mesmo tipo?]. */
 function web_parecidos(array $p, int $limite = 6): array {
     $campos = 'SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE ' . visivel($p['cidade']) . ' AND p.id <> ?';
-    $ordem = ' ORDER BY ' . SQL_DESTAQUE . ' DESC, ' . SQL_FICHA_PAGA . " DESC, RAND(?) LIMIT $limite";
+    $ordem = ' ORDER BY ' . SQL_DESTAQUE . ' DESC, ' . SQL_FICHA_PAGA . ' DESC, ' . SQL_COM_HORARIO . " DESC, RAND(?) LIMIT $limite";
     $r = $p['tipo'] ? linhas("$campos AND p.tipo = ?$ordem", [$p['id'], $p['tipo'], semente_dia() + (int)$p['id']]) : [];
     if (count($r) >= 3) return [$r, true];
     return [linhas("$campos AND p.categoria_id = ?$ordem", [$p['id'], $p['categoria_id'], semente_dia() + (int)$p['id']]), false];
@@ -185,7 +185,12 @@ function web_cartao(array $p): string {
         . ($p['destaque_pago'] ? '<span class="selo-destaque">Destaque</span>'
             : (ficha_paga($p) ? '<span class="selo-completa">✓ Ficha completa</span>'
             : (!empty($p['tem_dono']) ? '<span class="selo-completa">✓ Confirmado pelo dono</span>' : '')))   // passo 78
+        . (!$p['destaque_pago'] && web_tem_horario($p) ? '<span class="selo-horario">🕒 Horário informado</span>' : '')   // passo 116
         . web_nota($p) . '</span></a></li>';
+}
+function web_tem_horario(array $p): bool {
+    $h = (string)($p['horarios'] ?? '');
+    return $h !== '' && !in_array($h, ['[]', '{}'], true);
 }
 /**
  * 19/11 (avaliação do site): tudo o que falta na ficha num bloco só, em vez de um quadro 🔒 por item.
@@ -566,7 +571,15 @@ function web_pagina_ficha(array $p): void {
     <aside class="caixa ficha-dono">
       <?php if ($sem_dono): // sem dono: não pagou plano nem teve o painel liberado ?>
         <h2 class="h-pequeno">Este comércio é seu?</h2>
+        <?php // 19/11 (passo 116): números de verdade da própria ficha, para o dono ver que tem gente procurando
+        $vistas30 = (int)(valor("SELECT SUM(total) FROM contatos WHERE profissional_id = ? AND tipo = 'perfil' AND dia >= CURDATE() - INTERVAL 29 DAY", [$p['id']]) ?? 0);
+        $pedidos30 = 0;
+        try { $pedidos30 = (int)(valor('SELECT SUM(total) FROM pedidos_info WHERE profissional_id = ? AND dia >= CURDATE() - INTERVAL 29 DAY', [$p['id']]) ?? 0); } catch (PDOException) {}
+        if ($vistas30 >= 3 || $pedidos30): ?>
+        <p class="numeros-dono">👀 Esta página foi vista <strong><?= web_num($vistas30) ?> vezes</strong> nos últimos 30 dias<?= $pedidos30 ? ' e <strong>' . web_num($pedidos30) . ($pedidos30 === 1 ? ' pessoa pediu' : ' pessoas pediram') . '</strong> informações que faltam' : '' ?>.</p>
+        <?php endif ?>
         <p>Cadastre-se <strong>grátis</strong> com a sua conta Google e corrija o telefone, o WhatsApp, o endereço e o horário.
+          <?php if (!web_tem_horario($p)): ?><br>🕒 Informando o horário, sua ficha aparece no filtro <strong>"Aberto agora"</strong> e antes das outras nas listas.<?php endif ?>
           <a class="botao amarelo" href="<?= h(url('perfil.php?acao=assumir&id=' . (int)$p['id'])) ?>" rel="nofollow">Cadastrar grátis</a>
           <a class="botao contorno" href="<?= h($c['linkAssumir']) ?>" rel="nofollow">Ver os planos</a></p>
         <p class="discreto">Os dados vieram de informações públicas do comércio na internet. Não quer aparecer? <a href="<?= h($c['linkRemover']) ?>" rel="nofollow">Tirar meu comércio do Acha Fácil</a>.</p>

@@ -189,7 +189,7 @@ function busca_sql(array $grupos, ?string $cidade, int $limite, bool $so_com_hor
     $where = visivel($cidade) . ' AND (' . implode($todos ? ' AND ' : ' OR ', $conds) . ')'
         . ($so_com_horario ? " AND p.horarios IS NOT NULL AND p.horarios NOT IN ('', '[]', '{}')" : '');
     $ordem = ($todos ? '' : '(' . implode(' + ', $conds) . ') DESC, ')
-        . '(' . implode(' + ', $fortes) . ') DESC, ' . SQL_DESTAQUE . ' DESC, ' . SQL_FICHA_PAGA . ' DESC, RAND(' . semente_dia() . ')';
+        . '(' . implode(' + ', $fortes) . ') DESC, ' . SQL_DESTAQUE . ' DESC, ' . SQL_FICHA_PAGA . ' DESC, ' . SQL_COM_HORARIO . ' DESC, RAND(' . semente_dia() . ')';
     return linhas('SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
         WHERE ' . $where . ' ORDER BY ' . $ordem . ' LIMIT ' . (int)$limite);
 }

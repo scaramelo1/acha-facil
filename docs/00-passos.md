@@ -935,3 +935,17 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    mostrando até quando fica no ar). API: validade = "aproveite!" na ficha e "Oferta da semana" no início (apps antigos
    ficam sem data). Foto maior: ficha do site 200 px (era 120), celular até 360, cartões da cidade 110 (era 76); app 1.13.0
    mostra a foto quadrada no cartão do início (antes não tinha foto) e até 360 na ficha. CSS v=41.
+116. ✅ Donos: "Quem chamar hoje", números de verdade e prioridade para quem tem horário (19/11, pedido do usuário, itens 1–3 da
+   3ª avaliação, notas no chat: média 6,6):
+   (1) **/admin/chamar.php** ("📞 Quem chamar" no menu): comércios SEM dono (SQL_TEM_DONO) com telefone, mais vistos em 7 ou 30
+   dias (vistas + 3 x pedidos de informação), até 60; colunas vistas, pessoas, pedidos, toques, contato (celular/fixo);
+   botões WhatsApp (wa.me com a mensagem pronta: vistas, pedidos e link da ficha para "Cadastrar grátis"), Ligar, Copiar
+   mensagem e "✓ Chamei" (sai da lista por 30 dias; "Já chamados" com Desfazer). Marcados em <dados_dir>/prospeccao-chamados.json
+   (inc/prospeccao.php) + registro 'chamou_comercio'. Sem migração.
+   (2) **Números de verdade** (numeros_publicos() em inc/numeros.php, cache 1 h): na seção "Seu negócio" da inicial e no
+   topo de /planos.php, "visitas de pessoas, páginas abertas e toques nos últimos 30 dias" (só aparece com 100+ vistas). Na
+   ficha sem dono, o quadro "Este comércio é seu?" mostra "Esta página foi vista X vezes nos últimos 30 dias e N pessoas
+   pediram informações" (com 3+ vistas ou algum pedido).
+   (3) **Horário dá vantagem**: SQL_COM_HORARIO (inc/guia.php) logo depois das fichas pagas na ordem das listas do site e do
+   app, da busca e dos "parecidos"; selo "🕒 Horário informado" nos cartões do site; convite no quadro do dono: "Informando o
+   horário, sua ficha aparece no Aberto agora e antes das outras". CSS v=43.

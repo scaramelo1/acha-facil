@@ -52,6 +52,7 @@ pagina_inicio('Planos para o seu negócio | Acha Fácil!', 'Corrija os dados, co
 ?>
 <main class="documento" style="max-width:1200px">
   <h1>Planos para o seu negócio</h1>
+  <?= numeros_publicos_html() /* 19/11 (passo 116) */ ?>
   <p>Comece de graça: assuma a sua ficha e corrija os dados. Depois, se quiser, coloque fotos e apareça em destaque para toda a cidade ver.</p>
   <?php if (!$p): ?>
     <div class="quadro">Primeiro <a href="<?= $base ?>/busca.php">procure o seu negócio</a> e toque em "É meu: cadastrar grátis".

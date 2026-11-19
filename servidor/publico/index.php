@@ -153,6 +153,7 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
       <div>
         <h2>Seu negócio já pode estar no Acha Fácil</h2>
         <p class="intro">Montamos o guia com os dados públicos dos comércios das cidades atendidas. Procure o seu e assuma a sua ficha de graça para corrigir os dados.</p>
+        <?= numeros_publicos_html() /* 19/11 (passo 116): números de verdade */ ?>
         <ul class="lista-check">
           <li>Grátis: corrija telefone, WhatsApp, endereço e horário</li>
           <li>No Básico: coloque logo, 2 fotos, descrição e o que você vende ou faz</li>

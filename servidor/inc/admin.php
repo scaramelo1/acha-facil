@@ -48,7 +48,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
 <title><?= h($titulo) ?> · Admin Acha Fácil</title>
 <link rel="icon" type="image/png" href="<?= $base ?>/assets/favicon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=42">
+<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=43">
 </head>
 <body class="admin">
 <header class="topo">
@@ -57,6 +57,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
   <nav>
     <a href="<?= $base ?>/admin/">Pendências<?= $pend + $novos ? ' <span class="contador">' . ($pend + $novos) . '</span>' : '' ?></a>
     <a href="<?= $base ?>/admin/numeros.php">Números</a>
+    <a href="<?= $base ?>/admin/chamar.php">📞 Quem chamar</a>
     <a href="<?= $base ?>/admin/pedidos-info.php">Pedidos de informação</a>
     <a href="<?= $base ?>/admin/cidades.php">Cidades</a>
     <a href="<?= $base ?>/admin/novidades.php">Novidades<?= $nov ? ' <span class="contador">' . $nov . '</span>' : '' ?></a>
@@ -67,6 +68,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
       <div class="menu-lista">
         <a class="so-celular" href="<?= $base ?>/admin/">Pendências<?= $pend + $novos ? ' <span class="contador">' . ($pend + $novos) . '</span>' : '' ?></a>
         <a class="so-celular" href="<?= $base ?>/admin/numeros.php">Números</a>
+        <a class="so-celular" href="<?= $base ?>/admin/chamar.php">📞 Quem chamar</a>
         <a class="so-celular" href="<?= $base ?>/admin/pedidos-info.php">Pedidos de informação</a>
         <a class="so-celular" href="<?= $base ?>/admin/cidades.php">Cidades</a>
         <a class="so-celular" href="<?= $base ?>/admin/novidades.php">Novidades<?= $nov ? ' <span class="contador">' . $nov . '</span>' : '' ?></a>
