@@ -157,9 +157,6 @@ if (!$tem_hora_contatos): ?>
 <p class="aviso erro">Neste dia o servidor guardou <strong>só o total</strong> de fichas abertas, visualizações e toques (os quadros lá em cima),
   não a hora de cada um. Por isso a tabela abaixo mostra só as entradas. A hora começou a ser guardada <?= $ini_txt ? "em $ini_txt" : 'quando a mudança 034 for aplicada' ?>.
   Entradas no site já tinham hora e aparecem normalmente.</p>
-<?php elseif ($inicio_hora && $dia === substr($inicio_hora, 0, 10)): ?>
-<p class="aviso ok">A hora de cada visualização e toque começou a ser guardada hoje <?= h(date('\à\s H:i', strtotime($inicio_hora))) ?>: antes disso essas colunas ficam com "—"
-  e os totais da última linha são só a partir daí (o total do dia todo está nos quadros lá em cima).</p>
 <?php endif ?>
 <div class="tabela"><table class="por-hora">
   <tr><th>Hora</th><th>Entradas</th><th>De pessoas</th><th>Pré</th><?php if ($tem_hora_contatos): ?><th>Fichas abertas</th><th>Visualizações</th><th title="Pessoas diferentes que abriram fichas">Pessoas nas fichas</th><th>WhatsApp</th><th>Ligar</th><th>Mapa</th><th>Site/Insta</th><th>Toques</th><th>Compart.</th><?php endif ?></tr>
