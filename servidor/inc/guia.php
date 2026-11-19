@@ -172,13 +172,20 @@ function lista_fotos(?string $json): array {
     return is_array($l) ? array_values(array_filter($l, fn($f) => is_string($f) && preg_match('/^[a-z0-9-]{8,80}\.(jpg|png|webp)$/', $f))) : [];
 }
 
+// Ícone do comércio: o da área, menos para tipos que pedem outro (19/11: barbearia fica em Beleza, mas com tesoura no lugar do batom)
+const ICONES_TIPO = ['/barbear/iu' => 'content-cut'];
+function icone_comercio(array $p): string {
+    foreach (ICONES_TIPO as $re => $icone) if (preg_match($re, (string)($p['tipo'] ?? ''))) return $icone;
+    return (string)$p['icone'];
+}
+
 function prof_resumo(array $p): array {
     return [
         'id' => (int)$p['id'],
         'nome' => $p['nome'],
         'categoria' => $p['categoria'],
         'categoriaId' => (int)$p['categoria_id'],
-        'icone' => $p['icone'],
+        'icone' => icone_comercio($p),
         'cor' => $p['cor'],
         'tipo' => $p['tipo'] ?: $p['categoria'],
         'servicos' => $p['servicos'] ? array_values(array_filter(array_map('trim', explode(',', $p['servicos'])))) : [],

@@ -763,3 +763,6 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    tipo_da_lista, tipo_do_post, tipo_campos_html) usado por /incluir.php e /admin/comercio.php. No admin o tipo atual do
    comércio entra na lista da área dele (continua valendo mesmo com menos de 3 usos); tipo novo só por "Não encontrei o
    tipo na lista". Testado em cópia isolada (lista, forjado, vazio, novo, salvar sem mexer).
+97. ✅ Barbearia com tesoura no lugar do batom (19/11, pedido do usuário: continua dentro de Beleza). icone_comercio() e
+   ICONES_TIPO em inc/guia.php trocam o ícone da área pelo do tipo (barbear -> content-cut); usado em prof_resumo (app,
+   todas as listas) e web_logo (site, emoji ✂️ em EMOJI_AREAS). Vale na hora, sem APK novo. Cache da web limpo.
