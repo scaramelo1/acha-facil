@@ -901,3 +901,4 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    nome e comércios; tocar mostra a cidade do projeto mais perto (em linha reta, contando o outro estado). Busca de município, zoom (roda, botões, pinça) e arrasto. Tabela com cada cidade e a vizinha mais perto.
    Cidade que não é município (Monte Verde) entra pelo centro (lat/lng) e pinta o município onde fica (Camanducaia).
    19/11: o raio em volta das cidades foi tirado a pedido do usuário (atrapalhava a visualização); não pôr de volta.
+   19/11: aba "SP e MG juntos" (padrão, dados/mapas/SP-MG.json, divisa dos estados em linha escura); SP e MG separados continuam.

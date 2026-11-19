@@ -1,20 +1,22 @@
 <?php
 // Mapa das cidades (19/11, pedido do usuário): MG e SP divididos por município, as cidades do projeto pintadas,
 // para ver onde há espaço e onde as cidades se amontoam. Só administradores (exigir_admin).
-// Desenho dos municípios: dados/mapas/<UF>.json, gerado da malha do IBGE por scripts/gerar-mapas.py.
+// Desenho dos municípios: dados/mapas/<UF>.json (e SP-MG.json, os dois juntos), gerado da malha do IBGE por scripts/gerar-mapas.py.
 require __DIR__ . '/../../inc/admin.php';
 $admin = exigir_admin();
-const MAPA_UFS = ['MG' => 'Minas Gerais', 'SP' => 'São Paulo'];
-$uf = strtoupper((string)($_GET['uf'] ?? 'SP'));
-if (!isset(MAPA_UFS[$uf])) $uf = 'SP';
+const MAPA_UFS = ['SP-MG' => 'SP e MG juntos', 'SP' => 'São Paulo', 'MG' => 'Minas Gerais'];   // 19/11: juntos é o padrão (pedido do usuário)
+$uf = strtoupper((string)($_GET['uf'] ?? 'SP-MG'));
+if (!isset(MAPA_UFS[$uf])) $uf = 'SP-MG';
+$ufs = explode('-', $uf);
+$juntos = count($ufs) > 1;
 $mapa = json_decode((string)file_get_contents(__DIR__ . "/../../dados/mapas/$uf.json"), true);
 
 $tem_tabela = (bool)valor("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'cidades'");
 $cidades = $tem_tabela ? linhas("SELECT c.slug, c.nome, c.uf, c.ativa, c.lat, c.lng,
     (SELECT COUNT(*) FROM profissionais p WHERE p.cidade = c.slug AND p.status = 'ativo') AS comercios
     FROM cidades c ORDER BY c.nome") : [];
-$contagem = ['MG' => [0, 0], 'SP' => [0, 0]];
-foreach ($cidades as $c) if (isset($contagem[$c['uf']])) $contagem[$c['uf']][$c['ativa'] ? 0 : 1]++;
+$contagem = array_fill_keys(array_keys(MAPA_UFS), [0, 0]);
+foreach ($cidades as $c) foreach (array_keys(MAPA_UFS) as $v) if (in_array($c['uf'], explode('-', $v), true)) $contagem[$v][$c['ativa'] ? 0 : 1]++;
 
 /** Sem acento e minúsculo, para casar o nome do banco com o do IBGE. */
 function mapa_chave(string $s): string {
@@ -26,7 +28,7 @@ function mapa_chave(string $s): string {
 // fica em Camanducaia) o navegador acha o município pelo centro (lat/lng) da cidade.
 $doEstado = [];
 foreach ($cidades as $c) {
-    $doEstado[] = ['slug' => $c['slug'], 'nome' => $c['nome'], 'uf' => $c['uf'], 'aqui' => $c['uf'] === $uf, 'chave' => mapa_chave($c['nome']), 'ativa' => (int)$c['ativa'],
+    $doEstado[] = ['slug' => $c['slug'], 'nome' => $c['nome'], 'uf' => $c['uf'], 'aqui' => in_array($c['uf'], $ufs, true), 'chave' => mapa_chave($c['nome']), 'ativa' => (int)$c['ativa'],
         'comercios' => (int)$c['comercios'], 'lat' => $c['lat'] !== null ? (float)$c['lat'] : null, 'lng' => $c['lng'] !== null ? (float)$c['lng'] : null,
         'link' => $c['ativa'] && isset(CIDADES[$c['slug']]) ? url_publica(cidade_web($c['slug']) . '/') : null];
 }
@@ -43,6 +45,7 @@ admin_inicio('Mapa das cidades', $admin);
 .mapa-caixa path:hover{fill:#d9e2dd}
 .mapa-caixa path.ligada{fill:#0a8f55}.mapa-caixa path.ligada:hover{fill:#005C38}
 .mapa-caixa path.desligada{fill:#F7C600}.mapa-caixa path.desligada:hover{fill:#d9ad00}
+.mapa-caixa path.estado{fill:none;stroke:#173b2b;stroke-width:1.6;pointer-events:none}
 .mapa-caixa path.escolhida{stroke:#c0392b;stroke-width:2.5}
 .mapa-caixa text{font:700 9px Nunito,sans-serif;fill:#173b2b;paint-order:stroke;stroke:#fff;stroke-width:2.5px;pointer-events:none;text-anchor:middle}
 .mapa-zoom{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:6px}
@@ -70,51 +73,56 @@ admin_inicio('Mapa das cidades', $admin);
   <span><i style="background:#0a8f55"></i>Ligada no app</span>
   <span><i style="background:#F7C600"></i>Cadastrada, desligada</span>
   <span><i style="background:#eef1ef"></i>Fora do projeto</span>
-  <span><?= count($mapa['m']) ?> municípios em <?= h(MAPA_UFS[$uf]) ?></span>
+  <span><?php if ($juntos): ?><span><i style="background:#fff;border:2px solid #173b2b"></i>Divisa dos estados</span><?php endif ?>
+  <span><?= number_format(count($mapa['m']), 0, ',', '.') ?> municípios<?= $juntos ? '' : ' em ' . h(MAPA_UFS[$uf]) ?></span>
 </div>
 
 <div class="mapa-ferramentas">
   <input type="search" id="mapa-busca" list="mapa-nomes" placeholder="Procurar município..." aria-label="Procurar município">
-  <datalist id="mapa-nomes"><?php foreach ($mapa['m'] as $m): ?><option value="<?= h($m['n']) ?>"><?php endforeach ?></datalist>
+  <datalist id="mapa-nomes"><?php foreach ($mapa['m'] as $m): ?><option value="<?= h($m['n'] . ($juntos ? ' - ' . $m['u'] : '')) ?>"><?php endforeach ?></datalist>
   <label class="marcar"><input type="checkbox" id="mapa-nomes-ver" checked> Nomes das cidades do projeto</label>
 </div>
 
 <div class="quadro" id="mapa-info">Toque num município.</div>
 
 <div class="mapa-caixa">
-  <svg id="mapa" viewBox="0 0 <?= (int)$mapa['w'] ?> <?= (int)$mapa['h'] ?>" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mapa de <?= h(MAPA_UFS[$uf]) ?> por município">
+  <svg id="mapa" viewBox="0 0 <?= (int)$mapa['w'] ?> <?= (int)$mapa['h'] ?>" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mapa de <?= h($juntos ? 'São Paulo e Minas Gerais' : MAPA_UFS[$uf]) ?> por município">
     <g id="mapa-municipios"><?php foreach ($mapa['m'] as $i => $m): ?><path data-i="<?= $i ?>" d="<?= h($m['d']) ?>"/><?php endforeach ?></g>
+    <g id="mapa-estados"><?php foreach ($mapa['e'] as $e): ?><path class="estado" d="<?= h($e['d']) ?>"/><?php endforeach ?></g>
     <g id="mapa-rotulos"></g>
   </svg>
   <div class="mapa-zoom"><button type="button" data-z="1.5" title="Aproximar">+</button><button type="button" data-z="0.667" title="Afastar">−</button><button type="button" data-z="0" title="Ver tudo">⤢</button></div>
   <div class="mapa-dica" id="mapa-dica"></div>
 </div>
 
-<h2>Cidades do projeto em <?= h(MAPA_UFS[$uf]) ?></h2>
+<h2>Cidades do projeto<?= $juntos ? '' : ' em ' . h(MAPA_UFS[$uf]) ?></h2>
 <div class="tabela"><table id="mapa-tabela">
   <tr><th>Cidade</th><th>No app</th><th>Comércios</th><th>Cidade do projeto mais perto</th></tr>
 </table></div>
 
 <script>
 (function () {
-  const MUN = <?= json_encode(array_map(fn($m) => ['n' => $m['n'], 'x' => $m['x'], 'y' => $m['y']], $mapa['m']), JSON_UNESCAPED_UNICODE) ?>;
+  const MUN = <?= json_encode(array_map(fn($m) => ['n' => $m['n'], 'u' => $m['u'], 'x' => $m['x'], 'y' => $m['y']], $mapa['m']), JSON_UNESCAPED_UNICODE) ?>;
   const CID = <?= json_encode($doEstado, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
   const P = <?= json_encode($proj) ?>;
+  const JUNTOS = <?= $juntos ? 'true' : 'false' ?>;
   const W = <?= (int)$mapa['w'] ?>, H = <?= (int)$mapa['h'] ?>;
   const svg = document.getElementById('mapa'), dica = document.getElementById('mapa-dica'), info = document.getElementById('mapa-info');
   const paths = [...document.querySelectorAll('#mapa-municipios path')];
   const KM = 111.32;                                   // km por grau de latitude
   const px = (lat, lng) => [(lng - P.lon0) * P.k * P.L, (P.lat1 - lat) * P.L];
-  const chave = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const chave = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
   const num = n => n.toLocaleString('pt-BR');
 
   // cidade do projeto -> município (pelo nome; senão pelo centro dentro do desenho)
-  const porChave = {}; MUN.forEach((m, i) => porChave[chave(m.n)] = i);
+  const nomeMun = m => JUNTOS ? m.n + ' - ' + m.u : m.n;
+  const porChave = {}, porBusca = {}; MUN.forEach((m, i) => { porChave[m.u + '|' + chave(m.n)] = i; porBusca[chave(nomeMun(m))] = i; });
   const doMun = {};   // índice do município -> cidades do projeto nele
   CID.forEach(c => {
     if (!c.aqui) { if (c.lat !== null) [c.x, c.y] = px(c.lat, c.lng); c.nome += ' - ' + c.uf; return; }
-    let i = porChave[c.chave];
+    if (JUNTOS) c.nome += ' - ' + c.uf;
+    let i = porChave[c.uf + '|' + c.chave];
     if (i === undefined && c.lat !== null) {
       const [x, y] = px(c.lat, c.lng), pt = svg.createSVGPoint(); pt.x = x; pt.y = y;
       i = paths.findIndex(p => p.isPointInFill(pt));
@@ -164,8 +172,8 @@ admin_inicio('Mapa das cidades', $admin);
     if (escolhido !== null) paths[escolhido].classList.remove('escolhida');
     escolhido = i; paths[i].classList.add('escolhida');
     const m = MUN[i], cs = doMun[i] || [];
-    let html = `<strong>${esc(m.n)}</strong> - `;
-    if (cs.length) html += cs.map(c => `${c.nome !== m.n ? esc(c.nome) + ' (fica aqui): ' : ''}${c.ativa ? '✅ ligada no app' : '⏸️ cadastrada, desligada'}, ${num(c.comercios)} comércios`
+    let html = `<strong>${esc(nomeMun(m))}</strong>: `;
+    if (cs.length) html += cs.map(c => `${c.nome !== nomeMun(m) ? esc(c.nome) + ' (fica aqui): ' : ''}${c.ativa ? '✅ ligada no app' : '⏸️ cadastrada, desligada'}, ${num(c.comercios)} comércios`
       + (c.link ? ` · <a href="${esc(c.link)}" target="_blank" rel="noopener">abrir no site</a>` : '')).join('; ');
     else html += 'fora do projeto';
     const perto = maisPerto(m.x, m.y, cs[0]);
@@ -203,7 +211,7 @@ admin_inicio('Mapa das cidades', $admin);
       if (moveu) { const s = ponto(e)[2]; vb = {...arrasto.vb, x: arrasto.vb.x - dx * s, y: arrasto.vb.y - dy * s}; aplicar(); } }
     const p = e.target.closest?.('path[data-i]');
     if (p && e.pointerType === 'mouse' && !arrasto) { const i = +p.dataset.i, cs = doMun[i] || [], r = svg.parentNode.getBoundingClientRect();
-      dica.textContent = MUN[i].n + (cs.length ? ' - ' + cs.map(c => (c.nome !== MUN[i].n ? c.nome + ', ' : '') + (c.ativa ? 'ligada' : 'desligada') + ', ' + num(c.comercios) + ' comércios').join('; ') : '');
+      dica.textContent = nomeMun(MUN[i]) + (cs.length ? ': ' + cs.map(c => (c.nome !== nomeMun(MUN[i]) ? c.nome + ', ' : '') + (c.ativa ? 'ligada' : 'desligada') + ', ' + num(c.comercios) + ' comércios').join('; ') : '');
       dica.style.display = 'block'; dica.style.left = (e.clientX - r.left + 14) + 'px'; dica.style.top = (e.clientY - r.top + 14) + 'px'; }
     else if (!p) dica.style.display = 'none';
   });
@@ -215,7 +223,7 @@ admin_inicio('Mapa das cidades', $admin);
   svg.addEventListener('pointerleave', () => dica.style.display = 'none');
 
   document.getElementById('mapa-nomes-ver').addEventListener('change', desenharRotulos);
-  document.getElementById('mapa-busca').addEventListener('change', e => { const i = porChave[chave(e.target.value)]; if (i !== undefined) escolher(i, true); });
+  document.getElementById('mapa-busca').addEventListener('change', e => { const i = porBusca[chave(e.target.value)]; if (i !== undefined) escolher(i, true); });
 
   desenharRotulos();
   // começa perto das cidades do projeto
