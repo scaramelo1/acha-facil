@@ -36,6 +36,11 @@ $base = config()['url'];
 $num = fn(int $n) => number_format($n, 0, ',', '.');
 $por_uf = [];   // cidades separadas por estado, na ordem da tabela cidades
 foreach (CIDADES as $slug => $c) $por_uf[$c[2]][$slug] = $c;
+// 19/11 (pedido do usuário): dentro de cada estado, em ordem alfabética (Á junto do A)
+$sem_acento = fn(string $s) => strtr(mb_strtolower($s), ['á' => 'a', 'à' => 'a', 'â' => 'a', 'ã' => 'a', 'é' => 'e', 'ê' => 'e', 'í' => 'i',
+    'ó' => 'o', 'ô' => 'o', 'õ' => 'o', 'ú' => 'u', 'ç' => 'c']);
+foreach ($por_uf as &$cidades_do_uf) uksort($cidades_do_uf, fn($a, $b) => strcmp($sem_acento($cidades_do_uf[$a][0]), $sem_acento($cidades_do_uf[$b][0])));
+unset($cidades_do_uf);
 
 // dados do site para o Google (16/11): nome do site e marca nos resultados
 $ld_site = ['@context' => 'https://schema.org', '@type' => 'WebSite', 'name' => 'Acha Fácil!', 'alternateName' => 'Acha Fácil',
