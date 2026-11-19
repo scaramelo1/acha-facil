@@ -878,3 +878,6 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    "Quer saber quando colocarem o horário? Entre com o Google e receba o aviso no celular. É 1 toque, sem senha." e
    "Agora não" no lugar de "Não, obrigado". Acompanhar em /admin/pedidos-info.php, quadro "Convite" (por semana: pedidos,
    já com conta, aceitaram o aviso e taxa; base 16/11 = 3,0%). Rever em ~3 semanas (10/12).
+108. ✅ Administradores (19/11, pedido do usuário): fsadesignerbr@gmail.com desativado (ativo=0 na tabela admins, linha
+   mantida para o histórico; não entra mais no /admin nem recebe avisos de administração) e achafacilcontato@gmail.com
+   criado como admin "Acha Fácil" (entra pelo Google, no site e no app). Continuam: fellipealexandre1 e agnesamarilis51.
