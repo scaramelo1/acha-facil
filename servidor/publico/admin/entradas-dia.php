@@ -150,7 +150,7 @@ admin_inicio('Relatório do dia ' . date('d/m', strtotime($dia)), $admin);
 <?php endif ?>
 
 <h2>Por hora</h2>
-<p class="discreto">Entradas no site com a hora registrada; "pré" é o Chrome baixando a página antes do clique.
+<p class="discreto">Entradas no site com a hora registrada; "De pessoas" tira o Chrome baixando a página antes do clique (a diferença é o pré-carregamento).
   <?php if ($tem_hora_contatos): ?>Fichas abertas, visualizações e toques contam site e app<?= $origem !== '' ? ' (só desta origem)' : '' ?>.<?php endif ?></p>
 <?php $ini_txt = $inicio_hora ? date('d/m \à\s H:i', strtotime($inicio_hora)) : null;
 if (!$tem_hora_contatos): ?>
@@ -159,7 +159,7 @@ if (!$tem_hora_contatos): ?>
   Entradas no site já tinham hora e aparecem normalmente.</p>
 <?php endif ?>
 <div class="tabela"><table class="por-hora">
-  <tr><th>Hora</th><th>Entradas</th><th>De pessoas</th><th>Pré</th><?php if ($tem_hora_contatos): ?><th>Fichas abertas</th><th>Visualizações</th><th title="Pessoas diferentes que abriram fichas">Pessoas nas fichas</th><th>WhatsApp</th><th>Ligar</th><th>Mapa</th><th>Site/Insta</th><th>Toques</th><th>Compart.</th><?php endif ?></tr>
+  <tr><th>Hora</th><th>Entradas</th><th>De pessoas</th><?php if ($tem_hora_contatos): ?><th title="Fichas abertas">Fichas</th><th title="Visualizações">Visual.</th><th title="Pessoas diferentes que abriram fichas">Pessoas</th><th title="WhatsApp">Whats</th><th>Ligar</th><th>Mapa</th><th>Site/Insta</th><th>Toques</th><th>Compart.</th><?php endif ?></tr>
   <?php foreach ($por_hora as $hh => $l):
     $toq = $l['whatsapp'] + $l['ligar'] + $l['mapa'] + $l['outros'];
     $vazia = !$l['entradas'] && !$l['vis'] && !$toq && !$l['compartilhar'];
@@ -169,8 +169,7 @@ if (!$tem_hora_contatos): ?>
   <tr<?= $vazia ? ' class="discreto"' : '' ?><?= $dia === $hoje_d && $hh === (int)date('G') ? ' style="background:var(--amarelo-claro)"' : '' ?>>
     <td><strong><?= sprintf('%02dh', $hh) ?></strong></td>
     <td><?= $l['entradas'] ? num($l['entradas']) : '<span class="discreto">0</span>' ?></td>
-    <td class="com-barra"><span class="barra"><i style="width:<?= $l['gente'] ? max(3, round(100 * $l['gente'] / $max_gente)) : 0 ?>%"></i></span><span class="n"><?= $l['gente'] ? '<strong>' . num($l['gente']) . '</strong>' : '<span class="discreto">0</span>' ?></span></td>
-    <td><?= $l['pre'] ? num($l['pre']) : '<span class="discreto">0</span>' ?></td>
+    <td class="com-barra"><span class="barra" aria-hidden="true"><i style="width:<?= $l['gente'] ? max(3, round(100 * $l['gente'] / $max_gente)) : 0 ?>%"></i></span><span class="n"><?= $l['gente'] ? '<strong>' . num($l['gente']) . '</strong>' : '<span class="discreto">0</span>' ?></span></td>
     <?php if ($tem_hora_contatos): ?><td><?= $cel('fichas') ?></td><td><?= $cel('vis') ?></td><td><?= $cel('pessoas') ?></td>
     <td><?= $cel('whatsapp') ?></td><td><?= $cel('ligar') ?></td><td><?= $cel('mapa') ?></td><td><?= $cel('outros') ?></td>
     <td><?= $sem_dado ? '<span class="discreto">—</span>' : ($toq ? '<strong>' . num($toq) . '</strong>' : '<span class="discreto">0</span>') ?></td>
@@ -180,7 +179,7 @@ if (!$tem_hora_contatos): ?>
   $tt = $tot_hora['whatsapp'] + $tot_hora['ligar'] + $tot_hora['mapa'] + $tot_hora['outros'];
   $ct = fn(string $k) => $tem_hora_contatos ? '<strong>' . num($tot_hora[$k]) . '</strong>' : '—'; ?>
   <tr class="total-semana"><td><strong>Dia</strong></td><td><strong><?= num($tot_hora['entradas']) ?></strong></td><td><strong><?= num($tot_hora['gente']) ?></strong></td>
-    <td><strong><?= num($tot_hora['pre']) ?></strong></td><?php if ($tem_hora_contatos): ?><td><?= $ct('fichas') ?></td><td><?= $ct('vis') ?></td><td><?= $ct('pessoas') ?></td>
+<?php if ($tem_hora_contatos): ?><td><?= $ct('fichas') ?></td><td><?= $ct('vis') ?></td><td><?= $ct('pessoas') ?></td>
     <td><?= $ct('whatsapp') ?></td><td><?= $ct('ligar') ?></td><td><?= $ct('mapa') ?></td><td><?= $ct('outros') ?></td>
     <td><?= $tem_hora_contatos ? '<strong>' . num($tt) . '</strong>' : '—' ?></td><td><?= $ct('compartilhar') ?></td><?php endif ?></tr>
 </table></div>
@@ -230,7 +229,7 @@ if (!$tem_hora_contatos): ?>
   .por-hora td:first-child, .por-hora th:first-child { text-align: left; }
   /* barra de tamanho fixo (60px): a hora com mais pessoas enche 100%, as outras proporcionais; o número fica sempre no mesmo lugar */
   .por-hora .com-barra .barra { display: inline-block; width: 60px; height: 10px; border-radius: 5px; background: rgba(0, 92, 56, .1); margin-right: 8px; vertical-align: middle; overflow: hidden; text-align: left; }
-  .por-hora .com-barra .n { display: inline-block; min-width: 4ch; text-align: right; }   /* "9" e "12" ocupam o mesmo espaço: as barras não andam */
+  .por-hora .com-barra .n { display: inline-block; width: 36px; text-align: right; }   /* "9" e "12" ocupam o mesmo espaço: as barras não andam */
   .por-hora .com-barra .barra i { display: block; height: 100%; border-radius: 5px; background: var(--verde); }
   .por-hora tr.total-semana td { border-top: 2px solid var(--verde); }
 </style>
