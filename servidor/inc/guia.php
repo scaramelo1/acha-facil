@@ -224,14 +224,12 @@ function destaques(string $cidade, int $limite = 10): array {
         WHERE ' . visivel($cidade) . ' AND ' . SQL_DESTAQUE . " ORDER BY RAND(?) LIMIT $limite", [semente_dia()]));
 }
 
-// "Conhecidos na cidade": sorteio do dia entre os 80 mais procurados (sem destaque pago, que já tem vitrine).
-// $fora: ids que já apareceram em outra parte da tela; $com_contato: só quem tem WhatsApp ou telefone.
-function populares(string $cidade, int $limite = 12, array $fora = [], bool $com_contato = false): array {
-    $fora = array_map('intval', $fora) ?: [0];
-    return array_map('prof_resumo', linhas('SELECT * FROM (SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
-        WHERE ' . visivel($cidade) . ' AND NOT ' . SQL_DESTAQUE . " AND p.id NOT IN (" . implode(',', $fora) . ')'
-        . ($com_contato ? ' AND (p.whatsapp IS NOT NULL OR p.telefone IS NOT NULL)' : '') . "
-        ORDER BY p.popularidade + p.total_avaliacoes * 5 DESC LIMIT 80) t ORDER BY RAND(?) LIMIT $limite", [semente_dia()]));
+// "Recomendados em <cidade>" da tela inicial do app (passo 23, 19/11, pedido do usuário): só quem pagou o Básico
+// ou assina o Destaque (inclui Destaque + Site), sorteados uma vez por dia. Sem nenhum pagante, a faixa some no app.
+const SQL_RECOMENDADO = '(p.basico_pago_em IS NOT NULL OR ' . SQL_DESTAQUE . ')';
+function recomendados(string $cidade, int $limite = 12): array {
+    return array_map('prof_resumo', linhas('SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
+        WHERE ' . visivel($cidade) . ' AND ' . SQL_RECOMENDADO . " ORDER BY RAND(?) LIMIT $limite", [semente_dia()]));
 }
 
 /** "Comércios em destaque" da tela inicial: só quem paga o plano Destaque (nunca completa com outros). */

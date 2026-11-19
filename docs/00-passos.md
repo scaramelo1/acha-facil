@@ -88,7 +88,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Falta: (a) testar no APK novo (o do site é o 1.0.0, ainda com e-mail e senha); (b) ✅ tela de consentimento OAuth
    "Em produção" (09/11, Branding preenchido sem logo; falta confirmar entrando com uma conta Google qualquer);
    (c) para a App Store: "Entrar com Apple" junto (regra 4.8 da Apple), precisa da conta de desenvolvedor Apple
-8. 🟡 Administração web em /admin (07/11): **toda mudança do dono passa por um admin** (contra fraude). Feito: entrar
+8. ✅ Administração web em /admin (07/11): **toda mudança do dono passa por um admin** (contra fraude). Feito: entrar
    (admins; criar com `php servidor/criar-admin.php email "Nome"`, senha sorteada e mostrada uma vez), Pendências
    (alterações dos donos com "como está x como vai ficar", aprovar/recusar com motivo; pedidos de assumir/tirar do app),
    o dono que **paga entra no painel sozinho** (botão "Editar os dados do meu comércio" na página da assinatura; o
@@ -98,7 +98,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (acessos_dono, alteracoes, registro_admin); regras em servidor/inc/moderacao.php (só aprovar_alteracao() grava os
    dados do dono). Falta: total de downloads do APK (`/var/lib/acha-facil/apk/downloads.txt`), cadastrar negócio novo,
    selo, cortesia, categorias, ocultar comentários
-9. 🟡 Painel do dono em /painel (07/11): entra pela página da assinatura (?c=código do pedido pago) ou pelo link do admin; com plano em dia pede mudança de nome, sobre, serviços,
+9. ✅ Painel do dono em /painel (07/11): entra pela página da assinatura (?c=código do pedido pago) ou pelo link do admin; com plano em dia pede mudança de nome, sobre, serviços,
    WhatsApp, telefone, Instagram, site, endereço, bairro, horário, atende em casa e foto (sem dados escondidos da foto,
    reduzida). Nada vai ao app sem aprovação; endereço novo zera a localização para o geocodificar.php achar de novo.
    Falta: responder avaliações e ver contatos recebidos
@@ -125,7 +125,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    cidade, endereço, bairro, telefone, WhatsApp, horário, Instagram) + nome e telefone de quem pede. O comércio entra
    'pendente' e importado = 1; pedido tipo 'incluir' (mudança 012) avisa os admins; /admin/pedido.php publica ou recusa.
    A busca e os planos sem comércio levam para a busca/inclusão (plano é sempre de um comércio do app)
-11. 🟡 Publicar nas lojas (Play Store e App Store): guia, textos e formulários em `docs/lojas.md`; app.json pronto
+11. ✅ Publicar na Play Store (a App Store foi para o passo 102): guia, textos e formulários em `docs/lojas.md`; app.json pronto
    para o iOS (07/11). Nome "Acha Fácil" não achado em nenhuma das duas. Faltam: contas de desenvolvedor, capturas de
    tela, builds de produção (.aab e iOS), teste fechado de 14 dias na Play (conta pessoal) e conta de demonstração (passo 7).
    09/11: conta da Play ativa; passo a passo da Play no topo de `docs/lojas.md`; build "production" (Play) sem AD_ID (blockedPermissions; declaração "Não") e sem o aviso
@@ -236,14 +236,13 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Agora é só acompanhar: Páginas (indexação) na 1ª semana e Desempenho (buscas) depois de 2 a 8 semanas
 22. ⬜ Prospecção Saúde e Veículos: 2 semanas de dados do passo 20 → CSV → grupos A/B/C → WhatsApp manual
    (15–20/dia) com cupom por nicho → metas de 30 dias
-23. ⬜ "Recomendados" só com plano Básico e Destaque (10/11, pedido do usuário; 19/11: entram quem pagou o Básico e quem assina o Destaque): hoje a faixa "Recomendados em <cidade>"
-   da tela inicial sorteia entre os 80 mais procurados (populares() em inc/guia.php), com ou sem plano. Vai passar a mostrar
-   **só quem pagou o Básico ou assina o Destaque** (`basico_pago_em` ou Destaque em dia) e **só os que estão perto da
-   pessoa** (localização do celular, como no "Perto de você"), não sempre, para a seção não ficar lotada. Sem localização
-   ou sem ninguém do Básico por perto, a faixa não aparece. "Comércios em destaque" continua **só com quem assina o Destaque**
-   (passo 4g). Decidir: raio (sugestão 2 km) e quantos no máximo (sugestão 10). Precisa de APK novo (a tela inicial passa a
-   mandar a posição)
-- Google Play: já em teste fechado (passo 11). Parceria com o @sanjoanenses: decidido não fazer (10/11)
+23. ✅ "Recomendados" só com plano Básico e Destaque (10/11, pedido do usuário; feito em 19/11): a faixa "Recomendados em
+   <cidade>" da tela inicial do app mostra **só quem pagou o Básico ou assina o Destaque** (inclui Destaque + Site),
+   sorteados uma vez por dia (recomendados() e SQL_RECOMENDADO em inc/guia.php, chamada em api/inicio.php; a chave do
+   JSON continua `populares` para os apps já instalados). Sem nenhum pagante na cidade, a faixa não aparece.
+   A ideia de "só perto" (localização do celular) ficou de fora, por isso **não precisa de APK novo**.
+   Antes: sorteio entre os 80 mais procurados, com ou sem plano (populares(), que saiu). O site continua com
+   "Conhecidos na cidade" (web_pagina_cidade em inc/web.php), sem mudança. Testado em 19/11: São João 2 (Destaque), Poços 1 (Básico)
 24. ✅ Poços de Caldas atualizada (10/11, pedido do usuário): lista nova com 8.449 linhas → 8.375 comércios no app
    (6.701 novos, 1.353 atualizados; os antigos que não vieram na lista continuam). 390 lugares públicos fora.
    Importador: `--teste` (faz tudo e desfaz, mostra áreas e o que cai em "Outros"); filiais com o mesmo nome em outro
@@ -555,7 +554,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Telefone de central (4003/4004/3003/0800): mostrado sem DDD ("4004-4828 (central)"), tel: sem DDD, API com
    telefoneCentral (app 1.8.0 mostra "Central de atendimento da rede"). Telefones divididos (8 hotéis de Campos com o
    mesmo número) conferidos: são da mesma rede (central de reservas), não é erro — mantidos.
-63. 🟡 Ponto exato no mapa vindo do robô (16/11, pedido do usuário). Importador aceita data-lat/data-lng na `<tr>` ou o
+63. ✅ Ponto exato no mapa vindo do robô (16/11, pedido do usuário). Importador aceita data-lat/data-lng na `<tr>` ou o
    link do Maps com !3d…!4d… (prioridade), query=lat,lng ou @lat,lng; grava geo_origem = 'google'; ponto manual fica.
    scripts/robo/leads_places_api.py (cópia do robô da API oficial enviado pelo usuário) agora pede places.location e
    manda data-lat/data-lng e data-ativo. Testado com lista de exemplo e com o robô simulado no banco de teste.
@@ -790,3 +789,6 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (abas)/index.tsx: margem de 20 em cima do Destaque. Vitrine.tsx: passa para o próximo a cada 4 s (TROCA_MS), em
    volta (destaques + "Seu comércio aqui", depois volta ao 1º); só com a tela aberta (useFocusEffect) e com algum
    destaque; para enquanto a pessoa arrasta e espera 4 s depois de soltar. App 1.11.0 (precisa de build novo).
+102. ⬜ Publicar na App Store (19/11, pedido do usuário; separado do passo 11): conta de desenvolvedor Apple (US$ 99/ano),
+   "Entrar com Apple" junto do Google (regra 4.8 da Apple, ver passo 7c), build iOS de produção pelo EAS, capturas de
+   tela do iPhone, ficha e conta de demonstração. Guia e textos em `docs/lojas.md`; app.json já pronto para o iOS (07/11)
