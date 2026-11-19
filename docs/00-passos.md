@@ -902,3 +902,5 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Cidade que não é município (Monte Verde) entra pelo centro (lat/lng) e pinta o município onde fica (Camanducaia).
    19/11: o raio em volta das cidades foi tirado a pedido do usuário (atrapalhava a visualização); não pôr de volta.
    19/11: aba "SP e MG juntos" (padrão, dados/mapas/SP-MG.json, divisa dos estados em linha escura); SP e MG separados continuam.
+   19/11: cadastradas DESLIGADAS (amarelas no mapa, sem comércios ainda), pedido do usuário: São Sebastião da Grama, Tapiratiba,
+   Itobi, Estiva Gerbi, Itapira e Santo Antônio do Jardim (SP). Backup da tabela em /root/cidades.antes-amarelas.*.sql.
