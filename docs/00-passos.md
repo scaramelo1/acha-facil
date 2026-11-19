@@ -422,7 +422,10 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (registro: "entrou pela conta Google do site"). Topo do site mostra "Administração" (JS, j.usuario.admin), Minha
    conta mostra "Painel da administração", e /admin/entrar.php ganhou "Entrar com o Google (conta de admin)".
    Sair da administração sai também da conta do site. E-mail e senha continuam valendo
-46. ⬜ **Para amanhã (15/11):** login do Google com o nome **Acha Fácil!** em vez de **FSA Designer** (pedido do usuário).
+46. 🟡 (19/11: a, b e c feitos pelo usuário; projeto do Google Cloud "Acha Facil" é só do Acha Fácil; branding preenchido e
+   enviado para verificação da marca; logo 120x120 em publico/assets/logo-google-120.png; google_retorno no config e o
+   Google já recebe https://achafacilapp.com.br/google/retorno.php. Falta: testar entrar no site e no app e esperar o
+   Google aprovar a marca, quando aparece "Acha Fácil!" com a logo. Faturamento NÃO precisa.) **Para amanhã (15/11):** login do Google com o nome **Acha Fácil!** em vez de **FSA Designer** (pedido do usuário).
    Hoje a tela do Google mostra "FSA Designer" e volta pelo endereço antigo (fsadesigners.com.br). A fazer:
    a) Google Cloud → APIs e serviços → Tela de consentimento OAuth (Branding): nome do app "Acha Fácil!", logo do
       Acha Fácil, e-mail de suporte, página inicial https://achafacilapp.com.br/, privacidade
