@@ -95,7 +95,7 @@ if (contatos_hora_prontos()) {
 }
 $tot_hora = $h0;
 foreach ($por_hora as $l) foreach ($h0 as $k => $_) $tot_hora[$k] += $l[$k];
-$max_gente = max(1, max(array_column($por_hora, 'gente')));
+$max_entradas = max(1, max(array_column($por_hora, 'entradas')));   // barra: a hora com mais entradas = 100%
 
 // 4. cidades: entradas e fichas/toques
 $cidades = [];
@@ -150,7 +150,7 @@ admin_inicio('Relatório do dia ' . date('d/m', strtotime($dia)), $admin);
 <?php endif ?>
 
 <h2>Por hora</h2>
-<p class="discreto">Entradas no site com a hora registrada; "De pessoas" tira o Chrome baixando a página antes do clique (a diferença é o pré-carregamento).
+<p class="discreto">Entradas no site com a hora registrada; "Pessoas" tira o Chrome baixando a página antes do clique (a diferença para Entradas é o pré-carregamento).
   <?php if ($tem_hora_contatos): ?>Fichas abertas, visualizações e toques contam site e app<?= $origem !== '' ? ' (só desta origem)' : '' ?>.<?php endif ?></p>
 <?php $ini_txt = $inicio_hora ? date('d/m \à\s H:i', strtotime($inicio_hora)) : null;
 if (!$tem_hora_contatos): ?>
@@ -159,7 +159,7 @@ if (!$tem_hora_contatos): ?>
   Entradas no site já tinham hora e aparecem normalmente.</p>
 <?php endif ?>
 <div class="tabela"><table class="por-hora">
-  <tr><th>Hora</th><th>Entradas</th><th>De pessoas</th><?php if ($tem_hora_contatos): ?><th title="Fichas abertas">Fichas</th><th title="Visualizações">Visual.</th><th title="Pessoas diferentes que abriram fichas">Pessoas</th><th title="WhatsApp">Whats</th><th>Ligar</th><th>Mapa</th><th>Site/Insta</th><th>Toques</th><th>Compart.</th><?php endif ?></tr>
+  <tr><th>Hora</th><th>Entradas</th><th title="Entradas de pessoas (sem o pré-carregamento do Chrome)">Pessoas</th><?php if ($tem_hora_contatos): ?><th title="Fichas abertas">Fichas</th><th title="Visualizações">Visual.</th><th title="Pessoas diferentes que abriram fichas">Pessoas</th><th title="WhatsApp">Whats</th><th>Ligar</th><th>Mapa</th><th>Site/Insta</th><th>Toques</th><th>Compart.</th><?php endif ?></tr>
   <?php foreach ($por_hora as $hh => $l):
     $toq = $l['whatsapp'] + $l['ligar'] + $l['mapa'] + $l['outros'];
     $vazia = !$l['entradas'] && !$l['vis'] && !$toq && !$l['compartilhar'];
@@ -168,8 +168,8 @@ if (!$tem_hora_contatos): ?>
     $cel = fn(string $k) => $sem_dado ? '<span class="discreto">—</span>' : ($l[$k] ? num($l[$k]) : '<span class="discreto">0</span>'); ?>
   <tr<?= $vazia ? ' class="discreto"' : '' ?><?= $dia === $hoje_d && $hh === (int)date('G') ? ' style="background:var(--amarelo-claro)"' : '' ?>>
     <td><strong><?= sprintf('%02dh', $hh) ?></strong></td>
-    <td><?= $l['entradas'] ? num($l['entradas']) : '<span class="discreto">0</span>' ?></td>
-    <td class="com-barra"><span class="barra" aria-hidden="true"><i style="width:<?= $l['gente'] ? max(3, round(100 * $l['gente'] / $max_gente)) : 0 ?>%"></i></span><span class="n"><?= $l['gente'] ? '<strong>' . num($l['gente']) . '</strong>' : '<span class="discreto">0</span>' ?></span></td>
+    <td class="com-barra"><span class="barra" aria-hidden="true"><i style="width:<?= $l['entradas'] ? max(3, round(100 * $l['entradas'] / $max_entradas)) : 0 ?>%"></i></span><span class="n"><?= $l['entradas'] ? '<strong>' . num($l['entradas']) . '</strong>' : '<span class="discreto">0</span>' ?></span></td>
+    <td><?= $l['gente'] ? num($l['gente']) : '<span class="discreto">0</span>' ?></td>
     <?php if ($tem_hora_contatos): ?><td><?= $cel('fichas') ?></td><td><?= $cel('vis') ?></td><td><?= $cel('pessoas') ?></td>
     <td><?= $cel('whatsapp') ?></td><td><?= $cel('ligar') ?></td><td><?= $cel('mapa') ?></td><td><?= $cel('outros') ?></td>
     <td><?= $sem_dado ? '<span class="discreto">—</span>' : ($toq ? '<strong>' . num($toq) . '</strong>' : '<span class="discreto">0</span>') ?></td>
