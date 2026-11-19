@@ -172,12 +172,15 @@ function lista_fotos(?string $json): array {
     return is_array($l) ? array_values(array_filter($l, fn($f) => is_string($f) && preg_match('/^[a-z0-9-]{8,80}\.(jpg|png|webp)$/', $f))) : [];
 }
 
-// Ícone do comércio: o da área, menos para tipos que pedem outro (19/11: barbearia fica em Beleza, mas com tesoura no lugar do batom)
-const ICONES_TIPO = ['/barbear/iu' => 'content-cut'];
-function icone_comercio(array $p): string {
-    foreach (ICONES_TIPO as $re => $icone) if (preg_match($re, (string)($p['tipo'] ?? ''))) return $icone;
-    return (string)$p['icone'];
+// Ícone e cor do comércio: os da área, menos para tipos que pedem outros (19/11: barbearia fica em Beleza, mas com
+// tesoura no lugar do batom e fundo marrom no lugar do rosa). Tipo => [ícone, cor].
+const ICONES_TIPO = ['/barbear/iu' => ['content-cut', '#8B5A3C']];
+function visual_tipo(array $p): ?array {
+    foreach (ICONES_TIPO as $re => $v) if (preg_match($re, (string)($p['tipo'] ?? ''))) return $v;
+    return null;
 }
+function icone_comercio(array $p): string { return visual_tipo($p)[0] ?? (string)$p['icone']; }
+function cor_comercio(array $p): string { return visual_tipo($p)[1] ?? (string)$p['cor']; }
 
 function prof_resumo(array $p): array {
     return [
@@ -186,7 +189,7 @@ function prof_resumo(array $p): array {
         'categoria' => $p['categoria'],
         'categoriaId' => (int)$p['categoria_id'],
         'icone' => icone_comercio($p),
-        'cor' => $p['cor'],
+        'cor' => cor_comercio($p),
         'tipo' => $p['tipo'] ?: $p['categoria'],
         'servicos' => $p['servicos'] ? array_values(array_filter(array_map('trim', explode(',', $p['servicos'])))) : [],
         'bairro' => $p['bairro'],

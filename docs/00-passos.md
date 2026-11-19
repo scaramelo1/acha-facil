@@ -766,3 +766,4 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 97. ✅ Barbearia com tesoura no lugar do batom (19/11, pedido do usuário: continua dentro de Beleza). icone_comercio() e
    ICONES_TIPO em inc/guia.php trocam o ícone da área pelo do tipo (barbear -> content-cut); usado em prof_resumo (app,
    todas as listas) e web_logo (site, emoji ✂️ em EMOJI_AREAS). Vale na hora, sem APK novo. Cache da web limpo.
+   Ajuste 19/11 (usuário: fundo rosa não combinava): fundo marrom #8B5A3C (cor_comercio(); ICONES_TIPO = tipo => [ícone, cor]).

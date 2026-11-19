@@ -159,7 +159,7 @@ function web_json_ld(array ...$dados): string {
 /** Logo do comércio, ou o emoji da área no círculo com a cor dela. */
 function web_logo(array $p, string $classe = 'cc-logo'): string {
     if ($p['foto']) return '<img class="' . $classe . '" src="' . h(foto_url($p['foto'])) . '" alt=""' . ($classe === 'cc-logo' ? ' loading="lazy"' : '') . ' width="64" height="64">';
-    return '<i class="' . $classe . '" style="background:' . h($p['cor']) . '" aria-hidden="true">' . emoji_area(icone_comercio($p)) . '</i>';
+    return '<i class="' . $classe . '" style="background:' . h(cor_comercio($p)) . '" aria-hidden="true">' . emoji_area(icone_comercio($p)) . '</i>';
 }
 /** Estrelas das avaliações do app ("★ 4,5 (3)"), vazio se não tem. */
 function web_nota(array $p): string {
