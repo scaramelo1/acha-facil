@@ -781,3 +781,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    "portrait" do app.json vira recurso obrigatório no manifesto; plugins/tela-opcional.js marca screen.portrait e
    screen.landscape como android:required="false" (app continua em pé, instala em tablet/Chromebook/XR). Vale do
    próximo .aab em diante; o nº 11 foi enviado com "Continuar mesmo assim" (só aviso).
+100. ✅ Brotas no ar (19/11, leva 3 do cronograma, adiantada): 970 importados (backup profissionais-brotas-20261119), todos
+   com mapa, cidade ligada, https://achafacilapp.com.br/brotas/ e sitemap-brotas.xml respondendo. 19 resultados eram
+   BAIRROS/endereço (nome "Centro", "Jardim Regina"..., tipo "Brotas - SP", sem endereço): pausados (backup
+   brotas-bairros.antes-pausar.*.sql) → 951 no ar. Importador (importar-leads.php) agora pula tipo no formato
+   "Cidade - UF". Em "Outros" ficaram ~22 (atração turística, rafting, agência de turismo esportivo...).

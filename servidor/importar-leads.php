@@ -197,7 +197,8 @@ foreach ($linhas_html as [, $status, $tipo, $attrs, $tr]) {
     $tipo = mb_substr(html_entity_decode($tipo, ENT_QUOTES | ENT_HTML5, 'UTF-8'), 0, 80);
     if (mb_strtolower($tipo) === 'sem categoria') $tipo = '';
     $tipo = (string)limpar_tipo($tipo);   // 16/11: Bares → Bar etc. (inc/limpeza.php)
-    if ($tipo !== '' && (preg_match(NAO_COMERCIO, $tipo) || tipo_nao_comercio($tipo))) { $pulados++; $publicos++; continue; }
+    // 19/11 (Brotas): bairro/endereço vem com tipo "Brotas - SP" (cidade - UF): não é comércio
+    if ($tipo !== '' && (preg_match(NAO_COMERCIO, $tipo) || tipo_nao_comercio($tipo) || preg_match('/^[^,]+ - [A-Z]{2}$/u', $tipo))) { $pulados++; $publicos++; continue; }
     if (($tipo === '' && preg_match(SO_LUGAR, $nome)) || in_array(mb_strtolower($nome), array_map(fn($c) => mb_strtolower($c[0]), TODAS_CIDADES), true)) { $pulados++; $publicos++; continue; }
     // fechado no Google: não entra; se fechou de vez e já estava no app (importado, sem dono), sai do app (pausado)
     if ($ativo === 'inativo') {
