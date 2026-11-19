@@ -920,3 +920,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    19/11 (2): dias antes da 034 (aplicada 19/11 14:51) não têm hora de visualização/toque (só o total do dia; o registro do
    Apache também não tem id nem tipo, são POST): a tabela mostra só Entradas/De pessoas/Pré com aviso explicando; no dia 19/11
    as horas antes das 14h ficam "—". Quadros do topo arrumados (número em cima do texto) e coluna "Pessoas nas fichas".
+113. ✅ Ofertas: pôr no ar sem pagamento e editar pelo admin (19/11, pedido do usuário): /admin/ofertas.php ganhou a seção
+   "Esperando pagamento" (aguardando pagamento ou recusada) com "Pôr no ar sem pagamento" (liberar_oferta_sem_pagamento() em
+   inc/ofertas.php: valor 0, mp_status 'cortesia', registro 'liberou_oferta_sem_pagar', depois aprova normal e avisa o dono) e
+   "✏️ Editar" em todas as situações (?editar=ID: título, texto, preços, dias, foto; editar_oferta_admin(); no ar, mudar os dias
+   refaz o fim a partir do início). Oferta da Agnes Veterinária (nº 3, "Vacinação para cães e gatos") no ar sem pagamento para
+   teste, de 19/11 18:31 até 26/11 18:31 (ficha, página de São João e API conferidas).

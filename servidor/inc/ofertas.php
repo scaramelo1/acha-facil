@@ -149,6 +149,35 @@ function aprovar_oferta(int $id, int $admin_id): void {
         $o['titulo'] . ' — aparece na sua ficha e na página da cidade ' . oferta_validade($o) . '.', ['tela' => 'profissional', 'id' => (int)$o['profissional_id']]);
 }
 
+/**
+ * 19/11 (pedido do usuário): admin põe no ar SEM pagamento (teste ou cortesia). Vale para oferta esperando pagamento,
+ * em análise ou recusada. Fica registrada como valor 0 e mp_status 'cortesia'.
+ */
+function liberar_oferta_sem_pagamento(int $id, int $admin_id): void {
+    $o = linha("SELECT * FROM ofertas WHERE id = ? AND status IN ('aguardando_pagamento','em_analise','recusada')", [$id]);
+    if (!$o) throw new RuntimeException('Esta oferta não pode ser liberada (já está no ar ou foi cancelada).');
+    q("UPDATE ofertas SET status = 'em_analise', valor = 0, mp_status = 'cortesia', pago_em = COALESCE(pago_em, NOW()), atualizado_em = NOW() WHERE id = ?", [$id]);
+    require_once __DIR__ . '/moderacao.php';
+    registrar($admin_id, 'liberou_oferta_sem_pagar', (int)$o['profissional_id'], $o['titulo']);
+    aprovar_oferta($id, $admin_id);
+}
+
+/** 19/11 (pedido do usuário): admin ajusta a oferta direto (qualquer situação menos cancelada). No ar, mudar os dias refaz o fim. */
+function editar_oferta_admin(int $id, int $admin_id, array $d, ?string $foto_nova, bool $tirar_foto): void {
+    $o = linha("SELECT * FROM ofertas WHERE id = ? AND status <> 'cancelada'", [$id]);
+    if (!$o) throw new RuntimeException('Oferta não encontrada (ou já cancelada).');
+    $campos = ['titulo' => $d['titulo'], 'texto' => $d['texto'], 'preco_de' => $d['preco_de'], 'preco_por' => $d['preco_por'], 'dias' => $d['dias']];
+    if ($foto_nova) $campos['foto'] = $foto_nova;
+    elseif ($tirar_foto) $campos['foto'] = null;
+    $sets = implode(', ', array_map(fn($c) => "$c = ?", array_keys($campos)));
+    q("UPDATE ofertas SET $sets, atualizado_em = NOW() WHERE id = ?", [...array_values($campos), $id]);
+    if ($o['status'] === 'no_ar' && $o['inicio']) q('UPDATE ofertas SET fim = inicio + INTERVAL dias DAY WHERE id = ?', [$id]);
+    require_once __DIR__ . '/moderacao.php';
+    if (array_key_exists('foto', $campos) && $o['foto'] && $o['foto'] !== $campos['foto']) apagar_foto($o['foto']);
+    registrar($admin_id, 'editou_oferta', (int)$o['profissional_id'], $d['titulo']);
+    web_cache_limpar();
+}
+
 /** Recusa com motivo: o dono corrige no painel e manda de novo sem pagar outra vez. */
 function recusar_oferta(int $id, int $admin_id, string $motivo): void {
     $o = linha("SELECT * FROM ofertas WHERE id = ? AND status = 'em_analise'", [$id]);
