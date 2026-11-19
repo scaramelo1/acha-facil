@@ -640,9 +640,14 @@ document.querySelectorAll('[data-quero]').forEach(function (b) {
   cx.appendChild(p);
   if (!b.dataset.avisoTexto) return;
   var q = document.createElement('div'); q.className = 'quero-avisar'; q.hidden = true;
-  q.innerHTML = '<p></p><button type="button" class="botao pequeno" data-avisar>🔔 Sim, me avise</button> '
-    + '<button type="button" class="botao pequeno contorno" data-nao-avisar>Não, obrigado</button>';
-  q.querySelector('p').textContent = 'Quer ser avisado quando o comércio colocar ' + b.dataset.avisoTexto + '?';
+  // 19/11 (convite mais claro, para acompanhar quantos aceitam): diz a vantagem e que é 1 toque, sem senha
+  q.innerHTML = '<p></p><p class="quero-avisar-sub"></p><button type="button" class="botao pequeno" data-avisar></button> '
+    + '<button type="button" class="botao pequeno contorno" data-nao-avisar>Agora não</button>';
+  q.querySelector('p').textContent = '🔔 Quer saber quando colocarem ' + b.dataset.avisoTexto + '?';
+  q.querySelector('.quero-avisar-sub').textContent = logado
+    ? 'A gente te avisa no celular e em Minha conta assim que a informação entrar.'
+    : 'Entre com o Google e receba o aviso no celular e em Minha conta. É 1 toque, sem senha.';
+  q.querySelector('[data-avisar]').textContent = logado ? '🔔 Sim, me avise' : 'Entrar com o Google e me avisar';
   var ok = document.createElement('p'); ok.className = 'avisar-ok'; ok.hidden = true;
   ok.innerHTML = '🔔 Combinado! Você recebe um aviso no celular (app Acha Fácil) e em <a href="' + <?= json_encode(url('minha-conta.php')) ?> + '">Minha conta</a> quando a informação entrar.';
   cx.appendChild(q); cx.appendChild(ok);

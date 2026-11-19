@@ -873,3 +873,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    qualquer página (menos a própria ficha) mostra a barra "★ Como foi no X? Avaliar" que leva a ficha#avaliar
    (pagina_fim() em inc/pagina.php). Fechou ou avaliou, some. Já no ar (CSS v=38).
    Falta: app 1.13.0 (app.json já com 1.13.0): `npx tsc --noEmit`, `npx expo lint`, testar no emulador e gerar o build.
+108. ✅ Convite "Quer ser avisado?" mais claro, sem obrigar conta (19/11, pedido do usuário). Desde 16/11: 33 pedidos, 85% anônimos,
+   1 aceitou o aviso; decisão: pedir continua sem conta. Texto novo no site (inc/web.php) e no app (Trancado.tsx, vai no 1.13.0):
+   "Quer saber quando colocarem o horário? Entre com o Google e receba o aviso no celular. É 1 toque, sem senha." e
+   "Agora não" no lugar de "Não, obrigado". Acompanhar em /admin/pedidos-info.php, quadro "Convite" (por semana: pedidos,
+   já com conta, aceitaram o aviso e taxa; base 16/11 = 3,0%). Rever em ~3 semanas (10/12).

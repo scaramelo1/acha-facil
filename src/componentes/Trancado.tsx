@@ -117,8 +117,11 @@ export function Trancado({ id, tipo, titulo, texto, botao }: { id: number; tipo:
       )}
       {feito && !avisado && perguntar && (
         <View style={estilos.pergunta}>
-          <Text style={estilos.perguntaTexto}>Quer ser avisado quando o comércio colocar {TEXTO_AVISO[tipo]}?</Text>
-          {!usuario && <Text style={estilos.texto}>Para receber o aviso, entre com a sua conta Google.</Text>}
+          {/* 19/11: convite mais claro (a vantagem e "1 toque, sem senha") */}
+          <Text style={estilos.perguntaTexto}>Quer saber quando colocarem {TEXTO_AVISO[tipo]}?</Text>
+          <Text style={estilos.texto}>
+            {usuario ? 'A gente te avisa no celular assim que a informação entrar.' : 'Entre com o Google e receba o aviso no celular. É 1 toque, sem senha.'}
+          </Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             <Pressable
               accessibilityRole="button"
@@ -130,7 +133,7 @@ export function Trancado({ id, tipo, titulo, texto, botao }: { id: number; tipo:
               <Text style={estilos.botaoTexto}>{usuario ? 'Sim, me avise' : 'Entrar e me avisar'}</Text>
             </Pressable>
             <Pressable accessibilityRole="button" onPress={() => setPerguntar(false)} style={({ pressed }) => [estilos.botao, pressed && { opacity: 0.85 }]}>
-              <Text style={estilos.botaoTexto}>Não, obrigado</Text>
+              <Text style={estilos.botaoTexto}>Agora não</Text>
             </Pressable>
           </View>
         </View>

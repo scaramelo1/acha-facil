@@ -55,6 +55,24 @@ admin_inicio('Pedidos de informação', $admin);
 <p class="discreto">Fichas em que alguém tocou em "Quero saber..." (1 por pessoa, por dia). São os comércios para chamar primeiro:
   abra o <strong>Relatório</strong> e mande para o dono. As datas de cada pedido ficam em <strong>Quem pediu</strong>.</p>
 
+<?php // 19/11 (pedido do usuário): acompanhar quantos aceitam o convite "Quer saber quando colocarem...?" (texto novo em 19/11)
+if (pedidos_info_pessoas_prontos()):
+    $sem = linhas("SELECT YEARWEEK(criado_em, 3) AS s, MIN(DATE(criado_em)) AS de, COUNT(*) AS pedidos, SUM(usuario_id IS NOT NULL) AS com_conta
+        FROM pedidos_info_pessoas WHERE criado_em >= CURDATE() - INTERVAL 8 WEEK GROUP BY s ORDER BY s DESC");
+    $aceitos = [];
+    try { $aceitos = array_column(linhas("SELECT YEARWEEK(criado_em, 3) AS s, COUNT(*) AS n FROM avisos_info WHERE criado_em >= CURDATE() - INTERVAL 8 WEEK GROUP BY s"), 'n', 's'); } catch (PDOException) {}
+    if ($sem): ?>
+<details class="quadro" open><summary><strong>Convite "Quer saber quando colocarem...?"</strong> (quem pede e depois aceita o aviso)</summary>
+  <p class="discreto">Texto novo desde 19/11: diz a vantagem e "1 toque, sem senha" (antes de 19/11 era o texto antigo). Pedir continua sem conta.</p>
+  <div class="tabela"><table><thead><tr><th>Semana de</th><th>Pedidos</th><th>Já com conta</th><th>Aceitaram o aviso</th><th>Taxa</th></tr></thead><tbody>
+  <?php foreach ($sem as $l): $ac = (int)($aceitos[$l['s']] ?? 0); ?>
+    <tr><td><?= h(data_br($l['de'])) ?></td><td><?= num((int)$l['pedidos']) ?></td><td><?= num((int)$l['com_conta']) ?></td><td><?= num($ac) ?></td>
+      <td><?= pct($ac, (int)$l['pedidos']) ?></td></tr>
+  <?php endforeach ?>
+  </tbody></table></div>
+</details>
+<?php endif; endif ?>
+
 <form method="get" class="filtros-numeros">
   <label>Cidade <select name="cidade"><option value="">Todas</option>
     <?php foreach (TODAS_CIDADES as $slug => $c): ?><option value="<?= h($slug) ?>"<?= $slug === $cidade ? ' selected' : '' ?>><?= h($c[0]) ?></option><?php endforeach ?>
