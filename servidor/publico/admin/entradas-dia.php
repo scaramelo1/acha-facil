@@ -1,0 +1,176 @@
+<?php
+// Relatório completo de um dia (19/11, pedido do usuário): aberto pelo "Dia a dia" de /admin/entradas.php.
+// ?dia=AAAA-MM-DD&origem=<origem do site ou vazio = todas, site e app>&cidade=<slug ou vazio>
+// Mostra: resumo, de onde vieram (por origem), por hora, cidades, páginas onde entraram (com a hora), fichas abertas e toques.
+require __DIR__ . '/../../inc/admin.php';
+$admin = exigir_admin();
+exigir_numeros_prontos();
+
+$hoje_d = hoje();
+$dia = (string)($_GET['dia'] ?? $hoje_d);
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dia) || $dia > $hoje_d || !strtotime($dia)) $dia = $hoje_d;
+$origem = in_array($_GET['origem'] ?? '', ORIGENS_SITE, true) ? (string)$_GET['origem'] : '';
+$cidade = isset(TODAS_CIDADES[$_GET['cidade'] ?? '']) ? (string)$_GET['cidade'] : '';
+$link = fn(array $mudar) => '?' . http_build_query(array_filter(array_merge(['dia' => $dia, 'origem' => $origem, 'cidade' => $cidade], $mudar),
+    fn($v) => $v !== '' && $v !== null));
+$ontem = date('Y-m-d', strtotime("$dia -1 day"));
+$amanha = date('Y-m-d', strtotime("$dia +1 day"));
+$nome_dia = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'][(int)date('w', strtotime($dia))];
+$nome_origem = fn(string $o) => ORIGENS[$o] ?? $o;
+
+// filtros comuns: entradas/entradas_hora (coluna cidade) e contatos (cidade do comércio)
+$we = ($origem !== '' ? ' AND origem = ?' : '') . ($cidade !== '' ? ' AND cidade = ?' : '');
+$pe = array_merge($origem !== '' ? [$origem] : [], $cidade !== '' ? [$cidade] : []);
+$wk = ($origem !== '' ? ' AND k.origem = ?' : '') . ($cidade !== '' ? ' AND p.cidade = ?' : '');
+
+// 1. entradas no site
+$entradas = $pre = $pre_vistas = 0;
+$por_origem = [];
+if (entradas_prontas()) {
+    foreach (linhas("SELECT origem, SUM(total) AS t FROM entradas WHERE dia = ?$we GROUP BY origem", array_merge([$dia], $pe)) as $l) {
+        $por_origem[$l['origem']]['entradas'] = (int)$l['t'];
+        $entradas += (int)$l['t'];
+    }
+    if (pre_carregamento_pronto()) {
+        $pre = (int)valor("SELECT COUNT(*) FROM entradas_hora WHERE quando BETWEEN ? AND ? AND pre = 1$we", array_merge(["$dia 00:00:00", "$dia 23:59:59"], $pe));
+        $pre_vistas = (int)valor("SELECT COUNT(*) FROM entradas_hora WHERE quando BETWEEN ? AND ? AND pre = 2$we", array_merge(["$dia 00:00:00", "$dia 23:59:59"], $pe));
+    }
+}
+
+// 2. fichas e toques (contatos do dia), por comércio
+$fichas = linhas("SELECT p.id, p.nome, p.tipo, p.cidade, p.bairro, c.nome AS categoria,
+        SUM(IF(k.tipo = 'perfil', k.total, 0)) AS vis, SUM(IF(k.tipo = 'perfil', k.pessoas, 0)) AS pessoas,
+        SUM(IF(k.tipo = 'whatsapp', k.total, 0)) AS whatsapp, SUM(IF(k.tipo = 'ligar', k.total, 0)) AS ligar,
+        SUM(IF(k.tipo = 'mapa', k.total, 0)) AS mapa, SUM(IF(k.tipo IN ('site', 'instagram'), k.total, 0)) AS outros,
+        SUM(IF(k.tipo = 'compartilhar', k.total, 0)) AS compartilhar
+    FROM contatos k JOIN profissionais p ON p.id = k.profissional_id JOIN categorias c ON c.id = p.categoria_id
+    WHERE k.dia = ?$wk GROUP BY p.id ORDER BY (SUM(k.total) - SUM(IF(k.tipo = 'perfil', k.total, 0))) DESC, vis DESC, p.nome LIMIT 500",
+    array_merge([$dia], $pe));
+$tot = ['vis' => 0, 'pessoas' => 0, 'whatsapp' => 0, 'ligar' => 0, 'mapa' => 0, 'outros' => 0, 'compartilhar' => 0];
+foreach ($fichas as $f) foreach ($tot as $k => $_) $tot[$k] += (int)$f[$k];
+$toques = $tot['whatsapp'] + $tot['ligar'] + $tot['mapa'] + $tot['outros'];
+$abertas = count(array_filter($fichas, fn($f) => (int)$f['vis'] > 0));
+$tocados = count(array_filter($fichas, fn($f) => (int)$f['whatsapp'] + (int)$f['ligar'] + (int)$f['mapa'] + (int)$f['outros'] > 0));
+foreach (linhas("SELECT k.origem, SUM(IF(k.tipo = 'perfil', k.total, 0)) AS vis, SUM(IF(k.tipo NOT IN ('perfil', 'compartilhar'), k.total, 0)) AS toques
+        FROM contatos k JOIN profissionais p ON p.id = k.profissional_id WHERE k.dia = ?$wk GROUP BY k.origem", array_merge([$dia], $pe)) as $l) {
+    $por_origem[$l['origem']]['vis'] = (int)$l['vis'];
+    $por_origem[$l['origem']]['toques'] = (int)$l['toques'];
+}
+uasort($por_origem, fn($a, $b) => (($b['entradas'] ?? 0) + ($b['vis'] ?? 0)) <=> (($a['entradas'] ?? 0) + ($a['vis'] ?? 0)));
+
+// 3. por hora e páginas onde entraram (com a hora; pre = 1 é o Chrome baixando antes do clique)
+$horas = array_fill(0, 24, 0);
+$lista_entradas = [];
+try {
+    $lista_entradas = linhas("SELECT quando, origem, caminho, pagina, cidade, pre FROM entradas_hora WHERE quando BETWEEN ? AND ?$we ORDER BY quando DESC LIMIT 1000",
+        array_merge(["$dia 00:00:00", "$dia 23:59:59"], $pe));
+    foreach ($lista_entradas as $l) if ((int)$l['pre'] !== 1) $horas[(int)date('G', strtotime($l['quando']))]++;
+} catch (PDOException) {}
+$max_hora = max(1, max($horas));
+
+// 4. cidades: entradas e fichas/toques
+$cidades = [];
+if (entradas_prontas()) foreach (linhas("SELECT cidade, SUM(total) AS t FROM entradas WHERE dia = ?$we GROUP BY cidade", array_merge([$dia], $pe)) as $l)
+    $cidades[(string)$l['cidade']]['entradas'] = (int)$l['t'];
+foreach ($fichas as $f) {
+    $c = (string)$f['cidade'];
+    $cidades[$c]['vis'] = ($cidades[$c]['vis'] ?? 0) + (int)$f['vis'];
+    $cidades[$c]['toques'] = ($cidades[$c]['toques'] ?? 0) + (int)$f['whatsapp'] + (int)$f['ligar'] + (int)$f['mapa'] + (int)$f['outros'];
+}
+uasort($cidades, fn($a, $b) => (($b['entradas'] ?? 0) + ($b['vis'] ?? 0)) <=> (($a['entradas'] ?? 0) + ($a['vis'] ?? 0)));
+
+admin_inicio('Relatório do dia ' . date('d/m', strtotime($dia)), $admin);
+?>
+<p><a href="entradas.php?<?= h(http_build_query(array_filter(['origem' => $origem ?: 'google', 'cidade' => $cidade, 'semana' => date('Y-m-d', strtotime('monday this week', strtotime($dia)))]))) ?>#dia-a-dia">&larr; Dia a dia</a></p>
+<h1>Relatório de <?= date('d/m/Y', strtotime($dia)) ?> <small class="discreto"><?= $nome_dia ?><?= $dia === $hoje_d ? ' · hoje (ainda não acabou)' : '' ?></small></h1>
+
+<div class="paginacao-semana">
+  <a class="botao pequeno contorno" href="<?= h($link(['dia' => $ontem])) ?>">← <?= date('d/m', strtotime($ontem)) ?></a>
+  <form method="get" class="filtros-numeros" style="margin:0">
+    <input type="hidden" name="dia" value="<?= h($dia) ?>">
+    <label>Origem <select name="origem"><option value="">Todas (site e app)</option>
+      <?php foreach (ORIGENS_SITE as $o): if ($o === 'web') continue; ?><option value="<?= h($o) ?>"<?= $o === $origem ? ' selected' : '' ?>><?= h($nome_origem($o)) ?></option><?php endforeach ?>
+    </select></label>
+    <label>Cidade <select name="cidade"><option value="">Todas</option>
+      <?php foreach (TODAS_CIDADES as $slug => $c): ?><option value="<?= h($slug) ?>"<?= $slug === $cidade ? ' selected' : '' ?>><?= h($c[0]) ?></option><?php endforeach ?>
+    </select></label>
+    <button class="botao pequeno">Ver</button>
+  </form>
+  <?php if ($amanha <= $hoje_d): ?><a class="botao pequeno contorno" href="<?= h($link(['dia' => $amanha])) ?>"><?= date('d/m', strtotime($amanha)) ?> →</a><?php else: ?><span></span><?php endif ?>
+</div>
+
+<div class="numeros-resumo">
+  <div><b><?= num($entradas) ?></b><span>entradas no site</span></div>
+  <div><b><?= num(max(0, $entradas - $pre)) ?></b><span>de pessoas<?= $pre ? ' (' . num($pre) . ' pré-carregadas pelo Chrome)' : '' ?></span></div>
+  <div><b><?= num($abertas) ?></b><span>fichas abertas</span></div>
+  <div><b><?= num($tot['vis']) ?></b><span>visualizações</span></div>
+  <div><b><?= num($toques) ?></b><span>toques em <?= num($tocados) ?> comércios</span></div>
+  <div><b><?= num($tot['whatsapp']) ?> · <?= num($tot['ligar']) ?> · <?= num($tot['mapa']) ?></b><span>WhatsApp · Ligar · Mapa</span></div>
+</div>
+<?php if ($origem === ''): ?><p class="discreto">"Todas" junta o site (Google, direto, redes...) e o app (busca, categoria, perto...). Entradas são só do site.</p><?php endif ?>
+
+<?php if ($origem === '' && $por_origem): ?>
+<h2>De onde vieram</h2>
+<div class="tabela"><table>
+  <tr><th>Origem</th><th>Entradas</th><th>Visualizações</th><th>Toques</th></tr>
+  <?php foreach ($por_origem as $o => $l): ?>
+  <tr><td><?= in_array($o, ORIGENS_SITE, true) ? '<a href="' . h($link(['origem' => $o])) . '">' . h($nome_origem($o)) . '</a>' : h($nome_origem($o)) . ' <span class="discreto">(app)</span>' ?></td>
+    <td><?= isset($l['entradas']) ? num($l['entradas']) : '—' ?></td><td><?= num($l['vis'] ?? 0) ?></td><td><?= num($l['toques'] ?? 0) ?></td></tr>
+  <?php endforeach ?>
+</table></div>
+<?php endif ?>
+
+<?php if (array_sum($horas)): ?>
+<h2>Entradas por hora</h2>
+<p class="discreto">Só quem entrou no site com hora registrada, sem o pré-carregamento do Chrome.</p>
+<div class="horas-dia">
+  <?php foreach ($horas as $hh => $n): ?>
+  <div class="hora-linha"><span><?= sprintf('%02dh', $hh) ?></span><i style="width:<?= round(100 * $n / $max_hora) ?>%"></i><b><?= $n ?: '' ?></b></div>
+  <?php endforeach ?>
+</div>
+<?php endif ?>
+
+<?php if ($cidades): ?>
+<h2>Cidades</h2>
+<div class="tabela"><table>
+  <tr><th>Cidade</th><th>Entradas</th><th>Visualizações</th><th>Toques</th></tr>
+  <?php foreach ($cidades as $c => $l): ?>
+  <tr><td><?= $c !== '' ? adm_cidade($c) : 'Sem cidade (página inicial, busca)' ?></td><td><?= num($l['entradas'] ?? 0) ?></td><td><?= num($l['vis'] ?? 0) ?></td><td><?= num($l['toques'] ?? 0) ?></td></tr>
+  <?php endforeach ?>
+</table></div>
+<?php endif ?>
+
+<h2>Fichas abertas e toques (<?= num(count($fichas)) ?> comércios)</h2>
+<?php if (!$fichas): ?><p class="discreto">Nenhuma ficha aberta neste dia<?= $origem !== '' ? ' por esta origem' : '' ?>.</p><?php else: ?>
+<div class="tabela"><table>
+  <tr><th>Comércio</th><th>Vistas</th><th>Pessoas</th><th>WhatsApp</th><th>Ligar</th><th>Mapa</th><th>Site/Insta</th><th>Compart.</th><th></th></tr>
+  <?php foreach ($fichas as $f): ?>
+  <tr><td><strong><?= adm_comercio((int)$f['id'], $f['nome'], $f['cidade']) ?></strong><br><span class="discreto"><?= h($f['tipo'] ?: $f['categoria']) ?> · <?= adm_cidade($f['cidade'], null, true) ?><?= $f['bairro'] ? ' · ' . h($f['bairro']) : '' ?></span></td>
+    <?php foreach (['vis', 'pessoas', 'whatsapp', 'ligar', 'mapa', 'outros', 'compartilhar'] as $k): ?><td><?= (int)$f[$k] ? '<strong>' . num((int)$f[$k]) . '</strong>' : '<span class="discreto">0</span>' ?></td><?php endforeach ?>
+    <td><a class="botao pequeno contorno" href="numeros-ficha.php?id=<?= (int)$f['id'] ?>">Números</a></td></tr>
+  <?php endforeach ?>
+</table></div>
+<?php endif ?>
+
+<h2>Páginas onde entraram (<?= num(count($lista_entradas)) ?>)</h2>
+<?php if (!$lista_entradas): ?><p class="discreto">Nenhuma entrada com hora neste dia<?= $origem !== '' ? ' por esta origem' : '' ?>.</p><?php else: ?>
+<div class="tabela"><table>
+  <tr><th>Hora</th><th>Página</th><th>Tipo</th><th>Cidade</th><?php if ($origem === ''): ?><th>Origem</th><?php endif ?></tr>
+  <?php foreach ($lista_entradas as $l): ?>
+  <tr<?= (int)$l['pre'] === 1 ? ' class="discreto" title="Chrome baixou antes do clique"' : '' ?>><td><?= date('H:i', strtotime($l['quando'])) ?><?= (int)$l['pre'] === 1 ? ' <small>(pré)</small>' : '' ?></td>
+    <td><a href="<?= h(url_publica(ltrim((string)$l['caminho'], '/'))) ?>" target="_blank" rel="noopener"><?= h(rawurldecode((string)$l['caminho'])) ?></a></td>
+    <td><?= h(PAGINAS_ENTRADA[$l['pagina']] ?? $l['pagina']) ?></td><td><?= $l['cidade'] ? adm_cidade($l['cidade'], null, true) : '—' ?></td>
+    <?php if ($origem === ''): ?><td><?= h($nome_origem((string)$l['origem'])) ?></td><?php endif ?></tr>
+  <?php endforeach ?>
+</table></div>
+<?php endif ?>
+
+<style>
+  .paginacao-semana { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin: 0 0 16px; }
+  .horas-dia { display: grid; gap: 3px; max-width: 640px; }
+  .hora-linha { display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; gap: 8px; font-size: .85rem; }
+  .hora-linha i { display: block; height: 12px; border-radius: 6px; background: var(--verde); min-width: 2px; }
+  .hora-linha b { text-align: right; }
+</style>
+<?php
+admin_fim();

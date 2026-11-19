@@ -140,9 +140,17 @@ $diferenca = function (string $k) use ($agora_t, $antes_t, $ant_ini, $ant_fim, $
         . ($dias === 1 ? ' desde ontem' : ' x ' . h($nome_antes)) . " ($base)$parcial</small>";
 };
 $tem_parcial = $ant_ini < ORIGEM_FICHAS_DESDE && $ant_fim >= ENTRADAS_DESDE;
-// dia a dia: o período escolhido (no mínimo os últimos 7 dias), mais novo primeiro, com a diferença para o dia anterior
-$dd_ini = max(ENTRADAS_DESDE, desde_dias(max(7, $dias)));
-$dia_a_dia = $totais_por_dia(date('Y-m-d', strtotime("$dd_ini -1 day")), $hoje_d);
+// dia a dia (19/11, pedido do usuário): uma semana por vez, de segunda a domingo, com paginação (?semana=<segunda>);
+// cada dia abre o relatório completo do dia (entradas-dia.php). Diferença sempre para o dia anterior.
+$seg_atual = date('Y-m-d', strtotime('monday this week', strtotime($hoje_d)));
+$seg_primeira = date('Y-m-d', strtotime('monday this week', strtotime(ENTRADAS_DESDE)));
+$semana = (string)($_GET['semana'] ?? '');
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $semana) || $semana > $seg_atual) $semana = $seg_atual;
+$semana = max($seg_primeira, date('Y-m-d', strtotime('monday this week', strtotime($semana))));
+$sem_fim = date('Y-m-d', strtotime("$semana +6 days"));
+$dia_a_dia = $totais_por_dia(date('Y-m-d', strtotime("$semana -1 day")), $sem_fim);
+$sem_ant = $semana > $seg_primeira ? date('Y-m-d', strtotime("$semana -7 days")) : null;
+$sem_prox = $semana < $seg_atual ? date('Y-m-d', strtotime("$semana +7 days")) : null;
 
 // relatório (passo 43): cidades, áreas, comércios, dias e horários mais procurados por quem veio desta origem
 $rel = ['cidades' => [], 'areas' => [], 'comercios' => [], 'dias' => [], 'horas' => array_fill(0, 24, 0), 'horas_antes' => array_fill(0, 24, 0)];
@@ -267,23 +275,38 @@ admin_inicio(ORIGENS[$origem], $admin);
   <?= $tem_parcial ? '* O período anterior começa antes de os dados existirem (entradas desde 11/11, fichas e toques por origem desde 14/11): a comparação fica a favor de agora.' : '' ?>
   Os dias 15 e 16/11 têm robôs do AdSense contados como gente (separados só a partir de 16/11).</p>
 
-<h2>Dia a dia</h2>
+<h2 id="dia-a-dia">Dia a dia</h2>
+<div class="paginacao-semana">
+  <?php if ($sem_ant): ?><a class="botao pequeno contorno" href="<?= h($link(['semana' => $sem_ant, 'ordem' => $_GET['ordem'] ?? ''])) ?>#dia-a-dia">← Semana anterior</a><?php else: ?><span></span><?php endif ?>
+  <strong>Semana de <?= date('d/m', strtotime($semana)) ?> a <?= date('d/m', strtotime($sem_fim)) ?><?= $semana === $seg_atual ? ' · esta semana' : '' ?></strong>
+  <?php if ($sem_prox): ?><a class="botao pequeno contorno" href="<?= h($link(['semana' => $sem_prox === $seg_atual ? '' : $sem_prox, 'ordem' => $_GET['ordem'] ?? ''])) ?>#dia-a-dia">Próxima semana →</a><?php else: ?><span></span><?php endif ?>
+</div>
 <div class="tabela"><table class="dia-a-dia">
   <tr><th>Dia</th><th>Entradas</th><th>De pessoas</th><th>Fichas abertas</th><th>Visualizações</th><th>Toques</th></tr>
-  <?php $dds = array_keys($dia_a_dia); for ($i = count($dds) - 1; $i >= 1; $i--): $d = $dds[$i]; $v = $dia_a_dia[$d]; $a = $dia_a_dia[$dds[$i - 1]]; ?><tr>
-    <td><strong><?= date('d/m', strtotime($d)) ?></strong> <span class="discreto"><?= ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'][(int)date('w', strtotime($d))] ?><?= $d === $hoje_d ? ' · hoje' : '' ?></span></td>
+  <?php $dds = array_keys($dia_a_dia); $soma_sem = ['entradas' => 0, 'gente' => 0, 'fichas' => 0, 'vis' => 0, 'toques' => 0];
+  for ($i = 1; $i < count($dds); $i++): $d = $dds[$i]; $v = $dia_a_dia[$d]; $a = $dia_a_dia[$dds[$i - 1]];
+    $nome_dia = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'][(int)date('w', strtotime($d))];
+    if ($d > $hoje_d || $d < ENTRADAS_DESDE): ?><tr class="discreto">
+    <td><?= date('d/m', strtotime($d)) ?> <span class="discreto"><?= $nome_dia ?></span></td><td colspan="5"><?= $d > $hoje_d ? 'ainda não chegou' : 'antes dos dados' ?></td>
+  </tr><?php continue; endif;
+    foreach ($soma_sem as $k => $_) $soma_sem[$k] += $v[$k]; ?><tr<?= $d === $hoje_d ? ' class="dia-hoje"' : '' ?>>
+    <td><a href="entradas-dia.php?<?= h(http_build_query(array_filter(['dia' => $d, 'origem' => $origem, 'cidade' => $cidade]))) ?>" title="Relatório completo do dia"><strong><?= date('d/m', strtotime($d)) ?></strong> <?= $nome_dia ?></a><?= $d === $hoje_d ? ' <span class="discreto">· hoje</span>' : '' ?></td>
     <?php foreach (['entradas', 'gente', 'fichas', 'vis', 'toques'] as $k):
         $desde_k = in_array($k, ['entradas', 'gente'], true) ? ENTRADAS_DESDE : ORIGEM_FICHAS_DESDE;
         $dif = $v[$k] - $a[$k]; ?>
     <td><?= num($v[$k]) ?><?php if ($dds[$i - 1] >= $desde_k): ?> <small class="dif <?= $dif > 0 ? 'sobe' : ($dif < 0 ? 'desce' : 'igual') ?>"><?= $dif > 0 ? '+' . num($dif) : ($dif < 0 ? '−' . num(-$dif) : '=') ?></small><?php endif ?></td>
     <?php endforeach ?>
   </tr><?php endfor ?>
+  <tr class="total-semana"><td><strong>Semana</strong></td><?php foreach ($soma_sem as $k => $n): ?><td><strong><?= num($n) ?></strong><?= $k === 'fichas' ? ' <small class="discreto">(soma dos dias)</small>' : '' ?></td><?php endforeach ?></tr>
 </table></div>
-<p class="discreto">Ao lado de cada número, a diferença para o dia anterior. Hoje ainda não acabou.</p>
+<p class="discreto">Toque no dia para ver o relatório completo dele. Ao lado de cada número, a diferença para o dia anterior. Hoje ainda não acabou.</p>
 <style>
   .numeros-resumo .dif { display: block; margin-top: 4px; font-size: .8rem; font-weight: 700; }
   .dif.sobe { color: #12803c; } .dif.desce { color: #c0392b; } .dif.igual, .dif.sem { color: var(--texto2); font-weight: 400; }
   .dia-a-dia .dif { font-size: .78rem; }
+  .paginacao-semana { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin: 0 0 12px; }
+  .dia-a-dia tr.dia-hoje td { background: var(--amarelo-claro); }
+  .dia-a-dia tr.total-semana td { border-top: 2px solid var(--verde); }
 </style>
 
 <?php if ($rel_total): ?>
