@@ -905,3 +905,4 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    19/11: cadastradas DESLIGADAS (amarelas no mapa, sem comércios ainda), pedido do usuário: São Sebastião da Grama, Tapiratiba,
    Itobi, Estiva Gerbi, Itapira e Santo Antônio do Jardim (SP). Backup da tabela em /root/cidades.antes-amarelas.*.sql.
    Depois, também desligadas: Lindóia, Santo Antônio de Posse, Amparo e Mogi Mirim (SP); backup em /root/cidades.antes-amarelas2.*.sql.
+   Depois, também desligadas: Diamantina e Ouro Preto (MG); backup em /root/cidades.antes-amarelas3.*.sql.
