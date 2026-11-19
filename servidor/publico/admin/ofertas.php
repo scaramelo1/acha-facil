@@ -39,8 +39,8 @@ admin_inicio('Ofertas da semana', $admin);
 <?php if (!$analise): ?><p class="discreto">Nenhuma oferta esperando.</p><?php endif ?>
 <?php foreach ($analise as $o): ?>
   <div class="quadro">
-    <p><strong><a href="<?= h(url_ficha(['id' => $o['profissional_id'], 'nome' => $o['comercio'], 'cidade' => $o['cidade']])) ?>" target="_blank"><?= h($o['comercio']) ?></a></strong>
-      · <?= h(nome_cidade($o['cidade'], true)) ?> · pago em <?= h(datahora_br((string)$o['pago_em'])) ?> (<?= h(dinheiro((string)$o['valor'])) ?>)
+    <p><strong><?= adm_comercio((int)$o['profissional_id'], $o['comercio'], $o['cidade']) ?></strong>
+      · <?= adm_cidade($o['cidade'], null, true) ?> · pago em <?= h(datahora_br((string)$o['pago_em'])) ?> (<?= h(dinheiro((string)$o['valor'])) ?>)
       · <?= (int)$o['dias'] ?> dia<?= $o['dias'] > 1 ? 's' : '' ?>
       <?php if (!$o['destaque_ok']): ?><br><span class="aviso erro">O Destaque deste comércio não está em dia: se aprovar, a oferta não aparece.</span><?php endif ?></p>
     <?= oferta_quadro_ficha(array_merge($o, ['fim' => date('Y-m-d H:i:s', strtotime('+' . (int)$o['dias'] . ' days'))])) ?>
@@ -57,7 +57,7 @@ admin_inicio('Ofertas da semana', $admin);
 <?php if (!$no_ar): ?><p class="discreto">Nenhuma oferta no ar agora.</p><?php else: ?>
 <div class="tabela"><table><thead><tr><th>Comércio</th><th>Oferta</th><th>Fica</th><th></th></tr></thead><tbody>
 <?php foreach ($no_ar as $o): ?>
-  <tr><td><?= h($o['comercio']) ?><br><small><?= h(nome_cidade($o['cidade'], true)) ?></small></td><td><?= h($o['titulo']) ?></td>
+  <tr><td><?= adm_comercio((int)$o['profissional_id'], $o['comercio'], $o['cidade']) ?><br><small><?= adm_cidade($o['cidade'], null, true) ?></small></td><td><?= h($o['titulo']) ?></td>
     <td><?= h(oferta_validade($o)) ?></td>
     <td><form method="post"><?= campo_csrf() ?><input type="hidden" name="id" value="<?= (int)$o['id'] ?>">
       <button class="botao pequeno contorno" name="acao" value="encerrar" onclick="return confirm('Tirar esta oferta do ar?')">Encerrar</button></form></td></tr>
@@ -69,7 +69,7 @@ admin_inicio('Ofertas da semana', $admin);
 <?php if (!$historico): ?><p class="discreto">Nada ainda.</p><?php else: ?>
 <div class="tabela"><table><thead><tr><th>Quando</th><th>Comércio</th><th>Oferta</th><th>Situação</th><th>Pago</th></tr></thead><tbody>
 <?php foreach ($historico as $o): $acabou = $o['status'] === 'no_ar'; ?>
-  <tr><td><?= h(datahora_br($o['criado_em'])) ?></td><td><?= h($o['comercio']) ?></td><td><?= h($o['titulo']) ?></td>
+  <tr><td><?= h(datahora_br($o['criado_em'])) ?></td><td><?= adm_comercio((int)$o['profissional_id'], $o['comercio'], $o['cidade']) ?></td><td><?= h($o['titulo']) ?></td>
     <td><?= $acabou ? 'Terminou em ' . h(datahora_br($o['fim'])) : h(OFERTA_STATUS[$o['status']]) ?><?= $o['motivo'] ? '<br><small>' . h($o['motivo']) . '</small>' : '' ?></td>
     <td><?= $o['pago_em'] ? h(dinheiro((string)$o['valor'])) : '—' ?></td></tr>
 <?php endforeach ?>

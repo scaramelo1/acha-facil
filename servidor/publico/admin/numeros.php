@@ -211,7 +211,7 @@ admin_inicio('Números', $admin);
     <th>Taxa</th><th></th></tr>
   <?php foreach (array_slice($lista, ($pag - 1) * $por, $por) as $l): ?>
   <tr>
-    <td><strong><?= h($l['nome']) ?></strong><br><span class="discreto"><?= h($l['tipo'] ?: $l['categoria']) ?> · <?= h(nome_cidade($l['cidade'], true)) ?><?= $l['bairro'] ? ' · ' . h($l['bairro']) : '' ?></span></td>
+    <td><strong><?= adm_comercio((int)$l['id'], $l['nome'], $l['cidade']) ?></strong><br><span class="discreto"><?= h($l['tipo'] ?: $l['categoria']) ?> · <?= adm_cidade($l['cidade'], null, true) ?><?= $l['bairro'] ? ' · ' . h($l['bairro']) : '' ?></span></td>
     <td><?= $nome_plano[$l['plano_atual']] ?></td>
     <?php foreach (COLUNAS as $k => $n): ?><td><?= num((int)$l[$k]) ?></td><?php endforeach ?>
     <td><?= pct((int)$l['contatos'], (int)$l['visualizacoes']) ?></td>

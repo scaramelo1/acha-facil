@@ -90,7 +90,7 @@ $ja_dono = $p ? linha('SELECT a.criado_em, pe2.plano FROM acessos_dono a LEFT JO
   <div class="aviso erro"><strong>Pagamento não feito.</strong> A pessoa escolheu o plano <?= h(PLANOS_NOME[$pe['plano']] ?? $pe['plano']) ?>
     mas não terminou o pagamento. <strong>Não há nada para ativar:</strong> quando ela pagar, o plano libera sozinho. Para dar de cortesia,
     crie um <a href="cupons.php">cupom de 100%</a> e mande o link da assinatura abaixo para ela usar.
-    <?php if ($p && $pe['tipo'] === 'assumir'): ?>O comércio <strong><?= h($p['nome']) ?></strong> <em>já estava no app</em> (veio da lista do Google), não é um negócio novo.<?php endif ?></div>
+    <?php if ($p && $pe['tipo'] === 'assumir'): ?>O comércio <strong><?= adm_comercio((int)$p['id'], $p['nome'], $p['cidade']) ?></strong> <em>já estava no app</em> (veio da lista do Google), não é um negócio novo.<?php endif ?></div>
   <?php if (!empty($pe['codigo'])):
       $msg_pag = "Olá, {$pe['nome']}! Aqui é do Acha Fácil. Vimos que você escolheu o plano " . (PLANOS_NOME[$pe['plano']] ?? $pe['plano'])
           . ($p ? " para {$p['nome']}" : '') . ", mas o pagamento não foi concluído. Para terminar, é só abrir este link:\n"
@@ -123,14 +123,14 @@ $ja_dono = $p ? linha('SELECT a.criado_em, pe2.plano FROM acessos_dono a LEFT JO
 <?php if ($p && $pe['tipo'] === 'assumir'): ?><p><a class="botao pequeno contorno" href="<?= h(url('painel/?ver=' . (int)$p['id'])) ?>" target="_blank" rel="noopener">👁 Ver o painel como o dono</a></p><?php endif ?>
 <div class="tabela"><table>
   <tr><th>Situação</th><td><?= h(['novo' => 'Novo', 'feito' => 'Resolvido', 'recusado' => 'Recusado'][$pe['status']] ?? $pe['status']) ?></td></tr>
-  <tr><th>Comércio</th><td><?= $p ? '<strong>' . h($p['nome']) . '</strong><br>' . h($p['endereco'] ?? '') . ' · ' . h(nome_cidade($p['cidade']))
+  <tr><th>Comércio</th><td><?= $p ? '<strong>' . adm_comercio((int)$p['id'], $p['nome'], $p['cidade']) . '</strong><br>' . h($p['endereco'] ?? '') . ' · ' . adm_cidade($p['cidade'])
         . '<br>Telefone do cadastro: ' . h(telefone_formatado($p['telefone'] ?: $p['whatsapp'])) : '<em>Negócio novo (não está no app)</em>' ?></td></tr>
   <tr><th>Quem pediu</th><td><?= h($pe['nome']) ?> · <?= h(telefone_formatado($pe['telefone'])) ?><?= !empty($pe['email']) ? ' · ' . h($pe['email']) : '' ?></td></tr>
   <?php if ($pe['plano']): ?><tr><th>Plano</th><td><?= h(PLANOS_NOME[$pe['plano']] ?? $pe['plano']) ?><?= pedido_pago($pe) ? ' · <strong>pago</strong>' : ' · <strong>não pago</strong>' ?><?= !empty($pe['mp_status']) ? ' (Mercado Pago: ' . h($pe['mp_status']) . ')' : '' ?></td></tr><?php endif ?>
   <?php if ($pe['tipo'] === 'incluir' && $p): ?>
     <tr><th>Dados enviados</th><td>
-      <strong><?= h($p['nome']) ?></strong> · <?= h($p['tipo'] ?? '') ?> · área <?= h((string)valor('SELECT nome FROM categorias WHERE id = ?', [$p['categoria_id']])) ?><br>
-      <?= h($p['endereco'] ?? '') ?><?= $p['bairro'] ? ' · ' . h($p['bairro']) : '' ?> · <?= h(nome_cidade($p['cidade'])) ?><br>
+      <strong><?= adm_comercio((int)$p['id'], $p['nome'], $p['cidade']) ?></strong> · <?= h($p['tipo'] ?? '') ?> · área <?= h((string)valor('SELECT nome FROM categorias WHERE id = ?', [$p['categoria_id']])) ?><br>
+      <?= h($p['endereco'] ?? '') ?><?= $p['bairro'] ? ' · ' . h($p['bairro']) : '' ?> · <?= adm_cidade($p['cidade']) ?><br>
       Telefone: <?= h(telefone_formatado($p['telefone']) ?: '-') ?> · WhatsApp: <?= h(telefone_formatado($p['whatsapp']) ?: '-') ?><br>
       Horário: <?= h($p['horario'] ?? '-') ?><?= $p['instagram'] ? ' · Instagram @' . h($p['instagram']) : '' ?>
     </td></tr>

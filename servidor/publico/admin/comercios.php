@@ -41,8 +41,8 @@ admin_inicio('Comércios', $admin);
     <tr><th>Comércio</th><th>Cidade</th><th>Contato</th><th>Situação</th><th></th></tr>
     <?php foreach ($lista as $p): ?>
     <tr>
-      <td><strong><?= h($p['nome']) ?></strong><br><span class="discreto">Nº <?= (int)$p['id'] ?> · <?= h($p['tipo'] ?: $p['area']) ?></span></td>
-      <td><?= h(nome_cidade($p['cidade'], true)) ?><?= $p['bairro'] ? '<br><span class="discreto">' . h($p['bairro']) . '</span>' : '' ?></td>
+      <td><strong><?= adm_comercio((int)$p['id'], $p['nome'], $p['cidade']) ?></strong><br><span class="discreto">Nº <?= (int)$p['id'] ?> · <?= h($p['tipo'] ?: $p['area']) ?></span></td>
+      <td><?= adm_cidade($p['cidade'], null, true) ?><?= $p['bairro'] ? '<br><span class="discreto">' . h($p['bairro']) . '</span>' : '' ?></td>
       <td><?= h(telefone_formatado($p['whatsapp'] ?: $p['telefone']) ?: '-') ?></td>
       <td><?= h($p['status']) ?></td>
       <td><a class="botao pequeno" href="comercio.php?id=<?= (int)$p['id'] ?>">✏️ Editar</a></td>
@@ -57,7 +57,7 @@ admin_inicio('Comércios', $admin);
 <div class="tabela"><table>
   <tr><th>Comércio</th><th>Cidade</th><th>Quando</th><th></th></tr>
   <?php foreach ($ultimos as $p): ?>
-  <tr><td><?= h($p['nome']) ?></td><td><?= h(nome_cidade($p['cidade'], true)) ?></td><td><?= h(datahora_br($p['quando'])) ?></td>
+  <tr><td><?= adm_comercio((int)$p['id'], $p['nome'], $p['cidade']) ?></td><td><?= adm_cidade($p['cidade'], null, true) ?></td><td><?= h(datahora_br($p['quando'])) ?></td>
     <td><a class="botao pequeno" href="comercio.php?id=<?= (int)$p['id'] ?>">✏️ Editar</a></td></tr>
   <?php endforeach ?>
 </table></div>

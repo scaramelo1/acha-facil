@@ -36,7 +36,7 @@ admin_inicio('Suporte', $admin);
   <h1><?= h(SUPORTE_ASSUNTOS[$ch['assunto']] ?? 'Mensagem') ?></h1>
   <p>Nº <?= (int)$ch['id'] ?> · <strong><?= h(SUPORTE_STATUS[$ch['status']] ?? $ch['status']) ?></strong> ·
     <a href="pessoa.php?id=<?= (int)$ch['usuario_id'] ?>"><?= h($ch['pessoa']) ?></a> · <?= h($ch['email']) ?>
-    <?php if ($com): ?><br>Comércio: <a href="<?= h(url_ficha($com)) ?>" target="_blank"><?= h($com['nome']) ?></a> (<?= h(nome_cidade($com['cidade'], true)) ?>)
+    <?php if ($com): ?><br>Comércio: <?= adm_comercio((int)$com['id'], $com['nome'], $com['cidade']) ?> (<?= adm_cidade($com['cidade'], null, true) ?>)
       · <a href="numeros-ficha.php?id=<?= (int)$com['id'] ?>">números</a><?php endif ?></p>
   <?= suporte_conversa_html(suporte_mensagens((int)$ch['id']), primeiro_nome($ch['pessoa'])) ?>
   <form method="post" class="quadro">
@@ -66,7 +66,7 @@ admin_inicio('Suporte', $admin);
   <div class="tabela"><table>
     <tr><th>Assunto</th><th>Pessoa</th><th>Última mensagem</th><th>Quando</th><th></th></tr>
     <?php foreach ($lista as $c): ?><tr>
-      <td><?= h(SUPORTE_ASSUNTOS[$c['assunto']] ?? $c['assunto']) ?><?= $c['comercio'] ? '<br><span class="discreto">' . h($c['comercio']) . '</span>' : '' ?></td>
+      <td><?= h(SUPORTE_ASSUNTOS[$c['assunto']] ?? $c['assunto']) ?><?= $c['comercio'] ? '<br><span class="discreto">' . adm_comercio((int)$c['profissional_id'], $c['comercio']) . '</span>' : '' ?></td>
       <td><?= h($c['pessoa']) ?></td>
       <td><?= h(mb_strimwidth((string)$c['ultima'], 0, 90, '…')) ?></td>
       <td><?= h(datahora_br($c['atualizado_em'])) ?></td>

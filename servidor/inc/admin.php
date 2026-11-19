@@ -3,6 +3,26 @@
 declare(strict_types=1);
 require_once __DIR__ . '/moderacao.php';
 
+// ---------- links no admin (19/11, passo 109, pedido do usuário) ----------
+// Em todo o admin, o nome do comércio abre a ficha no site e o nome da cidade abre a página da cidade (nova aba).
+
+/** Nome do comércio como link para a ficha pública. Sem id (negócio novo) fica só o texto. */
+function adm_comercio(int $id, ?string $nome, ?string $cidade = null): string {
+    $nome = (string)$nome;
+    if ($id <= 0) return h($nome);
+    if ($cidade === null || $cidade === '') $cidade = (string)valor('SELECT cidade FROM profissionais WHERE id = ?', [$id]);
+    if ($cidade === '') return h($nome);
+    return '<a class="adm-link" href="' . h(url_publica(caminho_ficha($id, $nome !== '' ? $nome : 'comercio', $cidade))) . '" target="_blank" rel="noopener" title="Abrir a ficha no site">' . h($nome) . '</a>';
+}
+
+/** Nome da cidade como link para a página dela (só cidade ligada; desligada fica só o texto). $texto = o que aparece. */
+function adm_cidade(?string $slug, ?string $texto = null, bool $curto = false): string {
+    $slug = (string)$slug;
+    $texto ??= $slug !== '' && isset(TODAS_CIDADES[$slug]) ? nome_cidade($slug, $curto) : $slug;
+    if ($slug === '' || !isset(CIDADES[$slug])) return h($texto);
+    return '<a class="adm-link" href="' . h(url_publica(cidade_web($slug) . '/')) . '" target="_blank" rel="noopener" title="Abrir a cidade no site">' . h($texto) . '</a>';
+}
+
 function admin_inicio(string $titulo, ?array $admin): void {
     $base = config()['url'];
     header('Cache-Control: no-store');

@@ -52,7 +52,7 @@ if (isset($_GET['id'])) {
     admin_inicio('Novidades', $admin);
     ?>
 <p><a href="novidades.php">← Todas as listas</a></p>
-<h1><?= h(nome_cidade($m['cidade']) . ' - ' . uf_cidade($m['cidade'])) ?></h1>
+<h1><?= adm_cidade($m['cidade'], nome_cidade($m['cidade']) . ' - ' . uf_cidade($m['cidade'])) ?></h1>
 <p class="discreto">Recebida em <?= $quando($m['recebido']) ?> · <?= h($m['origem']) ?> · <?= number_format($m['linhas'], 0, ',', '.') ?> linhas
   · <strong><?= $STATUS[$m['status']] ?? h($m['status']) ?></strong>
   <?php if (!empty($m['importada_em'])): ?> em <?= $quando($m['importada_em']) ?> (<?= h($m['importada_por']) ?>)<?php endif ?></p>
@@ -80,7 +80,7 @@ if (isset($_GET['id'])) {
 <div class="tabela"><table>
   <tr><th>Nome</th><th>Área / tipo</th><th>Telefone</th><th>Endereço</th><th></th></tr>
   <?php foreach ($d['novos'] as $n): ?>
-  <tr><td><strong><?= h($n['nome']) ?></strong><?= $n['cidade'] !== $m['cidade'] ? ' <span class="discreto">(' . h(nome_cidade($n['cidade'])) . ')</span>' : '' ?></td>
+  <tr><td><strong><?= h($n['nome']) ?></strong><?= $n['cidade'] !== $m['cidade'] ? ' <span class="discreto">(' . adm_cidade($n['cidade']) . ')</span>' : '' ?></td>
     <td><?= h($AREAS[$n['area']] ?? $n['area']) ?><?= $n['tipo'] ? '<br><span class="discreto">' . h($n['tipo']) . '</span>' : '' ?></td>
     <td><?= h(trim(($n['telefone'] ?? '') . ($n['whatsapp'] ? ' · WhatsApp' : ''))) ?></td>
     <td><?= h(trim(($n['endereco'] ?? '') . ($n['bairro'] ? ' - ' . $n['bairro'] : ''))) ?></td>
@@ -94,7 +94,7 @@ if (isset($_GET['id'])) {
 <div class="tabela"><table>
   <tr><th>Comércio</th><th>O que mudou</th></tr>
   <?php foreach ($d['mudaram'] as $x): ?>
-  <tr><td><a href="numeros-ficha.php?id=<?= (int)$x['id'] ?>"><strong><?= h($x['nome']) ?></strong></a> <span class="discreto">nº <?= (int)$x['id'] ?></span></td>
+  <tr><td><strong><?= adm_comercio((int)$x['id'], $x['nome'], $m['cidade']) ?></strong> <span class="discreto"><a href="numeros-ficha.php?id=<?= (int)$x['id'] ?>">nº <?= (int)$x['id'] ?></a></span></td>
     <td><?php foreach ($x['campos'] as $cp => [$a, $b]): ?>
       <div><?= h($CAMPOS[$cp] ?? $cp) ?>: <s class="discreto"><?= h($a !== '' ? $a : '(vazio)') ?></s> → <strong><?= h($b) ?></strong></div>
     <?php endforeach ?></td></tr>
@@ -107,7 +107,7 @@ if (isset($_GET['id'])) {
 <p class="discreto">“Fechado permanentemente” no Google: saem do app (ficam pausados, dá para voltar).</p>
 <div class="tabela"><table>
   <tr><th>Comércio</th><th>Endereço</th></tr>
-  <?php foreach ($d['fecharam'] as $x): ?><tr><td><a href="numeros-ficha.php?id=<?= (int)$x['id'] ?>"><strong><?= h($x['nome']) ?></strong></a> <span class="discreto">nº <?= (int)$x['id'] ?></span></td><td><?= h((string)$x['endereco']) ?></td></tr><?php endforeach ?>
+  <?php foreach ($d['fecharam'] as $x): ?><tr><td><strong><?= adm_comercio((int)$x['id'], $x['nome'], $m['cidade']) ?></strong> <span class="discreto"><a href="numeros-ficha.php?id=<?= (int)$x['id'] ?>">nº <?= (int)$x['id'] ?></a></span></td><td><?= h((string)$x['endereco']) ?></td></tr><?php endforeach ?>
 </table></div>
 <?php endif ?>
 
@@ -135,7 +135,7 @@ admin_inicio('Novidades', $admin);
   <?php if (!$lista): ?><tr><td colspan="5" class="discreto">Nenhuma lista recebida ainda.</td></tr><?php endif ?>
   <?php foreach ($lista as $m): ?>
   <tr><td><?= $quando($m['recebido']) ?><br><span class="discreto"><?= h($m['origem']) ?></span></td>
-    <td><?= h(isset(TODAS_CIDADES[$m['cidade']]) ? nome_cidade($m['cidade']) : $m['cidade']) ?></td>
+    <td><?= adm_cidade($m['cidade']) ?></td>
     <td><?= !empty($m['sem_novidade']) ? '<span class="discreto">nada novo</span>' : h(nov_resumo($m)) ?></td>
     <td><?= $STATUS[$m['status']] ?? h($m['status']) ?></td>
     <td><a class="botao<?= $m['status'] === 'aguardando' ? '' : ' contorno' ?>" href="?id=<?= h($m['id']) ?>"><?= $m['status'] === 'aguardando' ? 'Conferir' : 'Ver' ?></a></td></tr>

@@ -41,8 +41,8 @@ $por_area = [];
 foreach ($favoritos as $f) $por_area[$f['categoria']] = ($por_area[$f['categoria']] ?? 0) + 1;
 arsort($por_area);
 
-$comercio = fn(array $l) => '<strong>' . h($l['nome']) . '</strong><br><span class="discreto">' . h($l['tipo'] ?: $l['categoria'])
-    . ' · ' . h(nome_cidade($l['cidade'], true)) . ($l['bairro'] ? ' · ' . h($l['bairro']) : '') . '</span>';
+$comercio = fn(array $l) => '<strong>' . adm_comercio((int)$l['id'], $l['nome'], $l['cidade']) . '</strong><br><span class="discreto">' . h($l['tipo'] ?: $l['categoria'])
+    . ' · ' . adm_cidade($l['cidade'], null, true) . ($l['bairro'] ? ' · ' . h($l['bairro']) : '') . '</span>';
 $botoes = fn(array $l) => '<a class="botao pequeno contorno" href="numeros-ficha.php?id=' . (int)$l['id'] . '">Números</a>'
     . (($l['status_ficha'] ?? $l['status']) === 'ativo' ? ' <a class="botao pequeno contorno" href="' . h(url_ficha($l)) . '" target="_blank" rel="noopener">Abrir</a>' : '');
 $estrelas = fn(int $n) => '<span title="' . $n . ' de 5" style="color:var(--amarelo);white-space:nowrap">' . str_repeat('★', $n) . '</span><span style="color:#ccc">' . str_repeat('★', 5 - $n) . '</span>';

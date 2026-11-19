@@ -73,6 +73,8 @@ foreach (linhas("SELECT a.*, d.nome AS dono, d.telefone AS dono_tel, d.pedido_id
     }
     $alteracoes[] = [
         'id' => (int)$a['id'], 'comercio' => $p['nome'], 'cidade' => nome_cidade($p['cidade'], true), 'quando' => datahora_br($a['criado_em']),
+        // 19/11 (passo 109): nome do comércio abre a ficha no app; cidade abre a página da cidade no site
+        'profissionalId' => (int)$p['id'], 'linkCidade' => isset(CIDADES[$p['cidade']]) ? url_publica(cidade_web($p['cidade']) . '/') : null,
         'dono' => $a['dono'], 'donoTelefone' => telefone_formatado($a['dono_tel']),
         'pago' => $pago ? ['nome' => $pago['nome'], 'telefone' => telefone_formatado($pago['telefone']), 'email' => $pago['email'] ?? null,
             'plano' => PLANOS_NOME[$pago['plano']] ?? null, 'status' => $pago['mp_status'] ?? null] : null,
@@ -88,7 +90,10 @@ $pedidos = array_map(fn($pe) => [
     'id' => (int)$pe['id'], 'tipo' => $pe['tipo'], 'plano' => $pe['plano'] ? PLANOS_NOME[$pe['plano']] ?? null : null,
     'pago' => in_array($pe['mp_status'] ?? '', ['authorized', 'approved'], true), 'comercio' => $pe['comercio'], 'nome' => $pe['nome'],
     'telefone' => telefone_formatado($pe['telefone']), 'quando' => datahora_br($pe['criado_em']),
-], array_slice(array_values(array_filter(linhas("SELECT pe.*, p.nome AS comercio FROM pedidos pe LEFT JOIN profissionais p ON p.id = pe.profissional_id
+    'profissionalId' => $pe['profissional_id'] ? (int)$pe['profissional_id'] : null,   // 19/11 (passo 109)
+    'cidade' => $pe['cidade_com'] ? nome_cidade($pe['cidade_com'], true) : null,
+    'linkCidade' => $pe['cidade_com'] && isset(CIDADES[$pe['cidade_com']]) ? url_publica(cidade_web($pe['cidade_com']) . '/') : null,
+], array_slice(array_values(array_filter(linhas("SELECT pe.*, p.nome AS comercio, p.cidade AS cidade_com FROM pedidos pe LEFT JOIN profissionais p ON p.id = pe.profissional_id
     WHERE pe.status = 'novo' ORDER BY pe.criado_em DESC LIMIT 100"), 'pedido_pendente')), 0, 50));
 
 $cidades = array_map(fn($c) => ['cidade' => $c['cidade'], 'uf' => $c['uf'], 'total' => (int)$c['total'], 'ultimo' => datahora_br($c['ultimo'])],
@@ -97,6 +102,7 @@ $cidades = array_map(fn($c) => ['cidade' => $c['cidade'], 'uf' => $c['uf'], 'tot
 
 $eventos = array_map(fn($e) => [
     'id' => (int)$e['id'], 'titulo' => $e['titulo'], 'cidade' => nome_cidade($e['cidade'], true),
+    'linkCidade' => isset(CIDADES[$e['cidade']]) ? url_publica(cidade_web($e['cidade']) . '/') : null,   // 19/11 (passo 109)
     'quando' => ucfirst(evento_quando($e)), 'horario' => evento_horario($e),
     'local' => implode(', ', array_filter([$e['local_nome'], $e['endereco']])) ?: null, 'preco' => $e['preco'],
     'descricao' => $e['descricao'], 'linkOficial' => evento_link_oficial($e), 'imagem' => $e['imagem'] ? foto_url($e['imagem']) : null,

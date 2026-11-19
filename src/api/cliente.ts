@@ -209,6 +209,8 @@ export interface AlteracaoPendente {
   comercio: string;
   cidade: string;
   quando: string;
+  profissionalId?: number; // 19/11 (passo 109): nome abre a ficha
+  linkCidade?: string | null; // pagina da cidade no site
   dono: string | null;
   donoTelefone: string;
   pago: { nome: string; telefone: string; email: string | null; plano: string | null; status: string | null } | null;
@@ -225,12 +227,16 @@ export interface PedidoNovo {
   nome: string;
   telefone: string;
   quando: string;
+  profissionalId?: number | null; // 19/11 (passo 109)
+  cidade?: string | null;
+  linkCidade?: string | null;
 }
 /** Evento enviado pelo publico em /incluir-evento.php, esperando autorizacao. */
 export interface EventoPendente {
   id: number;
   titulo: string;
   cidade: string;
+  linkCidade?: string | null; // 19/11 (passo 109)
   quando: string;
   horario: string | null;
   local: string | null;

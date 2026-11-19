@@ -118,8 +118,8 @@ admin_inicio('Editar ' . $p['nome'], $admin);
 ?>
 <p><a href="comercios.php">&larr; Comércios</a> · <a href="<?= h(url_ficha($p)) ?>" target="_blank" rel="noopener">ver a ficha no site</a>
   · <a href="numeros-ficha.php?id=<?= $id ?>">números</a></p>
-<h1>✏️ <?= h($p['nome']) ?></h1>
-<p class="discreto">Nº <?= $id ?> · <?= h(nome_cidade($p['cidade'])) ?> · <?= h(STATUS_NOME[$p['status']] ?? $p['status']) ?>
+<h1>✏️ <?= adm_comercio($id, $p['nome'], $p['cidade']) ?></h1>
+<p class="discreto">Nº <?= $id ?> · <?= adm_cidade($p['cidade']) ?> · <?= h(STATUS_NOME[$p['status']] ?? $p['status']) ?>
   · <?= (int)$p['importado'] ? 'veio da lista do Google' : 'cadastrado pelo dono' ?>
   · <?= $destaque ? 'Destaque em dia' : ($em_dia ? 'plano em dia' : 'sem plano pago') ?>
   · atualizado em <?= h(datahora_br($p['atualizado_em'])) ?></p>

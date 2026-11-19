@@ -73,7 +73,7 @@ admin_inicio('Notificações', $admin);
     <td><?= h($n['quando']) ?></td>
     <td><strong><?= h($n['titulo']) ?></strong><br><?= h($n['texto']) ?></td>
     <td><?= h($n['cidade']) ?><br><span class="discreto"><?= h($n['publico']) ?></span></td>
-    <td><?= $n['comercio'] ? h($n['comercio']) . ' <span class="discreto">(nº ' . (int)$n['profissionalId'] . ')</span>' : 'o app' ?></td>
+    <td><?= $n['comercio'] ? adm_comercio((int)$n['profissionalId'], $n['comercio']) . ' <span class="discreto">(nº ' . (int)$n['profissionalId'] . ')</span>' : 'o app' ?></td>
     <td><?= (int)$n['entregues'] ?> de <?= (int)$n['aparelhos'] ?><?= $n['falhas'] ? '<br><span class="discreto">' . (int)$n['falhas'] . ' falha(s)</span>' : '' ?></td>
     <td><?= h($n['admin'] ?? '-') ?><br><span class="discreto">pelo <?= $n['pelo'] === 'app' ? 'app' : 'site' ?></span></td>
   </tr>

@@ -35,8 +35,8 @@ $ja_aprovado = $a['acesso_id'] && (int)valor("SELECT COUNT(*) FROM alteracoes WH
 admin_inicio('Conferir alteração', $admin);
 ?>
 <p><a href="./">&larr; Pendências</a></p>
-<h1><?= h($p['nome']) ?></h1>
-<p class="discreto"><?= h(nome_cidade($p['cidade'])) ?> · pedido por <?= h($a['dono'] ?? '?') ?>
+<h1><?= adm_comercio((int)$p['id'], $p['nome'], $p['cidade']) ?></h1>
+<p class="discreto"><?= adm_cidade($p['cidade']) ?> · pedido por <?= h($a['dono'] ?? '?') ?>
   <?= $a['dono_tel'] ? '(' . h(telefone_formatado($a['dono_tel'])) . ')' : '' ?> em <?= h(datahora_br($a['criado_em'])) ?>
   · <a href="<?= h(url_publica('busca.php?q=' . rawurlencode($p['nome']))) ?>" target="_blank" rel="noopener">ver no site</a></p>
 

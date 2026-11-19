@@ -27,7 +27,7 @@ if (e_post() && in_array($_POST['acao'] ?? '', ['visto', 'desfazer_visto'], true
 $alteracoes = linhas("SELECT a.id, a.criado_em, a.novos, p.id AS pid, p.nome, p.cidade, d.nome AS dono
     FROM alteracoes a JOIN profissionais p ON p.id = a.profissional_id LEFT JOIN acessos_dono d ON d.id = a.acesso_id
     WHERE a.status = 'pendente' ORDER BY a.criado_em");
-$todos_pedidos = linhas("SELECT pe.id, pe.tipo, pe.plano, pe.mp_status, pe.status, pe.nome, pe.telefone, pe.criado_em, p.nome AS comercio, p.cidade
+$todos_pedidos = linhas("SELECT pe.id, pe.tipo, pe.plano, pe.mp_status, pe.status, pe.nome, pe.telefone, pe.criado_em, p.nome AS comercio, p.cidade, p.id AS pid
     FROM pedidos pe LEFT JOIN profissionais p ON p.id = pe.profissional_id WHERE pe.status = 'novo' ORDER BY pe.criado_em");
 $pedidos = array_values(array_filter($todos_pedidos, 'pedido_pendente'));
 $vistos = array_values(array_filter($todos_pedidos, fn($pe) => !pedido_pendente($pe)));
@@ -55,8 +55,8 @@ admin_inicio('Pendências', $admin);
   <tr><th>Comércio</th><th>Cidade</th><th>O que muda</th><th>Pedido por</th><th>Quando</th><th></th></tr>
   <?php foreach ($alteracoes as $a): $campos = array_map(fn($c) => CAMPOS_DONO[$c][0] ?? $c, array_keys(json_decode($a['novos'], true) ?: [])); ?>
   <tr>
-    <td><strong><?= h($a['nome']) ?></strong></td>
-    <td><?= h(nome_cidade($a['cidade'], true)) ?></td>
+    <td><strong><?= adm_comercio((int)$a['pid'], $a['nome'], $a['cidade']) ?></strong></td>
+    <td><?= adm_cidade($a['cidade'], null, true) ?></td>
     <td><?= h(implode(', ', $campos)) ?></td>
     <td><?= h($a['dono'] ?? '?') ?></td>
     <td><?= h(datahora_br($a['criado_em'])) ?></td>
@@ -73,7 +73,7 @@ admin_inicio('Pendências', $admin);
   <?php foreach ($pedidos as $pe): ?>
   <tr>
     <td><?= h(TIPO_PEDIDO[$pe['tipo']] ?? $pe['tipo']) ?><?= $pe['plano'] ? ' · plano ' . h(PLANOS_NOME[$pe['plano']] ?? $pe['plano']) : '' ?><?= in_array($pe['mp_status'], ['authorized', 'approved'], true) ? ' <span class="contador">pago</span>' : ($pe['plano'] ? ' <span class="discreto">(não pago)</span>' : '') ?></td>
-    <td><?= $pe['comercio'] ? h($pe['comercio']) . ' <span class="discreto">(' . h(nome_cidade($pe['cidade'], true)) . ')</span>' : '<em>Negócio novo</em>' ?></td>
+    <td><?= $pe['comercio'] ? adm_comercio((int)$pe['pid'], $pe['comercio'], $pe['cidade']) . ' <span class="discreto">(' . adm_cidade($pe['cidade'], null, true) . ')</span>' : '<em>Negócio novo</em>' ?></td>
     <td><?= h($pe['nome']) ?><br><span class="discreto"><?= h(telefone_formatado($pe['telefone'])) ?></span></td>
     <td><?= h(datahora_br($pe['criado_em'])) ?></td>
     <td><a class="botao pequeno" href="pedido.php?id=<?= (int)$pe['id'] ?>">Abrir</a>
@@ -94,7 +94,7 @@ admin_inicio('Pendências', $admin);
     <?php foreach ($vistos as $pe): ?>
     <tr>
       <td><?= h(TIPO_PEDIDO[$pe['tipo']] ?? $pe['tipo']) ?><?= $pe['plano'] ? ' · plano ' . h(PLANOS_NOME[$pe['plano']] ?? $pe['plano']) . ' <span class="discreto">(não pago)</span>' : '' ?></td>
-      <td><?= $pe['comercio'] ? h($pe['comercio']) . ' <span class="discreto">(' . h(nome_cidade($pe['cidade'], true)) . ')</span>' : '<em>Negócio novo</em>' ?></td>
+      <td><?= $pe['comercio'] ? adm_comercio((int)$pe['pid'], $pe['comercio'], $pe['cidade']) . ' <span class="discreto">(' . adm_cidade($pe['cidade'], null, true) . ')</span>' : '<em>Negócio novo</em>' ?></td>
       <td><?= h($pe['nome']) ?><br><span class="discreto"><?= h(telefone_formatado($pe['telefone'])) ?></span></td>
       <td><?= h(datahora_br($pe['criado_em'])) ?></td>
       <td><?= h(datahora_br(pedidos_vistos()[(int)$pe['id']] ?? null)) ?></td>
@@ -113,7 +113,7 @@ admin_inicio('Pendências', $admin);
   <tr><th>Comércio</th><th>Dono</th><th>Liberado em</th><th>Último uso</th><th></th></tr>
   <?php foreach ($acessos as $d): ?>
   <tr>
-    <td><?= h($d['comercio']) ?></td>
+    <td><?= adm_comercio((int)$d['pid'], $d['comercio']) ?></td>
     <td><?= h($d['nome']) ?><br><span class="discreto"><?= h(telefone_formatado($d['telefone'])) ?></span></td>
     <td><?= h(datahora_br($d['criado_em'])) ?></td>
     <td><?= h(datahora_br($d['ultimo_uso'])) ?></td>

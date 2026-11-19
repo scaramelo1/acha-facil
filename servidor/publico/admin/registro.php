@@ -15,7 +15,7 @@ admin_inicio('Registro', $admin);
   <tr><th>Quando</th><th>Quem</th><th>O quê</th><th>Comércio</th><th>Detalhe</th></tr>
   <?php foreach ($itens as $r): ?>
   <tr><td><?= h(datahora_br($r['criado_em'])) ?></td><td><?= h($r['admin_nome'] ?? '?') ?></td>
-    <td><?= h(ACOES[$r['acao']] ?? $r['acao']) ?></td><td><?= h($r['comercio'] ?? '') ?></td><td><?= h($r['detalhe'] ?? '') ?></td></tr>
+    <td><?= h(ACOES[$r['acao']] ?? $r['acao']) ?></td><td><?= $r['comercio'] ? adm_comercio((int)$r['profissional_id'], $r['comercio']) : '' ?></td><td><?= h($r['detalhe'] ?? '') ?></td></tr>
   <?php endforeach ?>
 </table></div>
 <?php admin_fim();

@@ -106,7 +106,7 @@ admin_inicio('Eventos', $admin);
 <?php foreach ($pendentes as $e): ?>
 <div class="quadro">
   <h3 style="margin-top:0"><?= h($e['titulo']) ?></h3>
-  <p><strong><?= h(ucfirst(evento_quando($e))) ?></strong><?= ($hr = evento_horario($e)) ? ' · ' . h($hr) : '' ?> · <?= h(nome_cidade($e['cidade'])) ?><br>
+  <p><strong><?= h(ucfirst(evento_quando($e))) ?></strong><?= ($hr = evento_horario($e)) ? ' · ' . h($hr) : '' ?> · <?= adm_cidade($e['cidade']) ?><br>
     <?= h(implode(', ', array_filter([$e['local_nome'], $e['endereco']]))) ?><?= $e['preco'] ? '<br>Entrada: ' . h($e['preco']) : '' ?>
     <?php if ($l = evento_link_oficial($e)): ?><br>Página oficial: <a href="<?= h($l) ?>" target="_blank" rel="noopener nofollow"><?= h($l) ?></a><?php endif ?></p>
   <?php if ($e['imagem']): ?><p><a href="<?= h(foto_url($e['imagem'])) ?>" target="_blank"><img src="<?= h(foto_url($e['imagem'])) ?>" alt="Cartaz" style="max-width:260px;border-radius:12px;display:block"></a></p><?php endif ?>
@@ -181,7 +181,7 @@ admin_inicio('Eventos', $admin);
   <tr<?= $e['visivel'] ? '' : ' class="discreto"' ?>>
     <td><?= h(evento_quando($e, false)) ?><?= ($hr = evento_horario($e)) ? '<br><small>' . h($hr) . '</small>' : '' ?></td>
     <td><strong><?= h($e['titulo']) ?></strong><?= $e['local_nome'] ? '<br><small>' . h($e['local_nome']) . '</small>' : '' ?></td>
-    <td><?= h(nome_cidade($e['cidade'])) ?></td>
+    <td><?= adm_cidade($e['cidade']) ?></td>
     <td><?php if ($e['visivel'] && isset(CIDADES[$e['cidade']])): ?><a href="<?= h(url_evento($e)) ?>" target="_blank">Ver ↗</a><?php else: ?>Escondido<?php endif ?></td>
     <td style="white-space:nowrap">
       <a class="botao contorno" href="?editar=<?= (int)$e['id'] ?>&cidade=<?= h(urlencode($e['cidade'])) ?>">Editar</a>

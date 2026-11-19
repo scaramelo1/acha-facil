@@ -74,7 +74,11 @@ export default function TelaAdmin() {
                   {p.plano ? ` · plano ${p.plano}` : ''}
                   {p.pago ? ' · pago' : ''}
                 </Text>
-                <Text style={estilos.texto}>{p.comercio ?? 'Negócio novo'}</Text>
+                <Text style={estilos.texto}>
+                  {p.comercio ? <LinkComercio id={p.profissionalId} nome={p.comercio} /> : 'Negócio novo'}
+                  {p.cidade ? ' · ' : ''}
+                  {p.cidade ? <LinkCidade nome={p.cidade} link={p.linkCidade} /> : null}
+                </Text>
                 <Text style={estilos.sub}>
                   {p.nome} · {p.telefone} · {p.quando}
                 </Text>
@@ -137,6 +141,27 @@ export default function TelaAdmin() {
 }
 
 /** Evento enviado pelo publico: tudo o que vai aparecer na agenda, quem enviou, e Autorizar ou Recusar. */
+/** 19/11 (passo 109): nome do comercio abre a ficha no app (sem id, so o texto). */
+function LinkComercio({ id, nome }: { id?: number | null; nome: string }) {
+  const router = useRouter();
+  if (!id) return <Text>{nome}</Text>;
+  return (
+    <Text accessibilityRole="link" onPress={() => router.push(`/profissional/${id}`)} style={estilos.link}>
+      {nome}
+    </Text>
+  );
+}
+
+/** 19/11 (passo 109): nome da cidade abre a pagina da cidade no site, com todos os comercios. */
+function LinkCidade({ nome, link }: { nome: string; link?: string | null }) {
+  if (!link) return <Text>{nome}</Text>;
+  return (
+    <Text accessibilityRole="link" onPress={() => WebBrowser.openBrowserAsync(link).catch(() => Linking.openURL(link))} style={estilos.link}>
+      {nome}
+    </Text>
+  );
+}
+
 function CartaoEvento({ e, aoDecidir }: { e: EventoPendente; aoDecidir: () => void }) {
   const [enviando, setEnviando] = useState(false);
   const decidir = (acao: 'autorizar_evento' | 'recusar_evento') =>
@@ -168,7 +193,7 @@ function CartaoEvento({ e, aoDecidir }: { e: EventoPendente; aoDecidir: () => vo
       <Text style={[estilos.titulo, { marginTop: e.imagem ? 10 : 0 }]}>{e.titulo}</Text>
       <Text style={estilos.texto}>
         {e.quando}
-        {e.horario ? ` - ${e.horario}` : ''} · {e.cidade}
+        {e.horario ? ` - ${e.horario}` : ''} · <LinkCidade nome={e.cidade} link={e.linkCidade} />
       </Text>
       {e.local && <Text style={estilos.texto}>{e.local}</Text>}
       {e.preco && <Text style={estilos.texto}>Entrada: {e.preco}</Text>}
@@ -221,9 +246,11 @@ function CartaoAlteracao({ a, aoDecidir }: { a: AlteracaoPendente; aoDecidir: ()
 
   return (
     <View style={estilos.cartao}>
-      <Text style={estilos.titulo}>{a.comercio}</Text>
+      <Text style={estilos.titulo}>
+        <LinkComercio id={a.profissionalId} nome={a.comercio} />
+      </Text>
       <Text style={estilos.sub}>
-        {a.cidade} · pedido por {a.dono ?? '?'} em {a.quando}
+        <LinkCidade nome={a.cidade} link={a.linkCidade} /> · pedido por {a.dono ?? '?'} em {a.quando}
       </Text>
       {a.pago && (
         <Text style={estilos.sub}>
@@ -302,6 +329,7 @@ function Valor({ campo, texto }: { campo: string; texto: string | null }) {
 }
 
 const estilos = StyleSheet.create({
+  link: { textDecorationLine: 'underline', color: cores.verde },
   secao: { fontSize: fonte.grande, fontWeight: '900', color: cores.texto, marginTop: 14, marginBottom: 10 },
   vazio: { fontSize: fonte.pequena, color: cores.textoSuave, marginBottom: 8 },
   cartao: { ...cartao, padding: 14, marginBottom: 12 },

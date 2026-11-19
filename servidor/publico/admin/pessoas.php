@@ -153,7 +153,7 @@ admin_inicio('Pessoas', $admin);
 <?php if ($mais_salvos): ?>
 <div class="tabela"><table>
   <tr><th>Mais salvos como favorito</th><th>Pessoas</th><th></th></tr>
-  <?php foreach ($mais_salvos as $l): ?><tr><td><strong><?= h($l['nome']) ?></strong><br><span class="discreto"><?= h($l['tipo'] ?: $l['categoria']) ?> · <?= h(nome_cidade($l['cidade'], true)) ?></span></td>
+  <?php foreach ($mais_salvos as $l): ?><tr><td><strong><?= adm_comercio((int)$l['id'], $l['nome'], $l['cidade']) ?></strong><br><span class="discreto"><?= h($l['tipo'] ?: $l['categoria']) ?> · <?= adm_cidade($l['cidade'], null, true) ?></span></td>
     <td><?= num((int)$l['n']) ?></td><td><a class="botao pequeno contorno" href="numeros-ficha.php?id=<?= (int)$l['id'] ?>">Números</a></td></tr><?php endforeach ?>
 </table></div>
 <?php endif ?>
@@ -161,7 +161,7 @@ admin_inicio('Pessoas', $admin);
 <?php if ($mais_avaliados): ?>
 <div class="tabela"><table>
   <tr><th>Mais avaliados</th><th>Avaliações</th><th>Média</th><th></th></tr>
-  <?php foreach ($mais_avaliados as $l): ?><tr><td><strong><?= h($l['nome']) ?></strong><br><span class="discreto"><?= h($l['tipo'] ?: $l['categoria']) ?> · <?= h(nome_cidade($l['cidade'], true)) ?></span></td>
+  <?php foreach ($mais_avaliados as $l): ?><tr><td><strong><?= adm_comercio((int)$l['id'], $l['nome'], $l['cidade']) ?></strong><br><span class="discreto"><?= h($l['tipo'] ?: $l['categoria']) ?> · <?= adm_cidade($l['cidade'], null, true) ?></span></td>
     <td><?= num((int)$l['n']) ?></td><td><?= number_format((float)$l['media'], 1, ',', '.') ?> ★</td><td><a class="botao pequeno contorno" href="numeros-ficha.php?id=<?= (int)$l['id'] ?>">Números</a></td></tr><?php endforeach ?>
 </table></div>
 <?php endif ?>

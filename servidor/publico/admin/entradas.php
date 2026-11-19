@@ -69,8 +69,8 @@ $abertas = array_values(array_filter($fichas, fn($l) => (int)$l['visualizacoes']
 $tocadas = array_values(array_filter($fichas, fn($l) => (int)$l['toques'] > 0));
 usort($tocadas, fn($a, $b) => (int)$b['toques'] <=> (int)$a['toques'] ?: strcmp($a['nome'], $b['nome']));
 $soma = fn(array $l, string $k) => array_sum(array_map(fn($x) => (int)$x[$k], $l));
-$comercio = fn(array $l) => '<strong>' . h($l['nome']) . '</strong><br><span class="discreto">' . h($l['tipo'] ?: $l['categoria'])
-    . ' · ' . h(nome_cidade($l['cidade'], true)) . ($l['bairro'] ? ' · ' . h($l['bairro']) : '') . '</span>';
+$comercio = fn(array $l) => '<strong>' . adm_comercio((int)$l['id'], $l['nome'], $l['cidade']) . '</strong><br><span class="discreto">' . h($l['tipo'] ?: $l['categoria'])
+    . ' · ' . adm_cidade($l['cidade'], null, true) . ($l['bairro'] ? ' · ' . h($l['bairro']) : '') . '</span>';
 $ver = fn(array $l) => '<a class="botao pequeno contorno" href="numeros-ficha.php?id=' . (int)$l['id'] . '&amp;dias=' . $dias . '">Ver</a>'
     . ' <a class="botao pequeno contorno" href="' . h(url_ficha($l)) . '" target="_blank" rel="noopener">Abrir</a>';
 
@@ -296,7 +296,7 @@ admin_inicio(ORIGENS[$origem], $admin);
   <tr><th>#</th><th>Cidade</th><th>Entradas</th><th>%</th><th>Comércios diferentes</th><th>Áreas mais procuradas</th><th>Visualizações*</th><th>Toques*</th></tr>
   <?php $i = 0; foreach ($rel['cidades'] as $c => $r): if (!$r['entradas'] && !$r['visualizacoes']) continue; $i++; arsort($r['areas']); ?><tr>
     <td><?= $i ?></td>
-    <td><strong><?= $c !== '' ? h(nome_cidade($c)) : 'Sem cidade (página inicial, busca)' ?></strong></td>
+    <td><strong><?= $c !== '' ? adm_cidade((string)$c) : 'Sem cidade (página inicial, busca)' ?></strong></td>
     <td><strong><?= num($r['entradas']) ?></strong></td><td><?= pct($r['entradas'], $rel_total) ?></td>
     <td><?= num($r['fichas']) ?></td>
     <td><?= h(implode(' · ', array_map(fn($a, $n) => "$a $n", array_keys(array_slice($r['areas'], 0, 3, true)), array_slice($r['areas'], 0, 3, true)))) ?: '—' ?></td>
@@ -335,7 +335,7 @@ admin_inicio(ORIGENS[$origem], $admin);
   <tr><th>#</th><th>Comércio</th><th>Entradas</th><th></th></tr>
   <?php foreach ($itens as $id => $r): $i++; ?><tr>
     <td><?= $i ?></td>
-    <td><strong><?= h($r['p']['nome']) ?></strong><br><span class="discreto"><?= h($r['p']['tipo'] ?: $r['p']['categoria']) ?> · <?= h(nome_cidade($r['p']['cidade'], true)) ?></span></td>
+    <td><strong><?= adm_comercio((int)$r['p']['id'], $r['p']['nome'], $r['p']['cidade']) ?></strong><br><span class="discreto"><?= h($r['p']['tipo'] ?: $r['p']['categoria']) ?> · <?= adm_cidade($r['p']['cidade'], null, true) ?></span></td>
     <td><?= num($r['total']) ?></td>
     <td><a class="botao pequeno contorno" href="numeros-ficha.php?id=<?= (int)$id ?>&amp;dias=<?= $dias ?>">Números</a>
       <a class="botao pequeno contorno" href="<?= h(url_publica(ltrim($r['caminho'], '/'))) ?>" target="_blank" rel="noopener">Abrir</a></td>
@@ -369,7 +369,7 @@ admin_inicio(ORIGENS[$origem], $admin);
   <tr><th>Página</th><th>Tipo</th><th>Quando</th><th>Entradas</th><th>%</th></tr>
   <?php [$itens, $nav] = $paginar($paginas, 'paginas'); foreach ($itens as $l): ?><tr>
     <td><a href="<?= h(url_publica(ltrim($l['caminho'], '/'))) ?>" target="_blank" rel="noopener"><?= h($l['caminho']) ?></a></td>
-    <td><?= h(PAGINAS_ENTRADA[$l['pagina']] ?? $l['pagina']) ?><?= $l['cidade'] ? ' · ' . h(nome_cidade($l['cidade'], true)) : '' ?></td>
+    <td><?= h(PAGINAS_ENTRADA[$l['pagina']] ?? $l['pagina']) ?><?= $l['cidade'] ? ' · ' . adm_cidade($l['cidade'], null, true) : '' ?></td>
     <td style="white-space:nowrap"><?php $q = $quando[$l['caminho']] ?? []; ?><?= implode('<br>', array_slice($q, 0, 5)) ?: '—' ?><?= count($q) > 5 ? '<br><span class="discreto">e mais ' . (count($q) - 5) . '</span>' : '' ?></td>
     <td><?= num((int)$l['total']) ?></td><td><?= pct((int)$l['total'], $total_entradas) ?></td>
   </tr><?php endforeach ?>

@@ -97,7 +97,7 @@ admin_inicio('Cupons', $admin);
 <div class="tabela"><table>
   <tr><th>Quando</th><th>Cupom</th><th>Comércio</th><th>Quem</th><th>Plano</th><th>Valor</th><th></th></tr>
   <?php foreach ($usos as $u): ?>
-  <tr><td><?= h(datahora_br($u['atualizado_em'])) ?></td><td><?= h($u['codigo']) ?></td><td><?= h($u['comercio'] ?? '-') ?></td><td><?= h($u['nome']) ?></td>
+  <tr><td><?= h(datahora_br($u['atualizado_em'])) ?></td><td><?= h($u['codigo']) ?></td><td><?= $u['comercio'] ? adm_comercio((int)$u['pid'], $u['comercio']) : '-' ?></td><td><?= h($u['nome']) ?></td>
     <td><?= h(PLANOS_NOME[$u['plano']] ?? '') ?></td>
     <td><?= (int)$u['desconto'] === 100 ? 'cortesia' : h(reais((float)$u['valor'])) . (plano_unico((string)$u['plano']) ? '' : '/mês') ?></td>
     <td><?php if ($u['assinatura'] === 'cortesia' && (int)$u['desconto'] === 100 && !plano_unico((string)$u['plano'])): ?>

@@ -63,7 +63,7 @@ admin_inicio('Importar lista', $admin);
 <div class="tabela"><table>
   <tr><th>Cidade</th><th>Última lista enviada</th></tr>
   <?php foreach ($listas as $slug => $t): ?>
-  <tr><td><?= h(isset(TODAS_CIDADES[$slug]) ? nome_cidade($slug) : $slug) ?></td><td><?= date('d/m/Y H:i', $t) ?></td></tr>
+  <tr><td><?= adm_cidade($slug) ?></td><td><?= date('d/m/Y H:i', $t) ?></td></tr>
   <?php endforeach ?>
 </table></div>
 <?php admin_fim();

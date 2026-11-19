@@ -606,3 +606,7 @@ html.fj-aberta, html.fj-aberta body { overflow: hidden; }
 .convite-avaliar .botao { white-space: nowrap; }
 .convite-estrela { font-size: 1.8rem; color: var(--amarelo); line-height: 1; }
 .convite-fechar { background: none; border: 0; font-size: 1.1rem; cursor: pointer; color: #6b7a72; padding: 4px; }
+
+/* 19/11 (passo 109): no admin, nome do comércio e da cidade abrem o site (nova aba) */
+.adm-link { color: inherit; text-decoration: underline dotted; text-underline-offset: 3px; }
+.adm-link:hover { color: var(--verde2, #0a7a4b); text-decoration-style: solid; }

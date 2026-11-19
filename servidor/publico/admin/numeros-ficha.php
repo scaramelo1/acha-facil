@@ -16,8 +16,8 @@ $maior = max([1, ...array_values(array_map(fn($d) => max($d["aparicoes"], $d["vi
 admin_inicio('Números · ' . $p['nome'], $admin);
 ?>
 <p><a href="numeros.php">← Números das fichas</a></p>
-<h1><?= h($p['nome']) ?></h1>
-<p class="discreto"><?= h($p['tipo'] ?: $p['categoria']) ?> · <?= h(nome_cidade($p['cidade'])) ?><?= $p['bairro'] ? ' · ' . h($p['bairro']) : '' ?>
+<h1><?= adm_comercio((int)$p['id'], $p['nome'], $p['cidade']) ?></h1>
+<p class="discreto"><?= h($p['tipo'] ?: $p['categoria']) ?> · <?= adm_cidade($p['cidade']) ?><?= $p['bairro'] ? ' · ' . h($p['bairro']) : '' ?>
   · <?php foreach ([1, 7, 30, 90] as $d): $t = $d === 1 ? 'hoje' : "$d dias"; ?><a href="?id=<?= (int)$p['id'] ?>&amp;dias=<?= $d ?>"><?= $d === $dias ? "<strong>$t</strong>" : $t ?></a> <?php endforeach ?></p>
 <p><a class="botao pequeno" href="relatorio.php?id=<?= (int)$p['id'] ?>&amp;dias=<?= $dias ?>" target="_blank">Relatório para o comerciante</a></p>
 

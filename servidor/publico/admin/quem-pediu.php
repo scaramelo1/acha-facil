@@ -34,12 +34,12 @@ $pessoa = function (array $l): string {
     if ($l['pessoa'] === null) return '<span class="discreto">Conta excluída</span>';
     return '<a href="pessoa.php?id=' . (int)$l['usuario_id'] . '"><strong>' . h($l['pessoa']) . '</strong></a><br><span class="discreto">' . h($l['email']) . '</span>';
 };
-$comercio = fn(array $l) => '<a href="numeros-ficha.php?id=' . (int)$l['profissional_id'] . '">' . h($l['comercio']) . '</a><br><span class="discreto">' . h(nome_cidade($l['cidade'], true)) . '</span>';
+$comercio = fn(array $l) => adm_comercio((int)$l['profissional_id'], $l['comercio'], $l['cidade']) . ' <a class="discreto" href="numeros-ficha.php?id=' . (int)$l['profissional_id'] . '">(números)</a><br><span class="discreto">' . adm_cidade($l['cidade'], null, true) . '</span>';
 
 admin_inicio('Quem pediu informação', $admin);
 ?>
 <p><a href="pedidos-info.php">&larr; Pedidos de informação</a><?php if ($p): ?> · <a href="quem-pediu.php">todos os comércios</a><?php endif ?></p>
-<h1>Quem pediu informação<?= $p ? ': ' . h($p['nome']) : '' ?></h1>
+<h1>Quem pediu informação<?= $p ? ': ' . adm_comercio((int)$p['id'], $p['nome'], $p['cidade'] ?? null) : '' ?></h1>
 <p class="discreto">Toques em "Quero saber o horário / ver fotos / saber mais / o WhatsApp". Conta 1 por pessoa, comércio e
   tipo no dia. Quem estava com a conta Google entrada (no app ou no site) aparece com o nome; quem não tinha, como anônimo.</p>
 

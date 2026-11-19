@@ -92,7 +92,7 @@ admin_inicio('Cidades', $admin);
   <tr><th>Cidade</th><th>Código</th><th>Comércios</th><th>No app</th><th>Nome curto e centro</th></tr>
   <?php foreach ($cidades as $c): ?>
   <tr<?= $c['ativa'] ? '' : ' class="discreto"' ?>>
-    <td><strong><?= h($c['nome']) ?></strong> - <?= h($c['uf']) ?></td>
+    <td><strong><?= adm_cidade($c['slug'], $c['nome']) ?></strong> - <?= h($c['uf']) ?></td>
     <td><code><?= h($c['slug']) ?></code></td>
     <td><?= number_format((int)$c['comercios'], 0, ',', '.') ?><br><small><?= number_format((int)$c['localizados'], 0, ',', '.') ?> com localização</small></td>
     <td><form method="post"<?= $c['ativa'] ? " onsubmit=\"return confirm('Desligar " . h($c['nome']) . "? Ela some do app.')\"" : '' ?>><?= campo_csrf() ?>

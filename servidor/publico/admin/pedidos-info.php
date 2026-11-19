@@ -106,7 +106,7 @@ if (pedidos_info_pessoas_prontos()):
     <?php foreach (TIPOS_PEDIDO_INFO as $n): ?><th><?= $n ?></th><?php endforeach ?><th>Total</th><th></th></tr>
   <?php foreach ($pedidos as $l): ?>
   <tr>
-    <td><strong><?= h($l['nome']) ?></strong><br><span class="discreto"><?= h($l['tipo'] ?: $l['categoria']) ?> · <?= h(nome_cidade($l['cidade'], true)) ?><?= $l['bairro'] ? ' · ' . h($l['bairro']) : '' ?></span></td>
+    <td><strong><?= adm_comercio((int)$l['id'], $l['nome'], $l['cidade']) ?></strong><br><span class="discreto"><?= h($l['tipo'] ?: $l['categoria']) ?> · <?= adm_cidade($l['cidade'], null, true) ?><?= $l['bairro'] ? ' · ' . h($l['bairro']) : '' ?></span></td>
     <td><?= $nome_plano[$l['plano_atual']] ?></td>
     <td><?= h(telefone_formatado($l['fone_whatsapp'] ?: $l['telefone']) ?: '—') ?></td>
     <?php foreach (TIPOS_PEDIDO_INFO as $k => $n): ?><td><?= (int)$l[$k] ? num((int)$l[$k]) : '' ?></td><?php endforeach ?>

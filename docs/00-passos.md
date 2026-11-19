@@ -881,3 +881,12 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 108. ✅ Administradores (19/11, pedido do usuário): fsadesignerbr@gmail.com desativado (ativo=0 na tabela admins, linha
    mantida para o histórico; não entra mais no /admin nem recebe avisos de administração) e achafacilcontato@gmail.com
    criado como admin "Acha Fácil" (entra pelo Google, no site e no app). Continuam: fellipealexandre1 e agnesamarilis51.
+109. 🟡 Nome do comércio e da cidade viram links para os administradores (19/11, pedido do usuário):
+   **Site (/admin, no ar):** adm_comercio() e adm_cidade() em inc/admin.php: nome do comércio abre a ficha no site e o nome da
+   cidade abre a página da cidade (nova aba, sublinhado pontilhado, CSS v=39); cidade desligada e negócio novo ficam só texto.
+   Trocado em Pendências, Pedido, Alteração, Comércios (lista e edição), Cidades, Números, Números da ficha, Pedidos de
+   informação, Quem pediu, Pessoas, Pessoa, Entradas, Google por cidade, Registro, Cupons, Ofertas, Eventos, Suporte,
+   Novidades, Notificações e Importar ("Números" continua como link pequeno ao lado onde já existia). O relatório para o
+   comerciante (relatorio.php) não muda. Testado em cópia: 25 páginas sem erro.
+   **App (Administração, vai no 1.13.0):** comércio abre a ficha no app, cidade abre a página da cidade no navegador
+   (api/admin.php manda profissionalId e linkCidade).

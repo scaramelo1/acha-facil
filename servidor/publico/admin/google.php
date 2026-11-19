@@ -71,7 +71,7 @@ admin_inicio('Google por cidade', $admin);
   <?php foreach ($linhas as $i => $l): $baixo = $l['sitemap'] > 0 && $l['pct'] < 0.10; ?>
   <tr<?= $baixo ? ' style="background:#fde2e1"' : '' ?>>
     <td><?= $i + 1 ?></td>
-    <td><strong><?= h($l['nome']) ?></strong></td>
+    <td><strong><?= adm_cidade($l['slug'], $l['nome']) ?></strong></td>
     <td><?= $l['desde'] ? h(date('d/m', strtotime($l['desde']))) : '-' ?></td>
     <td><?= num($l['sitemap']) ?></td>
     <td><strong><?= num($l['visitadas']) ?></strong></td>
@@ -96,7 +96,7 @@ admin_inicio('Google por cidade', $admin);
 <div class="tabela"><table>
   <tr><th>Cidade</th><th>Sitemap de comércios (enviar)</th><th>Página da cidade (pedir indexação)</th></tr>
   <?php foreach ($ajuda as $l): $w = cidade_web($l['slug']); ?>
-  <tr><td><strong><?= h($l['nome']) ?></strong><br><span class="discreto"><?= num($l['visitadas']) ?> de <?= num($l['sitemap']) ?></span></td>
+  <tr><td><strong><?= adm_cidade($l['slug'], $l['nome']) ?></strong><br><span class="discreto"><?= num($l['visitadas']) ?> de <?= num($l['sitemap']) ?></span></td>
     <td><code><?= h(url_publica("sitemap-$w-comercios.xml")) ?></code></td>
     <td><code><?= h(url_publica("$w/")) ?></code></td></tr>
   <?php endforeach ?>
@@ -108,7 +108,7 @@ admin_inicio('Google por cidade', $admin);
 <div class="tabela"><table>
   <tr><th>Cidade</th><?php foreach ($dias_tab as $dia): ?><th><?= h(date('d/m', strtotime($dia))) ?></th><?php endforeach ?></tr>
   <?php foreach ($linhas as $l): ?>
-  <tr><td><?= h($l['nome']) ?></td>
+  <tr><td><?= adm_cidade($l['slug'], $l['nome']) ?></td>
     <?php foreach ($dias_tab as $dia): $n = (int)($dias[$dia][$l['slug']]['paginas'] ?? 0); ?><td><?= $n ? '<strong>' . num($n) . '</strong>' : '<span class="discreto">·</span>' ?></td><?php endforeach ?></tr>
   <?php endforeach ?>
 </table></div>
