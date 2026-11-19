@@ -284,11 +284,10 @@ admin_inicio(ORIGENS[$origem], $admin);
 <div class="tabela"><table class="dia-a-dia">
   <tr><th>Dia</th><th>Entradas</th><th>De pessoas</th><th>Fichas abertas</th><th>Visualizações</th><th>Toques</th></tr>
   <?php $dds = array_keys($dia_a_dia); $soma_sem = ['entradas' => 0, 'gente' => 0, 'fichas' => 0, 'vis' => 0, 'toques' => 0];
-  for ($i = 1; $i < count($dds); $i++): $d = $dds[$i]; $v = $dia_a_dia[$d]; $a = $dia_a_dia[$dds[$i - 1]];
+  // 19/11 (pedido do usuário): mais novo em cima (hoje primeiro); dias que ainda não chegaram e antes dos dados não aparecem
+  for ($i = count($dds) - 1; $i >= 1; $i--): $d = $dds[$i]; $v = $dia_a_dia[$d]; $a = $dia_a_dia[$dds[$i - 1]];
     $nome_dia = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'][(int)date('w', strtotime($d))];
-    if ($d > $hoje_d || $d < ENTRADAS_DESDE): ?><tr class="discreto">
-    <td><?= date('d/m', strtotime($d)) ?> <span class="discreto"><?= $nome_dia ?></span></td><td colspan="5"><?= $d > $hoje_d ? 'ainda não chegou' : 'antes dos dados' ?></td>
-  </tr><?php continue; endif;
+    if ($d > $hoje_d || $d < ENTRADAS_DESDE) continue;
     foreach ($soma_sem as $k => $_) $soma_sem[$k] += $v[$k]; ?><tr<?= $d === $hoje_d ? ' class="dia-hoje"' : '' ?>>
     <td><a href="entradas-dia.php?<?= h(http_build_query(array_filter(['dia' => $d, 'origem' => $origem, 'cidade' => $cidade]))) ?>" title="Relatório completo do dia"><strong><?= date('d/m', strtotime($d)) ?></strong> <?= $nome_dia ?></a><?= $d === $hoje_d ? ' <span class="discreto">· hoje</span>' : '' ?></td>
     <?php foreach (['entradas', 'gente', 'fichas', 'vis', 'toques'] as $k):

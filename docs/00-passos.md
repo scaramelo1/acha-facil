@@ -908,7 +908,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Depois, também desligadas: Diamantina e Ouro Preto (MG); backup em /root/cidades.antes-amarelas3.*.sql.
 111. ✅ Entradas: "Dia a dia" por semana e relatório do dia (19/11, pedido do usuário): em /admin/entradas.php o Dia a dia mostra
    uma semana de segunda a domingo (?semana=<segunda>, "← Semana anterior" / "Próxima semana →", desde a semana de 11/11),
-   dias que ainda não chegaram em cinza, hoje destacado e linha "Semana" com a soma. Cada dia abre /admin/entradas-dia.php
+   hoje em cima e destacado (mais novo primeiro; dias que ainda não chegaram não aparecem) e linha "Semana" com a soma. Cada dia abre /admin/entradas-dia.php
    (?dia=&origem=&cidade=; origem vazia = todas, site e app): resumo (entradas, de pessoas, pré-carregadas, fichas, vistas,
    toques por tipo), de onde vieram, entradas por hora, cidades, fichas abertas com toques por comércio e páginas onde
    entraram com a hora; navega para o dia anterior/seguinte. Conferido com os dados de 18/11.
