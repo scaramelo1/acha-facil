@@ -55,7 +55,7 @@ export default function TelaInicio() {
           <>
             {/* 17/11 (pedido do usuario): Destaque antes das categorias; sem Destaque pago, o convite fica depois delas */}
             {dados.destaques.length > 0 && (
-              <View style={{ marginBottom: 8 }}>
+              <View style={{ marginTop: 20, marginBottom: 12 }}>
                 <Vitrine itens={dados.destaques} />
               </View>
             )}

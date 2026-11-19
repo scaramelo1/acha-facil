@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useRef } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import type { ProfissionalResumo } from '../api/cliente';
@@ -7,6 +8,8 @@ import { cores, fonte, RAIO } from '../tema';
 import { Foto } from './ui';
 
 const ALTURA = 150;
+// 19/11 (pedido do usuario): os destaques passam sozinhos, um a cada 4 s
+const TROCA_MS = 4000;
 
 /**
  * "Comércios em destaque": só quem paga o plano Destaque. Cartões largos que rolam para o lado, com o logo
@@ -18,12 +21,44 @@ export function Vitrine({ itens }: { itens: ProfissionalResumo[] }) {
   const { width } = useWindowDimensions();
   // sem destaques pagos, o convite ocupa a largura toda
   const largura = itens.length ? Math.min(width * 0.84, 420) : width - 32;
+  const passo = largura + 12;
+  const rolagem = useRef<ScrollView>(null);
+  const atual = useRef(0);
+  const mexendo = useRef(false);
+  const soltouEm = useRef(0); // depois de arrastar, espera um intervalo inteiro antes de girar
+  const total = itens.length + 1; // os destaques e o convite "Seu comercio aqui"
+
+  // gira sozinho so com a tela aberta e com algum destaque; para enquanto a pessoa arrasta
+  useFocusEffect(
+    useCallback(() => {
+      if (!itens.length) return undefined;
+      const relogio = setInterval(() => {
+        if (mexendo.current || Date.now() - soltouEm.current < TROCA_MS) return;
+        atual.current = (atual.current + 1) % total;
+        rolagem.current?.scrollTo({ x: atual.current * passo, animated: true });
+      }, TROCA_MS);
+      return () => clearInterval(relogio);
+    }, [itens.length, total, passo]),
+  );
 
   return (
     <ScrollView
+      ref={rolagem}
       horizontal
+      onScrollBeginDrag={() => {
+        mexendo.current = true;
+      }}
+      onScrollEndDrag={(e) => {
+        // depois de arrastar, continua dali (arrasto devagar nem sempre gera onMomentumScrollEnd)
+        atual.current = Math.min(total - 1, Math.max(0, Math.round(e.nativeEvent.contentOffset.x / passo)));
+        mexendo.current = false;
+        soltouEm.current = Date.now();
+      }}
+      onMomentumScrollEnd={(e) => {
+        atual.current = Math.min(total - 1, Math.max(0, Math.round(e.nativeEvent.contentOffset.x / passo)));
+      }}
       showsHorizontalScrollIndicator={false}
-      snapToInterval={largura + 12}
+      snapToInterval={passo}
       decelerationRate="fast"
       contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
       style={{ marginHorizontal: -16 }}

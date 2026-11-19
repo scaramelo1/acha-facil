@@ -786,3 +786,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    BAIRROS/endereço (nome "Centro", "Jardim Regina"..., tipo "Brotas - SP", sem endereço): pausados (backup
    brotas-bairros.antes-pausar.*.sql) → 951 no ar. Importador (importar-leads.php) agora pula tipo no formato
    "Cidade - UF". Em "Outros" ficaram ~22 (atração turística, rafting, agência de turismo esportivo...).
+101. ✅ Destaque da inicial com espaço e girando sozinho (19/11, pedido do usuário: cartão grudado no cabeçalho).
+   (abas)/index.tsx: margem de 20 em cima do Destaque. Vitrine.tsx: passa para o próximo a cada 4 s (TROCA_MS), em
+   volta (destaques + "Seu comércio aqui", depois volta ao 1º); só com a tela aberta (useFocusEffect) e com algum
+   destaque; para enquanto a pessoa arrasta e espera 4 s depois de soltar. App 1.11.0 (precisa de build novo).
