@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useRef } from 'react';
+import { type ComponentRef, useCallback, useRef } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import type { ProfissionalResumo } from '../api/cliente';
@@ -22,7 +22,7 @@ export function Vitrine({ itens }: { itens: ProfissionalResumo[] }) {
   // sem destaques pagos, o convite ocupa a largura toda
   const largura = itens.length ? Math.min(width * 0.84, 420) : width - 32;
   const passo = largura + 12;
-  const rolagem = useRef<ScrollView>(null);
+  const rolagem = useRef<ComponentRef<typeof ScrollView>>(null);   // RN novo: ScrollView é função, o tipo vem do ref
   const atual = useRef(0);
   const mexendo = useRef(false);
   const soltouEm = useRef(0); // depois de arrastar, espera um intervalo inteiro antes de girar
