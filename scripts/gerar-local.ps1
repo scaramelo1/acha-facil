@@ -55,6 +55,14 @@ if ($VersionCode -le 0) {
   $json = (npx eas build:version:get -p android -e production --json 2>$null) | Out-String
   $atual = 0
   try { $atual = [int](($json | ConvertFrom-Json).versionCode) } catch { $atual = 0 }
+  # o EAS so fica certo se alguem rodar eas build:version:set depois de cada envio; por isso olha tambem os .aab ja
+  # gerados aqui (saida\acha-facil-<versao>-<numero>.aab) e usa o maior (19/11: o 10 saiu repetido)
+  $local = 0
+  Get-ChildItem 'saida' -Filter 'acha-facil-*.aab' -ErrorAction SilentlyContinue | ForEach-Object {
+    if ($_.BaseName -match '-(\d+)$') { $n = [int]$Matches[1]; if ($n -gt $local) { $local = $n } }
+  }
+  if ($local -gt $atual) { Write-Host "EAS diz $atual, mas ja existe .aab com o numero $local em saida\. Usando $local + 1." }
+  $atual = [math]::Max($atual, $local)
   if ($atual -le 0) { Parar "Nao consegui ler o numero do EAS. Veja o 'Version code' do ultimo envio no Play Console e rode de novo com -VersionCode (esse numero + 1)." }
   $VersionCode = $atual + 1
 }

@@ -772,6 +772,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    app parava ali e nunca olhava a reserva do servidor; (2) a reserva (/admin/app.php, versao-play.txt) estava vazia.
    src/versao.ts: avisoPelaPlay() devolve 'avisou'|'sem'; com 'sem' confere a versão do /admin/app.php. App 1.10.0.
    Depois de liberar cada versão na Play: pôr o número em /admin/app.php. Obs.: APK do site parado na 1.7.1 (12/11).
+   Ajuste 19/11: o .aab saiu com versionCode 10 já usado (EAS não foi atualizado após o envio anterior); gerar-local.ps1
+   agora usa o maior entre o EAS e os .aab de saida\.
 99. ✅ Pedreira no ar (19/11, leva 1 do cronograma): 1262 comércios importados (backup profissionais-pedreira-20261119),
    todos com mapa, cidade ligada, https://achafacilapp.com.br/pedreira/ e sitemap-pedreira.xml respondendo. Só 14 em
    "Outros". Águas de Lindóia também ligada (774). Falta da leva 1: Monte Alegre do Sul e Socorro.
