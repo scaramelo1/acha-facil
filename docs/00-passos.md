@@ -895,3 +895,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    aviso só para ela), comércio e cidade (links), o que quer saber, quando pediu e situação (⏳ esperando o comércio informar
    / ✅ avisado em). O aviso sai sozinho quando a informação entra; agora também quando o ADMIN edita a ficha em
    /admin/comercio.php (antes só alteração do dono aprovada e lista nova). Em 19/11 havia 1 inscrito, já avisado em 17/11.
+111. ✅ Mapa das cidades (19/11, pedido do usuário): /admin/mapa.php (só admin; menu "Mais" > "Mapa das cidades" e botões
+   em /admin/cidades.php). Abas SP e MG, cada município desenhado (malha do IBGE em servidor/dados/mapas/<UF>.json, gerada
+   por scripts/gerar-mapas.py). Verde = ligada no app, amarelo = cadastrada e desligada, cinza = fora. Passar o mouse mostra
+   nome e comércios; tocar mostra a cidade do projeto mais perto (em linha reta, contando o outro estado). Raio de 15/30/50/80 km
+   em volta das ligadas, busca de município, zoom (roda, botões, pinça) e arrasto. Tabela com cada cidade e a vizinha mais perto.
+   Cidade que não é município (Monte Verde) entra pelo centro (lat/lng) e pinta o município onde fica (Camanducaia).

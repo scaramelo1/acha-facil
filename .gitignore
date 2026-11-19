@@ -31,7 +31,8 @@ yarn-error.*
 *.pem
 
 # banco do servidor
-servidor/dados/
+servidor/dados/*
+!servidor/dados/mapas/
 
 # local env files
 .env*.local

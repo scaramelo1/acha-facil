@@ -70,6 +70,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
         <a class="so-celular" href="<?= $base ?>/admin/pedidos-info.php">Pedidos de informação</a>
         <a class="so-celular" href="<?= $base ?>/admin/cidades.php">Cidades</a>
         <a class="so-celular" href="<?= $base ?>/admin/novidades.php">Novidades<?= $nov ? ' <span class="contador">' . $nov . '</span>' : '' ?></a>
+        <a href="<?= $base ?>/admin/mapa.php">Mapa das cidades</a>
         <a href="<?= $base ?>/admin/comercios.php">Comércios (editar)</a>
         <a href="<?= $base ?>/admin/buscas.php">O que procuram</a>
         <a href="<?= $base ?>/admin/google.php">Google por cidade</a>
