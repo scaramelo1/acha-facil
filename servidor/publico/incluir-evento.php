@@ -63,7 +63,7 @@ if (e_post() && $pronto) {
 
 $sel = fn(string $campo, $valor) => (string)($f[$campo] ?? '') === (string)$valor ? ' selected' : '';
 $v = fn(string $campo) => h((string)($f[$campo] ?? ''));
-pagina_inicio('Divulgar um evento · Acha Fácil!', 'Divulgue de graça o seu show, festa, feira ou encontro na agenda de eventos do Acha Fácil.');
+pagina_inicio('Divulgar um evento | Acha Fácil!', 'Divulgue de graça o seu show, festa, feira ou encontro na agenda de eventos do Acha Fácil.');
 ?>
 <main class="documento">
   <h1>Divulgar um evento</h1>

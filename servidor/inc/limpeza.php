@@ -178,3 +178,106 @@ const BAIRRO_ACENTOS = [
 function acentuar_bairro(string $b): string {
     return preg_replace_callback('/\b\p{Lu}\p{Ll}+\b/u', fn($m) => BAIRRO_ACENTOS[$m[0]] ?? $m[0], $b);
 }
+
+// ---------- nomes em caixa irregular (19/11, avaliação do site: "Canhotos BAR", "Point Vip Sjbv", "REDE DROGÃO") ----------
+
+/** Siglas que ficam em maiúsculas (também corrige "Sjbv" → "SJBV"). */
+const NOME_SIGLAS = ['SJBV', 'EMEB', 'EMEF', 'EMEI', 'ETEC', 'FATEC', 'APAE', 'SENAI', 'SESI', 'SENAC', 'SEBRAE', 'SESC', 'UBS', 'UPA',
+    'CRAS', 'CREAS', 'CCAA', 'CNA', 'CFC', 'OAB', 'CDL', 'ACIA', 'ACE', 'INSS', 'CEU', 'SAAE', 'DAE', 'DER', 'IPTU', 'PUC', 'USP',
+    'UNIFEOB', 'UNIFAE', 'CNPJ', 'CPF', 'RPG', 'DJ', 'TV', 'GNV', 'GLP', 'ATM', 'BMW', 'VW', 'GM', 'SP', 'MG', 'RJ', 'PR', 'CEP', 'EPI', 'EPP',
+    'MEI', 'LTDA', 'EIRELI', 'CEI', 'CIEP', 'CEMEI', 'SOS'];
+/** Palavras curtas comuns: num nome TODO EM MAIÚSCULAS não são tratadas como sigla ("ALÔ PIZZA" → "Alô Pizza"). */
+const NOME_CURTAS_COMUNS = ['alô', 'alo', 'top', 'mix', 'vai', 'bem', 'sol', 'lar', 'pão', 'pao', 'céu', 'rei', 'boa', 'bom', 'mar', 'luz',
+    'sul', 'lua', 'paz', 'fé', 'pé', 'lá', 'já', 'tô', 'eu', 'tu', 'ti', 'só', 'nós', 'meu', 'seu', 'sua', 'mãe', 'pai', 'avó', 'avô', 'tia',
+    'tio', 'zé', 'joão', 'ana', 'léo', 'leo', 'bia', 'gás', 'gas', 'chá', 'cha', 'fit', 'pet', 'bar', 'spa', 'art', 'fox', 'pop', 'big',
+    'new', 'one', 'the', 'max', 'kid', 'mel', 'oca', 'bis', 'ok', 'ki', 'dr', 'dra', 'sr', 'sra', 'são', 'sao', 'via', 'ver', 'uai', 'oi',
+    'ar', 'os', 'as', 'ao', 'um', 'ou', 'me', 'te', 'se', 'lu', 'jô', 'bel', 'gil', 'rui', 'ivo', 'eva', 'liz', 'mia', 'nil', 'tom', 'zen',
+    'jr', 'sta', 'sto', 'up', 'la', 'du', 'dú', 're', 'by', 'ju', 'ai', 'ed', 'ze', 'del', 'pri', 'all', 'kay', 'joy', 'ypê', 'ype', 'cão', 'cao', 'pão', 'pra', 'pro'];
+/** Siglas que também são palavra ("Céu", "Ace"): só ficam em maiúsculas quando o nome inteiro já veio assim. */
+const NOME_SIGLAS_SO_MAIUSC = ['SP', 'MG', 'RJ', 'PR', 'EPP', 'LTDA', 'EIRELI', 'ACE', 'CEU', 'DER', 'DAE', 'MEI'];
+
+/** Palavras comuns (tipos de negócio, áreas, cidades e as do dia a dia): só essas saem de MAIÚSCULAS num nome misto. */
+function nome_vocabulario(): array {
+    static $v = null;
+    if ($v !== null) return $v;
+    $v = [];
+    $textos = array_merge(
+        array_column(linhas('SELECT DISTINCT tipo FROM profissionais WHERE tipo IS NOT NULL'), 'tipo'),
+        array_column(linhas('SELECT nome FROM categorias'), 'nome'),
+        array_map(fn($c) => $c[0], TODAS_CIDADES),
+        ['loja lojas moda modas store decor decoração lanches lanche bar bares pastelaria salgaderia salgados doces bolos sobrancelhas cílios
+          corretor corretora imóveis espaço passeios fisioterapia terapia ocupacional especializada especialista distribuidora baterias
+          provedor internet via radio rádio locação equipamentos empreendimentos medicina nuclear refrigeração conveniência pronto quero
+          mais casa nova novo boa bom são santa santo vila jardim centro filial matriz unidade cia família irmãos filhos auto peças
+          serviços serviço comércio indústria artesanal caseira caseiro gastronomia multimarcas planejados funilaria pintura banho tosa
+          rações sucos bebidas marmitaria marmitex restaurante churrascaria pizzaria padaria açougue mercado supermercado hortifruti
+          farmácia drogaria ótica óculos academia studio estúdio salão beleza barbearia oficina mecânica elétrica escola colégio clínica
+          consultório odontologia dentista advocacia advogados contabilidade imobiliária hotel pousada hostel chalés buffet festas eventos
+          flores floricultura pet shop veterinária papelaria livraria móveis colchões tintas materiais construção vidraçaria serralheria
+          calçados roupas infantil feminina masculina acessórios presentes variedades utilidades celulares informática assistência técnica
+          pra tia tio vovó vovô'],
+    );
+    foreach ($textos as $t) foreach (preg_split('/[^\p{L}]+/u', (string)$t, -1, PREG_SPLIT_NO_EMPTY) as $p)
+        if (mb_strlen($p) >= 3 && $p !== mb_strtoupper($p)) $v[mb_strtolower($p)] = true;   // sigla nos tipos (EMDR) não entra
+    foreach (['de', 'da', 'do', 'das', 'dos', 'e', 'em', 'a', 'o', 'na', 'no', 'para', 'com'] as $p) $v[$p] = true;
+    return $v;
+}
+
+/** Uma palavra em caixa de título, com os ajustes do português (de/da/do minúsculos, D'Jesus, algarismos romanos). */
+function nome_palavra(string $w, bool $primeira, bool $ligacao = true): string {
+    $baixa = mb_strtolower($w);
+    if (!$primeira && $ligacao && in_array($baixa, ['de', 'da', 'do', 'das', 'dos', 'e', 'em', 'na', 'no', 'para', 'com', 'a', 'o'], true)) return $baixa;
+    if (preg_match('/^(i|ii|iii|iv|vi|vii|viii|ix|xi|xii)$/u', $baixa)) return mb_strtoupper($w);
+    $t = mb_convert_case($baixa, MB_CASE_TITLE);
+    // apóstrofo: 1 letra depois fica minúscula (Deca's), mais letras ficam com maiúscula (D'Arc, Di'Ana)
+    return preg_replace_callback("/'(\p{L}+)/u", fn($m) => "'" . (mb_strlen($m[1]) === 1 ? mb_strtolower($m[1]) : mb_convert_case($m[1], MB_CASE_TITLE)), $t);
+}
+
+/**
+ * Nome com a caixa arrumada, ou o mesmo nome quando não precisa (ou quando é arriscado mexer):
+ *  - TUDO MAIÚSCULO ou tudo minúsculo → "Rede Drogão", "Farmácia Popular" (siglas conhecidas e palavras sem vogal, como
+ *    JMJ, ficam em maiúsculas);
+ *  - nome misto: só a palavra comum em MAIÚSCULAS vira normal ("Canhotos BAR" → "Canhotos Bar"); marca em maiúsculas
+ *    (FLAGRA, APPLE, LARALU) fica como está;
+ *  - sigla conhecida escrita errada vira maiúscula ("Point Vip Sjbv" → "Point Vip SJBV").
+ */
+function limpar_nome(string $nome): string {
+    $nome = trim(preg_replace('/\s+/u', ' ', $nome));
+    if ($nome === '') return $nome;
+    $letras = preg_replace('/[^\p{L}]/u', '', $nome);
+    $tudo_maiusc = $letras !== '' && $letras === mb_strtoupper($letras) && mb_strlen($letras) >= 4;
+    $tudo_minusc = $letras !== '' && $letras === mb_strtolower($letras) && mb_strlen($letras) >= 3;
+    if (preg_match('/\p{L}\.\p{L}{2,}(\s|$)/u', $nome) && !str_contains(trim($nome), ' ')) return $nome;   // gu.car, 2solv.ai
+    $voc = nome_vocabulario();
+    $partes = preg_split('/(\s+|[\-\/|&(),.:+]+)/u', $nome, -1, PREG_SPLIT_DELIM_CAPTURE);
+    $primeira = true;
+    $ligacao_ok = fn(int $i) => in_array(mb_strtolower($partes[$i]), ['de', 'da', 'do', 'das', 'dos', 'e', 'em', 'na', 'no', 'a', 'o', 'com'], true);
+    foreach ($partes as $i => $w) {
+        if ($w === '' || !preg_match('/\p{L}/u', $w)) continue;   // separador ou número
+        $sobe = mb_strtoupper($w);
+        $sigla = in_array($sobe, NOME_SIGLAS, true) && ($tudo_maiusc || !in_array($sobe, NOME_SIGLAS_SO_MAIUSC, true));
+        if ($sigla && !in_array($sobe, ['LTDA', 'EIRELI'], true)) { $partes[$i] = $sobe; $primeira = false; continue; }
+        if (preg_match('/\d/u', $w)) { $primeira = false; continue; }   // 4x4, 2B...: fica como veio
+        // ligação (de, da, e...) só quando está entre espaços: em "E.M.E.B." o E é letra de sigla
+        $ligacao = preg_match('/^\s+$/u', $partes[$i - 1] ?? ' ') && preg_match('/^\s+$/u', $partes[$i + 1] ?? ' ');
+        $letra_sigla = mb_strlen($w) === 1 && !$ligacao;
+        $ultima = !preg_match('/\p{L}/u', implode('', array_slice($partes, $i + 1)));
+        if ($sobe === 'ME' && $ultima && $tudo_maiusc || $sobe === 'ME' && $ultima && preg_match('/(-|LTDA\s*)\s*$/iu', implode('', array_slice($partes, 0, $i)))) {
+            $partes[$i] = 'ME'; $primeira = false; continue;   // "... Ltda - ME" (microempresa)
+        }
+        // nome TODO EM MAIÚSCULAS: palavra de 2 ou 3 letras que não é comum é sigla (AEF Tech, DAF Peças, RC Motos)
+        // (3 letras que se leem como palavra, consoante-vogal-consoante ou vogal-consoante-vogal, não são sigla: CAR, DOM, ECO)
+        $comum = in_array(mb_strtolower($w), NOME_CURTAS_COMUNS, true);
+        $se_le = mb_strlen($w) === 3 && preg_match('/^([^AEIOUÁÉÍÓÚÂÊÔÃÕ][AEIOUÁÉÍÓÚÂÊÔÃÕ][^AEIOUÁÉÍÓÚÂÊÔÃÕ]|[AEIOUÁÉÍÓÚÂÊÔÃÕ][^AEIOUÁÉÍÓÚÂÊÔÃÕ][AEIOUÁÉÍÓÚÂÊÔÃÕ])$/u', $sobe);
+        if ($tudo_maiusc && mb_strlen($w) <= 3 && mb_strlen($w) >= 2 && !$ligacao_ok($i) && !isset($voc[mb_strtolower($w)])
+            && !$comum && !$se_le) { $primeira = false; continue; }
+        if ($tudo_maiusc || $tudo_minusc) {
+            $sem_vogal = !preg_match('/[aeiouyáéíóúâêôãõà]/iu', $w) && mb_strlen($w) >= 2;
+            $partes[$i] = ($sem_vogal && !$comum || $letra_sigla) && $tudo_maiusc ? $w : nome_palavra($w, $primeira, $ligacao);
+        } elseif ($w === $sobe && mb_strlen($w) >= 2 && isset($voc[mb_strtolower($w)])) {
+            $partes[$i] = nome_palavra($w, $primeira, $ligacao);   // palavra comum em MAIÚSCULAS no meio de nome normal
+        }
+        $primeira = false;
+    }
+    return implode('', $partes);
+}

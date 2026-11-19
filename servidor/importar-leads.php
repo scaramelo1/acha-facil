@@ -221,6 +221,7 @@ foreach ($linhas_html as [, $status, $tipo, $attrs, $tr]) {
     // 16/11: tipo que o robô põe na área errada (Despachante em Beleza...) e bairro limpo (inc/limpeza.php)
     if (($certa = area_certa_do_tipo($tipo)) && isset($cat[$certa])) $categoria_id = $cat[$certa];
     $bairro = limpar_bairro($bairro, $nome, $cidade);
+    $nome = limpar_nome($nome);   // 19/11: "REDE DROGÃO" → "Rede Drogão", "Canhotos BAR" → "Canhotos Bar" (inc/limpeza.php)
     $dados = [
         'categoria_id' => $categoria_id,
         'tipo' => $tipo ?: null,

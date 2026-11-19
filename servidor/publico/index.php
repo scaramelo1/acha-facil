@@ -92,14 +92,14 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
     </div>
   </section>
 
-  <?php if (eventos_prontos()): ?>
+  <?php // 19/11 (avaliação do site): a seção só aparece com evento marcado; quando o último passa, some sozinha
+        // (o cache é por dia e o admin limpa ao aprovar). Sem evento, fica só a linha para divulgar.
+        // Cada evento já leva à agenda da cidade dele, então saiu a 3ª lista com as 22 cidades.
+  if (eventos_prontos() && $eventos): ?>
   <section id="eventos">
     <div class="conteudo">
       <h2>Próximos eventos na região</h2>
       <p class="intro">Shows, festas e feiras das cidades do Acha Fácil, em ordem de data.</p>
-      <?php if (!$eventos): ?>
-        <p class="aviso ok">Nenhum evento marcado por enquanto.</p>
-      <?php else: ?>
       <ol class="agenda-lista agenda-inicio">
         <?php foreach ($eventos as $e): ?>
           <li><a class="evento-cartao" href="<?= h(url_evento($e)) ?>">
@@ -112,19 +112,11 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
           </a></li>
         <?php endforeach ?>
       </ol>
-      <?php endif ?>
       <?= evento_convite_divulgar() ?>
-      <form class="agenda-escolher" onsubmit="if(this.c.value)location.href=this.c.value;return false">
-        <label for="agenda-cidade">Agenda completa da cidade</label>
-        <select id="agenda-cidade" name="c">
-          <?php foreach ($por_uf as $uf => $cidades_uf): ?><optgroup label="<?= h(NOMES_ESTADOS[$uf] ?? $uf) ?>">
-            <?php foreach ($cidades_uf as $slug => [$nome]): ?><option value="<?= h(url_eventos($slug)) ?>"><?= h($nome) ?></option><?php endforeach ?>
-          </optgroup><?php endforeach ?>
-        </select>
-        <button class="botao">Ver agenda</button>
-      </form>
     </div>
   </section>
+  <?php elseif (eventos_prontos()): ?>
+  <p class="conteudo divulgar-evento-linha">📅 Vai ter um show, festa ou feira? <a href="<?= h(url('incluir-evento.php')) ?>">Divulgue o evento de graça</a></p>
   <?php endif ?>
 
   <section id="areas">

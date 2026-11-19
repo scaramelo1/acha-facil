@@ -48,7 +48,7 @@ $avaliacoes = linhas('SELECT a.estrelas, a.comentario, a.resposta, a.status, a.c
 $avisos = $_SESSION['flash'] ?? [];
 unset($_SESSION['flash']);
 
-pagina_inicio('Minha conta · Acha Fácil', 'Seus comércios salvos e suas avaliações no Acha Fácil.', 'web', ['noindex' => true, 'canonica' => url_publica('minha-conta.php')]);
+pagina_inicio('Minha conta | Acha Fácil!', 'Seus comércios salvos e suas avaliações no Acha Fácil.', 'web', ['noindex' => true, 'canonica' => url_publica('minha-conta.php')]);
 ?>
 <main class="documento minha-conta">
   <?php foreach ($avisos as [$tipo, $msg]): ?><p class="aviso <?= h($tipo) ?>"><?= h($msg) ?></p><?php endforeach ?>

@@ -3,7 +3,7 @@
 require __DIR__ . '/../inc/base.php';
 require __DIR__ . '/../inc/pagina.php';
 $base = config()['url'];
-pagina_inicio('Termos de uso · Acha Fácil', 'Regras de uso do app Acha Fácil, para quem procura e para profissionais.');
+pagina_inicio('Termos de uso | Acha Fácil!', 'Regras de uso do app Acha Fácil, para quem procura e para profissionais.');
 ?>
 <main class="documento">
   <h1>Termos de uso</h1>

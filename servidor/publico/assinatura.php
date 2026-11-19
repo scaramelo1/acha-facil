@@ -13,7 +13,7 @@ header('X-Robots-Tag: noindex');
 
 $codigo = (string)($_GET['c'] ?? '');
 $pedido = pedido_por_codigo($codigo);
-if (!$pedido) { http_response_code(404); pagina_inicio('Assinatura · Acha Fácil!', 'Assinatura do plano.');
+if (!$pedido) { http_response_code(404); pagina_inicio('Assinatura | Acha Fácil!', 'Assinatura do plano.');
     echo '<main class="documento"><h1>Assinatura não encontrada</h1><p>Confira o endereço ou escolha um plano de novo.</p><p><a class="botao amarelo" href="' . h(config()['url']) . '/planos.php">Ver os planos</a></p></main>';
     pagina_fim(); exit; }
 
@@ -80,7 +80,7 @@ $desconto = (int)($pedido['desconto'] ?? 0);
 $cortesia = $desconto === 100;
 $cupom = $desconto ? (string)valor('SELECT codigo FROM cupons WHERE id = ?', [$pedido['cupom_id']]) : '';
 $preco_html = $desconto && !$cortesia ? '<s>' . h(preco_plano($plano)) . '</s> ' . h(reais($valor)) : h(reais($valor));
-pagina_inicio('Plano ' . PLANOS_NOME[$plano] . ' · Acha Fácil!', 'Pagamento do plano do seu comércio.');
+pagina_inicio('Plano ' . PLANOS_NOME[$plano] . ' | Acha Fácil!', 'Pagamento do plano do seu comércio.');
 ?>
 <main class="documento">
   <h1>Plano <?= h(PLANOS_NOME[$plano]) ?></h1>

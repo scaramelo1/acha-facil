@@ -45,7 +45,7 @@ $planos = [
 ];
 if (!plano_site_pronto()) unset($planos['site']);
 
-pagina_inicio('Planos para o seu negócio · Acha Fácil!', 'Corrija os dados, coloque fotos, apareça em destaque e tenha um site próprio com o Acha Fácil.');
+pagina_inicio('Planos para o seu negócio | Acha Fácil!', 'Corrija os dados, coloque fotos, apareça em destaque e tenha um site próprio com o Acha Fácil.');
 ?>
 <main class="documento" style="max-width:1200px">
   <h1>Planos para o seu negócio</h1>

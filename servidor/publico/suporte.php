@@ -46,7 +46,7 @@ unset($_SESSION['flash']);
 $meus = suporte_pronto() ? linhas('SELECT c.*, p.nome AS comercio FROM chamados c LEFT JOIN profissionais p ON p.id = c.profissional_id
     WHERE c.usuario_id = ? ORDER BY c.atualizado_em DESC LIMIT 50', [$u['id']]) : [];
 
-pagina_inicio('Fale com a equipe · Acha Fácil', 'Mande uma mensagem para a equipe do Acha Fácil.', 'web', ['noindex' => true]);
+pagina_inicio('Fale com a equipe | Acha Fácil!', 'Mande uma mensagem para a equipe do Acha Fácil.', 'web', ['noindex' => true]);
 ?>
 <main class="documento suporte">
   <?php foreach ($avisos as [$tipo, $msg]): ?><p class="aviso <?= h($tipo) ?>"><?= h($msg) ?></p><?php endforeach ?>

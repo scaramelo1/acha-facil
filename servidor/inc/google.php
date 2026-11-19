@@ -61,7 +61,7 @@ function conta_do_google(array $p): int {
 function pagina_google(string $titulo, string $texto, ?string $volta_site = null): void {   // $volta_site: entrada pelo site (passo 44)
     header('Content-Type: text/html; charset=utf-8');
     echo '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-        . '<meta name="robots" content="noindex"><title>' . h($titulo) . ' · Acha Fácil</title><style>'
+        . '<meta name="robots" content="noindex"><title>' . h($titulo) . ' | Acha Fácil!</title><style>'
         . 'body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#073D25;font-family:system-ui,sans-serif;color:#fff;text-align:center;padding:24px;box-sizing:border-box}'
         . 'h1{font-size:28px;margin:0 0 10px}p{font-size:18px;margin:0 0 24px;color:#E6F3EA}'
         . 'a{display:inline-block;background:#F7C600;color:#005C38;font-weight:800;font-size:18px;text-decoration:none;padding:16px 28px;border-radius:30px}'

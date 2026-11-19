@@ -21,3 +21,13 @@ RewriteRule ^ web.php [L,QSA]
     php_value post_max_size 12M
   </IfModule>
 </Files>
+# 19/11 (avaliação do site): cache no navegador. O CSS sempre vai com ?v=N (pagina.php e admin.php; subir o N ao mudar),
+# então pode ficar 1 ano. Ícones, logo e imagens de compartilhar (assets/og/) por 7 dias.
+<IfModule mod_headers.c>
+  <FilesMatch "\.css$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(png|ico|jpg|webp|svg)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+</IfModule>

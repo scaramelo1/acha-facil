@@ -59,7 +59,7 @@ if (e_post() && $pronto) {
 }
 
 $sel = fn(string $campo, $valor) => (string)($f[$campo] ?? '') === (string)$valor ? ' selected' : '';
-pagina_inicio('Incluir meu negócio · Acha Fácil!', 'Inclua o seu negócio no Acha Fácil de graça.');
+pagina_inicio('Incluir meu negócio | Acha Fácil!', 'Inclua o seu negócio no Acha Fácil de graça.');
 ?>
 <main class="documento">
   <h1>Incluir meu negócio</h1>

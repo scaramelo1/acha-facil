@@ -10,7 +10,7 @@ $termo = trim(mb_substr((string)($_GET['q'] ?? ''), 0, 60));
 $achados = $cidade && mb_strlen($termo) >= 2 ? buscar($termo, $cidade, 30) : [];
 $base = config()['url'];
 
-pagina_inicio('Procure seu negócio · Acha Fácil!', 'Ache o seu comércio no Acha Fácil e confira os planos para corrigir os dados e colocar fotos.');
+pagina_inicio('Procure seu negócio | Acha Fácil!', 'Ache o seu comércio no Acha Fácil e confira os planos para corrigir os dados e colocar fotos.');
 ?>
 <main class="documento">
   <h1>Procure seu negócio</h1>

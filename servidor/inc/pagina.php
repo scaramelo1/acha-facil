@@ -60,7 +60,13 @@ function pagina_inicio(string $titulo, string $descricao, string $classe = '', a
 <meta property="og:url" content="<?= h($canonica) ?>">
 <meta property="og:title" content="<?= h($titulo) ?>">
 <meta property="og:description" content="<?= h($descricao) ?>">
-<meta property="og:image" content="<?= h($opc['imagem'] ?? url_publica('assets/logo.png')) ?>">
+<?php // 19/11: sem foto própria, a imagem da cidade (páginas da cidade) ou a da inicial, com o número de comércios (og.php)
+  $og_imagem = $opc['imagem'] ?? null; ?>
+<meta property="og:image" content="<?= h($og_imagem ?? url_publica('og.php?c=' . rawurlencode($GLOBALS['og_cidade'] ?? 'inicio'))) ?>">
+<?php if (!$og_imagem): ?><meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<?php endif ?>
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
 <link rel="icon" href="<?= $base ?>/assets/favicon.ico" sizes="any">
@@ -70,7 +76,7 @@ function pagina_inicio(string $titulo, string $descricao, string $classe = '', a
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=34">
+<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=35">
 <?= $opc['head'] ?? '' ?>
 <?= !empty($opc['anuncios']) ? anuncios_head() : '' ?>
 </head>

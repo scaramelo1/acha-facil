@@ -177,17 +177,24 @@ function web_cartao(array $p): string {
         . web_nota($p) . '</span></a></li>';
 }
 /**
- * Espaço trancado na ficha incompleta (passo 59): mostra o que falta e o botão "Quero saber...", que conta o pedido
- * (api/quero.php). O dono vê esses pedidos como motivo para completar a ficha.
+ * 19/11 (avaliação do site): tudo o que falta na ficha num bloco só, em vez de um quadro 🔒 por item.
+ * Cada linha tem o seu "Pedir" (mesmo data-quero de web_trancado, contado em api/quero.php).
+ * $faltam: tipo => rótulo, na ordem em que aparecem.
  */
-function web_trancado(string $tipo, string $titulo, string $texto, string $botao): string {
-    return '<div class="trancado" data-trancado="' . h($tipo) . '"><p class="trancado-titulo"><span aria-hidden="true">🔒</span> ' . h($titulo) . '</p>'
-        . '<p class="trancado-texto">' . h($texto) . '</p>'
-        . '<button type="button" class="botao pequeno contorno" data-quero="' . h($tipo) . '"'
-        . (web_avisos_ligados() ? ' data-aviso-texto="' . h(AVISO_INFO_TEXTO[$tipo] ?? 'isso') . '"' : '') . '>🙋 ' . h($botao) . '</button>'
-        // "Pedido anotado", "Quer ser avisado?" e "Combinado" são criados pelo JS da ficha (passo 70): o mesmo texto
-        // escondido em todas as fichas deixava as páginas parecidas demais para o Google
-        . '</div>';
+function web_faltam(array $faltam): string {
+    if (!$faltam) return '';
+    $itens = '';
+    foreach ($faltam as $tipo => $rotulo) {
+        $itens .= '<li class="trancado" data-trancado="' . h($tipo) . '"><span class="faltam-item">' . h($rotulo) . '</span>'
+            . '<button type="button" class="botao pequeno contorno" data-quero="' . h($tipo) . '"'
+            . (web_avisos_ligados() ? ' data-aviso-texto="' . h(AVISO_INFO_TEXTO[$tipo] ?? 'isso') . '"' : '') . '>🙋 Pedir</button></li>';
+    }
+    $lista = array_map(fn($r) => $r === 'WhatsApp' ? $r : mb_strtolower($r), array_values($faltam));
+    $txt = count($lista) > 1 ? implode(', ', array_slice($lista, 0, -1)) . ' e ' . end($lista) : $lista[0];
+    return '<section class="faltam" aria-label="Informações que faltam"><p class="faltam-titulo"><span aria-hidden="true">🔒</span> '
+        . 'Faltam nesta ficha: ' . h($txt) . '</p>'
+        . '<p class="faltam-texto">Toque em <b>Pedir</b> e a gente avisa o comércio que você quer essa informação.</p>'
+        . '<ul class="faltam-lista">' . $itens . '</ul></section>';
 }
 function web_avisos_ligados(): bool {
     static $ok = null;
@@ -393,8 +400,11 @@ function web_pagina_ficha(array $p): void {
     if ($sameAs) $ld['sameAs'] = $sameAs;
 
     $sub = array_filter([$tipo ?? $p['categoria'], $p['bairro'], "$nome_cidade - $uf"]);
+    // 19/11 (avaliação do site): "Endereço: Atendimento a domicílio" ficava estranho no Google; sem rua de verdade vira "Atende a domicílio"
+    $tem_rua = $p['endereco'] && !preg_match('/domic[ií]lio|em casa|delivery|online|sem endere/iu', $p['endereco']);
     $descricao = $nome . ' em ' . $nome_cidade . ' (' . $uf . ')' . ($tipo ? ", $tipo" : '') . '. '
-        . ($p['endereco'] ? 'Endereço: ' . $p['endereco'] . '. ' : '') . 'Veja horário, telefone e WhatsApp no Acha Fácil.';
+        . ($tem_rua ? 'Endereço: ' . $p['endereco'] . '. ' : ($p['atende_em_casa'] || $p['endereco'] ? 'Atende a domicílio. ' : ''))
+        . 'Veja horário, telefone e WhatsApp no Acha Fácil.';
     pagina_inicio($nome . ' - ' . ($tipo ? "$tipo em " : '') . "$nome_cidade | Acha Fácil!", mb_substr($descricao, 0, 300), 'web',
         ['canonica' => $url, 'imagem' => $imagem, 'head' => web_json_ld($ld, $ld_trilha), 'noindex' => !ficha_no_google($p),
             'anuncios' => $p['importado'] && !$p['destaque_pago']]);   // 17/11 (pedido do usuário): anúncio também no Básico; só o Destaque fica sem
@@ -434,12 +444,12 @@ function web_pagina_ficha(array $p): void {
         <?php else: ?><a class="botao contorno botao-salvar" href="<?= h(link_entrar(url_ficha($p))) ?>" rel="nofollow" title="Entre com o Google para salvar">♡ Salvar</a><?php endif ?>
       </div>
 
-      <?php if (!$c['whatsapp'] || !$fotos): // passo 59: o que falta, com o botão de pedir ?>
-        <div class="trancados">
-          <?php if (!$c['whatsapp']): ?><?= web_trancado('whatsapp', 'WhatsApp', 'O comércio ainda não informou o WhatsApp.', 'Pedir o WhatsApp ao comércio') ?><?php endif ?>
-          <?php if (!$fotos): ?><?= web_trancado('fotos', 'Fotos', 'Ainda sem fotos do lugar, dos produtos ou do cardápio.', 'Pedir fotos ao comércio') ?><?php endif ?>
-        </div>
-      <?php endif ?>
+      <?= web_faltam(array_filter([   // passo 59 + 19/11: o que falta, num bloco só, cada item com o seu "Pedir"
+          'whatsapp' => $c['whatsapp'] ? null : 'WhatsApp',
+          'fotos' => $fotos ? null : 'Fotos',
+          'horario' => $tem_horario ? null : 'Horário',
+          'sobre' => $tem_sobre ? null : 'O que vende ou faz',
+      ])) ?>
 
       <?php if ($fotos): ?>
         <div class="ficha-fotos">
@@ -460,7 +470,6 @@ function web_pagina_ficha(array $p): void {
         <div>
           <?php if ($p['descricao']): ?><h2>Sobre</h2><p><?= nl2br(h($p['descricao'])) ?></p><?php endif ?>
           <?php if ($c['servicos']): ?><h2>O que faz ou vende</h2><p class="chips chips-texto"><?php foreach ($c['servicos'] as $s): ?><span><?= h($s) ?></span><?php endforeach ?></p><?php endif ?>
-          <?php if (!$tem_sobre): ?><h2>O que faz ou vende</h2><?= web_trancado('sobre', 'Produtos e serviços', 'O comércio ainda não contou o que vende ou faz.', 'Pedir detalhes ao comércio') ?><?php endif ?>
           <h2>Endereço</h2>
           <p><?= $p['endereco'] ? h($p['endereco']) : 'Endereço não informado.' ?><?= $p['bairro'] && !str_contains((string)$p['endereco'], $p['bairro']) ? '<br>Bairro ' . h($p['bairro']) : '' ?><br><?= h("$nome_cidade - $uf") ?></p>
           <?php if ($p['atende_em_casa']): ?><p class="selo-verificado">🏠 Atende em casa</p><?php endif ?>
@@ -476,14 +485,12 @@ function web_pagina_ficha(array $p): void {
           <?php elseif ($p['horario']): ?>
             <p><?= h($p['horario']) ?></p>
           <?php else: ?>
-            <?= web_trancado('horario', 'Horário de funcionamento', 'O comércio ainda não informou o horário.', 'Pedir o horário ao comércio') ?>
+            <p class="discreto">Não informado.</p>
           <?php endif ?>
         </div>
       </div>
 
-      <?php if ($link_dono && (!$c['whatsapp'] || !$fotos || !$tem_sobre || !$tem_horario)): // convite uma vez só, abaixo dos quadros trancados ?>
-        <p class="trancado-dono">🔒 Faltam dados nesta ficha. É o dono? <a href="<?= h(url('perfil.php?acao=assumir&id=' . (int)$p['id'])) ?>" rel="nofollow">Cadastre-se grátis</a></p>
-      <?php endif ?>
+      <?php // 19/11: o convite ao dono fica só na caixa "Este comércio é seu?" (antes repetia aqui) ?>
 
       <h2>Avaliações de quem usa o Acha Fácil</h2>
       <?php if (!$c['comentarios']): ?><p class="discreto">Ainda sem avaliações. Seja o primeiro a avaliar!</p><?php endif ?>
@@ -585,11 +592,12 @@ function lerLocal(k) { try { return localStorage.getItem(k); } catch (e) { retur
 function gravarLocal(k) { try { localStorage.setItem(k, '1'); } catch (e) {} }
 // mensagens que aparecem depois do toque (passo 70: fora do HTML, para as fichas não ficarem iguais para o Google)
 document.querySelectorAll('[data-quero]').forEach(function (b) {
-  var cx = b.parentNode, p = document.createElement('p'), nota = document.createElement('p');
+  var cx = b.parentNode, p = document.createElement('p'), nota = document.createElement('p'), noBloco = !!cx.closest('.faltam');
   // 17/11 (pedido do usuário): o botão diz "Pedir..." e esta linha deixa claro que a informação ainda não existe
+  // 19/11: no bloco "Faltam nesta ficha" essa explicação já está no topo, uma vez só
   nota.className = 'trancado-nota'; nota.textContent = 'Vamos avisar o dono que você quer essa informação.';
-  b.insertAdjacentElement('afterend', nota);
-  p.className = 'quero-ok'; p.hidden = true; p.textContent = '✓ Pedido anotado! Quando o comércio completar a ficha, a informação aparece aqui.';
+  if (!noBloco) b.insertAdjacentElement('afterend', nota);
+  p.className = 'quero-ok'; p.hidden = true; p.textContent = noBloco ? '✓ Pedido anotado' : '✓ Pedido anotado! Quando o comércio completar a ficha, a informação aparece aqui.';
   cx.appendChild(p);
   if (!b.dataset.avisoTexto) return;
   var q = document.createElement('div'); q.className = 'quero-avisar'; q.hidden = true;

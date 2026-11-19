@@ -368,6 +368,18 @@ a.area:hover { border-color: var(--verde); }
 .avisar-ok { margin: 8px 0 0; font-size: .92rem; color: var(--verde); font-weight: 700; }
 .trancado-dono { margin: 10px 0 0; font-size: .85rem; color: var(--texto2); }
 .trancado-dono a { color: var(--verde2); font-weight: 800; }
+/* 19/11 (avaliação do site): o que falta na ficha num bloco só, cada item com o seu "Pedir" */
+.faltam { margin: 16px 0; border: 2px dashed var(--borda); border-radius: 18px; padding: 14px 16px; background: var(--creme); }
+.faltam-titulo { margin: 0; font-weight: 900; color: var(--texto); }
+.faltam-texto { margin: 2px 0 10px; color: var(--texto2); font-size: .92rem; }
+.faltam-lista { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+.faltam .trancado { border: 0; padding: 8px 10px; border-radius: 12px; background: var(--branco); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; }
+.faltam-item { font-weight: 800; }
+.faltam .quero-ok { font-size: .9rem; }
+.faltam .quero-avisar, .faltam .avisar-ok { flex-basis: 100%; margin-top: 4px; }
+/* inicial sem evento marcado: só a linha para divulgar */
+.divulgar-evento-linha { text-align: center; margin-top: 8px; margin-bottom: 8px; color: var(--texto2); }
+.divulgar-evento-linha a { color: var(--verde2); font-weight: 800; }
 .selo-aberto { background: #dcf5e3; color: #11672c; }
 .selo-fechado { background: #fde2e1; color: #9b1c1c; }
 .nota { display: inline-block; font-size: .9rem; font-weight: 800; color: #9a6b00; margin-top: 4px; }

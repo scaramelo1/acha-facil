@@ -29,7 +29,7 @@ require_once __DIR__ . '/../inc/moderacao.php';
 $e_o_dono = fn(): bool => (int)(dono_atual()['id'] ?? 0) === (int)$p['id']
     || (pedido_usuario_pronto() && valor("SELECT 1 FROM pedidos WHERE profissional_id = ? AND usuario_id = ? AND status = 'feito'", [$p['id'], $conta['id']]));
 if ($p && tem_dono($p) && !$e_o_dono()) {
-    pagina_inicio('Comércio com responsável · Acha Fácil!', 'Este comércio já tem um responsável no Acha Fácil.', '', ['noindex' => true]);
+    pagina_inicio('Comércio com responsável | Acha Fácil!', 'Este comércio já tem um responsável no Acha Fácil.', '', ['noindex' => true]);
     echo '<main class="documento"><h1>Este comércio já tem responsável</h1><div class="quadro"><strong>' . h($p['nome']) . '</strong></div>'
         . '<p>O responsável por este comércio já cuida da página no Acha Fácil. Se acha que isso está errado, fale com a gente: '
         . contatos_html() . '.</p></main>';
@@ -83,7 +83,7 @@ if (e_post()) {
 }
 
 $titulo = $acao === 'remover' ? 'Tirar do app' : ($plano ? 'Plano ' . PLANOS_NOME[$plano] : ($p ? 'Cadastrar grátis' : 'Incluir meu negócio'));
-pagina_inicio("$titulo · Acha Fácil!", 'Pedido do dono do comércio para o Acha Fácil.');
+pagina_inicio("$titulo | Acha Fácil!", 'Pedido do dono do comércio para o Acha Fácil.');
 ?>
 <main class="documento">
   <h1><?= h($titulo) ?></h1>

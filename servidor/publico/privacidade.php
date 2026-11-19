@@ -4,7 +4,7 @@
 require __DIR__ . '/../inc/base.php';
 require __DIR__ . '/../inc/pagina.php';
 $base = config()['url'];
-pagina_inicio('Privacidade · Acha Fácil', 'Quais dados o Acha Fácil usa, para quê, e como excluir sua conta.');
+pagina_inicio('Privacidade | Acha Fácil!', 'Quais dados o Acha Fácil usa, para quê, e como excluir sua conta.');
 ?>
 <main class="documento">
   <h1>Política de privacidade</h1>

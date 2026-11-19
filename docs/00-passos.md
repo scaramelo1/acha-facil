@@ -792,3 +792,22 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 102. ⬜ Publicar na App Store (19/11, pedido do usuário; separado do passo 11): conta de desenvolvedor Apple (US$ 99/ano),
    "Entrar com Apple" junto do Google (regra 4.8 da Apple, ver passo 7c), build iOS de produção pelo EAS, capturas de
    tela do iPhone, ficha e conta de demonstração. Guia e textos em `docs/lojas.md`; app.json já pronto para o iOS (07/11)
+103. ✅ Avaliação do site, 1ª rodada de mudanças (19/11, pedido do usuário):
+   (1) Instagram @fsa.designer fora do rodapé (config `instagram` vazio; volta quando existir o @ do Acha Fácil).
+   (2) Inicial: "Próximos eventos" só aparece com evento marcado e some sozinha quando o último passa (cache por dia; o
+   admin limpa ao aprovar); sem evento fica só a linha "Divulgue o evento de graça". Saiu a 3ª lista com as 22 cidades.
+   (3) Ficha incompleta: os 4 quadros 🔒 viraram um bloco só, "Faltam nesta ficha: WhatsApp, fotos, horário e o que vende
+   ou faz", cada item com o seu "🙋 Pedir" (mesma contagem de api/quero.php e o "Quer ser avisado?"); web_faltam() em
+   inc/web.php. O convite ao dono ficou só na caixa "Este comércio é seu?".
+   (4) Descrição do Google sem rua de verdade: "Atende a domicílio." no lugar de "Endereço: Atendimento a domicílio".
+   (5) Imagem de compartilhar 1200x630 por cidade e da inicial ("4.464 comércios e serviços em São João da Boa Vista - SP"),
+   com a paisagem do app: publico/og.php gera com og-imagem.py (Pillow, fonte Nunito em servidor/fontes/) na 1ª vez e de
+   novo a cada 7 dias, em /var/lib/acha-facil/og/. Cidade nova ganha a sua sozinha. Ficha/evento com foto continuam com a foto.
+   (6) Cache no navegador (.htaccess, também em dominio/htaccess-redirecionar): CSS 1 ano (sempre com ?v=, agora 35),
+   imagens 7 dias. (7) Títulos de todas as páginas com " | Acha Fácil!".
+   (8) Nomes em caixa irregular: limpar_nome() em inc/limpeza.php ("REDE DROGÃO" → "Rede Drogão", "Canhotos BAR" →
+   "Canhotos Bar", "Point Vip Sjbv" → "Point Vip SJBV"); marca em maiúsculas no meio do nome (FLAGRA, APPLE) e siglas
+   (SENAI, AEF, RC) ficam. 4.208 fichas importadas sem dono arrumadas com `php servidor/limpar-nomes.php --aplicar`
+   (desfazer: /var/lib/acha-facil/backups/nomes-antes-20261119-104447.sql e -104509.sql); o importador já usa a regra.
+   O endereço das fichas não muda (só 1, Lumière, e o antigo redireciona). Google Play "em breve" continua até sair do
+   teste fechado (9 de 14 dias em 19/11): aí é só pôr o `link_play` no config.

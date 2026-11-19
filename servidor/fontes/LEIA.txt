@@ -1,0 +1,2 @@
+Nunito.ttf: fonte Nunito (Google Fonts, licença SIL Open Font License 1.1), baixada de github.com/google/fonts em 19/11/2026.
+Usada só por servidor/og-imagem.py para desenhar as imagens de compartilhar (og:image) das cidades.

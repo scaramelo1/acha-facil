@@ -50,6 +50,7 @@ if (!$cidade && isset(CIDADES[$partes[0]]) && cidade_web($partes[0]) !== $partes
     redirecionar(url(implode('/', $partes) . ($barra ? '/' : '')));
 }
 if (!$cidade) { web_pagina_404(); exit; }
+$GLOBALS['og_cidade'] = $cidade;   // 19/11: imagem de compartilhar da cidade (pagina_inicio)
 $n = count($partes);
 
 // de onde a pessoa chegou ao site (passo 38): conta a entrada e guarda a origem para a ficha
