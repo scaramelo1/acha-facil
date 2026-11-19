@@ -48,53 +48,50 @@ function admin_inicio(string $titulo, ?array $admin): void {
 <title><?= h($titulo) ?> · Admin Acha Fácil</title>
 <link rel="icon" type="image/png" href="<?= $base ?>/assets/favicon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=43">
+<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=44">
 </head>
 <body class="admin">
 <header class="topo">
   <a class="marca" href="<?= $base ?>/admin/"><img src="<?= $base ?>/assets/logo.png" alt="" width="40" height="40"><span>Acha <b>Fácil!</b> admin</span></a>
   <?php if ($admin): ?>
-  <nav>
-    <a href="<?= $base ?>/admin/">Pendências<?= $pend + $novos ? ' <span class="contador">' . ($pend + $novos) . '</span>' : '' ?></a>
-    <a href="<?= $base ?>/admin/numeros.php">Números</a>
-    <a href="<?= $base ?>/admin/chamar.php">📞 Quem chamar</a>
-    <a href="<?= $base ?>/admin/pedidos-info.php">Pedidos de informação</a>
-    <a href="<?= $base ?>/admin/cidades.php">Cidades</a>
-    <a href="<?= $base ?>/admin/novidades.php">Novidades<?= $nov ? ' <span class="contador">' . $nov . '</span>' : '' ?></a>
-    <a href="<?= $base ?>/admin/pessoas.php">Pessoas</a>
-    <a href="<?= $base ?>/admin/suporte.php">Suporte<?= $sup ? ' <span class="contador">' . $sup . '</span>' : '' ?></a>
-    <details class="menu-suspenso">
-      <summary>Mais<?= $ev ? ' <span class="contador">' . $ev . '</span>' : '' ?> <span aria-hidden="true">▾</span></summary>
+  <?php
+  // 19/11 (pedido do usuário): menu compacto em 4 grupos + Pendências; o número de cada grupo soma o que espera ali dentro
+  $cont = fn(int $n) => $n ? ' <span class="contador">' . $n . '</span>' : '';
+  $grupos = [
+      ['🏪', 'Comércios', $nov + $of, [
+          ['chamar.php', '📞 Quem chamar hoje', 0], ['comercios.php', 'Comércios (editar)', 0], ['ofertas.php', 'Ofertas da semana', $of],
+          ['cupons.php', 'Cupons', 0], ['novidades.php', 'Novidades do robô', $nov], ['importar.php', 'Importar lista', 0],
+          ['cidades.php', 'Cidades', 0], ['mapa.php', 'Mapa das cidades', 0]]],
+      ['📊', 'Números', 0, [
+          ['numeros.php', 'Números', 0], ['entradas.php', 'De onde vêm (entradas)', 0], ['buscas.php', 'O que procuram', 0],
+          ['pedidos-info.php', 'Pedidos de informação', 0], ['google.php', 'Google por cidade', 0]]],
+      ['👥', 'Pessoas', $sup, [
+          ['pessoas.php', 'Pessoas', 0], ['suporte.php', 'Suporte', $sup], ['notificacoes.php', 'Notificações', 0]]],
+      ['⚙️', 'Mais', $ev, [
+          ['eventos.php', 'Eventos', $ev], ['app.php', 'App e downloads', 0], ['anuncios.php', 'Anúncios', 0],
+          ['registro.php', 'Registro', 0], ['senha.php', 'Trocar senha', 0], ['sair.php', 'Sair', 0]]],
+  ];
+  $atual = basename((string)parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH));
+  ?>
+  <nav class="nav-admin-grupos">
+    <a class="nav-fixo<?= $atual === 'admin' || $atual === 'index.php' || $atual === '' ? ' atual' : '' ?>" href="<?= $base ?>/admin/">📋<span class="rotulo"> Pendências</span><?= $cont($pend + $novos) ?></a>
+    <?php foreach ($grupos as $gi => [$ico, $nome, $n, $itens]):
+      $aqui = in_array($atual, array_column($itens, 0), true); ?>
+    <details class="menu-suspenso<?= $aqui ? ' atual' : '' ?><?= $gi === count($grupos) - 1 ? ' ultimo' : '' ?>">
+      <summary><?= $ico ?><span class="rotulo"> <?= $nome ?></span><?= $cont($n) ?> <span aria-hidden="true">▾</span></summary>
       <div class="menu-lista">
-        <a class="so-celular" href="<?= $base ?>/admin/">Pendências<?= $pend + $novos ? ' <span class="contador">' . ($pend + $novos) . '</span>' : '' ?></a>
-        <a class="so-celular" href="<?= $base ?>/admin/numeros.php">Números</a>
-        <a class="so-celular" href="<?= $base ?>/admin/chamar.php">📞 Quem chamar</a>
-        <a class="so-celular" href="<?= $base ?>/admin/pedidos-info.php">Pedidos de informação</a>
-        <a class="so-celular" href="<?= $base ?>/admin/cidades.php">Cidades</a>
-        <a class="so-celular" href="<?= $base ?>/admin/novidades.php">Novidades<?= $nov ? ' <span class="contador">' . $nov . '</span>' : '' ?></a>
-        <a href="<?= $base ?>/admin/mapa.php">Mapa das cidades</a>
-        <a href="<?= $base ?>/admin/comercios.php">Comércios (editar)</a>
-        <a href="<?= $base ?>/admin/buscas.php">O que procuram</a>
-        <a href="<?= $base ?>/admin/google.php">Google por cidade</a>
-        <a href="<?= $base ?>/admin/importar.php">Importar lista</a>
-        <a class="so-celular" href="<?= $base ?>/admin/pessoas.php">Pessoas</a>
-        <a class="so-celular" href="<?= $base ?>/admin/suporte.php">Suporte<?= $sup ? ' <span class="contador">' . $sup . '</span>' : '' ?></a>
-        <a href="<?= $base ?>/admin/notificacoes.php">Notificações</a>
-        <a href="<?= $base ?>/admin/cupons.php">Cupons</a>
-        <a href="<?= $base ?>/admin/eventos.php">Eventos<?= $ev ? ' <span class="contador">' . $ev . '</span>' : '' ?></a>
-        <a href="<?= $base ?>/admin/ofertas.php">Ofertas da semana<?= $of ? ' <span class="contador">' . $of . '</span>' : '' ?></a>
-        <a href="<?= $base ?>/admin/app.php">App e downloads</a>
-        <a href="<?= $base ?>/admin/anuncios.php">Anúncios</a>
-        <a href="<?= $base ?>/admin/registro.php">Registro</a>
-        <a href="<?= $base ?>/admin/senha.php">Trocar senha</a>
-        <a href="<?= $base ?>/admin/sair.php">Sair</a>
+        <?php foreach ($itens as [$arq, $rot, $c]): ?><a href="<?= $base ?>/admin/<?= $arq ?>"<?= $arq === $atual ? ' aria-current="page"' : '' ?>><?= h($rot) ?><?= $cont($c) ?></a><?php endforeach ?>
       </div>
     </details>
+    <?php endforeach ?>
   </nav>
   <script>
-  // fecha o menu suspenso ao clicar fora dele
+  // fecha o menu suspenso ao clicar fora dele e deixa só um aberto por vez
   document.addEventListener('click', function (e) {
     document.querySelectorAll('details.menu-suspenso[open]').forEach(function (d) { if (!d.contains(e.target)) d.removeAttribute('open'); });
+  });
+  document.querySelectorAll('details.menu-suspenso').forEach(function (d) {
+    d.addEventListener('toggle', function () { if (d.open) document.querySelectorAll('details.menu-suspenso[open]').forEach(function (o) { if (o !== d) o.removeAttribute('open'); }); });
   });
   </script>
   <?php endif ?>

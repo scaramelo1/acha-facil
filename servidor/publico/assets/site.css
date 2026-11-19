@@ -631,3 +631,16 @@ section.secao-ofertas + section { padding-top: 32px; }
 .numeros-blocos div { background: var(--branco); border-radius: 16px; padding: 14px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,.05); }
 .numeros-blocos strong { display: block; font-size: 1.7rem; font-weight: 900; color: var(--verde); line-height: 1.1; }
 .numeros-blocos span { color: var(--texto2); font-size: .9rem; }
+
+/* 19/11 (pedido do usuário): menu do admin compacto em grupos */
+.nav-admin-grupos { flex-wrap: wrap; justify-content: flex-end; }
+.admin .topo nav a.nav-fixo { display: inline-flex; align-items: center; gap: 2px; }
+.nav-admin-grupos .atual > summary, .admin .topo nav a.nav-fixo.atual { background: rgba(255,255,255,.18); }
+.nav-admin-grupos .menu-suspenso:not(.ultimo) .menu-lista { right: auto; left: 0; }
+.topo nav .menu-lista a[aria-current="page"] { background: rgba(0,92,56,.12); }
+@media (max-width: 760px) {
+  .admin .topo nav a.nav-fixo { display: inline-flex; padding: 8px 10px; }
+  .nav-admin-grupos summary { padding: 8px 10px; }
+  .nav-admin-grupos .menu-lista { position: fixed; left: 12px !important; right: 12px !important; top: 64px; }
+}
+@media (max-width: 520px) { .nav-admin-grupos .rotulo { display: none; } }

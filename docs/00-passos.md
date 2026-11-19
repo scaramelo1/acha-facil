@@ -949,3 +949,12 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (3) **Horário dá vantagem**: SQL_COM_HORARIO (inc/guia.php) logo depois das fichas pagas na ordem das listas do site e do
    app, da busca e dos "parecidos"; selo "🕒 Horário informado" nos cartões do site; convite no quadro do dono: "Informando o
    horário, sua ficha aparece no Aberto agora e antes das outras". CSS v=43.
+117. ✅ Títulos das fichas mais curtos e menu do admin compacto (19/11, pedido do usuário, item 4 da 3ª avaliação):
+   (1) web_titulo_ficha() em inc/web.php: até 65 letras (o que o Google mostra sem cortar); tira a cidade do fim do nome
+   ("Spani Atacadista São João da Boa Vista" -> "Spani Atacadista - Supermercado em São João da Boa Vista") e encurta na
+   ordem "Nome - Tipo em Cidade | Acha Fácil!" -> sem a marca -> "Nome em Cidade" -> "Nome - Tipo" -> nome cortado.
+   Exceção à regra do passo 103: fichas longas ficam sem " | Acha Fácil!" no título. O h1 da ficha não muda.
+   (2) Menu do admin em 4 grupos + Pendências (inc/admin.php): 🏪 Comércios (Quem chamar, Comércios, Ofertas, Cupons,
+   Novidades, Importar, Cidades, Mapa), 📊 Números (Números, Entradas, O que procuram, Pedidos de informação, Google),
+   👥 Pessoas (Pessoas, Suporte, Notificações), ⚙️ Mais (Eventos, App, Anúncios, Registro, Senha, Sair). O contador de cada
+   grupo soma as pendências de dentro; grupo e página atuais destacados; só um aberto por vez; no celular até 520 px só ícones.

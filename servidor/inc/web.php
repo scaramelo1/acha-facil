@@ -444,7 +444,7 @@ function web_pagina_ficha(array $p): void {
     $descricao = $nome . ' em ' . $nome_cidade . ' (' . $uf . ')' . ($tipo ? ", $tipo" : '') . '. '
         . ($tem_rua ? 'Endereço: ' . $p['endereco'] . '. ' : ($p['atende_em_casa'] || $p['endereco'] ? 'Atende a domicílio. ' : ''))
         . 'Veja horário, telefone e WhatsApp no Acha Fácil.';
-    pagina_inicio($nome . ' - ' . ($tipo ? "$tipo em " : '') . "$nome_cidade | Acha Fácil!", mb_substr($descricao, 0, 300), 'web',
+    pagina_inicio(web_titulo_ficha((string)$nome, (string)$tipo, (string)$nome_cidade), mb_substr($descricao, 0, 300), 'web',
         ['canonica' => $url, 'imagem' => $imagem, 'head' => web_json_ld($ld, $ld_trilha), 'noindex' => !ficha_no_google($p),
             'anuncios' => $p['importado'] && !$p['destaque_pago']]);   // 17/11 (pedido do usuário): anúncio também no Básico; só o Destaque fica sem
     [$parecidos, $mesmo_tipo] = web_parecidos($p);
@@ -755,6 +755,28 @@ document.querySelectorAll('[data-contato]').forEach(function (a) {
 <?php
     echo visita_adiada_js((int)$p['id'], rawurldecode((string)parse_url((string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH)));   // 16/11
     pagina_fim();
+}
+
+/**
+ * Título da ficha para o Google (19/11, passo 117, avaliação item 4): até ~65 letras, que é o que o Google mostra sem cortar.
+ * Tira a cidade do fim do nome ("Spani Atacadista São João da Boa Vista" -> "Spani Atacadista") e vai encurtando:
+ *   "Nome - Tipo em Cidade | Acha Fácil!" -> "Nome - Tipo em Cidade" -> "Nome em Cidade" -> "Nome - Tipo" -> "Nome" (cortado).
+ */
+function web_titulo_ficha(string $nome, string $tipo, string $cidade, int $max = 65): string {
+    $nome = trim($nome);
+    $sem = trim((string)preg_replace('/[\s\-–|,]*' . preg_quote($cidade, '/') . '(\s*[-–]?\s*(SP|MG))?\s*$/iu', '', $nome));
+    if (mb_strlen($sem) >= 3) $nome = $sem;
+    $tipo = trim($tipo);
+    $opcoes = [];
+    if ($tipo !== '' && mb_stripos($nome, $tipo) === false) {
+        $opcoes[] = "$nome - $tipo em $cidade | Acha Fácil!";
+        $opcoes[] = "$nome - $tipo em $cidade";
+    }
+    $opcoes[] = "$nome em $cidade | Acha Fácil!";
+    $opcoes[] = "$nome em $cidade";
+    if ($tipo !== '' && mb_stripos($nome, $tipo) === false) $opcoes[] = "$nome - $tipo";
+    foreach ($opcoes as $o) if (mb_strlen($o) <= $max) return $o;
+    return mb_strlen($nome) <= $max ? $nome : rtrim(mb_substr($nome, 0, $max - 1)) . '…';
 }
 
 /** Busca dentro da cidade (não vai para o Google): mesma regra da busca do app (inc/busca.php busca_executar()). */
