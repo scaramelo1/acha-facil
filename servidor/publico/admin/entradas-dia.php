@@ -169,7 +169,7 @@ if (!$tem_hora_contatos): ?>
   <tr<?= $vazia ? ' class="discreto"' : '' ?><?= $dia === $hoje_d && $hh === (int)date('G') ? ' style="background:var(--amarelo-claro)"' : '' ?>>
     <td><strong><?= sprintf('%02dh', $hh) ?></strong></td>
     <td><?= $l['entradas'] ? num($l['entradas']) : '<span class="discreto">0</span>' ?></td>
-    <td class="com-barra"><span class="barra"><i style="width:<?= $l['gente'] ? max(3, round(100 * $l['gente'] / $max_gente)) : 0 ?>%"></i></span><?= $l['gente'] ? '<strong>' . num($l['gente']) . '</strong>' : '<span class="discreto">0</span>' ?></td>
+    <td class="com-barra"><span class="barra"><i style="width:<?= $l['gente'] ? max(3, round(100 * $l['gente'] / $max_gente)) : 0 ?>%"></i></span><span class="n"><?= $l['gente'] ? '<strong>' . num($l['gente']) . '</strong>' : '<span class="discreto">0</span>' ?></span></td>
     <td><?= $l['pre'] ? num($l['pre']) : '<span class="discreto">0</span>' ?></td>
     <?php if ($tem_hora_contatos): ?><td><?= $cel('fichas') ?></td><td><?= $cel('vis') ?></td><td><?= $cel('pessoas') ?></td>
     <td><?= $cel('whatsapp') ?></td><td><?= $cel('ligar') ?></td><td><?= $cel('mapa') ?></td><td><?= $cel('outros') ?></td>
@@ -230,6 +230,7 @@ if (!$tem_hora_contatos): ?>
   .por-hora td:first-child, .por-hora th:first-child { text-align: left; }
   /* barra de tamanho fixo (60px): a hora com mais pessoas enche 100%, as outras proporcionais; o número fica sempre no mesmo lugar */
   .por-hora .com-barra .barra { display: inline-block; width: 60px; height: 10px; border-radius: 5px; background: rgba(0, 92, 56, .1); margin-right: 8px; vertical-align: middle; overflow: hidden; text-align: left; }
+  .por-hora .com-barra .n { display: inline-block; min-width: 4ch; text-align: right; }   /* "9" e "12" ocupam o mesmo espaço: as barras não andam */
   .por-hora .com-barra .barra i { display: block; height: 100%; border-radius: 5px; background: var(--verde); }
   .por-hora tr.total-semana td { border-top: 2px solid var(--verde); }
 </style>
