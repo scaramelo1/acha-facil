@@ -2,6 +2,7 @@
 // Termos de uso do app e do site (exigidos pelas lojas). Texto simples, em linguagem do dia a dia.
 require __DIR__ . '/../inc/base.php';
 require __DIR__ . '/../inc/pagina.php';
+require_once __DIR__ . '/../inc/ofertas.php';   // 19/11: preço e regras da Oferta da semana
 $base = config()['url'];
 pagina_inicio('Termos de uso | Acha Fácil!', 'Regras de uso do app Acha Fácil, para quem procura e para profissionais.');
 ?>
@@ -66,6 +67,13 @@ pagina_inicio('Termos de uso | Acha Fácil!', 'Regras de uso do app Acha Fácil,
     do topo da tela inicial. Avaliações não podem ser compradas, trocadas nem apagadas a pedido.</li>
     <li>O selo "Verificado pelo Acha Fácil", responder as avaliações e ver os números da página são recursos do plano Destaque.
     O selo aparece depois que a equipe confere o comércio; não vem automaticamente com o pagamento.</li>
+    <li>Quem tem o plano Destaque em dia pode colocar uma <strong>Oferta da semana</strong>, paga à parte por oferta (pagamento
+    único pelo Mercado Pago, <?= h(oferta_preco_texto()) ?>). A oferta aparece na página do comércio e na página da cidade pelos dias
+    escolhidos (no máximo <?= OFERTA_MAX_DIAS ?>), contados a partir da aprovação da equipe. Se a equipe pedir um ajuste, o dono corrige e
+    manda de novo sem pagar outra vez. Encerrar a oferta antes do prazo, ou o Destaque vencer, não devolve o valor. A oferta tem que
+    ser verdadeira e valer para quem chegar pelo Acha Fácil.</li>
+    <li>Quem tem o Básico pago ou o Destaque em dia recebe, no dia 1 de cada mês, um aviso no celular com o resumo do mês anterior
+    (visitas à página e toques no WhatsApp, em ligar e no mapa) e o link para o relatório completo.</li>
   </ul>
 
   <h2>6. Uso correto</h2>

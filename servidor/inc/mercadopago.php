@@ -181,6 +181,12 @@ function mp_pagar_unico(array $pedido): string {
 function mp_conferir_pagamento(string $mp_id): ?array {
     if (!preg_match('/^\d{1,30}$/', $mp_id) || !mp_pronto_unico()) return null;
     $pg = mp_api('GET', '/v1/payments/' . $mp_id);
+    // 19/11: pagamento de Oferta da semana (inc/ofertas.php)
+    if (preg_match('/^oferta:(\d+)$/', (string)($pg['external_reference'] ?? ''), $m)) {
+        require_once __DIR__ . '/ofertas.php';
+        mp_conferir_oferta($mp_id, $pg, (int)$m[1]);
+        return null;
+    }
     if (!preg_match('/^pedido:(\d+)$/', (string)($pg['external_reference'] ?? ''), $m)) return null;
     $pedido = linha("SELECT * FROM pedidos WHERE id = ? AND tipo = 'assumir' AND plano IS NOT NULL", [(int)$m[1]]);
     if (!$pedido || !plano_unico((string)$pedido['plano'])) return $pedido;

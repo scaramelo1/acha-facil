@@ -171,6 +171,17 @@ pagina_inicio('Painel do comércio | Acha Fácil!', 'Painel do dono do comércio
   <?php endif ?>
   <?php endif ?>
 
+  <?php // 19/11: relatório de 1 folha do mês (o mesmo que chega no aviso do dia 1) e Oferta da semana (Destaque)
+  if ($em_dia): require_once __DIR__ . '/../../inc/ofertas.php'; $of = ofertas_prontas() ? oferta_do_dono((int)$p['id']) : null; ?>
+  <div class="painel-atalhos">
+    <a class="painel-atalho" href="relatorio.php?id=<?= (int)$p['id'] ?>"><b>📊 Relatório do mês</b><span>Visitas, toques no WhatsApp e posição entre os concorrentes. Todo dia 1 chega o do mês anterior no celular.</span></a>
+    <?php if (ofertas_prontas()): ?>
+    <a class="painel-atalho<?= $destaque ? ' amarelo' : '' ?>" href="oferta.php"><b>🏷️ Oferta da semana</b><span><?= $of ? h(OFERTA_STATUS[$of['status']]) . ': ' . h($of['titulo'])
+      : ($destaque ? 'Coloque uma promoção na sua ficha e na página da cidade: ' . h(oferta_preco_texto()) . ' por oferta, até ' . OFERTA_MAX_DIAS . ' dias.' : 'Exclusivo do Destaque: promoções em evidência na ficha e na página da cidade.') ?></span></a>
+    <?php endif ?>
+  </div>
+  <?php endif ?>
+
   <?php $pedidos = array_filter(pedidos_info_ficha((int)$p['id'], desde_dias(30)));   // passo 59
   if ($pedidos): ?>
   <div class="quadro"><strong>O que as pessoas pediram nos últimos 30 dias:</strong>

@@ -21,7 +21,8 @@ const PAGINAS_ENTRADA = ['inicio' => 'Página inicial', 'cidade' => 'Cidade', 'l
     'eventos' => 'Agenda de eventos', 'evento' => 'Evento', 'busca' => 'Busca', 'outra' => 'Outra página'];
 /** Onde a ficha foi mostrada numa lista. */
 const ONDE_APARICAO = ['inicio' => 'Tela inicial', 'categoria' => 'Categoria', 'busca' => 'Busca', 'perto' => 'Perto de você'];
-const TIPOS_CONTATO = ['whatsapp' => 'WhatsApp', 'ligar' => 'Ligar', 'mapa' => 'Mapa', 'instagram' => 'Instagram', 'site' => 'Site'];
+const TIPOS_CONTATO = ['whatsapp' => 'WhatsApp', 'ligar' => 'Ligar', 'mapa' => 'Mapa', 'instagram' => 'Instagram', 'site' => 'Site',
+    'compartilhar' => 'Compartilhar no WhatsApp'];   // 19/11 (mudança 032): compartilhar não entra no total de contatos
 /** Numa lista longa (área com 700 comércios) só contam as primeiras posições, que a pessoa de fato vê. */
 const APARICAO_MAX = 40;
 
@@ -215,9 +216,9 @@ function numeros_ficha(int $id, string $desde, ?string $ate = null): array {
             $dia['visualizacoes'] += (int)$l['total'];
             $dia['pessoas'] += (int)$l['pessoas'];
         } else {
-            $r['contatos'] += (int)$l['total'];
+            if ($l['tipo'] !== 'compartilhar') $r['contatos'] += (int)$l['total'];
             $r['por_tipo'][$l['tipo']] = ($r['por_tipo'][$l['tipo']] ?? 0) + (int)$l['total'];
-            $dia['contatos'] += (int)$l['total'];
+            if ($l['tipo'] !== 'compartilhar') $dia['contatos'] += (int)$l['total'];
         }
         unset($dia);
     }

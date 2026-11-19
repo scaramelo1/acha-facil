@@ -4,6 +4,7 @@
 require __DIR__ . '/../inc/base.php';
 require_once __DIR__ . '/../inc/guia.php';
 require __DIR__ . '/../inc/pagina.php';
+require_once __DIR__ . '/../inc/ofertas.php';   // 19/11: preço da Oferta da semana
 
 $id = (int)($_GET['id'] ?? 0);
 $p = $id ? linha('SELECT id, nome, tipo, endereco FROM profissionais WHERE id = ? AND status = \'ativo\'', [$id]) : null;
@@ -24,6 +25,7 @@ $planos = [
         'Descrição e lista do que você vende ou faz',
         'Instagram e "atende em casa / faz entrega" na sua página',
         'Ver quantas pessoas abriram a sua ficha no mês',
+        'Relatório do mês no celular, todo dia 1',
     ]],
     'destaque' => ['Destaque', 'Tudo do Básico e mais visibilidade', [
         'Tudo o que tem no Básico',
@@ -34,6 +36,7 @@ $planos = [
         'Ver quantas pessoas abriram sua página e chamaram no WhatsApp',
         'Aparece em "Em destaque" no topo da tela inicial',
         'Aparece na frente dos outros na sua área e na busca',
+        'Pode colocar Ofertas da semana na ficha e na página da cidade (' . oferta_preco_texto() . ' por oferta, até ' . OFERTA_MAX_DIAS . ' dias)',
     ]],
     'site' => ['Destaque + Site', 'O Destaque e um site só seu, feito por nós', [
         'Tudo o que tem no Destaque',

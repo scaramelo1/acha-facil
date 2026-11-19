@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { Linking } from 'react-native';
 
 import { Abertura } from '../componentes/Abertura';
 import { ProvedorCidade } from '../cidade';
@@ -21,6 +22,11 @@ function AbrirAvisos() {
       if (!r || r.notification.request.identifier === ultimo) return;
       ultimo = r.notification.request.identifier;
       const dados = r.notification.request.content.data ?? {};
+      // 19/11: relatorio mensal do dono (e outros avisos com pagina do site): abre o link no navegador
+      if (typeof dados.url === 'string' && dados.url.startsWith('https://achafacilapp.com.br/')) {
+        Linking.openURL(dados.url).catch(() => {});
+        return;
+      }
       if (dados.tela === 'admin') router.push('/admin');
       else if (dados.tela === 'profissional' && Number(dados.id) > 0) router.push(`/profissional/${Number(dados.id)}?origem=link`);
     };

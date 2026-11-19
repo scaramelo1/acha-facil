@@ -1,8 +1,10 @@
 <?php
 // Relatório de 1 folha para mandar ao comerciante (passo 20): quantas pessoas viram a ficha, contatos, posição entre os
 // concorrentes, o que falta na ficha e o que o Destaque traz. Abrir, "Imprimir / salvar PDF" ou tirar print e mandar no WhatsApp.
-require __DIR__ . '/../../inc/admin.php';
-$admin = exigir_admin();
+require_once __DIR__ . '/../../inc/admin.php';
+// 19/11: o dono também abre este relatório por /painel/relatorio.php (link assinado do aviso mensal ou painel aberto),
+// que confere a permissão e define RELATORIO_DONO antes de incluir este arquivo
+$admin = defined('RELATORIO_DONO') ? null : exigir_admin();
 exigir_numeros_prontos();
 header('Cache-Control: no-store');
 
@@ -109,8 +111,11 @@ for ($i = 0; $i < 4; $i++) { $t = strtotime(date('Y-m-01') . " -$i month"); $mes
 <body>
 <div class="acoes" style="padding-top:16px">
   <button onclick="print()">Imprimir / salvar PDF</button>
+  <?php if (!defined('RELATORIO_DONO') || RELATORIO_DONO === 'painel'): // pelo link assinado só o mês do link ?>
   <?php foreach ($meses as $k => $nome): ?><a class="claro" href="?id=<?= (int)$p['id'] ?>&amp;mes=<?= $k ?>"><?= ucfirst($nome) ?></a><?php endforeach ?>
   <a class="claro" href="?id=<?= (int)$p['id'] ?>&amp;dias=30">30 dias</a>
+  <?php endif ?>
+  <?php if (defined('RELATORIO_DONO')): ?><a class="claro" href="<?= $base ?>/painel/">Abrir o painel do comércio</a><?php endif ?>
 </div>
 <div class="folha">
   <div class="topo">
@@ -185,6 +190,10 @@ for ($i = 0; $i < 4; $i++) { $t = strtotime(date('Y-m-01') . " -$i month"); $mes
     </div>
     <?php endif ?>
 
+    <?php if ($p['destaque_pago']): require_once __DIR__ . '/../../inc/ofertas.php'; ?>
+    <div class="chamada" style="margin-top:16px"><strong>🏷️ Tem uma promoção?</strong> Coloque uma <strong>Oferta da semana</strong>
+      (<?= h(oferta_preco_texto()) ?> por oferta, até <?= OFERTA_MAX_DIAS ?> dias no ar) na sua ficha e na página da cidade, pelo painel do comércio.</div>
+    <?php endif ?>
     <p class="rodape">Veja os planos em <strong><?= h(preg_replace('#^https?://#', '', url_publica('planos.php'))) ?></strong>
       · App Acha Fácil para Android</p>
   </div>

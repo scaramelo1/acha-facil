@@ -45,6 +45,10 @@ admin_inicio('Pendências', $admin);
 <div class="aviso ok"><strong><?= $ev_pend ?> <?= $ev_pend === 1 ? 'evento enviado' : 'eventos enviados' ?> pelo público esperando autorização.</strong>
   <a class="botao" href="eventos.php" style="margin-left:8px">Ver e autorizar</a></div>
 <?php endif ?>
+<?php require_once __DIR__ . '/../../inc/ofertas.php'; if (ofertas_prontas() && ($of_pend = (int)valor("SELECT COUNT(*) FROM ofertas WHERE status = 'em_analise'"))): ?>
+<div class="aviso ok"><strong><?= $of_pend ?> <?= $of_pend === 1 ? 'oferta paga esperando' : 'ofertas pagas esperando' ?> conferência.</strong>
+  <a class="botao" href="ofertas.php" style="margin-left:8px">Conferir</a></div>
+<?php endif ?>
 <h2>Alterações dos donos (<?= count($alteracoes) ?>)</h2>
 <?php if (!$alteracoes): ?><p class="discreto">Nenhuma alteração esperando.</p><?php else: ?>
 <div class="tabela"><table>

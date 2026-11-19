@@ -98,9 +98,10 @@ fi
 cat > /etc/cron.d/$NOME <<CRON
 */10 * * * * www-data php $RAIZ/avisar-sem-pagamento.php >/dev/null 2>&1
 17 * * * * root php $RAIZ/google-visitas.php >/dev/null 2>&1
+13 10 1 * * www-data php $RAIZ/relatorio-mensal.php >/dev/null 2>&1
 CRON
 chmod 644 /etc/cron.d/$NOME
-echo "✔ verificação de pagamento a cada 10 min e visitas do Google de hora em hora (/etc/cron.d/$NOME)"
+echo "✔ verificação de pagamento a cada 10 min, visitas do Google de hora em hora e relatório mensal no dia 1 (/etc/cron.d/$NOME)"
 php "$RAIZ/google-visitas.php" || true
 if [ "${1:-}" = "--leads" ]; then
   # São João: a lista enviada em /admin/importar.php ($DADOS/leads/sao-joao.html) ou, sem ela, a de fsadesigners.com.br/leads

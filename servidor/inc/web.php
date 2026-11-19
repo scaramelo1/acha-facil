@@ -13,6 +13,7 @@
 declare(strict_types=1);
 require_once __DIR__ . '/guia.php';
 require_once __DIR__ . '/pagina.php';
+require_once __DIR__ . '/ofertas.php';   // 19/11: Oferta da semana na ficha e na página da cidade
 
 const WEB_POR_PAGINA = 30;
 const WEB_TIPO_MINIMO = 3;          // tipo com menos comércios que isso não vai para o Google (página fraca)
@@ -81,6 +82,32 @@ function web_lista(string $cidade, int $categoria_id, ?string $tipo, ?string $ba
     return linhas('SELECT ' . CAMPOS_RESUMO . ", p.endereco FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
         WHERE $sql ORDER BY " . SQL_DESTAQUE . ' DESC, ' . SQL_FICHA_PAGA . ' DESC, p.total_avaliacoes > 0 DESC, RAND(?)
         LIMIT ' . WEB_POR_PAGINA . ' OFFSET ' . (max(1, $pagina) - 1) * WEB_POR_PAGINA, [...$par, semente_dia()]);
+}
+/**
+ * 19/11: "Aberto agora". Só dá para saber de quem informou o horário (painel do dono), então a lista com o filtro mostra
+ * só esses, abertos neste minuto, na mesma ordem justa. Não vai para o cache nem para o Google (muda a cada minuto).
+ */
+function web_abertos(string $cidade, int $categoria_id, ?string $tipo, ?string $bairro): array {
+    [$sql, $par] = web_filtro($cidade, $categoria_id, $tipo, $bairro);
+    $todos = linhas('SELECT ' . CAMPOS_RESUMO . ", p.endereco, p.horarios FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
+        WHERE $sql AND p.horarios IS NOT NULL AND p.horarios NOT IN ('', '[]', '{}') ORDER BY " . SQL_DESTAQUE . ' DESC, ' . SQL_FICHA_PAGA . ' DESC, p.total_avaliacoes > 0 DESC, RAND(?)
+        LIMIT 500', [...$par, semente_dia()]);
+    return array_values(array_filter($todos, fn($p) => aberto_agora(horarios_ler($p['horarios'])) === true));
+}
+/** Botão liga/desliga "Aberto agora" (mantém o bairro e o termo da busca). */
+function web_botao_aberto(string $base, bool $ligado, array $manter = []): string {
+    $q = array_filter($manter, fn($v) => $v !== null && $v !== '');
+    if (!$ligado) $q['aberto'] = 1;
+    $href = $base . ($q ? '?' . http_build_query($q) : '');
+    return '<a class="filtro-aberto' . ($ligado ? ' ligado' : '') . '" href="' . h($href) . '" rel="nofollow">'
+        . ($ligado ? '✕ Ver todos (aberto ou não)' : '🟢 Aberto agora') . '</a>';
+}
+/** Aviso da lista "Aberto agora": poucos informaram o horário, e o dono pode informar o dele. */
+function web_aviso_aberto(int $achados): string {
+    return '<p class="aviso-aberto">' . ($achados ? '<b>' . web_qtd($achados, 'lugar aberto', 'lugares abertos') . ' agora</b> entre os que informaram o horário.'
+            : '<b>Nenhum lugar com horário informado está aberto agora.</b>')
+        . ' Muitos comércios ainda não informaram o horário no Acha Fácil.'
+        . ' É dono? <a href="' . h(url('busca.php')) . '" rel="nofollow">Informe o seu horário de graça</a> e apareça aqui.</p>';
 }
 /** Bairros da lista (sem o filtro de bairro), para o filtro. */
 function web_bairros(string $cidade, int $categoria_id, ?string $tipo): array {
@@ -201,6 +228,19 @@ function web_avisos_ligados(): bool {
     if ($ok === null) { require_once __DIR__ . '/avisos-info.php'; $ok = avisos_info_prontos(); }
     return $ok;
 }
+/** 19/11: cartões das Ofertas da semana na página da cidade (oferta + comércio, leva à ficha). */
+function web_cartoes_ofertas(array $lista): string {
+    $html = '';
+    foreach ($lista as $o) {
+        $html .= '<li><a class="oferta-cartao" href="' . h(url_ficha($o)) . '">'
+            . ($o['oferta_foto'] ? '<img src="' . h(foto_url($o['oferta_foto'])) . '" alt="" loading="lazy">' : '<span class="oferta-cartao-icone" aria-hidden="true">🏷️</span>')
+            . '<span class="oferta-cartao-info"><b>' . h($o['oferta_titulo']) . '</b>'
+            . '<span>' . h(nome_curto($o['nome'])) . '</span>'
+            . ($o['oferta_por'] ? '<span class="oferta-precos">' . ($o['oferta_de'] ? '<s>' . h(dinheiro($o['oferta_de'])) . '</s> ' : '') . '<b>' . h(dinheiro($o['oferta_por'])) . '</b></span>' : '')
+            . '<small>' . h(oferta_validade($o)) . '</small></span></a></li>';
+    }
+    return '<ul class="ofertas-lista">' . $html . '</ul>';
+}
 function web_cartoes(array $lista): string {
     return '<ul class="cartoes">' . implode('', array_map('web_cartao', $lista)) . '</ul>';
 }
@@ -259,6 +299,13 @@ function web_pagina_cidade(string $cidade): void {
     <?= function_exists('web_abas_cidade') ? web_abas_cidade($cidade, 'comercios') : '' ?>
   </div></section>
 
+  <?php if ($ofertas = ofertas_da_cidade($cidade)): // 19/11: Ofertas da semana (benefício pago do Destaque), antes de tudo ?>
+  <section><div class="conteudo">
+    <h2>🏷️ Ofertas da semana em <?= h($nome) ?></h2>
+    <?= web_cartoes_ofertas($ofertas) ?>
+  </div></section>
+  <?php endif ?>
+
   <?php if ($destaques): // 17/11 (pedido do usuário): Destaque ANTES das áreas, para ficar em destaque de verdade ?>
   <section><div class="conteudo">
     <h2>Em destaque em <?= h($nome) ?></h2>
@@ -296,8 +343,8 @@ function web_pagina_cidade(string $cidade): void {
 }
 
 /** Página da área ou do tipo (lista paginada com filtro de bairro). */
-function web_pagina_lista(string $cidade, array $area, ?string $tipo, ?string $bairro, int $pagina, int $total): void {
-    $itens = web_lista($cidade, (int)$area['id'], $tipo, $bairro, $pagina);
+function web_pagina_lista(string $cidade, array $area, ?string $tipo, ?string $bairro, int $pagina, int $total, bool $aberto = false): void {
+    $itens = $aberto ? web_abertos($cidade, (int)$area['id'], $tipo, $bairro) : web_lista($cidade, (int)$area['id'], $tipo, $bairro, $pagina);
     [$nome_cidade, , $uf] = CIDADES[$cidade];
     $base_url = $tipo !== null ? url_tipo($cidade, $area['slug'], $tipo) : url_area($cidade, $area['slug']);
     $paginas = max(1, (int)ceil($total / WEB_POR_PAGINA));
@@ -311,7 +358,7 @@ function web_pagina_lista(string $cidade, array $area, ?string $tipo, ?string $b
     $titulo = ($tipo !== null ? "$tipo em $nome_cidade - $uf" : "{$area['nome']} em $nome_cidade - $uf") . ($pagina > 1 ? " (página $pagina)" : '') . ' | Acha Fácil!';
     $descricao = "$qtd de " . mb_strtolower($titulo_lista) . " em $nome_cidade ($uf): endereço, horário, WhatsApp e avaliações. Veja quem está aberto e chame direto.";
     // não vai para o Google: filtro de bairro e tipo com poucos comércios
-    $noindex = $bairro !== null || ($tipo !== null && $total < WEB_TIPO_MINIMO);
+    $noindex = $aberto || $bairro !== null || ($tipo !== null && $total < WEB_TIPO_MINIMO);
     $canonica = web_absoluta($base_url) . ($pagina > 1 ? '?pagina=' . $pagina : '');
     $lista_ld = ['@context' => 'https://schema.org', '@type' => 'ItemList', 'name' => "$titulo_lista em $nome_cidade",
         'itemListElement' => array_map(fn($p, $i) => ['@type' => 'ListItem', 'position' => ($pagina - 1) * WEB_POR_PAGINA + $i + 1,
@@ -338,15 +385,18 @@ function web_pagina_lista(string $cidade, array $area, ?string $tipo, ?string $b
           <option value="">Todos os bairros</option>
           <?php foreach ($bairros as $b): ?><option<?= $b === $bairro ? ' selected' : '' ?>><?= h($b) ?></option><?php endforeach ?>
         </select>
+        <?php if ($aberto): ?><input type="hidden" name="aberto" value="1"><?php endif ?>
         <noscript><button class="botao">Filtrar</button></noscript>
       </form>
     <?php endif ?>
+    <p class="filtros-linha"><?= web_botao_aberto($base_url, $aberto, ['bairro' => $bairro]) ?></p>
+    <?php if ($aberto): ?><?= web_aviso_aberto(count($itens)) ?><?php endif ?>
     <?php if ($itens): ?>
       <?= web_cartoes($itens) ?>
-    <?php else: ?>
+    <?php elseif (!$aberto): ?>
       <p class="aviso erro">Nenhum lugar encontrado<?= $bairro !== null ? ' neste bairro' : '' ?>.</p>
     <?php endif ?>
-    <?= web_paginacao($base_url, $pagina, $paginas, $bairro) ?>
+    <?= $aberto ? '' : web_paginacao($base_url, $pagina, $paginas, $bairro) ?>
     <p class="discreto">Tem um negócio de <?= h(mb_strtolower($titulo_lista)) ?> em <?= h($nome_cidade) ?> e não está aqui? <a href="<?= h(url('incluir.php')) ?>">Inclua de graça</a>.</p>
   </div></section>
   <?= web_baixe_app($cidade) ?>
@@ -442,7 +492,12 @@ function web_pagina_ficha(array $p): void {
         <?php if ($p['site']): ?><a class="botao contorno" href="<?= h(preg_match('#^https?://#i', $p['site']) ? $p['site'] : 'https://' . $p['site']) ?>" data-contato="site" rel="nofollow noopener" target="_blank">Site</a><?php endif ?>
         <?php if ($eu): ?><button type="button" class="botao contorno botao-salvar<?= $salvo ? ' salvo' : '' ?>" id="botao-salvar" aria-pressed="<?= $salvo ? 'true' : 'false' ?>"><?= $salvo ? '♥ Salvo' : '♡ Salvar' ?></button>
         <?php else: ?><a class="botao contorno botao-salvar" href="<?= h(link_entrar(url_ficha($p))) ?>" rel="nofollow" title="Entre com o Google para salvar">♡ Salvar</a><?php endif ?>
+        <?php // 19/11: compartilhar no WhatsApp ("Olha esse lugar: ..." com o link da ficha); conta como 'compartilhar'
+          $msg = 'Olha esse lugar: ' . $nome . ($tipo ? " ($tipo)" : '') . ", em $nome_cidade\n$url"; ?>
+        <a class="botao contorno botao-compartilhar" href="https://wa.me/?text=<?= h(rawurlencode($msg)) ?>" data-contato="compartilhar" rel="nofollow noopener" target="_blank">Compartilhar no WhatsApp</a>
       </div>
+
+      <?php if ($oferta = oferta_no_ar((int)$p['id'])) echo oferta_quadro_ficha($oferta);   // 19/11: Oferta da semana (só Destaque) ?>
 
       <?= web_faltam(array_filter([   // passo 59 + 19/11: o que falta, num bloco só, cada item com o seu "Pedir"
           'whatsapp' => $c['whatsapp'] ? null : 'WhatsApp',
@@ -690,15 +745,18 @@ document.querySelectorAll('[data-contato]').forEach(function (a) {
 }
 
 /** Busca dentro da cidade (não vai para o Google): mesma regra da busca do app (inc/guia.php buscar()). */
-function web_pagina_busca(string $cidade, string $termo): void {
+function web_pagina_busca(string $cidade, string $termo, bool $aberto = false): void {
     [$nome_cidade, , $uf] = CIDADES[$cidade];
     $achados = [];
     if (mb_strlen($termo) >= 2) {
         $like = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $termo) . '%';
-        $achados = linhas('SELECT ' . CAMPOS_RESUMO . ' FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
-            WHERE ' . visivel($cidade) . ' AND (p.nome LIKE ? OR p.tipo LIKE ? OR p.servicos LIKE ? OR p.descricao LIKE ? OR p.bairro LIKE ? OR c.nome LIKE ?)
+        $achados = linhas('SELECT ' . CAMPOS_RESUMO . ', p.horarios FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
+            WHERE ' . visivel($cidade) . ' AND (p.nome LIKE ? OR p.tipo LIKE ? OR p.servicos LIKE ? OR p.descricao LIKE ? OR p.bairro LIKE ? OR c.nome LIKE ?)'
+            . ($aberto ? " AND p.horarios IS NOT NULL AND p.horarios NOT IN ('', '[]', '{}')" : '') . '
             ORDER BY (c.nome LIKE ? OR p.tipo LIKE ? OR p.nome LIKE ?) DESC, ' . SQL_DESTAQUE . ' DESC, ' . SQL_FICHA_PAGA . ' DESC, RAND(?) LIMIT 60',
             [...array_fill(0, 9, $like), semente_dia()]);
+        // 19/11: "Aberto agora" (só quem informou o horário)
+        if ($aberto) $achados = array_values(array_filter($achados, fn($p) => aberto_agora(horarios_ler($p['horarios'])) === true));
     }
     [$trilha] = web_trilha([["$nome_cidade - $uf", url_cidade($cidade)], ['Busca', null]]);
     pagina_inicio("Procurar em $nome_cidade | Acha Fácil!", "Procure comércios e serviços em $nome_cidade ($uf).", 'web',
@@ -715,7 +773,12 @@ function web_pagina_busca(string $cidade, string $termo): void {
       <p class="aviso erro">Escreva pelo menos 2 letras.</p>
     <?php elseif ($termo !== '' && !$achados): ?>
       <p class="aviso erro">Nada encontrado com "<?= h($termo) ?>" em <?= h($nome_cidade) ?>. Tente outra palavra ou <a href="<?= h(url_cidade($cidade)) ?>">veja as áreas</a>.</p>
+    <?php elseif ($aberto && mb_strlen($termo) >= 2): ?>
+      <p class="filtros-linha"><?= web_botao_aberto(url(cidade_web($cidade) . '/buscar'), true, ['q' => $termo]) ?></p>
+      <?= web_aviso_aberto(count($achados)) ?>
+      <?= $achados ? web_cartoes($achados) : '' ?>
     <?php elseif ($achados): ?>
+      <p class="filtros-linha"><?= web_botao_aberto(url(cidade_web($cidade) . '/buscar'), false, ['q' => $termo]) ?></p>
       <p><?= web_qtd(count($achados), 'resultado', 'resultados') ?> para "<?= h($termo) ?>"<?= count($achados) >= 60 ? ' (os 60 primeiros)' : '' ?>.</p>
       <?= web_cartoes($achados) ?>
     <?php endif ?>

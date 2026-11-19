@@ -345,6 +345,8 @@ function prof_completo(array $p, ?int $usuario_id): array {
         $m = linha('SELECT estrelas, comentario FROM avaliacoes WHERE profissional_id = ? AND usuario_id = ?', [$p['id'], $usuario_id]);
         if ($m) $r['minhaAvaliacao'] = ['estrelas' => (int)$m['estrelas'], 'comentario' => $m['comentario']];
     }
+    require_once __DIR__ . '/ofertas.php';
+    $r['oferta'] = oferta_api(oferta_no_ar((int)$p['id']));   // 19/11: Oferta da semana (apps antes da versão com ofertas ignoram)
     return $r;
 }
 

@@ -811,3 +811,23 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (desfazer: /var/lib/acha-facil/backups/nomes-antes-20261119-104447.sql e -104509.sql); o importador já usa a regra.
    O endereço das fichas não muda (só 1, Lumière, e o antigo redireciona). Google Play "em breve" continua até sair do
    teste fechado (9 de 14 dias em 19/11): aí é só pôr o `link_play` no config.
+104. ✅ Relatório mensal, compartilhar, "Aberto agora" e Oferta da semana (19/11, pedido do usuário, da avaliação do site):
+   (1) **Relatório mensal automático** para quem paga (Básico ou Destaque): cron no dia 1 às 10:13
+   (`servidor/relatorio-mensal.php`, regras em inc/relatorio-mensal.php, tabela relatorios_mensais da mudança 031). Aviso no
+   celular "📊 Seu outubro no Acha Fácil: Sua ficha foi vista 230 vezes e teve 18 toques no WhatsApp" para as contas ligadas ao
+   comércio; o link abre o relatório de 1 folha (/painel/relatorio.php, link assinado, sem login; o mesmo do admin). Atalho
+   "📊 Relatório do mês" no painel. Conferir antes: `php servidor/relatorio-mensal.php --ver`. App: tocar no aviso abre o link
+   a partir do próximo APK (src/app/_layout.tsx, dados.url); os apps de hoje abrem a ficha.
+   (2) **Compartilhar no WhatsApp** na ficha do site ("Olha esse lugar: Nome (tipo), em Cidade" + link). Conta como
+   'compartilhar' (mudança 032), fora do total de contatos.
+   (3) **"🟢 Aberto agora"** nas páginas de área, tipo e busca do site (?aberto=1, sem cache e fora do Google). Só entra quem
+   informou o horário (19/11: 4 fichas), com aviso "É dono? Informe o seu horário de graça". O app ainda não tem o filtro.
+   (4) **Oferta da semana** (benefício pago do Destaque): **R$ 9,90 por oferta** (pagamento único, sem mensalidade;
+   'preco_oferta' no config muda o valor), no ar 1 a 7 dias a partir da aprovação. Dono: /painel/oferta.php (título, texto,
+   preço de/por, foto, dias) → Mercado Pago → admin confere em /admin/ofertas.php (aviso no celular dos admins; contador em
+   Pendências) → no ar na ficha e em "🏷️ Ofertas da semana em <cidade>" no topo da página da cidade. Recusada: o dono corrige
+   e manda de novo sem pagar. Uma no ar por vez; some sozinha no fim ou com o Destaque vencido. Regras em inc/ofertas.php,
+   pagamento pelo mp-webhook.php (external_reference "oferta:N"). Termos e planos atualizados. A API já manda `ofertas`
+   (inicio.php) e `oferta` (profissional.php); o app ainda não mostra (falta tela no app).
+   Testado em 19/11: oferta de teste no ar (ficha, cidade, API) e apagada; fluxo pago → recusa → correção → aprovação →
+   encerrar simulado no servidor (sem avisos de verdade); link de pagamento do Mercado Pago criado (não pago).

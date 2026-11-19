@@ -12,6 +12,9 @@ function admin_inicio(string $titulo, ?array $admin): void {
     require_once __DIR__ . '/eventos.php';
     $ev = $admin ? eventos_pendentes_contar() : 0;   // eventos enviados pelo público esperando autorização
     $novos += $ev;
+    require_once __DIR__ . '/ofertas.php';
+    $of = $admin && ofertas_prontas() ? (int)valor("SELECT COUNT(*) FROM ofertas WHERE status = 'em_analise'") : 0;   // ofertas pagas para conferir (19/11)
+    $novos += $of;
     require_once __DIR__ . '/suporte.php';
     $sup = $admin ? suporte_abertos_contar() : 0;   // chamados esperando resposta (passo 53)
     require_once __DIR__ . '/novidades.php';
@@ -25,7 +28,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
 <title><?= h($titulo) ?> · Admin Acha Fácil</title>
 <link rel="icon" type="image/png" href="<?= $base ?>/assets/favicon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=35">
+<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=36">
 </head>
 <body class="admin">
 <header class="topo">
@@ -55,6 +58,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
         <a href="<?= $base ?>/admin/notificacoes.php">Notificações</a>
         <a href="<?= $base ?>/admin/cupons.php">Cupons</a>
         <a href="<?= $base ?>/admin/eventos.php">Eventos<?= $ev ? ' <span class="contador">' . $ev . '</span>' : '' ?></a>
+        <a href="<?= $base ?>/admin/ofertas.php">Ofertas da semana<?= $of ? ' <span class="contador">' . $of . '</span>' : '' ?></a>
         <a href="<?= $base ?>/admin/app.php">App e downloads</a>
         <a href="<?= $base ?>/admin/anuncios.php">Anúncios</a>
         <a href="<?= $base ?>/admin/registro.php">Registro</a>

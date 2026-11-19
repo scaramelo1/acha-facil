@@ -61,7 +61,7 @@ $fichas = linhas("SELECT p.id, p.nome, p.tipo, p.cidade, p.bairro, c.nome AS cat
         SUM(IF(k.tipo = 'perfil', k.total, 0)) AS visualizacoes, SUM(IF(k.tipo = 'perfil', k.pessoas, 0)) AS pessoas,
         SUM(IF(k.tipo = 'whatsapp', k.total, 0)) AS whatsapp, SUM(IF(k.tipo = 'ligar', k.total, 0)) AS ligar,
         SUM(IF(k.tipo = 'mapa', k.total, 0)) AS mapa, SUM(IF(k.tipo = 'site', k.total, 0)) AS site_t,
-        SUM(IF(k.tipo = 'instagram', k.total, 0)) AS instagram, SUM(IF(k.tipo <> 'perfil', k.total, 0)) AS toques
+        SUM(IF(k.tipo = 'instagram', k.total, 0)) AS instagram, SUM(IF(k.tipo NOT IN ('perfil','compartilhar'), k.total, 0)) AS toques
     FROM contatos k JOIN profissionais p ON p.id = k.profissional_id JOIN categorias c ON c.id = p.categoria_id
     WHERE k.origem = ? AND k.dia >= ?$w
     GROUP BY p.id ORDER BY visualizacoes DESC, toques DESC, p.nome LIMIT 500", array_merge([$origem, $desde], $cidade !== '' ? [$cidade] : []));
@@ -98,8 +98,8 @@ $totais_por_dia = function (string $ini, string $fim) use ($origem, $cidade): ar
     }
     $wp = $cidade !== '' ? ' AND p.cidade = ?' : '';
     foreach (linhas("SELECT k.dia, COUNT(DISTINCT IF(k.tipo = 'perfil' AND k.total > 0, k.profissional_id, NULL)) AS fichas,
-            SUM(IF(k.tipo = 'perfil', k.total, 0)) AS vis, SUM(IF(k.tipo <> 'perfil', k.total, 0)) AS toques,
-            COUNT(DISTINCT IF(k.tipo <> 'perfil' AND k.total > 0, k.profissional_id, NULL)) AS tocados
+            SUM(IF(k.tipo = 'perfil', k.total, 0)) AS vis, SUM(IF(k.tipo NOT IN ('perfil','compartilhar'), k.total, 0)) AS toques,
+            COUNT(DISTINCT IF(k.tipo NOT IN ('perfil','compartilhar') AND k.total > 0, k.profissional_id, NULL)) AS tocados
         FROM contatos k JOIN profissionais p ON p.id = k.profissional_id
         WHERE k.origem = ? AND k.dia BETWEEN ? AND ?$wp GROUP BY k.dia", array_merge([$origem, $ini, $fim], $pc)) as $l) {
         foreach (['fichas', 'vis', 'toques', 'tocados'] as $k) $dias_lista[$l['dia']][$k] = (int)$l[$k];
@@ -120,7 +120,7 @@ $antes_t = $somar($totais_por_dia($ant_ini, $ant_fim));
 $diferentes = function (string $ini, string $fim) use ($origem, $cidade): array {
     $wp = $cidade !== '' ? ' AND p.cidade = ?' : '';
     $l = linhas("SELECT COUNT(DISTINCT IF(k.tipo = 'perfil' AND k.total > 0, k.profissional_id, NULL)) AS fichas,
-            COUNT(DISTINCT IF(k.tipo <> 'perfil' AND k.total > 0, k.profissional_id, NULL)) AS tocados
+            COUNT(DISTINCT IF(k.tipo NOT IN ('perfil','compartilhar') AND k.total > 0, k.profissional_id, NULL)) AS tocados
         FROM contatos k JOIN profissionais p ON p.id = k.profissional_id WHERE k.origem = ? AND k.dia BETWEEN ? AND ?$wp",
         array_merge([$origem, $ini, $fim], $cidade !== '' ? [$cidade] : []))[0] ?? [];
     return ['fichas' => (int)($l['fichas'] ?? 0), 'tocados' => (int)($l['tocados'] ?? 0)];
@@ -181,7 +181,7 @@ if (entradas_prontas()) {
     // visualizações e toques por cidade (contados desde 14/11)
     $wc = $cidade !== '' ? ' AND p.cidade = ?' : '';
     foreach (linhas("SELECT p.cidade, SUM(IF(k.tipo = 'perfil', k.total, 0)) AS v, SUM(IF(k.tipo = 'perfil', k.pessoas, 0)) AS pe,
-            SUM(IF(k.tipo <> 'perfil', k.total, 0)) AS t FROM contatos k JOIN profissionais p ON p.id = k.profissional_id
+            SUM(IF(k.tipo NOT IN ('perfil','compartilhar'), k.total, 0)) AS t FROM contatos k JOIN profissionais p ON p.id = k.profissional_id
             WHERE k.origem = ? AND k.dia >= ?$wc GROUP BY p.cidade", $pe) as $l) {
         $rel['cidades'][$l['cidade']] ??= ['entradas' => 0, 'fichas' => 0, 'areas' => [], 'visualizacoes' => 0, 'pessoas' => 0, 'toques' => 0];
         $rel['cidades'][$l['cidade']]['visualizacoes'] = (int)$l['v'];

@@ -78,7 +78,7 @@ if ($n === 3 && $partes[1] === 'c') {
 // busca
 if ($n === 2 && $partes[1] === 'buscar') {
     header('X-Robots-Tag: noindex');
-    web_pagina_busca($cidade, (string)$get('q'));
+    web_pagina_busca($cidade, (string)$get('q'), isset($_GET['aberto']));   // 19/11: ?aberto=1
     exit;
 }
 
@@ -123,5 +123,11 @@ $bairro = $get('bairro');
 // página além do fim, ou área sem nenhum comércio na cidade = 404
 $total = web_contar($cidade, (int)$area['id'], $tipo, $bairro);
 if (($total === 0 && $bairro === null) || ($pagina - 1) * WEB_POR_PAGINA >= max(1, $total)) { web_pagina_404(); exit; }
+// 19/11: "Aberto agora" (?aberto=1) muda a cada minuto: sem cache e fora do Google
+if (isset($_GET['aberto'])) {
+    header('X-Robots-Tag: noindex');
+    web_pagina_lista($cidade, $area, $tipo, $bairro, 1, $total, true);
+    exit;
+}
 echo web_cache("lista|$cidade|{$area['slug']}|" . ($tipo ?? '') . '|' . ($bairro ?? '') . "|$pagina",
     fn() => web_pagina_lista($cidade, $area, $tipo, $bairro, $pagina, $total));

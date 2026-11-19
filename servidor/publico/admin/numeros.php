@@ -40,7 +40,7 @@ $sql = "SELECT p.id, p.nome, p.tipo, p.cidade, p.bairro, p.whatsapp AS fone_what
             SUM(IF(tipo = 'perfil', total, 0)) AS visualizacoes, SUM(IF(tipo = 'perfil', pessoas, 0)) AS pessoas,
             SUM(IF(tipo = 'whatsapp', total, 0)) AS whatsapp, SUM(IF(tipo = 'ligar', total, 0)) AS ligar,
             SUM(IF(tipo = 'mapa', total, 0)) AS mapa, SUM(IF(tipo = 'site', total, 0)) AS site_t,
-            SUM(IF(tipo = 'instagram', total, 0)) AS instagram, SUM(IF(tipo <> 'perfil', total, 0)) AS contatos
+            SUM(IF(tipo = 'instagram', total, 0)) AS instagram, SUM(IF(tipo NOT IN ('perfil','compartilhar'), total, 0)) AS contatos
         FROM contatos WHERE dia >= ? GROUP BY profissional_id) k ON k.profissional_id = p.id
     LEFT JOIN (SELECT profissional_id, SUM(total) AS aparicoes FROM aparicoes WHERE dia >= ? GROUP BY profissional_id) a ON a.profissional_id = p.id
     WHERE " . implode(' AND ', $where) . "
