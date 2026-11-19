@@ -82,7 +82,7 @@ admin_inicio('Cidades', $admin);
 <h1>Cidades</h1>
 <p class="discreto">O app baixa esta lista sempre que abre: cidade ligada aqui aparece no app na hora, <strong>sem APK novo</strong>.
   Cidade nova nasce desligada: primeiro entram os comércios (a lista do robô, importada na VPS com o código da cidade), depois você liga.</p>
-<p><a class="botao contorno" href="mapa.php?uf=SP">🗺️ Mapa de SP</a> <a class="botao contorno" href="mapa.php?uf=MG">🗺️ Mapa de MG</a></p>
+<p><a class="botao contorno" href="mapa.php">🗺️ Mapas</a></p>
 
 <?php if (isset($_GET['sitemaps']) && isset(TODAS_CIDADES[$_GET['sitemaps']])):   // passo 80: sitemaps gerados na hora
   require_once __DIR__ . '/../../inc/sitemaps.php'; ?>
