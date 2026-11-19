@@ -777,3 +777,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 99. ✅ Pedreira no ar (19/11, leva 1 do cronograma): 1262 comércios importados (backup profissionais-pedreira-20261119),
    todos com mapa, cidade ligada, https://achafacilapp.com.br/pedreira/ e sitemap-pedreira.xml respondendo. Só 14 em
    "Outros". Águas de Lindóia também ligada (774). Falta da leva 1: Monte Alegre do Sul e Socorro.
+100. ✅ Aviso da Play "screen.portrait restringe a disponibilidade" (19/11, ao enviar a 1.10.0 nº 11). O "orientation":
+   "portrait" do app.json vira recurso obrigatório no manifesto; plugins/tela-opcional.js marca screen.portrait e
+   screen.landscape como android:required="false" (app continua em pé, instala em tablet/Chromebook/XR). Vale do
+   próximo .aab em diante; o nº 11 foi enviado com "Continuar mesmo assim" (só aviso).

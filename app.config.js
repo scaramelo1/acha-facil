@@ -14,7 +14,7 @@ module.exports = ({ config }) => {
     ...config,
     extra: { ...config.extra, loja },
     android: { ...config.android, ...(codigo > 0 ? { versionCode: codigo } : {}) },
-    plugins: [...(config.plugins ?? []), './plugins/assinatura-local'],
+    plugins: [...(config.plugins ?? []), './plugins/assinatura-local', './plugins/tela-opcional'],
   };
   const firebase = path.join(__dirname, 'google-services.json');
   if (!fs.existsSync(firebase)) return comLoja;
