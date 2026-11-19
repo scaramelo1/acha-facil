@@ -44,7 +44,6 @@ admin_inicio('Mapa das cidades', $admin);
 .mapa-caixa path.ligada{fill:#0a8f55}.mapa-caixa path.ligada:hover{fill:#005C38}
 .mapa-caixa path.desligada{fill:#F7C600}.mapa-caixa path.desligada:hover{fill:#d9ad00}
 .mapa-caixa path.escolhida{stroke:#c0392b;stroke-width:2.5}
-.mapa-caixa circle.raio{fill:rgba(10,143,85,.08);stroke:#0a8f55;stroke-width:1;stroke-dasharray:4 3;vector-effect:non-scaling-stroke;pointer-events:none}
 .mapa-caixa text{font:700 9px Nunito,sans-serif;fill:#173b2b;paint-order:stroke;stroke:#fff;stroke-width:2.5px;pointer-events:none;text-anchor:middle}
 .mapa-zoom{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:6px}
 .mapa-zoom button{width:38px;height:38px;border-radius:10px;border:1px solid #cfd9d3;background:#fff;font:800 20px Nunito,sans-serif;cursor:pointer}
@@ -58,7 +57,7 @@ admin_inicio('Mapa das cidades', $admin);
 
 <h1>Mapa das cidades</h1>
 <p class="discreto">Cada pedaço é um município. Verde = cidade ligada no app, amarelo = cadastrada mas desligada. Toque num
-  município para ver a distância até a cidade do projeto mais perto; use o raio para ver a área que cada cidade já cobre.</p>
+  município para ver a distância até a cidade do projeto mais perto.</p>
 
 <div class="mapa-abas">
   <?php foreach (MAPA_UFS as $sigla => $nomeUf): ?>
@@ -77,8 +76,6 @@ admin_inicio('Mapa das cidades', $admin);
 <div class="mapa-ferramentas">
   <input type="search" id="mapa-busca" list="mapa-nomes" placeholder="Procurar município..." aria-label="Procurar município">
   <datalist id="mapa-nomes"><?php foreach ($mapa['m'] as $m): ?><option value="<?= h($m['n']) ?>"><?php endforeach ?></datalist>
-  <label>Raio em volta das cidades ligadas:
-    <select id="mapa-raio"><option value="0">sem raio</option><option value="15">15 km</option><option value="30" selected>30 km</option><option value="50">50 km</option><option value="80">80 km</option></select></label>
   <label class="marcar"><input type="checkbox" id="mapa-nomes-ver" checked> Nomes das cidades do projeto</label>
 </div>
 
@@ -87,7 +84,6 @@ admin_inicio('Mapa das cidades', $admin);
 <div class="mapa-caixa">
   <svg id="mapa" viewBox="0 0 <?= (int)$mapa['w'] ?> <?= (int)$mapa['h'] ?>" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mapa de <?= h(MAPA_UFS[$uf]) ?> por município">
     <g id="mapa-municipios"><?php foreach ($mapa['m'] as $i => $m): ?><path data-i="<?= $i ?>" d="<?= h($m['d']) ?>"/><?php endforeach ?></g>
-    <g id="mapa-raios"></g>
     <g id="mapa-rotulos"></g>
   </svg>
   <div class="mapa-zoom"><button type="button" data-z="1.5" title="Aproximar">+</button><button type="button" data-z="0.667" title="Afastar">−</button><button type="button" data-z="0" title="Ver tudo">⤢</button></div>
@@ -141,8 +137,8 @@ admin_inicio('Mapa das cidades', $admin);
   }
   const situacao = c => c.ativa ? 'ligada' : 'desligada';
 
-  // rótulos e raios
-  const NS = 'http://www.w3.org/2000/svg', gRot = document.getElementById('mapa-rotulos'), gRaio = document.getElementById('mapa-raios');
+  // rótulos
+  const NS = 'http://www.w3.org/2000/svg', gRot = document.getElementById('mapa-rotulos');
   function desenharRotulos() {
     gRot.innerHTML = '';
     if (!document.getElementById('mapa-nomes-ver').checked) return;
@@ -150,13 +146,6 @@ admin_inicio('Mapa das cidades', $admin);
     CID.forEach(c => { if (c.x === undefined) return;
       const t = document.createElementNS(NS, 'text'); t.setAttribute('x', c.x); t.setAttribute('y', c.y - 4 / z);
       t.style.fontSize = (9 / z) + 'px'; t.style.strokeWidth = (2.5 / z) + 'px'; t.textContent = c.nome; gRot.appendChild(t); });
-  }
-  function desenharRaios() {
-    gRaio.innerHTML = '';
-    const km = +document.getElementById('mapa-raio').value; if (!km) return;
-    CID.forEach(c => { if (c.x === undefined || !c.ativa) return;
-      const k = document.createElementNS(NS, 'circle'); k.setAttribute('class', 'raio');
-      k.setAttribute('cx', c.x); k.setAttribute('cy', c.y); k.setAttribute('r', km / KM * P.L); gRaio.appendChild(k); });
   }
 
   // tabela
@@ -225,11 +214,10 @@ admin_inicio('Mapa das cidades', $admin);
   svg.addEventListener('pointerup', soltar); svg.addEventListener('pointercancel', soltar);
   svg.addEventListener('pointerleave', () => dica.style.display = 'none');
 
-  document.getElementById('mapa-raio').addEventListener('change', desenharRaios);
   document.getElementById('mapa-nomes-ver').addEventListener('change', desenharRotulos);
   document.getElementById('mapa-busca').addEventListener('change', e => { const i = porChave[chave(e.target.value)]; if (i !== undefined) escolher(i, true); });
 
-  desenharRaios(); desenharRotulos();
+  desenharRotulos();
   // começa perto das cidades do projeto
   const pos = CID.filter(c => c.i !== undefined && c.aqui);
   if (pos.length) { const xs = pos.map(c => c.x), ys = pos.map(c => c.y), m = 60;

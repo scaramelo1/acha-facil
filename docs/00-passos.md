@@ -898,6 +898,6 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 111. ✅ Mapa das cidades (19/11, pedido do usuário): /admin/mapa.php (só admin; menu "Mais" > "Mapa das cidades" e botões
    em /admin/cidades.php). Abas SP e MG, cada município desenhado (malha do IBGE em servidor/dados/mapas/<UF>.json, gerada
    por scripts/gerar-mapas.py). Verde = ligada no app, amarelo = cadastrada e desligada, cinza = fora. Passar o mouse mostra
-   nome e comércios; tocar mostra a cidade do projeto mais perto (em linha reta, contando o outro estado). Raio de 15/30/50/80 km
-   em volta das ligadas, busca de município, zoom (roda, botões, pinça) e arrasto. Tabela com cada cidade e a vizinha mais perto.
+   nome e comércios; tocar mostra a cidade do projeto mais perto (em linha reta, contando o outro estado). Busca de município, zoom (roda, botões, pinça) e arrasto. Tabela com cada cidade e a vizinha mais perto.
    Cidade que não é município (Monte Verde) entra pelo centro (lat/lng) e pinta o município onde fica (Camanducaia).
+   19/11: o raio em volta das cidades foi tirado a pedido do usuário (atrapalhava a visualização); não pôr de volta.
