@@ -19,7 +19,7 @@ Notifications.setNotificationHandler({
 let tokenAtual: string | null = null;
 let canaisProntos = false;
 
-async function criarCanais() {
+export async function criarCanais() {
   if (Platform.OS !== 'android' || canaisProntos) return;
   // o AndroidImportance existe (vem de outro arquivo do pacote); o eslint-plugin-import e que nao o enxerga
   /* eslint-disable import/namespace */

@@ -1,9 +1,10 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { chamar, type ProfissionalResumo } from '../api/cliente';
+import { Armazenamento } from '../armazenamento';
 import { useCidade } from '../cidade';
 import { Cabecalho } from '../componentes/Cabecalho';
 import { AVISO_ABERTO, Botao, CartaoProfissional, Carregando, Pilula, Vazio } from '../componentes/ui';
@@ -17,6 +18,25 @@ interface Filtros {
 }
 const SEM_FILTRO: Filtros = { categoria: null, bairro: null, ordem: 'relevancia', comTelefone: false };
 
+// 19/11 (passo 107): buscas recentes guardadas no celular (as 8 últimas que acharam algo)
+const CHAVE_RECENTES = 'buscas-recentes';
+const MAX_RECENTES = 8;
+function lerRecentes(): string[] {
+  try {
+    const l = JSON.parse(Armazenamento.ler(CHAVE_RECENTES) ?? '[]') as unknown;
+    return Array.isArray(l) ? l.filter((x): x is string => typeof x === 'string').slice(0, MAX_RECENTES) : [];
+  } catch {
+    return [];
+  }
+}
+function guardarRecente(t: string): string[] {
+  const termo = t.trim();
+  if (termo.length < 2) return lerRecentes();
+  const l = [termo, ...lerRecentes().filter((x) => x.toLowerCase() !== termo.toLowerCase())].slice(0, MAX_RECENTES);
+  Armazenamento.gravar(CHAVE_RECENTES, JSON.stringify(l));
+  return l;
+}
+
 export default function TelaBusca() {
   // pode chegar com um termo pronto (atalhos da tela inicial)
   const { q } = useLocalSearchParams<{ q?: string }>();
@@ -28,6 +48,34 @@ export default function TelaBusca() {
   const [filtros, setFiltros] = useState<Filtros>(SEM_FILTRO);
   const [abrirFiltros, setAbrirFiltros] = useState(false);
   const [aberto, setAberto] = useState(false);   // 19/11: "Aberto agora" 
+  const [aviso, setAviso] = useState<string | null>(null);   // 19/11 (passo 107): "Mostrando resultados para ..."
+  const [recentes, setRecentes] = useState<string[]>(lerRecentes);
+  const [populares, setPopulares] = useState<string[]>([]);
+
+  // sugestões da cidade (o que mais procuram); sem internet fica só com as recentes
+  useEffect(() => {
+    let cancelado = false;
+    chamar<{ populares: string[] }>('sugestoes.php')
+      .then((r) => !cancelado && setPopulares(r.populares ?? []))
+      .catch(() => {});
+    return () => {
+      cancelado = true;
+    };
+  }, [cidade.slug]);
+
+  // guarda o termo como recente quando a pessoa sai da tela (abriu um resultado ou voltou) e a busca achou algo
+  const ultimo = useRef({ termo: '', achou: false });
+  useEffect(() => {
+    ultimo.current = { termo: termo.trim(), achou: !!itens?.length };
+  }, [termo, itens]);
+  useFocusEffect(
+    useCallback(
+      () => () => {
+        if (ultimo.current.achou) setRecentes(guardarRecente(ultimo.current.termo));
+      },
+      [],
+    ),
+  );
 
   // busca enquanto digita, esperando a pessoa parar por meio segundo; termo novo zera os filtros
   useEffect(() => {
@@ -36,9 +84,18 @@ export default function TelaBusca() {
     let cancelado = false;
     const espera = setTimeout(async () => {
       try {
-        const r = await chamar<{ profissionais: ProfissionalResumo[] }>(`busca.php?q=${encodeURIComponent(t)}`);
+        const r = await chamar<{ profissionais: ProfissionalResumo[]; corrigido?: string | null; parcial?: boolean }>(
+          `busca.php?q=${encodeURIComponent(t)}`,
+        );
         if (!cancelado) {
           setItens(r.profissionais);
+          setAviso(
+            r.parcial
+              ? 'Nenhum lugar tem todas as palavras. Mostrando os que têm parte delas.'
+              : r.corrigido
+                ? `Não achamos "${t}". Mostrando resultados para "${r.corrigido}".`
+                : null,
+          );
           setErro(null);
           setTipo(null);
           setFiltros(SEM_FILTRO);
@@ -92,6 +149,9 @@ export default function TelaBusca() {
               placeholder="Ex.: pizza, farmácia, borracharia"
               placeholderTextColor={cores.textoSuave}
               returnKeyType="search"
+              onSubmitEditing={() => {
+                if (itens?.length) setRecentes(guardarRecente(termo));
+              }}
               style={estilos.campoTexto}
               accessibilityLabel="Digite o que você procura"
             />
@@ -115,7 +175,43 @@ export default function TelaBusca() {
       </View>
 
       {curto ? (
-        <Vazio icone="store-search-outline" texto="Digite o nome, o tipo de negócio (pizzaria, oficina...) ou o bairro." />
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }} keyboardShouldPersistTaps="handled">
+          {recentes.length > 0 && (
+            <View style={{ marginBottom: 18 }}>
+              <View style={estilos.sugTopo}>
+                <Text style={estilos.sugTitulo}>Buscas recentes</Text>
+                <Pressable
+                  accessibilityRole="button"
+                  hitSlop={10}
+                  onPress={() => {
+                    Armazenamento.apagar(CHAVE_RECENTES);
+                    setRecentes([]);
+                  }}
+                >
+                  <Text style={estilos.sugLimpar}>Limpar</Text>
+                </Pressable>
+              </View>
+              <View style={estilos.sugLista}>
+                {recentes.map((r) => (
+                  <Pilula key={r} texto={r} icone="history" ativo={false} onPress={() => setTermo(r)} />
+                ))}
+              </View>
+            </View>
+          )}
+          {populares.length > 0 && (
+            <View style={{ marginBottom: 18 }}>
+              <Text style={[estilos.sugTitulo, { marginBottom: 10 }]}>Mais procurados em {cidade.nome}</Text>
+              <View style={estilos.sugLista}>
+                {populares.map((r) => (
+                  <Pilula key={r} texto={r} icone="trending-up" ativo={false} onPress={() => setTermo(r)} />
+                ))}
+              </View>
+            </View>
+          )}
+          {recentes.length === 0 && populares.length === 0 && (
+            <Vazio icone="store-search-outline" texto="Digite o nome, o tipo de negócio (pizzaria, oficina...) ou o bairro." />
+          )}
+        </ScrollView>
       ) : erro ? (
         <Vazio icone="wifi-off" texto={erro} />
       ) : itens === null ? (
@@ -135,6 +231,7 @@ export default function TelaBusca() {
                   tipos.map(([nome]) => <Pilula key={nome} texto={nome} ativo={tipo === nome} onPress={() => setTipo(tipo === nome ? null : nome)} />)}
               </ScrollView>
               {aberto && <Text style={[estilos.sub, { marginTop: -4, marginBottom: 10 }]}>{AVISO_ABERTO}</Text>}
+              {aviso && !aberto && <Text style={estilos.avisoBusca}>{aviso}</Text>}
             </View>
           }
           renderItem={({ item }) => <CartaoProfissional p={item} origem="busca" />}
@@ -310,6 +407,12 @@ function Escolha({
 const estilos = StyleSheet.create({
   titulo: { fontSize: 26, fontWeight: '900', color: cores.texto },
   sub: { fontSize: fonte.pequena - 1, color: cores.textoSuave, marginTop: 2 },
+  // 19/11 (passo 107): sugestões com o campo vazio e aviso da busca corrigida
+  sugTopo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
+  sugTitulo: { fontSize: fonte.media, fontWeight: '900', color: cores.texto },
+  sugLimpar: { fontSize: fonte.pequena, fontWeight: '800', color: cores.verde },
+  sugLista: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  avisoBusca: { fontSize: fonte.pequena - 1, color: cores.verde, backgroundColor: cores.fundoSuave, borderRadius: 12, padding: 10, marginTop: -4, marginBottom: 10 },
   linhaBusca: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 14 },
   campo: { ...cartao, flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 56, paddingHorizontal: 12 },
   campoTexto: { flex: 1, fontSize: fonte.normal, color: cores.texto, minHeight: 52 },

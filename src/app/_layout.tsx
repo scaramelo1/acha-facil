@@ -29,6 +29,8 @@ function AbrirAvisos() {
       }
       if (dados.tela === 'admin') router.push('/admin');
       else if (dados.tela === 'profissional' && Number(dados.id) > 0) router.push(`/profissional/${Number(dados.id)}?origem=link`);
+      // 19/11 (passo 107): aviso local "Como foi no X?" (src/pedirAvaliacao.ts): abre a ficha com o convite para avaliar
+      else if (dados.tela === 'avaliar' && Number(dados.id) > 0) router.push(`/profissional/${Number(dados.id)}?origem=link&avaliar=1`);
     };
     try {
       abrir(Notifications.getLastNotificationResponse());

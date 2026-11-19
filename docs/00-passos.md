@@ -425,7 +425,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
 46. 🟡 (19/11: a, b e c feitos pelo usuário; projeto do Google Cloud "Acha Facil" é só do Acha Fácil; branding preenchido e
    enviado para verificação da marca; logo 120x120 em publico/assets/logo-google-120.png; google_retorno no config e o
    Google já recebe https://achafacilapp.com.br/google/retorno.php (1º teste deu redirect_uri_mismatch: o Google demora uns minutos
-   para valer o URI novo; depois funcionou, conferido pelo usuário em 19/11). Falta: testar no app e esperar o
+   para valer o URI novo; depois funcionou, conferido pelo usuário em 19/11). Login no app testado pelo usuário (19/11). Falta: esperar o
    Google aprovar a marca, quando aparece "Acha Fácil!" com a logo. Faturamento NÃO precisa.) **Para amanhã (15/11):** login do Google com o nome **Acha Fácil!** em vez de **FSA Designer** (pedido do usuário).
    Hoje a tela do Google mostra "FSA Designer" e volta pelo endereço antigo (fsadesigners.com.br). A fazer:
    a) Google Cloud → APIs e serviços → Tela de consentimento OAuth (Branding): nome do app "Acha Fácil!", logo do
@@ -835,7 +835,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (inicio.php) e `oferta` (profissional.php); o app ainda não mostra (falta tela no app).
    Testado em 19/11: oferta de teste no ar (ficha, cidade, API) e apagada; fluxo pago → recusa → correção → aprovação →
    encerrar simulado no servidor (sem avisos de verdade); link de pagamento do Mercado Pago criado (não pago).
-105. 🟡 App 1.12.0: oferta, "Aberto agora" e compartilhar (19/11, pedido do usuário; código feito, falta testar no PC e gerar o build):
+105. ✅ App 1.12.0: oferta, "Aberto agora" e compartilhar (19/11, pedido do usuário; testado e build gerado pelo usuário em 19/11):
    (1) Ficha: quadro amarelo "Oferta da semana · até domingo, 22/11" com foto, detalhes e preço de/por (`oferta` da API).
    Início: faixa "Ofertas da semana" antes do Destaque, só quando tem oferta no ar (`ofertas` de inicio.php).
    (2) Pílula "Aberto agora" na busca e na categoria (filtra `abertoAgora === true`, com o aviso "Só aparecem os comércios que
@@ -860,3 +860,16 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (3) **Página sem resultado** do site: dica, "Tem em outras cidades" (com quantos), "O pessoal de <cidade> procura"
    (buscas que deram certo, com 2+ pessoas, completadas por uma lista fixa), áreas e "Incluir um negócio de graça"
    (/incluir.php?cidade= já vem com a cidade escolhida). CSS v=37.
+107. 🟡 Buscas recentes no app e pedir avaliação depois do contato (19/11, pedido do usuário, itens 8 e 9 da 2ª avaliação):
+   (1) **App, busca:** com o campo vazio mostra "Buscas recentes" (as 8 últimas que acharam algo, guardadas no celular,
+   com "Limpar"; grava ao abrir um resultado/sair da tela ou ao tocar em buscar) e "Mais procurados em <cidade>"
+   (api/sugestoes.php: buscas_populares() da tabela buscas, completada com lista fixa). Mostra também o aviso da busca
+   corrigida/parcial que o servidor já mandava (passo 106).
+   (2) **App, avaliação:** tocar em WhatsApp ou Ligar guarda o contato (src/pedirAvaliacao.ts) e agenda um aviso LOCAL
+   para o dia seguinte às 18h, "Como foi no X?" (só com avisos permitidos; 1 agendado por vez; mesmo comércio no máximo
+   1 vez a cada 30 dias). Tocar abre a ficha com ?avaliar=1 e o quadro amarelo "Como foi no X? Avaliar agora". Quem volta
+   à ficha de 2 h a 14 dias depois do contato também vê o quadro. Fechar ou avaliar tira o quadro e o aviso.
+   (3) **Site:** tocar em WhatsApp/Ligar na ficha guarda no navegador (localStorage af_avaliar); de 2 h a 14 dias depois,
+   qualquer página (menos a própria ficha) mostra a barra "★ Como foi no X? Avaliar" que leva a ficha#avaliar
+   (pagina_fim() em inc/pagina.php). Fechou ou avaliou, some. Já no ar (CSS v=38).
+   Falta: app 1.13.0 (app.json já com 1.13.0): `npx tsc --noEmit`, `npx expo lint`, testar no emulador e gerar o build.

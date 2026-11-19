@@ -11,6 +11,7 @@ import { Horarios } from '../../componentes/Horarios';
 import { Trancado } from '../../componentes/Trancado';
 import { Botao, Estrelas, Etiqueta, Falha, Carregando, SeloVerificado, estilos as ui, useCarregar } from '../../componentes/ui';
 import { useConta } from '../../conta';
+import { deveConvidar, fecharConvite, lembrarContato } from '../../pedirAvaliacao';
 import { cartao, cores, fonte, RAIO } from '../../tema';
 
 type NomeIcone = keyof typeof MaterialCommunityIcons.glyphMap;
@@ -20,7 +21,7 @@ type NomeIcone = keyof typeof MaterialCommunityIcons.glyphMap;
 const aberturasContadas = new Set<string>();
 
 export default function TelaProfissional() {
-  const { id, origem: origemParam } = useLocalSearchParams<{ id: string; origem?: string }>();
+  const { id, origem: origemParam, avaliar: avaliarParam } = useLocalSearchParams<{ id: string; origem?: string; avaliar?: string }>();
   const origem: Origem = ORIGENS.includes(origemParam as Origem) ? (origemParam as Origem) : 'link';
   const [abertura] = useState(() => `${Date.now()}-${Math.random()}`);
   const { usuario } = useConta();
@@ -33,6 +34,8 @@ export default function TelaProfissional() {
     },
     `${id}-${usuario?.id ?? 0}`,
   );
+  // 19/11 (passo 107): convite "Como foi?" (veio do aviso de amanhã ou tocou em WhatsApp/Ligar há 2+ horas)
+  const [convite, setConvite] = useState(() => avaliarParam === '1' || deveConvidar(Number(id)));
   // volta da tela de avaliar: atualiza as avaliações (a primeira vez já carregou acima)
   const primeira = useRef(true);
   useFocusEffect(
@@ -52,6 +55,7 @@ export default function TelaProfissional() {
 
   const abrir = (tipo: 'whatsapp' | 'ligar' | 'instagram' | 'mapa' | 'site', link: string) => {
     registrarContato(p.id, tipo);
+    if (tipo === 'whatsapp' || tipo === 'ligar') lembrarContato({ id: p.id, nome: p.nome, jaAvaliou: !!p.minhaAvaliacao }).catch(() => {});
     Linking.openURL(link).catch(() => Alert.alert('Não foi possível abrir', 'Confira se o aplicativo está instalado.'));
   };
   // passo 59: o convite ao dono fica só no cartao "Este comércio é seu?", logo abaixo dos espaços trancados
@@ -189,6 +193,38 @@ export default function TelaProfissional() {
             </View>
             <MaterialCommunityIcons name="chevron-right" size={28} color={cores.verde} />
           </Pressable>
+        )}
+
+        {convite && !p.minhaAvaliacao && (
+          <View style={estilos.convite}>
+            <MaterialCommunityIcons name="star-circle" size={36} color={cores.verde} />
+            <View style={{ flex: 1 }}>
+              <Text style={estilos.donoTitulo}>Como foi no {p.nome}?</Text>
+              <Text style={estilos.donoTexto}>Dê sua nota em estrelas. Ajuda quem procura em {p.cidade}.</Text>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => {
+                  fecharConvite(p.id);
+                  setConvite(false);
+                  router.push(usuario ? `/avaliar/${p.id}` : '/entrar');
+                }}
+                style={({ pressed }) => [estilos.avaliar, { alignSelf: 'flex-start', marginTop: 10 }, pressed && { opacity: 0.85 }]}
+              >
+                <Text style={estilos.avaliarTexto}>{usuario ? 'Avaliar agora' : 'Entrar para avaliar'}</Text>
+              </Pressable>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Fechar"
+              hitSlop={10}
+              onPress={() => {
+                fecharConvite(p.id);
+                setConvite(false);
+              }}
+            >
+              <MaterialCommunityIcons name="close" size={22} color={cores.textoSuave} />
+            </Pressable>
+          </View>
         )}
 
         <View style={estilos.avalTopo}>
@@ -359,6 +395,7 @@ const estilos = StyleSheet.create({
   donoTitulo: { fontSize: fonte.media, fontWeight: '900', color: cores.verde },
   donoTexto: { fontSize: fonte.pequena - 1, color: cores.verde },
   avalTopo: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 24, marginBottom: 8 },
+  convite: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, backgroundColor: cores.fundoSuave, borderRadius: 18, padding: 14, marginTop: 18 },
   avaliar: { backgroundColor: cores.amarelo, borderRadius: 22, paddingHorizontal: 16, minHeight: 44, justifyContent: 'center' },
   avaliarTexto: { color: cores.verde, fontSize: fonte.pequena, fontWeight: '900' },
   fonte: { fontSize: 14, color: cores.textoSuave, textAlign: 'center', marginTop: 28 },

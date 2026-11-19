@@ -615,7 +615,7 @@ fa.addEventListener('submit', function (ev) {
   if (!est) { falhaA(new Error('Escolha de 1 a 5 estrelas.')); return; }
   fa.querySelector('button').disabled = true;
   contaApi('avaliar.php', 'POST', { id: <?= (int)$p['id'] ?>, estrelas: +est.value, comentario: fa.comentario.value })
-    .then(function () { location.hash = 'avaliar'; location.reload(); })
+    .then(function () { afMarcarAvaliar(true); location.hash = 'avaliar'; location.reload(); })
     .catch(function (e) { falhaA(e); fa.querySelector('button').disabled = false; });
 });
 var ap = document.getElementById('apagar-avaliacao');
@@ -716,8 +716,19 @@ document.querySelectorAll('[data-quero]').forEach(function (b) {
   });
   window.addEventListener('resize', function () { if (!j.hidden) ir(atual(), false); });
 })();
+// 19/11 (passo 107): quem toca em WhatsApp/Ligar recebe depois o convite "Como foi?" (barra em pagina_fim(), inc/pagina.php)
+function afMarcarAvaliar(fechar) {
+  try {
+    var id = <?= (int)$p['id'] ?>, l = JSON.parse(localStorage.getItem('af_avaliar') || '[]').filter(function (c) { return c.id !== id; });
+    if (fechar) { var a = JSON.parse(localStorage.getItem('af_avaliar') || '[]'); a.forEach(function (c) { if (c.id === id) c.f = 1; }); localStorage.setItem('af_avaliar', JSON.stringify(a)); return; }
+    l.unshift({ id: id, n: <?= json_encode((string)$p['nome'], JSON_UNESCAPED_UNICODE) ?>, u: location.pathname, em: Date.now() });
+    localStorage.setItem('af_avaliar', JSON.stringify(l.slice(0, 20)));
+  } catch (e) {}
+}
+<?php if ($minha): ?>afMarcarAvaliar(true);<?php endif ?>
 document.querySelectorAll('[data-contato]').forEach(function (a) {
   a.addEventListener('click', function () {
+    if ((a.dataset.contato === 'whatsapp' || a.dataset.contato === 'ligar') && !<?= $minha ? 'true' : 'false' ?>) afMarcarAvaliar(false);
     try { fetch(<?= json_encode(url('api/contato.php')) ?>, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: <?= (int)$p['id'] ?>, tipo: a.dataset.contato, origem: 'web' }) }); } catch (e) {}
   });

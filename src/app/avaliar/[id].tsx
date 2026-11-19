@@ -7,6 +7,7 @@ import { chamar, type Profissional } from '../../api/cliente';
 import { Cabecalho } from '../../componentes/Cabecalho';
 import { Botao, Carregando, Falha, Foto, estilos as ui, useCarregar } from '../../componentes/ui';
 import { useConta } from '../../conta';
+import { fecharConvite } from '../../pedirAvaliacao';
 import { cartao, cores, fonte } from '../../tema';
 
 const NOMES = ['', 'Ruim', 'Regular', 'Bom', 'Muito bom', 'Excelente'];
@@ -60,6 +61,7 @@ function Formulario({ p }: { p: Profissional }) {
     setEnviando(true);
     try {
       await chamar('avaliar.php', 'POST', { id: p.id, estrelas, comentario });
+      fecharConvite(p.id); // 19/11 (passo 107): ja avaliou, nao pede mais
       router.back();
     } catch (e) {
       Alert.alert('Não foi possível publicar', e instanceof Error ? e.message : '');

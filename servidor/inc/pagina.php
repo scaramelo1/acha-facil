@@ -76,7 +76,7 @@ function pagina_inicio(string $titulo, string $descricao, string $classe = '', a
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=37">
+<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=38">
 <?= $opc['head'] ?? '' ?>
 <?= !empty($opc['anuncios']) ? anuncios_head() : '' ?>
 </head>
@@ -123,6 +123,31 @@ function pagina_fim(): void {
   <p><a href="<?= $base ?>/busca.php">Procurar meu negócio</a> · <a href="<?= $base ?>/termos.php">Termos de uso</a> · <a href="<?= $base ?>/privacidade.php">Privacidade</a> · <a href="<?= $base ?>/privacidade.php#excluir-conta">Excluir minha conta</a></p>
   <p class="discreto">Acha Fácil · <?= date('Y') ?></p>
 </footer>
+<div class="convite-avaliar" id="convite-avaliar" hidden>
+  <span class="convite-estrela" aria-hidden="true">★</span>
+  <p><b>Como foi no <span id="convite-nome"></span>?</b> Dê sua nota em estrelas e ajude quem procura na sua cidade.</p>
+  <a class="botao pequeno" id="convite-link" href="#">Avaliar</a>
+  <button type="button" class="convite-fechar" id="convite-fechar" aria-label="Fechar">✕</button>
+</div>
+<script>
+// 19/11 (passo 107): convite para avaliar quem a pessoa chamou no WhatsApp ou ligou (gravado na ficha, inc/web.php).
+// Aparece de 2 horas a 14 dias depois do contato, em qualquer página menos a própria ficha; fechou ou avaliou, some.
+(function () {
+  try {
+    var l = JSON.parse(localStorage.getItem('af_avaliar') || '[]'), agora = Date.now(), h = 3600000;
+    var c = l.filter(function (x) { return !x.f && agora - x.em >= 2 * h && agora - x.em < 14 * 24 * h && x.u !== location.pathname; })[0];
+    if (!c) return;
+    var caixa = document.getElementById('convite-avaliar');
+    var marcar = function () { l.forEach(function (x) { if (x.id === c.id) x.f = 1; }); localStorage.setItem('af_avaliar', JSON.stringify(l)); };
+    document.getElementById('convite-nome').textContent = c.n;
+    var link = document.getElementById('convite-link');
+    link.href = c.u + '#avaliar';
+    link.addEventListener('click', marcar);
+    document.getElementById('convite-fechar').addEventListener('click', function () { marcar(); caixa.hidden = true; });
+    caixa.hidden = false;
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>
 <?php
