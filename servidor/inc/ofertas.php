@@ -238,7 +238,7 @@ function oferta_precos_html(?string $de, ?string $por): string {
 function oferta_quadro_ficha(array $o): string {
     return '<section class="oferta-ficha" aria-label="Oferta da semana">'
         . ($o['foto'] ? '<img src="' . h(foto_url($o['foto'])) . '" alt="" loading="lazy">' : '')
-        . '<div><p class="oferta-selo">🏷️ Oferta da semana · ' . h(oferta_validade($o)) . '</p>'
+        . '<div><p class="oferta-selo">🏷️ Oferta da semana</p>'   // 19/11 (pedido do usuário): sem "até quinta, 26/11"; o prazo da promoção o dono põe no texto ou na foto
         . '<h2>' . h($o['titulo']) . '</h2>'
         . ($o['texto'] ? '<p>' . nl2br(h($o['texto'])) . '</p>' : '')
         . oferta_precos_html($o['preco_de'], $o['preco_por']) . '</div></section>';
@@ -249,5 +249,6 @@ function oferta_api(?array $o): ?array {
     if (!$o) return null;
     return ['titulo' => $o['titulo'], 'texto' => $o['texto'], 'precoDe' => $o['preco_de'] !== null ? (float)$o['preco_de'] : null,
         'precoPor' => $o['preco_por'] !== null ? (float)$o['preco_por'] : null, 'foto' => foto_url($o['foto']),
-        'validade' => oferta_validade($o), 'fim' => $o['fim']];
+        // 19/11: sem a data (é o prazo no ar, não o da promoção); apps até 1.12.0 mostram "Oferta da semana · aproveite!"
+        'validade' => 'aproveite!', 'fim' => $o['fim']];
 }

@@ -930,3 +930,8 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (OFERTA_TEXTO_MAX, era 400), com contador "x de 50 letras" (vermelho perto do limite) no painel do dono e no admin.
    Foto sempre QUADRADA 800 x 800 (salvar_foto_oferta(): mínimo 400 x 400, corta o meio se vier deitada ou em pé), com a
    orientação escrita no formulário e prévia quadrada antes de enviar. Site no celular e app (1.13.0) mostram a foto quadrada.
+115. ✅ Oferta sem a data e foto maior (19/11, pedido do usuário): o "até quinta, 26/11" (prazo no ar, não o da promoção) saiu
+   da ficha, da página da cidade e do app; o prazo da promoção o dono escreve no texto ou na foto (painel e admin continuam
+   mostrando até quando fica no ar). API: validade = "aproveite!" na ficha e "Oferta da semana" no início (apps antigos
+   ficam sem data). Foto maior: ficha do site 200 px (era 120), celular até 360, cartões da cidade 110 (era 76); app 1.13.0
+   mostra a foto quadrada no cartão do início (antes não tinha foto) e até 360 na ficha. CSS v=41.

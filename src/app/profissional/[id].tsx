@@ -275,7 +275,7 @@ function QuadroOferta({ oferta: o }: { oferta: Oferta }) {
     <View style={estilos.oferta}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
         <MaterialCommunityIcons name="tag-outline" size={20} color={cores.verde} />
-        <Text style={estilos.ofertaSelo}>Oferta da semana · {o.validade}</Text>
+        <Text style={estilos.ofertaSelo}>Oferta da semana</Text>
       </View>
       {o.foto ? <Image source={{ uri: o.foto }} style={estilos.ofertaFoto} resizeMode="cover" accessibilityIgnoresInvertColors /> : null}
       <Text style={estilos.ofertaTitulo}>{o.titulo}</Text>
@@ -379,7 +379,7 @@ const estilos = StyleSheet.create({
   acoes: { flexDirection: 'row', gap: 10, marginTop: 16 },
   oferta: { backgroundColor: cores.fundoSuave, borderWidth: 2, borderColor: cores.amarelo, borderRadius: RAIO, padding: 14, marginTop: 16, gap: 6 },
   ofertaSelo: { fontSize: fonte.pequena - 1, fontWeight: '900', color: cores.verde },
-  ofertaFoto: { width: '100%', maxWidth: 320, aspectRatio: 1, alignSelf: 'center', borderRadius: 14 }, // 19/11: foto da oferta sempre quadrada (800 x 800)
+  ofertaFoto: { width: '100%', maxWidth: 360, aspectRatio: 1, alignSelf: 'center', borderRadius: 14 }, // 19/11: foto da oferta sempre quadrada (800 x 800)
   ofertaTitulo: { fontSize: fonte.media, fontWeight: '900', color: cores.texto },
   ofertaDe: { fontSize: fonte.normal - 1, color: cores.textoSuave, textDecorationLine: 'line-through' },
   ofertaPor: { fontSize: fonte.grande, fontWeight: '900', color: cores.verde },

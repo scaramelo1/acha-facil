@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { chamar, reais, type Categoria, type OfertaInicio, type ProfissionalResumo } from '../../api/cliente';
 import { useCidade } from '../../cidade';
@@ -69,10 +69,14 @@ export default function TelaInicio() {
                       onPress={() => router.push(`/profissional/${o.id}?origem=inicio`)}
                       style={({ pressed }) => [estilos.oferta, pressed && { opacity: 0.85 }]}
                     >
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                        <MaterialCommunityIcons name="tag-outline" size={16} color={cores.verde} />
-                        <Text style={estilos.ofertaValidade} numberOfLines={1}>{o.validade}</Text>
-                      </View>
+                      {/* 19/11 (pedido do usuario): foto quadrada maior e sem a data de fim */}
+                      {o.foto ? (
+                        <Image source={{ uri: o.foto }} style={estilos.ofertaFoto} resizeMode="cover" accessibilityIgnoresInvertColors />
+                      ) : (
+                        <View style={[estilos.ofertaFoto, estilos.ofertaSemFoto]}>
+                          <MaterialCommunityIcons name="tag-outline" size={48} color={cores.verde} />
+                        </View>
+                      )}
                       <Text style={estilos.ofertaTitulo} numberOfLines={3}>{o.titulo}</Text>
                       {o.precoPor != null && (
                         <Text style={estilos.ofertaPreco}>
@@ -166,7 +170,8 @@ const estilos = StyleSheet.create({
   miniNome: { fontSize: fonte.pequena, fontWeight: '900', color: cores.texto, lineHeight: 20 },
   miniTipo: { fontSize: 14, color: cores.textoSuave, marginTop: 2 },
   oferta: { ...cartao, width: 220, padding: 12, gap: 4, borderWidth: 2, borderColor: cores.amarelo, backgroundColor: cores.fundoSuave },
-  ofertaValidade: { fontSize: 13, fontWeight: '900', color: cores.verde, flex: 1 },
+  ofertaFoto: { width: '100%', aspectRatio: 1, borderRadius: 12, marginBottom: 6 },
+  ofertaSemFoto: { alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' },
   ofertaTitulo: { fontSize: fonte.pequena, fontWeight: '900', color: cores.texto, lineHeight: 21 },
   ofertaPreco: { fontSize: fonte.media, fontWeight: '900', color: cores.verde },
   ofertaDe: { fontSize: 14, fontWeight: '700', color: cores.textoSuave, textDecorationLine: 'line-through' },

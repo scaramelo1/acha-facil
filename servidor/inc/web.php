@@ -221,7 +221,7 @@ function web_cartoes_ofertas(array $lista): string {
             . '<span class="oferta-cartao-info"><b>' . h($o['oferta_titulo']) . '</b>'
             . '<span>' . h(nome_curto($o['nome'])) . '</span>'
             . ($o['oferta_por'] ? '<span class="oferta-precos">' . ($o['oferta_de'] ? '<s>' . h(dinheiro($o['oferta_de'])) . '</s> ' : '') . '<b>' . h(dinheiro($o['oferta_por'])) . '</b></span>' : '')
-            . '<small>' . h(oferta_validade($o)) . '</small></span></a></li>';
+            . '</span></a></li>';   // 19/11: sem a data de fim (pedido do usuário)
     }
     return '<ul class="ofertas-lista">' . $html . '</ul>';
 }
