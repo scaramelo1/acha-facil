@@ -661,10 +661,15 @@ section.secao-ofertas + section { padding-top: 32px; }
 #cid-top .cidades-lista { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
 #cid-top .cidades-lista a { padding: 14px 16px; }
 #cid-top .cidades-lista b { font-size: 1.08rem; }
-.cid-compacta { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 22px; }
+/* colunas corridas (como jornal): nome em 2 linhas não abre buraco nas outras colunas */
+.cid-compacta { list-style: none; margin: 0; padding: 0; columns: 4; column-gap: 26px; }
+.cid-compacta li { break-inside: avoid; }
+.cid-uf { margin-top: 34px; }
+#cid-top + .cid-uf, .cid-nada + #cid-top { margin-top: 26px; }
+.cid-uf .cidades-uf { margin: 0 0 8px; padding-bottom: 6px; border-bottom: 2px solid var(--verde-claro); }
 .cid-compacta a { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 8px 4px; border-bottom: 1px solid var(--borda); text-decoration: none; color: var(--verde); font-weight: 700; }
 .cid-compacta a:hover span { text-decoration: underline; }
 .cid-compacta small { color: var(--texto2); font-weight: 400; font-size: .85rem; white-space: nowrap; }
 .cid-uf[hidden], .cid-compacta li[hidden], #cid-top[hidden] { display: none; }
-@media (max-width: 960px) { .cid-compacta { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 700px) { .cid-compacta { grid-template-columns: repeat(2, 1fr); column-gap: 14px; } #cid-top .cidades-lista { grid-template-columns: 1fr 1fr; gap: 10px; } #cid-top .cidades-lista a { padding: 12px; } }
+@media (max-width: 960px) { .cid-compacta { columns: 3; } }
+@media (max-width: 700px) { .cid-compacta { columns: 2; column-gap: 16px; } .cid-uf { margin-top: 28px; } #cid-top .cidades-lista { grid-template-columns: 1fr 1fr; gap: 10px; } #cid-top .cidades-lista a { padding: 12px; } }
