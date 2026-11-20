@@ -118,6 +118,20 @@ def checa_site(url):
     if probs: return "site_desatualizado", "; ".join(probs).capitalize()
     return "tem_site", "Site funcionando"
 
+INICIO = [time.time()]
+
+def barra(etapa, feito, total, extra=""):
+    """Barra de progresso numa linha só (20/11): [######----] 60% 120/199 · 2:30 passados · faltam ~1:40."""
+    pct = feito / total if total else 1
+    gasto = time.time() - INICIO[0]
+    falta = gasto / pct - gasto if pct > 0 else 0
+    mmss = lambda x: f"{int(x // 60)}:{int(x % 60):02d}"
+    cheio = int(pct * 30)
+    linha = (f"\r{etapa} [{'#' * cheio}{'-' * (30 - cheio)}] {pct * 100:3.0f}% {feito}/{total}"
+             f" · {mmss(gasto)} passados" + (f" · faltam ~{mmss(falta)}" if 0 < pct < 1 else "") + (f" · {extra}" if extra else ""))
+    sys.stdout.write(linha.ljust(130)[:130]); sys.stdout.flush()
+    if feito >= total: sys.stdout.write("\n")
+
 def mesma_cidade(a, b):
     """Compara sem acento, hífen e maiúsculas ("São João del-Rei" = "São João del Rei")."""
     n = lambda x: re.sub(r"[^a-z0-9]", "", unicodedata.normalize("NFD", (x or "").lower()).encode("ascii", "ignore").decode())
@@ -132,13 +146,17 @@ def main():
     resultados = []
     ex = cf.ThreadPoolExecutor(4)   # sem "with": o Ctrl+C não fica esperando as pesquisas em andamento
     try:
-        resultados = list(ex.map(busca, TERMOS))
+        futuros = [ex.submit(busca, t) for t in TERMOS]
+        INICIO[0] = time.time()
+        for i, f in enumerate(cf.as_completed(futuros), 1):
+            resultados.append(f.result())
+            barra("Pesquisando no Google", i, len(TERMOS), f"{PESQUISAS[0]} pesquisas")
         ex.shutdown()
     except KeyboardInterrupt:
         print("\nParado com Ctrl+C. Nada foi salvo. Pesquisas feitas:", PESQUISAS[0])
         os._exit(130)
     except Parar as erro:
-        print("\nPAREI SEM SALVAR NADA:", erro)
+        print("\n\nPAREI SEM SALVAR NADA:", erro)
         print("Pesquisas feitas antes de parar:", PESQUISAS[0])
         os._exit(2)
     for res in resultados:
@@ -165,9 +183,17 @@ def main():
             else:
                 l["ativo"], l["ativo_mot"] = "ativo", "Perfil ativo no Google (horário/avaliações)"
     print(len(leads), "comércios únicos; checando sites...")
-    with cf.ThreadPoolExecutor(24) as ex:
-        for l, (st, mot) in zip(leads, ex.map(lambda l: checa_site(l["site"]), leads)):
-            l["st"], l["mot"] = st, mot
+    ex = cf.ThreadPoolExecutor(24)
+    try:
+        futuros = {ex.submit(checa_site, l["site"]): l for l in leads}
+        INICIO[0] = time.time()
+        for i, f in enumerate(cf.as_completed(futuros), 1):
+            futuros[f]["st"], futuros[f]["mot"] = f.result()
+            barra("Conferindo os sites  ", i, len(leads))
+        ex.shutdown()
+    except KeyboardInterrupt:
+        print("\nParado com Ctrl+C. Nada foi salvo. Pesquisas feitas:", PESQUISAS[0])
+        os._exit(130)
     linhas = []
     for l in sorted(leads, key=lambda l: (l["cat"], l["nome"])):
         dig = re.sub(r"\D", "", l["tel"])

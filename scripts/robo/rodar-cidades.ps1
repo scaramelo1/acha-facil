@@ -115,11 +115,14 @@ if (-not $env:GOOGLE_MAPS_API_KEY) { Write-Host 'Sem chave.' -ForegroundColor Re
 $feitasArq = Join-Path $Pasta 'feitas.txt'
 $feitas = @(); if (Test-Path $feitasArq) { $feitas = Get-Content $feitasArq -Encoding UTF8 }
 $rodadas = 0
+$fila = @($cidades | Where-Object { $feitas -notcontains $_ })
+if ($Quantas -gt 0) { $fila = @($fila | Select-Object -First $Quantas) }
+Write-Host "Cidades na fila: $($fila.Count)" -ForegroundColor Cyan
 foreach ($linha in $cidades) {
   $nome, $uf = $linha.Split(';')
   if ($feitas -contains $linha) { continue }
   if ($Quantas -gt 0 -and $rodadas -ge $Quantas) { break }
-  Write-Host "`n===== $nome - $uf  ($(Get-Date -Format HH:mm)) =====" -ForegroundColor Green
+  Write-Host "`n===== Cidade $($rodadas + 1) de $($fila.Count): $nome - $uf  (comecou $(Get-Date -Format HH:mm)) =====" -ForegroundColor Green
   python $robo $nome $uf
   if ($LASTEXITCODE -eq 2) { Write-Host "`nO Google recusou (veja a mensagem acima). Parei; $nome NAO foi salva." -ForegroundColor Red; break }
   if ($LASTEXITCODE -eq 130) { Write-Host "`nParado com Ctrl+C. $nome NAO foi salva." -ForegroundColor Yellow; break }
