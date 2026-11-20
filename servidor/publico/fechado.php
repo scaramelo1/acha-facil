@@ -7,7 +7,7 @@ $caminho = (string)parse_url((string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_P
 http_response_code(in_array($caminho, ['/', '/index.php', '/acha-facil/', '/acha-facil/index.php'], true) ? 200 : 410);
 header('X-Robots-Tag: noindex, nofollow');
 header('Cache-Control: public, max-age=600');
-$novo = 'https://fsadesigners.com.br/guia-novo/';   // vira https://localizafacilapp.com.br/ quando o domínio novo estiver no ar
+$novo = 'https://localizafacilapp.com.br/';   // vira https://localizafacilapp.com.br/ quando o domínio novo estiver no ar
 ?><!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow"><title>O Acha Fácil agora é Localiza Fácil</title>
