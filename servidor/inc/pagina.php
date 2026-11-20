@@ -76,7 +76,7 @@ function pagina_inicio(string $titulo, string $descricao, string $classe = '', a
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=44">
+<link rel="stylesheet" href="<?= $base ?>/assets/site.css?v=45">
 <?= $opc['head'] ?? '' ?>
 <?= !empty($opc['anuncios']) ? anuncios_head() : '' ?>
 </head>

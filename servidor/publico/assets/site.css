@@ -638,9 +638,16 @@ section.secao-ofertas + section { padding-top: 32px; }
 .nav-admin-grupos .atual > summary, .admin .topo nav a.nav-fixo.atual { background: rgba(255,255,255,.18); }
 .nav-admin-grupos .menu-suspenso:not(.ultimo) .menu-lista { right: auto; left: 0; }
 .topo nav .menu-lista a[aria-current="page"] { background: rgba(0,92,56,.12); }
+/* 19/11: no celular e em telas médias só os ícones (o topo é uma pílula de uma linha só; com os nomes ele quebrava) */
+.nav-admin-grupos { flex-wrap: nowrap; }
+@media (max-width: 980px) { .nav-admin-grupos .rotulo { display: none; } .nav-admin-grupos summary, .admin .topo nav a.nav-fixo { font-size: 1.15rem; } }
 @media (max-width: 760px) {
-  .admin .topo nav a.nav-fixo { display: inline-flex; padding: 8px 10px; }
-  .nav-admin-grupos summary { padding: 8px 10px; }
-  .nav-admin-grupos .menu-lista { position: fixed; left: 12px !important; right: 12px !important; top: 64px; }
+  .admin .topo { padding: 6px 6px 6px 10px; gap: 6px; }
+  .admin .topo nav a.nav-fixo { display: inline-flex; padding: 8px 9px; }
+  .nav-admin-grupos { gap: 0; }
+  .nav-admin-grupos summary { padding: 8px 9px; }
+  .nav-admin-grupos summary > span[aria-hidden] { display: none; }   /* sem a setinha ▾ */
+  .nav-admin-grupos .menu-lista { position: fixed; left: 12px !important; right: 12px !important; top: 76px; max-height: calc(100vh - 96px); overflow-y: auto; }
+  .nav-admin-grupos .contador { min-width: 20px; padding: 0 5px; font-size: .8rem; }
 }
-@media (max-width: 520px) { .nav-admin-grupos .rotulo { display: none; } }
+@media (max-width: 520px) { .admin .marca span { display: none; } .admin .marca img { width: 36px; height: 36px; } }
