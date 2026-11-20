@@ -18,14 +18,14 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 7. [x] Ubatuba (SP) — temporada; grande
 8. [ ] Capitólio (MG) — turismo em alta, comércios quase sem site
 9. [ ] Santo Antônio do Pinhal (SP)
-10. [ ] São Tomé das Letras (MG)
+10. [x] São Tomé das Letras (MG)
 11. [ ] Joanópolis (SP)
 12. [ ] Águas de São Pedro (SP) — pequena
 13. [ ] São Pedro (SP) — junto com Águas de São Pedro
 14. [ ] Tiradentes (MG)
 15. [ ] Ouro Preto (MG)
-16. [ ] São Lourenço (MG)
-17. [ ] Caxambu (MG) — junto com São Lourenço
+16. [x] São Lourenço (MG)
+17. [x] Caxambu (MG) — junto com São Lourenço
 
 ## 🟠 Prioridade 2 — em seguida
 18. [ ] Atibaia (SP) — grande
@@ -41,8 +41,8 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 28. [x] São Sebastião (SP)
 29. [ ] Mariana (MG) — junto com Ouro Preto
 30. [ ] Brumadinho (MG)
-31. [ ] Lambari (MG)
-32. [ ] Baependi (MG) — ao lado de Caxambu
+31. [x] Lambari (MG)
+32. [x] Baependi (MG) — ao lado de Caxambu
 33. [ ] Barra Bonita (SP)
 34. [ ] Vinhedo (SP)
 35. [x] Ouro Fino (MG)
@@ -51,9 +51,9 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 
 ## 🟡 Prioridade 3 — quando der
 38. [x] Borda da Mata (MG)
-39. [ ] Cambuquira (MG)
+39. [x] Cambuquira (MG)
 40. [ ] Maria da Fé (MG)
-41. [ ] Aiuruoca (MG)
+41. [x] Aiuruoca (MG)
 42. [ ] Itamonte (MG)
 43. [ ] São José da Barra (MG) — ao lado de Capitólio
 44. [ ] São Roque de Minas (MG)
@@ -153,7 +153,7 @@ Ordem: ver a lista de prioridades no topo deste arquivo.
 
 ## Grupos de cidades vizinhas (20/11) — `.\scripts\robo\rodar-cidades.ps1 -Grupo N`
 1 ✅ (20/11, importadas e ligadas: 8.014 comércios) Lindóia, Amparo, Monte Sião, Jacutinga, Ouro Fino, Borda da Mata · 2 ✅ (20/11, ligadas: 15.490 comércios) Ilhabela, Ubatuba, Caraguatatuba, São Sebastião ·
-3 São Lourenço, Caxambu, Baependi, São Tomé das Letras, Lambari, Cambuquira, Aiuruoca · 4 Águas de São Pedro, São Pedro ·
+3 ✅ (20/11, ligadas: 7.353 comércios) São Lourenço, Caxambu, Baependi, São Tomé das Letras, Lambari, Cambuquira, Aiuruoca · 4 Águas de São Pedro, São Pedro ·
 5 Tiradentes, São João del Rei · 6 Ouro Preto, Mariana, Congonhas · 7 Capitólio, São José da Barra ·
 8 Santo Antônio do Pinhal, Gonçalves, Maria da Fé, Passa Quatro, Itamonte · 9 Atibaia, Joanópolis · 10 Itu, Boituva, Indaiatuba ·
 11 Vinhedo, Valinhos, Louveira, Jundiaí · 12 Cunha, São Luiz do Paraitinga, Guararema · 13 Embu das Artes, Santana de Parnaíba ·
