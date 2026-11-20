@@ -664,12 +664,21 @@ section.secao-ofertas + section { padding-top: 32px; }
 /* colunas corridas (como jornal): nome em 2 linhas não abre buraco nas outras colunas */
 .cid-compacta { list-style: none; margin: 0; padding: 0; columns: 4; column-gap: 26px; }
 .cid-compacta li { break-inside: avoid; }
-.cid-uf { margin-top: 34px; }
-#cid-top + .cid-uf, .cid-nada + #cid-top { margin-top: 26px; }
-.cid-uf .cidades-uf { margin: 0 0 8px; padding-bottom: 6px; border-bottom: 2px solid var(--verde-claro); }
+.cid-uf { margin-top: 14px; }
+#cid-top + .cid-uf { margin-top: 26px; }
+.cid-uf summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 16px; background: var(--branco); border: 2px solid var(--borda); border-radius: 16px; }
+.cid-uf summary::-webkit-details-marker { display: none; }
+.cid-uf summary:hover { border-color: var(--verde); }
+.cid-uf .cidades-uf { margin: 0; padding: 0; border: 0; }
+.cid-uf[open] summary { margin-bottom: 8px; border-color: var(--verde-claro); }
+.cid-mais { flex: none; position: relative; width: 34px; height: 34px; border-radius: 50%; background: var(--verde); }
+.cid-mais::before, .cid-mais::after { content: ""; position: absolute; left: 50%; top: 50%; width: 14px; height: 3px; margin: -1.5px 0 0 -7px; background: #fff; border-radius: 2px; transition: transform .2s; }
+.cid-mais::after { transform: rotate(90deg); }
+.cid-uf[open] .cid-mais::after { transform: rotate(0deg); }   /* + vira − aberto */
 .cid-compacta a { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 8px 4px; border-bottom: 1px solid var(--borda); text-decoration: none; color: var(--verde); font-weight: 700; }
 .cid-compacta a:hover span { text-decoration: underline; }
 .cid-compacta small { color: var(--texto2); font-weight: 400; font-size: .85rem; white-space: nowrap; }
 .cid-uf[hidden], .cid-compacta li[hidden], #cid-top[hidden] { display: none; }
 @media (max-width: 960px) { .cid-compacta { columns: 3; } }
-@media (max-width: 700px) { .cid-compacta { columns: 2; column-gap: 16px; } .cid-uf { margin-top: 28px; } #cid-top .cidades-lista { grid-template-columns: 1fr 1fr; gap: 10px; } #cid-top .cidades-lista a { padding: 12px; } }
+@media (max-width: 700px) { .cid-compacta { columns: 2; column-gap: 16px; } .cid-uf { margin-top: 12px; } #cid-top .cidades-lista { grid-template-columns: 1fr 1fr; gap: 10px; } #cid-top .cidades-lista a { padding: 12px; } }

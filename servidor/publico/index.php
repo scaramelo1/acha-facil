@@ -109,14 +109,15 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
         </div>
       </div>
       <?php foreach ($por_uf as $uf => $cidades_uf): ?>
-        <div class="cid-uf">
-          <h3 class="cidades-uf"><?= h(NOMES_ESTADOS[$uf] ?? $uf) ?> <small><?= count($cidades_uf) ?> <?= count($cidades_uf) === 1 ? 'cidade' : 'cidades' ?></small></h3>
+        <?php // 20/11 (pedido do usuário): estado fechado, abre no "+"; a lista fica na página (o Google lê mesmo fechada) ?>
+        <details class="cid-uf">
+          <summary><h3 class="cidades-uf"><?= h(NOMES_ESTADOS[$uf] ?? $uf) ?> <small><?= count($cidades_uf) ?> <?= count($cidades_uf) === 1 ? 'cidade' : 'cidades' ?></small></h3><span class="cid-mais" aria-hidden="true"></span></summary>
           <ul class="cid-compacta">
             <?php foreach ($cidades_uf as $slug => [$nome]): ?>
               <li data-busca="<?= h($sem_acento($nome)) ?>"><a href="<?= h(url_cidade($slug)) ?>"><span><?= h($nome) ?></span><small><?= $num((int)($por_cidade[$slug] ?? 0)) ?></small></a></li>
             <?php endforeach ?>
           </ul>
-        </div>
+        </details>
       <?php endforeach ?>
       <script>
       (function () {
@@ -130,6 +131,8 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
             var n = 0;
             bloco.querySelectorAll('li').forEach(function (li) { var ok = !q || li.dataset.busca.indexOf(q) !== -1; li.hidden = !ok; if (ok) n++; });
             bloco.hidden = n === 0; achou += n;
+            if (q) { if (!('antes' in bloco.dataset)) bloco.dataset.antes = bloco.open ? '1' : ''; bloco.open = n > 0; }   // busca abre o estado
+            else if ('antes' in bloco.dataset) { bloco.open = bloco.dataset.antes === '1'; delete bloco.dataset.antes; }   // apagou: volta como estava
           });
           nada.hidden = achou > 0;
         });
