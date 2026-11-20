@@ -22,7 +22,7 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 11. [ ] Joanópolis (SP)
 12. [x] Águas de São Pedro (SP) — pequena
 13. [x] São Pedro (SP) — junto com Águas de São Pedro
-14. [ ] Tiradentes (MG)
+14. [x] Tiradentes (MG)
 15. [ ] Ouro Preto (MG)
 16. [x] São Lourenço (MG)
 17. [x] Caxambu (MG) — junto com São Lourenço
@@ -59,7 +59,7 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 44. [ ] São Roque de Minas (MG)
 45. [ ] Delfinópolis (MG)
 46. [ ] Vargem Bonita (MG)
-47. [ ] São João del Rei (MG) — grande
+47. [x] São João del Rei (MG) — grande
 48. [ ] Congonhas (MG)
 49. [ ] Bananal (SP)
 50. [ ] Igaraçu do Tietê (SP) — ao lado de Barra Bonita
