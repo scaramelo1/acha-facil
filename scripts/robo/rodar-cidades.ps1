@@ -1,5 +1,6 @@
 ﻿# Acha Facil - roda o robo do Google Places nas cidades desligadas, na ordem de prioridade (docs/cronograma-cidades.md).
 # 20/11/2026. Uma cidade depois da outra; as que ja geraram lista ficam em feitas.txt e sao puladas na proxima vez.
+# Chave do Google: pedida na 1a vez e guardada em <Pasta>\chave-google.txt (fora do git). Trocar a chave = apagar o arquivo.
 # Para tudo (sem salvar lista pela metade) se o Google recusar: chave invalida, credito acabou ou limite do dia.
 #
 #   .\scripts\robo\rodar-cidades.ps1                  -> todas, na ordem
@@ -77,7 +78,13 @@ $cidades = @(
 New-Item -ItemType Directory -Force $Pasta | Out-Null
 Set-Location $Pasta
 $env:PYTHONUTF8 = '1'
-if (-not $env:GOOGLE_MAPS_API_KEY) { $env:GOOGLE_MAPS_API_KEY = (Read-Host 'Cole a chave do Google Places').Trim().Trim('"') }
+# a chave fica guardada so neste PC, fora do projeto e do git (D:\robo-listas\chave-google.txt): pede uma vez so
+$chaveArq = Join-Path $Pasta 'chave-google.txt'
+if (-not $env:GOOGLE_MAPS_API_KEY -and (Test-Path $chaveArq)) { $env:GOOGLE_MAPS_API_KEY = (Get-Content $chaveArq -Raw).Trim() }
+if (-not $env:GOOGLE_MAPS_API_KEY) {
+  $env:GOOGLE_MAPS_API_KEY = (Read-Host 'Cole a chave do Google Places').Trim().Trim('"')
+  if ($env:GOOGLE_MAPS_API_KEY) { Set-Content -Path $chaveArq -Value $env:GOOGLE_MAPS_API_KEY -Encoding ASCII; Write-Host "Chave guardada em $chaveArq (so neste PC)." }
+}
 if (-not $env:GOOGLE_MAPS_API_KEY) { Write-Host 'Sem chave.' -ForegroundColor Red; return }
 $feitasArq = Join-Path $Pasta 'feitas.txt'
 $feitas = @(); if (Test-Path $feitasArq) { $feitas = Get-Content $feitasArq -Encoding UTF8 }
