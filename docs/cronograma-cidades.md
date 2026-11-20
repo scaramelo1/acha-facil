@@ -14,8 +14,8 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 3. [x] Jacutinga (MG) — junto com Monte Sião
 4. [x] Lindóia (SP) — pequena; fecha o Circuito das Águas
 5. [x] Amparo (SP) — mesmo circuito
-6. [ ] Ilhabela (SP) — temporada (até início de dezembro)
-7. [ ] Ubatuba (SP) — temporada; grande
+6. [x] Ilhabela (SP) — temporada (até início de dezembro)
+7. [x] Ubatuba (SP) — temporada; grande
 8. [ ] Capitólio (MG) — turismo em alta, comércios quase sem site
 9. [ ] Santo Antônio do Pinhal (SP)
 10. [ ] São Tomé das Letras (MG)
@@ -37,8 +37,8 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 24. [ ] Passa Quatro (MG)
 25. [ ] Cunha (SP)
 26. [ ] São Luiz do Paraitinga (SP)
-27. [ ] Caraguatatuba (SP) — grande
-28. [ ] São Sebastião (SP)
+27. [x] Caraguatatuba (SP) — grande
+28. [x] São Sebastião (SP)
 29. [ ] Mariana (MG) — junto com Ouro Preto
 30. [ ] Brumadinho (MG)
 31. [ ] Lambari (MG)
@@ -152,7 +152,7 @@ Ordem: ver a lista de prioridades no topo deste arquivo.
 - Litoral e Estrada Real ficam longe da base: conferir a CAIXA do geocodificador antes de importar.
 
 ## Grupos de cidades vizinhas (20/11) — `.\scripts\robo\rodar-cidades.ps1 -Grupo N`
-1 ✅ (20/11, importadas e ligadas: 8.014 comércios) Lindóia, Amparo, Monte Sião, Jacutinga, Ouro Fino, Borda da Mata · 2 Ilhabela, Ubatuba, Caraguatatuba, São Sebastião ·
+1 ✅ (20/11, importadas e ligadas: 8.014 comércios) Lindóia, Amparo, Monte Sião, Jacutinga, Ouro Fino, Borda da Mata · 2 ✅ (20/11, ligadas: 15.490 comércios) Ilhabela, Ubatuba, Caraguatatuba, São Sebastião ·
 3 São Lourenço, Caxambu, Baependi, São Tomé das Letras, Lambari, Cambuquira, Aiuruoca · 4 Águas de São Pedro, São Pedro ·
 5 Tiradentes, São João del Rei · 6 Ouro Preto, Mariana, Congonhas · 7 Capitólio, São José da Barra ·
 8 Santo Antônio do Pinhal, Gonçalves, Maria da Fé, Passa Quatro, Itamonte · 9 Atibaia, Joanópolis · 10 Itu, Boituva, Indaiatuba ·
