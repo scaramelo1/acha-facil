@@ -9,7 +9,7 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 **Temporada:** Ilhabela e Ubatuba precisam estar importadas até o começo de dezembro para o Google ler antes do verão.
 
 ## 🔴 Prioridade 1 — fazer primeiro
-1. [ ] Olímpia (SP) — cidade pequena com milhões de turistas/ano; melhor aposta
+1. [x] Olímpia (SP) — cidade pequena com milhões de turistas/ano; melhor aposta
 2. [x] Monte Sião (MG) — colada na base; excursões de compras o ano todo
 3. [x] Jacutinga (MG) — junto com Monte Sião
 4. [x] Lindóia (SP) — pequena; fecha o Circuito das Águas
@@ -17,7 +17,7 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 6. [x] Ilhabela (SP) — temporada (até início de dezembro)
 7. [x] Ubatuba (SP) — temporada; grande
 8. [x] Capitólio (MG) — turismo em alta, comércios quase sem site
-9. [ ] Santo Antônio do Pinhal (SP)
+9. [x] Santo Antônio do Pinhal (SP)
 10. [x] São Tomé das Letras (MG)
 11. [ ] Joanópolis (SP)
 12. [x] Águas de São Pedro (SP) — pequena
@@ -33,8 +33,8 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 20. [ ] Embu das Artes (SP)
 21. [ ] Guararema (SP)
 22. [ ] Boituva (SP)
-23. [ ] Gonçalves (MG)
-24. [ ] Passa Quatro (MG)
+23. [x] Gonçalves (MG)
+24. [x] Passa Quatro (MG)
 25. [ ] Cunha (SP)
 26. [ ] São Luiz do Paraitinga (SP)
 27. [x] Caraguatatuba (SP) — grande
@@ -52,9 +52,9 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 ## 🟡 Prioridade 3 — quando der
 38. [x] Borda da Mata (MG)
 39. [x] Cambuquira (MG)
-40. [ ] Maria da Fé (MG)
+40. [x] Maria da Fé (MG)
 41. [x] Aiuruoca (MG)
-42. [ ] Itamonte (MG)
+42. [x] Itamonte (MG)
 43. [x] São José da Barra (MG) — ao lado de Capitólio
 44. [ ] São Roque de Minas (MG)
 45. [ ] Delfinópolis (MG)
@@ -155,8 +155,8 @@ Ordem: ver a lista de prioridades no topo deste arquivo.
 1 ✅ (20/11, importadas e ligadas: 8.014 comércios) Lindóia, Amparo, Monte Sião, Jacutinga, Ouro Fino, Borda da Mata · 2 ✅ (20/11, ligadas: 15.490 comércios) Ilhabela, Ubatuba, Caraguatatuba, São Sebastião ·
 3 ✅ (20/11, ligadas: 7.353 comércios) São Lourenço, Caxambu, Baependi, São Tomé das Letras, Lambari, Cambuquira, Aiuruoca · 4 ✅ (20/11, ligadas: 2.368) Águas de São Pedro, São Pedro ·
 5 Tiradentes, São João del Rei · 6 ✅ (20/11, ligadas: 6.710) Ouro Preto, Mariana, Congonhas · 7 ✅ (20/11, ligadas: 1.455) Capitólio, São José da Barra ·
-8 Santo Antônio do Pinhal, Gonçalves, Maria da Fé, Passa Quatro, Itamonte · 9 Atibaia, Joanópolis · 10 Itu, Boituva, Indaiatuba ·
+8 ✅ (20/11, ligadas: 3.188) Santo Antônio do Pinhal, Gonçalves, Maria da Fé, Passa Quatro, Itamonte · 9 Atibaia, Joanópolis · 10 Itu, Boituva, Indaiatuba ·
 11 Vinhedo, Valinhos, Louveira, Jundiaí · 12 Cunha, São Luiz do Paraitinga, Guararema · 13 Embu das Artes, Santana de Parnaíba ·
 14 Barra Bonita, Igaraçu do Tietê · 15 São Roque de Minas, Delfinópolis, Vargem Bonita · 16 Peruíbe, Iguape, Ilha Comprida ·
 17 Itapira, Mogi Mirim, Santo Antônio de Posse, Estiva Gerbi · 18 São Sebastião da Grama, Tapiratiba, Itobi ·
-19 (sozinhas) Olímpia, Brumadinho, Araxá, Diamantina, Bananal.
+19 (sozinhas) Olímpia ✅ (20/11, 2.919), Brumadinho, Araxá, Diamantina, Bananal.
