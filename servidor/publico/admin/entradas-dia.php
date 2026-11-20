@@ -226,6 +226,8 @@ if (!$tem_hora_contatos): ?>
   .hora-linha i { display: block; height: 12px; border-radius: 6px; background: var(--verde); min-width: 2px; }
   .hora-linha b { text-align: right; }
   .por-hora td, .por-hora th { text-align: center; white-space: nowrap; }
+  .por-hora td { font-size: 18px; }   /* 19/11 (pedido do usuário): linhas com movimento 18 px, sem movimento 14 px */
+  .por-hora tr.discreto td, .por-hora tr.discreto td * { font-size: 14px; }
   .fichas-dia td, .fichas-dia th { text-align: center; } .fichas-dia td:first-child, .fichas-dia th:first-child { text-align: left; }
   /* barra de tamanho fixo (60px): a hora com mais pessoas enche 100%, as outras proporcionais; o número fica sempre no mesmo lugar */
   .por-hora .com-barra .barra { display: inline-block; width: 60px; height: 10px; border-radius: 5px; background: rgba(0, 92, 56, .1); margin-right: 8px; vertical-align: middle; overflow: hidden; text-align: left; }
