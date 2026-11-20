@@ -112,9 +112,22 @@ const NAO_COMERCIO = '/^(ponto de [ôo]nibus|esta[çc][ãa]o de [ôo]nibus|esta[
 // linha sem tipo cujo nome é só bairro ou endereço (vem nas buscas do Google por região)
 const SO_LUGAR = '/^(centro$|cidade nova$|santa maria$|vila \\S|jardim \\S|parque \\S|condom[íi]nio|pra[çc]a\\s|s[ãa]o \\S+$|santa \\S+$|dom bosco$|real$|vale d|cascata|mirante|campo d|est[âa]ncia|psf\\b|regi[ãa]o urbana|conj\\.? hab|r\\.\\s|rua\\s|av\\.?\\s|avenida\\s|esta[çc][ãa]o)/iu';
 // cidade pelo endereço ("..., Águas da Prata - SP")
+// 20/11: a que TERMINA por último e, empatando, a de nome mais longo ("Águas de São Pedro" ganha de "São Pedro", "Águas de
+// Lindóia" de "Lindóia"); só nome inteiro ("Itu" não casa dentro de "Itupeva"). Antes era a que começava por último.
+// Se o endereço tem "Cidade - UF", só vale o nome nessa posição: "R. Itu, 3, Itupeva - SP" fica com a cidade da lista,
+// não vai para Itu. "Camanducaia - MG" = Monte Verde (distrito).
 function cidade_do_endereco(string $e, string $padrao): string {
-    $achada = $padrao; $pos = -1;   // a que aparece por último ("..., Cidade - UF, CEP"); o começo pode citar outra cidade
-    foreach (TODAS_CIDADES as $slug => [$nome]) if (($p = mb_strripos($e, $nome)) !== false && $p > $pos) { $achada = $slug; $pos = $p; }
+    $achada = $padrao; $fim = -1; $tam = 0;   // a que aparece por último ("..., Cidade - UF, CEP"); o começo pode citar outra cidade
+    $com_uf = preg_match('/\p{L}\s+-\s+[A-Z]{2}\b/u', $e) === 1;
+    $nomes = array_map(fn($c) => $c[0], TODAS_CIDADES);
+    if (isset($nomes['monte-verde'])) $nomes['monte-verde|camanducaia'] = 'Camanducaia';   // distrito de Camanducaia (MG)
+    foreach ($nomes as $slug => $nome) {
+        $slug = explode('|', $slug)[0];
+        $depois = $com_uf ? '(?=\s+-\s+[A-Z]{2}\b)' : '(?!\p{L})';
+        if (!preg_match_all('/(?<!\p{L})' . preg_quote($nome, '/') . $depois . '/iu', $e, $m, PREG_OFFSET_CAPTURE)) continue;
+        $f = end($m[0])[1] + strlen(end($m[0])[0]);
+        if ($f > $fim || ($f === $fim && strlen($nome) > $tam)) { $achada = $slug; $fim = $f; $tam = strlen($nome); }
+    }
     return $achada;
 }
 
@@ -129,10 +142,27 @@ define('NOMES_NO_ENDERECO', implode('|', array_map(function ($c) {
     $t = preg_quote($c[0], '/');
     return strtr($t, ['á' => '[áa]', 'à' => '[àa]', 'â' => '[âa]', 'ã' => '[ãa]', 'é' => '[ée]', 'ê' => '[êe]', 'í' => '[íi]', 'ó' => '[óo]', 'ô' => '[ôo]', 'õ' => '[õo]', 'ú' => '[úu]', 'ç' => '[çc]', 'Á' => '[ÁA]', 'É' => '[ÉE]', 'Í' => '[ÍI]', 'Ó' => '[ÓO]', 'Ú' => '[ÚU]']);
 }, TODAS_CIDADES)) . '|Camanducaia');   // 17/11: Monte Verde é distrito de Camanducaia (MG), o Google escreve as duas
+/** Corta o endereço no nome da cidade (o 1º que abre um pedaço do endereço e não é bairro de outra cidade). */
+function corta_cidade(string $e): string {
+    // o nome fecha o pedaço: depois vem "-", UF, CEP, "," que não é número de casa ("Tiradentes, 115" é rua) ou o fim
+    // ("São Sebastião da Serra" é bairro, não corta)
+    if (!preg_match_all('/(?:^|,|\s-)\s*(' . NOMES_NO_ENDERECO . ')(?=\s*(?:,(?!\s*\d{1,4}(?!\d))|-|$|\d{5})|\s+(?-i:[A-Z]{2})\b)/iu', $e, $m, PREG_OFFSET_CAPTURE)) return $e;
+    foreach ($m[0] as $i => [$todo, $ini]) {
+        $resto = substr($e, $ini + strlen($todo));
+        // no começo do endereço só é a cidade se vier logo UF, CEP ou "Brasil" ("Tiradentes - Centro, São José do Rio Pardo" é rua)
+        if ($ini === 0 && !preg_match('/^\s*(?:[-,]?\s*(?-i:[A-Z]{2})\b|,?\s*\d{5}|,?\s*Brasil\b|$)/u', $resto)) continue;
+        if (preg_match('/^\s*,\s*([^,]+?)\s+-\s+(?-i:[A-Z]{2})\b/u', $resto, $c) && chave($c[1]) !== chave($m[1][$i][0])
+            && chave($c[1]) !== 'camanducaia') continue;   // é bairro: a cidade de verdade vem depois
+        return substr($e, 0, $ini);
+    }
+    return $e;
+}
 // "Rua X, 410 - Jardim São Paulo, São João da Boa Vista - SP, 13875-089, Brasil" → ["Rua X, 410", "Jardim São Paulo"]
 function endereco_e_bairro(string $e): array {
     // 17/11: só corta quando o nome da cidade abre um pedaço do endereço ("..., Monte Verde"), não no meio da rua ("Av. Monte Verde, 100")
-    $e = preg_replace('/(?:^|,|\s-)\s*(' . NOMES_NO_ENDERECO . ')\b.*$/iu', '', $e);
+    // 20/11: menos quando o nome é BAIRRO com nome de cidade cadastrada, seguido da cidade de verdade
+    // ("- Tiradentes, Poços de Caldas - MG", "- São Pedro, Pedreira - SP"); "- Aguai, Aguaí - SP" continua cortando
+    $e = corta_cidade($e);
     $e = trim(preg_replace('/,?\s*\d{5}-?\d{3}.*$/', '', $e), " ,-");
     $endereco = null; $bairro = null;
     foreach (array_map('trim', explode(' - ', $e)) as $parte) {
