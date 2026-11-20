@@ -10,6 +10,7 @@
 # Chave do robo: gere em Admin > Novidades > "Chave do robo" (mostrada uma vez so). O script pede na 1a vez e guarda em
 # D:\robo-listas\chave-robo.txt (so neste PC). Chave nova = apague esse arquivo.
 param([string]$Pasta = 'D:\robo-listas', [switch]$SoConferir, [switch]$NaoLigar, [string]$Site = 'https://achafacilapp.com.br')
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8   # respostas do site com acento ("São" saía "S├úo")
 $curl = (Get-Command curl.exe -ErrorAction SilentlyContinue).Source
 if (-not $curl) { Write-Host 'Nao achei o curl.exe (vem no Windows 10/11).' -ForegroundColor Red; return }
 $chaveArq = Join-Path $Pasta 'chave-robo.txt'
