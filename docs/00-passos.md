@@ -967,6 +967,11 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
        outras continuam no site e no app e voltam sozinhas. Backups em /var/lib/acha-facil/backups/*.antes-regra-google.20261120.
    (2) ✅ Pausa combinada com o usuário em 20/11: cidades novas e lotes 2–4 do Search Console parados até o tráfego voltar (~20/h por 1–2 semanas); depois 2–3 cidades/semana.
    (3) ✅ Não precisa (20/11): o Google relê os sitemaps sozinho todo dia (48–125 leituras/dia); a pausa é de não enviar nada novo. Não usar Remoções.
-   (4) ⬜ Páginas de cidade e categoria mais fortes (texto próprio, bairros, abertos agora, perguntas).
+   (4) ✅ Páginas de cidade, área e tipo mais fortes (20/11): inc/web-conteudo.php, bloco "Sobre" no fim da página 1 (sem
+       bairro nem Aberto agora), tudo com números reais da página: quantos, com WhatsApp/telefone/site, bairros com mais,
+       atende em casa, horário; "Mais conhecidos" (5, por popularidade + avaliações, ordem fixa; nota do Google não aparece);
+       "Veja também" (outros tipos da área); mesmo tipo nas cidades vizinhas (até 6, só onde a página existe, com km);
+       perguntas frequentes respondidas com os dados (sem FAQPage no schema). Cidade: sobre, "Mais procurados" (16 tipos,
+       sem "Escritório da empresa"), cidades perto (8, km em linha reta) e perguntas. CSS v=50. Testado em cópia.
    (5) ⬜ Divulgação fora do Google (Quem chamar, Instagram por cidade, app).
    (6) ⬜ Conferir toda semana: Search Console Desempenho 7 dias + Páginas; registros do servidor.

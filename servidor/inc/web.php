@@ -14,6 +14,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/guia.php';
 require_once __DIR__ . '/pagina.php';
 require_once __DIR__ . '/ofertas.php';   // 19/11: Oferta da semana na ficha e na página da cidade
+require_once __DIR__ . '/web-conteudo.php';   // 20/11 (passo 119): sobre, mais conhecidos, vizinhas e perguntas
 
 const WEB_POR_PAGINA = 30;
 const WEB_TIPO_MINIMO = 3;          // tipo com menos comércios que isso não vai para o Google (página fraca)
@@ -319,6 +320,8 @@ function web_pagina_cidade(string $cidade): void {
   </div></section>
   <?php endif ?>
 
+  <?= web_conteudo_cidade($cidade, $areas) ?>
+
   <?php if (count(CIDADES) > 1): ?>
   <section><div class="conteudo">
     <h2>Outras cidades</h2>
@@ -388,6 +391,7 @@ function web_pagina_lista(string $cidade, array $area, ?string $tipo, ?string $b
     <?= $aberto ? '' : web_paginacao($base_url, $pagina, $paginas, $bairro) ?>
     <p class="discreto">Tem um negócio de <?= h(mb_strtolower($titulo_lista)) ?> em <?= h($nome_cidade) ?> e não está aqui? <a href="<?= h(url('incluir.php')) ?>">Inclua de graça</a>.</p>
   </div></section>
+  <?= ($pagina === 1 && $bairro === null && !$aberto) ? web_conteudo_lista($cidade, $area, $tipo) : '' ?>
   <?= web_baixe_app($cidade) ?>
 </main>
 <?php

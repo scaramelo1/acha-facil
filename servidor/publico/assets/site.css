@@ -677,3 +677,16 @@ section.secao-ofertas + section { padding-top: 32px; }
 .cid-uf[hidden], .cid-compacta li[hidden], #cid-top[hidden] { display: none; }
 @media (max-width: 960px) { .cid-compacta { columns: 3; } }
 @media (max-width: 700px) { .cid-compacta { columns: 2; column-gap: 16px; } .cid-uf { margin-top: 12px; } #cid-top .cidades-lista { grid-template-columns: 1fr 1fr; gap: 10px; } #cid-top .cidades-lista a { padding: 12px; } }
+
+/* 20/11 (passo 119): conteúdo próprio das páginas de cidade, área e tipo */
+.conteudo-extra { background: var(--branco, #fff); border-top: 1px solid rgba(0,0,0,.06); }
+.conteudo-extra h2 { margin-bottom: 12px; }
+.conteudo-extra h3 { font-size: 1.1rem; margin: 26px 0 10px; }
+.conteudo-extra .sobre { font-size: 1.05rem; line-height: 1.6; max-width: 75ch; color: var(--texto2); }
+.conteudo-extra .sobre b { color: var(--texto, inherit); }
+.conhecidos { margin: 0; padding-left: 22px; line-height: 1.9; }
+.conhecidos a { font-weight: 800; color: var(--verde); }
+.conhecidos small { color: var(--texto2); margin-left: 6px; }
+.perguntas h4 { font-size: 1rem; margin: 18px 0 4px; }
+.perguntas p { margin: 0; color: var(--texto2); line-height: 1.55; max-width: 75ch; }
+.perguntas a { color: var(--verde); font-weight: 700; }
