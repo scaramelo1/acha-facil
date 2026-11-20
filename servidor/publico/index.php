@@ -104,14 +104,14 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
         <h3 class="cidades-uf">Mais procuradas</h3>
         <div class="cidades-lista">
           <?php foreach ($populares as $slug): ?>
-            <a href="<?= h(url_cidade($slug)) ?>"><b><?= h(CIDADES[$slug][0]) ?></b><small><?= $num((int)($por_cidade[$slug] ?? 0)) ?> lugares</small></a>
+            <a href="<?= h(url_cidade($slug)) ?>"><b><?= h(CIDADES[$slug][0] . ' - ' . CIDADES[$slug][2]) ?></b><small><?= $num((int)($por_cidade[$slug] ?? 0)) ?> lugares</small></a>
           <?php endforeach ?>
         </div>
       </div>
       <?php foreach ($por_uf as $uf => $cidades_uf): ?>
         <?php // 20/11 (pedido do usuário): estado fechado, abre no "+"; a lista fica na página (o Google lê mesmo fechada) ?>
         <details class="cid-uf">
-          <summary><h3 class="cidades-uf"><?= h(NOMES_ESTADOS[$uf] ?? $uf) ?> <small><?= count($cidades_uf) ?> <?= count($cidades_uf) === 1 ? 'cidade' : 'cidades' ?></small></h3><span class="cid-mais" aria-hidden="true"></span></summary>
+          <summary><h3 class="cidades-uf"><?= h(NOMES_ESTADOS[$uf] ?? $uf) ?> <small><?= count($cidades_uf) ?> <?= count($cidades_uf) === 1 ? 'cidade' : 'cidades' ?></small></h3></summary>
           <ul class="cid-compacta">
             <?php foreach ($cidades_uf as $slug => [$nome]): ?>
               <li data-busca="<?= h($sem_acento($nome)) ?>"><a href="<?= h(url_cidade($slug)) ?>"><span><?= h($nome) ?></span><small><?= $num((int)($por_cidade[$slug] ?? 0)) ?></small></a></li>

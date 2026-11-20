@@ -666,16 +666,11 @@ section.secao-ofertas + section { padding-top: 32px; }
 .cid-compacta li { break-inside: avoid; }
 .cid-uf { margin-top: 14px; }
 #cid-top + .cid-uf { margin-top: 26px; }
-.cid-uf summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 12px 16px; background: var(--branco); border: 2px solid var(--borda); border-radius: 16px; }
-.cid-uf summary::-webkit-details-marker { display: none; }
-.cid-uf summary:hover { border-color: var(--verde); }
+/* o abre/fecha usa o estilo de details/summary do site (borda única e + amarelo, como nas perguntas) */
+.cid-uf { margin-bottom: 0; }
+.cid-uf summary { align-items: center; }
 .cid-uf .cidades-uf { margin: 0; padding: 0; border: 0; }
-.cid-uf[open] summary { margin-bottom: 8px; border-color: var(--verde-claro); }
-.cid-mais { flex: none; position: relative; width: 34px; height: 34px; border-radius: 50%; background: var(--verde); }
-.cid-mais::before, .cid-mais::after { content: ""; position: absolute; left: 50%; top: 50%; width: 14px; height: 3px; margin: -1.5px 0 0 -7px; background: #fff; border-radius: 2px; transition: transform .2s; }
-.cid-mais::after { transform: rotate(90deg); }
-.cid-uf[open] .cid-mais::after { transform: rotate(0deg); }   /* + vira − aberto */
+.cid-uf .cid-compacta { margin: 0 0 14px; }
 .cid-compacta a { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 8px 4px; border-bottom: 1px solid var(--borda); text-decoration: none; color: var(--verde); font-weight: 700; }
 .cid-compacta a:hover span { text-decoration: underline; }
 .cid-compacta small { color: var(--texto2); font-weight: 400; font-size: .85rem; white-space: nowrap; }
