@@ -975,3 +975,9 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
        sem "Escritório da empresa"), cidades perto (8, km em linha reta) e perguntas. CSS v=50. Testado em cópia.
    (5) ⬜ Divulgação fora do Google (Quem chamar, Instagram por cidade, app).
    (6) ⬜ Conferir toda semana: Search Console Desempenho 7 dias + Páginas; registros do servidor.
+   Diagnóstico (20/11 ~15h30, prints do usuário): sem ação manual, Navegação Segura limpa, páginas indexadas, mas nem
+   "achafacilapp" aparece na 1ª página em janela anônima = rebaixamento algorítmico do site inteiro. Causa provável: fichas
+   copiadas do Google Maps (robô/Places API) em grande escala.
+   (7) ⬜ 27/11 (agendado): revisar os números; se não voltou, montar o plano da opção D com números de cada cidade:
+       mesmo domínio, modelo novo (no Google só cidades, categorias e fichas com algo próprio; 2-3 cidades trabalhadas a
+       fundo com os donos; lançar o app). Domínio novo com os mesmos dados = não (repetiria a queda).
