@@ -26,12 +26,19 @@ $dados = json_decode(web_cache('inicio-dados', function () {
         'eventos' => eventos_proximos_todas(6),
         'por_cidade' => array_column(linhas('SELECT p.cidade, COUNT(*) AS total FROM profissionais p JOIN categorias c ON c.id = p.categoria_id
             WHERE ' . visivel() . ' GROUP BY p.cidade'), 'total', 'cidade'),
+        // 20/11: as mais procuradas = mais entradas no site nos últimos 30 dias (cartões grandes no topo de "Escolha a sua cidade")
+        'populares' => entradas_prontas() ? array_column(linhas("SELECT cidade, SUM(total) AS t FROM entradas WHERE cidade IS NOT NULL
+            AND dia >= CURDATE() - INTERVAL 29 DAY GROUP BY cidade ORDER BY t DESC LIMIT 20"), 'cidade') : [],
     ], JSON_UNESCAPED_UNICODE);
 }), true) ?: [];
 $areas = $dados['areas'] ?? [];
 $total = (int)($dados['total'] ?? 0);
 $eventos = $dados['eventos'] ?? [];
 $por_cidade = $dados['por_cidade'] ?? [];
+// 8 mais procuradas (só cidades ligadas); faltando dado, completa com as que têm mais comércios
+$populares = array_values(array_filter($dados['populares'] ?? [], fn($c) => isset(CIDADES[$c])));
+if (count($populares) < 8) { arsort($por_cidade); foreach (array_keys($por_cidade) as $c) if (isset(CIDADES[$c]) && !in_array($c, $populares, true)) $populares[] = $c; }
+$populares = array_slice($populares, 0, 8);
 $base = config()['url'];
 $num = fn(int $n) => number_format($n, 0, ',', '.');
 $por_uf = [];   // cidades separadas por estado, na ordem da tabela cidades
@@ -86,14 +93,52 @@ pagina_inicio('Acha Fácil! O comércio da sua cidade no seu celular',
     <div class="conteudo">
       <h2>Escolha a sua cidade</h2>
       <p class="intro">Veja os comércios e serviços de cada cidade, com endereço, horário e WhatsApp, direto no site.</p>
-      <?php foreach ($por_uf as $uf => $cidades_uf): ?>
-        <?php if (count($por_uf) > 1): ?><h3 class="cidades-uf"><?= h(NOMES_ESTADOS[$uf] ?? $uf) ?> <small><?= count($cidades_uf) ?> <?= count($cidades_uf) === 1 ? 'cidade' : 'cidades' ?></small></h3><?php endif ?>
+      <?php // 20/11 (pedido do usuário): seção estava longa demais com 63 cartões. Busca + 8 mais procuradas + lista compacta.
+            // Todas as cidades continuam com link na página (o Google chega às cidades novas por aqui). ?>
+      <div class="cid-busca">
+        <input type="search" id="cid-filtro" placeholder="Digite o nome da sua cidade..." autocomplete="off" aria-label="Procurar cidade">
+      </div>
+      <p class="cid-nada" id="cid-nada" hidden>Ainda não chegamos nessa cidade.<?php if ($e_cont = site('contato_email')): ?>
+        <a href="mailto:<?= h($e_cont) ?>?subject=<?= rawurlencode('Quero o Acha Fácil na minha cidade') ?>">Peça a sua cidade</a>.<?php endif ?></p>
+      <div id="cid-top">
+        <h3 class="cidades-uf">Mais procuradas</h3>
         <div class="cidades-lista">
-          <?php foreach ($cidades_uf as $slug => [$nome]): ?>
-            <a href="<?= h(url_cidade($slug)) ?>"><b><?= h($nome) ?></b><small><?= $num((int)($por_cidade[$slug] ?? 0)) ?> lugares</small></a>
+          <?php foreach ($populares as $slug): ?>
+            <a href="<?= h(url_cidade($slug)) ?>"><b><?= h(CIDADES[$slug][0]) ?></b><small><?= $num((int)($por_cidade[$slug] ?? 0)) ?> lugares</small></a>
           <?php endforeach ?>
         </div>
+      </div>
+      <?php foreach ($por_uf as $uf => $cidades_uf): ?>
+        <div class="cid-uf">
+          <h3 class="cidades-uf"><?= h(NOMES_ESTADOS[$uf] ?? $uf) ?> <small><?= count($cidades_uf) ?> <?= count($cidades_uf) === 1 ? 'cidade' : 'cidades' ?></small></h3>
+          <ul class="cid-compacta">
+            <?php foreach ($cidades_uf as $slug => [$nome]): ?>
+              <li data-busca="<?= h($sem_acento($nome)) ?>"><a href="<?= h(url_cidade($slug)) ?>"><span><?= h($nome) ?></span><small><?= $num((int)($por_cidade[$slug] ?? 0)) ?></small></a></li>
+            <?php endforeach ?>
+          </ul>
+        </div>
       <?php endforeach ?>
+      <script>
+      (function () {
+        var campo = document.getElementById('cid-filtro'); if (!campo) return;
+        var top = document.getElementById('cid-top'), nada = document.getElementById('cid-nada');
+        var limpa = function (s) { return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); };
+        campo.addEventListener('input', function () {
+          var q = limpa(campo.value.trim()), achou = 0;
+          top.hidden = q !== '';
+          document.querySelectorAll('.cid-uf').forEach(function (bloco) {
+            var n = 0;
+            bloco.querySelectorAll('li').forEach(function (li) { var ok = !q || li.dataset.busca.indexOf(q) !== -1; li.hidden = !ok; if (ok) n++; });
+            bloco.hidden = n === 0; achou += n;
+          });
+          nada.hidden = achou > 0;
+        });
+        campo.addEventListener('keydown', function (e) {   // Enter vai direto para a primeira cidade achada
+          if (e.key !== 'Enter') return;
+          var a = document.querySelector('.cid-uf:not([hidden]) li:not([hidden]) a'); if (a && campo.value.trim()) { e.preventDefault(); location.href = a.href; }
+        });
+      })();
+      </script>
     </div>
   </section>
 
