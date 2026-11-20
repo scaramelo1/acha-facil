@@ -981,3 +981,11 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    (7) ⬜ 27/11 (agendado): revisar os números; se não voltou, montar o plano da opção D com números de cada cidade:
        mesmo domínio, modelo novo (no Google só cidades, categorias e fichas com algo próprio; 2-3 cidades trabalhadas a
        fundo com os donos; lançar o app). Domínio novo com os mesmos dados = não (repetiria a queda).
+120. ✅ Acha Fácil fechado para o Google e para o público (20/11, pedido do usuário; passo 17 do Plano D, ver
+   /var/www/guia-novo/docs/00-passos.md): X-Robots-Tag noindex em TUDO (.htaccess); inicial, cidades, áreas, fichas,
+   sitemaps, incluir e baixar APK mostram publico/fechado.php ("O Acha Fácil agora é Localiza Fácil → conheça", link
+   comum, SEM redirecionar; inicial 200, o resto 410). Continuam abertos (fora do Google) o admin (só admins), api/,
+   google/, painel/, planos, perfil, assinatura, suporte, busca.php, entrar/sair, termos, privacidade e mp-webhook,
+   porque o app em teste ainda usa este servidor. robots.txt sem Sitemap. Backups: /var/lib/acha-facil/backups/
+   htaccess.antes-fechar.20261120 e robots.antes-fechar.20261120. O link do aviso vai para fsadesigners.com.br/guia-novo
+   até o domínio novo entrar no ar (o ativar.sh do guia-novo troca para https://localizafacilapp.com.br/).

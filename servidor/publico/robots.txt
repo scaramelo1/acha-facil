@@ -17,4 +17,4 @@ Disallow: /planos.php?
 Disallow: /suporte.php
 Disallow: /incluir.php?
 
-Sitemap: https://achafacilapp.com.br/sitemap.xml
+# 20/11/2026: sem sitemap; o Acha Fácil saiu do Google (agora é Localiza Fácil). As páginas respondem com noindex.

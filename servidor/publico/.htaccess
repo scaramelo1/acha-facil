@@ -1,3 +1,10 @@
+# 20/11/2026 (passo 17 do Plano D, pedido do usuário): o Acha Fácil saiu do Google e o guia público fechou.
+# Tudo com noindex; as páginas públicas mostram fechado.php ("agora é Localiza Fácil", link comum, SEM redirecionar).
+# Abertos (fora do Google): admin/ (só admins), api/, google/, painel/, planos, perfil, assinatura, suporte, busca.php,
+# minha-conta, entrar/sair, termos, privacidade, mp-webhook e arquivos (assets, fotos). Desfazer: backups/htaccess.antes-fechar.20261120
+<IfModule mod_headers.c>
+  Header always set X-Robots-Tag "noindex, nofollow"
+</IfModule>
 # Copiado para servidor/publico/.htaccess por servidor/dominio/ativar.sh (só depois do HTTPS do domínio novo funcionar).
 # Quem abre fsadesigners.com.br/acha-facil/... vai para achafacilapp.com.br/...
 # Ficam no endereço antigo: api/ (os APKs já instalados chamam fsadesigners.com.br/acha-facil/api, com POST)
@@ -9,11 +16,14 @@ RewriteRule ^(.*)$ https://achafacilapp.com.br/$1 [R=301,L,NE]
 # www.achafacilapp.com.br -> achafacilapp.com.br
 RewriteCond %{HTTP_HOST} ^www\.achafacilapp\.com\.br$ [NC]
 RewriteRule ^(.*)$ https://achafacilapp.com.br/$1 [R=301,L,NE]
-# Páginas públicas de cidade, área, tipo e ficha (passo 21): o que não é arquivo nem pasta vai para web.php
+# 20/11 (passo 17 do Plano D): inicial, incluir e baixar APK fecharam
+RewriteCond %{HTTP_HOST} ^achafacilapp\.com\.br$ [NC]
+RewriteRule ^(index\.php|incluir\.php|incluir-evento\.php|baixar-apk\.php)?$ fechado.php [L]
+# Páginas públicas de cidade, área, tipo, ficha e sitemaps (eram web.php): agora fechado.php (410)
 RewriteCond %{HTTP_HOST} ^achafacilapp\.com\.br$ [NC]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ web.php [L,QSA]
+RewriteRule ^ fechado.php [L]
 # Divulgar um evento (passo 36): o cartaz pode ter até 8 MB (o php.ini global é 2M/8M)
 <Files "incluir-evento.php">
   <IfModule mod_php.c>
