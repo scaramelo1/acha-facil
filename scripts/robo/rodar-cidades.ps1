@@ -1,0 +1,97 @@
+﻿# Acha Facil - roda o robo do Google Places nas cidades desligadas, na ordem de prioridade (docs/cronograma-cidades.md).
+# 20/11/2026. Uma cidade depois da outra; as que ja geraram lista ficam em feitas.txt e sao puladas na proxima vez.
+# Para tudo (sem salvar lista pela metade) se o Google recusar: chave invalida, credito acabou ou limite do dia.
+#
+#   .\scripts\robo\rodar-cidades.ps1                  -> todas, na ordem
+#   .\scripts\robo\rodar-cidades.ps1 -Quantas 5       -> so as 5 proximas
+#   .\scripts\robo\rodar-cidades.ps1 -Pasta E:\listas -> outra pasta para os arquivos (padrao D:\robo-listas)
+param([int]$Quantas = 0, [string]$Pasta = 'D:\robo-listas')
+$robo = Join-Path $PSScriptRoot 'leads_places_api.py'
+$cidades = @(
+  "Olímpia;SP",
+  "Lindóia;SP",
+  "Amparo;SP",
+  "Monte Sião;MG",
+  "Jacutinga;MG",
+  "Ilhabela;SP",
+  "Ubatuba;SP",
+  "Capitólio;MG",
+  "Santo Antônio do Pinhal;SP",
+  "São Tomé das Letras;MG",
+  "Joanópolis;SP",
+  "Águas de São Pedro;SP",
+  "São Pedro;SP",
+  "Tiradentes;MG",
+  "Ouro Preto;MG",
+  "São Lourenço;MG",
+  "Caxambu;MG",
+  "Atibaia;SP",
+  "Itu;SP",
+  "Embu das Artes;SP",
+  "Guararema;SP",
+  "Boituva;SP",
+  "Gonçalves;MG",
+  "Passa Quatro;MG",
+  "Cunha;SP",
+  "São Luiz do Paraitinga;SP",
+  "Caraguatatuba;SP",
+  "São Sebastião;SP",
+  "Mariana;MG",
+  "Brumadinho;MG",
+  "Lambari;MG",
+  "Baependi;MG",
+  "Barra Bonita;SP",
+  "Vinhedo;SP",
+  "Ouro Fino;MG",
+  "Diamantina;MG",
+  "Araxá;MG",
+  "Borda da Mata;MG",
+  "Cambuquira;MG",
+  "Maria da Fé;MG",
+  "Aiuruoca;MG",
+  "Itamonte;MG",
+  "São José da Barra;MG",
+  "São Roque de Minas;MG",
+  "Delfinópolis;MG",
+  "Vargem Bonita;MG",
+  "São João del Rei;MG",
+  "Congonhas;MG",
+  "Bananal;SP",
+  "Igaraçu do Tietê;SP",
+  "Peruíbe;SP",
+  "Iguape;SP",
+  "Ilha Comprida;SP",
+  "Valinhos;SP",
+  "Louveira;SP",
+  "Indaiatuba;SP",
+  "Jundiaí;SP",
+  "Santana de Parnaíba;SP",
+  "Itapira;SP",
+  "Mogi Mirim;SP",
+  "Santo Antônio de Posse;SP",
+  "Estiva Gerbi;SP",
+  "São Sebastião da Grama;SP",
+  "Tapiratiba;SP",
+  "Itobi;SP"
+)
+New-Item -ItemType Directory -Force $Pasta | Out-Null
+Set-Location $Pasta
+$env:PYTHONUTF8 = '1'
+if (-not $env:GOOGLE_MAPS_API_KEY) { $env:GOOGLE_MAPS_API_KEY = (Read-Host 'Cole a chave do Google Places').Trim().Trim('"') }
+if (-not $env:GOOGLE_MAPS_API_KEY) { Write-Host 'Sem chave.' -ForegroundColor Red; return }
+$feitasArq = Join-Path $Pasta 'feitas.txt'
+$feitas = @(); if (Test-Path $feitasArq) { $feitas = Get-Content $feitasArq -Encoding UTF8 }
+$rodadas = 0
+foreach ($linha in $cidades) {
+  $nome, $uf = $linha.Split(';')
+  if ($feitas -contains $linha) { continue }
+  if ($Quantas -gt 0 -and $rodadas -ge $Quantas) { break }
+  Write-Host "`n===== $nome - $uf  ($(Get-Date -Format HH:mm)) =====" -ForegroundColor Green
+  python $robo $nome $uf
+  if ($LASTEXITCODE -eq 2) { Write-Host "`nO Google recusou (veja a mensagem acima). Parei; $nome NAO foi salva." -ForegroundColor Red; break }
+  if ($LASTEXITCODE -ne 0) { Write-Host "`nErro em $nome. Parei." -ForegroundColor Red; break }
+  Add-Content -Path $feitasArq -Value $linha -Encoding UTF8
+  $rodadas++
+}
+Write-Host "`nCidades rodadas agora: $rodadas. Listas em $Pasta" -ForegroundColor Green
+Get-ChildItem (Join-Path $Pasta 'leads_*.html') | Sort-Object LastWriteTime | Select-Object Name, @{n='KB';e={[int]($_.Length/1KB)}}, LastWriteTime

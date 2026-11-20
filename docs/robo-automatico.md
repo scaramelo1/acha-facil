@@ -55,3 +55,11 @@ que vem no mesmo pedido, sem custo a mais) e `data-ativo` (fechado de vez sai do
 link do nome, ou grave `data-lat`/`data-lng` na `<tr>`. Qualquer um dos dois já basta.
 
 Cada cidade fica exata na próxima vez que a lista dela for importada (Admin → Importar lista, ou o rodízio do robô).
+
+## Rodar as cidades novas em sequência (20/11/2026)
+`scripts\robo\rodar-cidades.ps1` roda o `leads_places_api.py` nas 65 cidades desligadas, na ordem de prioridade do
+`docs/cronograma-cidades.md`. As que já geraram lista ficam em `D:\robo-listas\feitas.txt` e são puladas da próxima vez.
+`-Quantas 5` roda só as 5 próximas. O robô agora **para sem salvar** quando o Google recusa (400/401/403/429: chave
+inválida, API desligada, crédito ou limite do dia), em vez de gravar uma lista pela metade, e mostra quantas pesquisas
+fez (cada uma é cobrada). Compara a cidade sem acento/hífen ("São João del-Rei" = "São João del Rei") e grava o nome
+como está cadastrado.

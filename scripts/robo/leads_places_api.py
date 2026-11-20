@@ -11,7 +11,7 @@ Saída: leads_<cidade>.html  + totais por status no terminal.
 no mesmo pedido, sem custo extra) e se o comércio está aberto (data-ativo: ativo / confirmar = fechado temporariamente /
 inativo = fechado de vez; o importador tira do app os que fecharam de vez).
 """
-import os, sys, re, json, html, time, datetime, concurrent.futures as cf
+import os, sys, re, json, html, time, datetime, unicodedata, concurrent.futures as cf
 from urllib.parse import urlparse, quote_plus
 import requests, urllib3
 urllib3.disable_warnings()
@@ -26,13 +26,31 @@ FIELDS = ("places.id,places.displayName,places.primaryTypeDisplayName,places.for
           "places.nationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount,places.googleMapsUri,"
           "places.businessStatus,places.location,places.regularOpeningHours,nextPageToken")
 
+class Parar(Exception):
+    """Erro que não adianta repetir (chave inválida, API desligada, crédito ou limite do dia acabou)."""
+
+PESQUISAS = [0]   # pesquisas feitas (cada uma é cobrada pelo Google)
+
 def busca(termo):
     out, token = [], None
     for _ in range(3):  # a API devolve até 60 por consulta
         body = {"textQuery": f"{termo} em {CIDADE} - {UF}", "languageCode": "pt-BR", "regionCode": "BR", "pageSize": 20}
         if token: body["pageToken"] = token
-        r = requests.post("https://places.googleapis.com/v1/places:searchText", json=body, timeout=30,
-                          headers={"X-Goog-Api-Key": KEY, "X-Goog-FieldMask": FIELDS})
+        for tentativa in range(4):
+            try:
+                r = requests.post("https://places.googleapis.com/v1/places:searchText", json=body, timeout=30,
+                                  headers={"X-Goog-Api-Key": KEY, "X-Goog-FieldMask": FIELDS})
+            except requests.RequestException as erro:
+                print("rede", termo, erro); time.sleep(10); continue
+            PESQUISAS[0] += 1
+            if r.status_code == 429 and tentativa < 3: time.sleep(30); continue   # muitas por minuto: espera e tenta de novo
+            if r.status_code >= 500 and tentativa < 3: time.sleep(10); continue
+            break
+        else:
+            print("erro", termo, "sem resposta"); return out
+        # 20/11: chave inválida, API desligada, sem faturamento ou limite do dia = para tudo (antes salvava a lista pela metade)
+        if r.status_code in (400, 401, 403, 429):
+            raise Parar(f"{r.status_code} em '{termo}': {r.text[:300]}")
         if r.status_code != 200:
             print("erro", termo, r.status_code, r.text[:200]); break
         j = r.json(); out += j.get("places", [])
@@ -50,6 +68,7 @@ def comp(p, tipo, short=False):
 def endereco(p):
     rua, num, bairro = comp(p, "route", True), comp(p, "street_number"), comp(p, "sublocality") or comp(p, "sublocality_level_1")
     cidade, uf, cep = comp(p, "administrative_area_level_2") or CIDADE, comp(p, "administrative_area_level_1", True) or UF, comp(p, "postal_code")
+    if mesma_cidade(cidade, CIDADE): cidade = CIDADE   # 20/11: grava o nome do jeito cadastrado ("del-Rei" -> "del Rei")
     s = rua + (f", {num}" if num else "") + (f" - {bairro}" if bairro else "")
     s = (s + ", " if s else "") + f"{cidade} - {uf}" + (f", {cep}" if cep else "")
     return s, cidade
@@ -99,26 +118,38 @@ def checa_site(url):
     if probs: return "site_desatualizado", "; ".join(probs).capitalize()
     return "tem_site", "Site funcionando"
 
+def mesma_cidade(a, b):
+    """Compara sem acento, hífen e maiúsculas ("São João del-Rei" = "São João del Rei")."""
+    n = lambda x: re.sub(r"[^a-z0-9]", "", unicodedata.normalize("NFD", (x or "").lower()).encode("ascii", "ignore").decode())
+    return n(a) == n(b)
+
 ROTULO = {"sem_site": "Sem site", "site_fora": "Site fora do ar", "site_desatualizado": "Site desatualizado", "tem_site": "Tem site"}
 e = lambda s: html.escape(str(s or ""), quote=True)
 
 def main():
     if not KEY: sys.exit("Defina GOOGLE_MAPS_API_KEY")
     vistos, leads = set(), []
-    with cf.ThreadPoolExecutor(4) as ex:
-        for res in ex.map(busca, TERMOS):
-            for p in res:
-                end, cidade = endereco(p)
-                if cidade.lower() != CIDADE.lower(): continue
-                nome = p.get("displayName", {}).get("text", "")
-                chave = (nome.strip().lower(), end.strip().lower())
-                if chave in vistos: continue
-                vistos.add(chave)
-                leads.append(dict(nome=nome, cat=p.get("primaryTypeDisplayName", {}).get("text", ""), end=end,
-                                  tel=p.get("nationalPhoneNumber", ""), site=p.get("websiteUri", ""),
-                                  nota=p.get("rating"), n=p.get("userRatingCount"), link=p.get("googleMapsUri", ""),
-                                  lat=(p.get("location") or {}).get("latitude"), lng=(p.get("location") or {}).get("longitude"),
-                                  status_google=p.get("businessStatus"), tem_horario=bool(p.get("regularOpeningHours"))))
+    resultados = []
+    try:
+        with cf.ThreadPoolExecutor(4) as ex:
+            resultados = list(ex.map(busca, TERMOS))
+    except Parar as erro:
+        print("\nPAREI SEM SALVAR NADA:", erro)
+        print("Pesquisas feitas antes de parar:", PESQUISAS[0])
+        sys.exit(2)
+    for res in resultados:
+        for p in res:
+            end, cidade = endereco(p)
+            if not mesma_cidade(cidade, CIDADE): continue
+            nome = p.get("displayName", {}).get("text", "")
+            chave = (nome.strip().lower(), end.strip().lower())
+            if chave in vistos: continue
+            vistos.add(chave)
+            leads.append(dict(nome=nome, cat=p.get("primaryTypeDisplayName", {}).get("text", ""), end=end,
+                              tel=p.get("nationalPhoneNumber", ""), site=p.get("websiteUri", ""),
+                              nota=p.get("rating"), n=p.get("userRatingCount"), link=p.get("googleMapsUri", ""),
+                              lat=(p.get("location") or {}).get("latitude"), lng=(p.get("location") or {}).get("longitude"),
+                              status_google=p.get("businessStatus"), tem_horario=bool(p.get("regularOpeningHours"))))
     # etiqueta Ativo / Confirmar / Inativo (mesmas regras e textos das listas que já estão no Acha Fácil)
     for l in leads:
         if l["status_google"] == "CLOSED_PERMANENTLY": l["ativo"], l["ativo_mot"] = "inativo", "Fechado permanentemente no Google"
@@ -167,6 +198,7 @@ a.nm{{font-weight:600;color:#1a56db;text-decoration:none}}a.wa{{color:#128c4b}}<
     from collections import Counter
     c = Counter(l["st"] for l in leads)
     a = Counter(l["ativo"] for l in leads)
+    print("Pesquisas feitas no Google:", PESQUISAS[0])
     print("Ativo:", a.get("ativo", 0), "· Confirmar:", a.get("confirmar", 0), "· Inativo:", a.get("inativo", 0))
     print(nome_arq, "| total", len(leads), "|", " · ".join(f"{ROTULO[k]}: {c.get(k, 0)}" for k in ROTULO),
           "| com ponto no mapa:", sum(1 for l in leads if l["lat"] is not None), "| fechados de vez:", sum(1 for l in leads if l["ativo"] == "inativo"))
