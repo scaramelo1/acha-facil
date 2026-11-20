@@ -131,7 +131,12 @@ function nome_curto(string $nome, int $max = 60): string {
     $c = preg_replace('/\s+\S*$/u', '', $c) ?: $c;
     return preg_replace('/[\s\-–,.:;]+$/u', '', $c) . '…';   // 20/11: rtrim com "–" cortava meio "Ó" ou "À"
 }
-function ficha_no_google(array $p): bool { return trim((string)($p['telefone'] ?? '')) !== '' || trim((string)($p['whatsapp'] ?? '')) !== ''; }
+/** Ficha no Google: a regra é SQL_NO_GOOGLE (20/11). Sem id (ficha montada à mão), vale só o telefone. */
+function ficha_no_google(array $p): bool {
+    $tem_contato = trim((string)($p['telefone'] ?? '')) !== '' || trim((string)($p['whatsapp'] ?? '')) !== '';
+    if (!$tem_contato || empty($p['id'])) return $tem_contato;
+    return (bool)valor('SELECT ' . SQL_NO_GOOGLE . ' FROM profissionais p WHERE p.id = ?', [(int)$p['id']]);
+}
 
 // Aparece no app: aprovado e com assinatura em dia.
 // Comércios importados da lista de leads aparecem sem assinatura até o dono assumir o perfil.
@@ -148,6 +153,16 @@ function semente_dia(): int { return (int)date('Ymd'); }
 // "Este comércio é seu?" e ninguém mais pede para assumir ou tirar pelo site/app.
 const SQL_TEM_DONO = '(p.importado = 0 OR p.basico_pago_em IS NOT NULL OR ' . SQL_DESTAQUE . '
     OR EXISTS (SELECT 1 FROM acessos_dono ad WHERE ad.profissional_id = p.id AND ad.ativo = 1))';
+/**
+ * Ficha no Google (20/11, pedido do usuário, depois da queda do tráfego do Google às 11:52 com 59 mil fichas novas):
+ * com telefone ou WhatsApp E pelo menos um destes: tem dono/pagou, 5+ avaliações no Google (popularidade), site ou
+ * Instagram, ou recebeu visita vinda do Google nos últimos 30 dias. As outras continuam no site e no app, mas com
+ * noindex e fora do sitemap; voltam sozinhas quando ganharem avaliações, site/Instagram ou dono.
+ */
+const SQL_NO_GOOGLE = '(' . SQL_TEM_CONTATO . ' AND (' . SQL_TEM_DONO . " OR p.popularidade >= 5
+    OR COALESCE(p.site, '') <> '' OR COALESCE(p.instagram, '') <> ''
+    OR p.id IN (SELECT CAST(SUBSTRING_INDEX(e.caminho, '-', -1) AS UNSIGNED) FROM entradas e
+        WHERE e.origem = 'google' AND e.dia >= CURDATE() - INTERVAL 30 DAY AND e.caminho LIKE '%/c/%')))";
 /** Pagou o Básico ou se cadastrou sozinho (não veio da lista pública). */
 function ficha_paga(array $p): bool {
     if (array_key_exists('ficha_paga', $p)) return (bool)$p['ficha_paga'];

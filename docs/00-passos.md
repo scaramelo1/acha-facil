@@ -958,3 +958,15 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Novidades, Importar, Cidades, Mapa), 📊 Números (Números, Entradas, O que procuram, Pedidos de informação, Google),
    👥 Pessoas (Pessoas, Suporte, Notificações), ⚙️ Mais (Eventos, App, Anúncios, Registro, Senha, Sair). O contador de cada
    grupo soma as pendências de dentro; grupo e página atuais destacados; só um aberto por vez; no celular até 520 px só ícones.
+119. 🟡 Recuperar o tráfego do Google (20/11, pedido do usuário): às 11:52 de 20/11 as visitas vindas do Google caíram de
+   ~20-26/h para 0-3/h de uma vez (site no ar e indexado, Navegação Segura limpa, certificado ok, Googlebot normal). No mesmo
+   dia entraram 59.165 fichas novas (37 cidades; total 110.895): suspeita de rebaixamento automático por conteúdo em massa.
+   (1) ✅ Fichas fracas fora do Google (20/11): SQL_NO_GOOGLE em inc/guia.php = telefone/WhatsApp E (dono ou pagou, 5+
+       avaliações no Google [popularidade], site/Instagram, ou visita vinda do Google nos últimos 30 dias). Usada no sitemap
+       de comércios, no noindex da ficha (ficha_no_google) e em /admin/google.php. No Google: 64.658 (antes 93.474). As
+       outras continuam no site e no app e voltam sozinhas. Backups em /var/lib/acha-facil/backups/*.antes-regra-google.20261120.
+   (2) ⬜ Pausado: cidades novas e lotes 2–4 do Search Console até o tráfego voltar (~20/h por 1–2 semanas); depois 2–3 cidades/semana.
+   (3) ⬜ Reenviar só o sitemap.xml principal no Search Console (usuário). Não usar Remoções.
+   (4) ⬜ Páginas de cidade e categoria mais fortes (texto próprio, bairros, abertos agora, perguntas).
+   (5) ⬜ Divulgação fora do Google (Quem chamar, Instagram por cidade, app).
+   (6) ⬜ Conferir toda semana: Search Console Desempenho 7 dias + Páginas; registros do servidor.

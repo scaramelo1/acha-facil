@@ -12,9 +12,9 @@ $dias = $d['dias'] ?? [];
 $hoje = hoje();
 $ult7 = array_filter($dias, fn($k) => $k >= date('Y-m-d', strtotime('-6 days')), ARRAY_FILTER_USE_KEY);
 
-// fichas no sitemap (mesma regra do web_sitemap_cidade: visível e com telefone ou WhatsApp), por cidade
+// fichas no sitemap (mesma regra do web_sitemap_cidade: SQL_NO_GOOGLE), por cidade
 $no_sitemap = $visitadas = [];
-foreach (q('SELECT p.id, p.cidade FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE ' . visivel() . ' AND ' . SQL_TEM_CONTATO) as $p) {
+foreach (q('SELECT p.id, p.cidade FROM profissionais p JOIN categorias c ON c.id = p.categoria_id WHERE ' . visivel() . ' AND ' . SQL_NO_GOOGLE) as $p) {
     $no_sitemap[$p['cidade']] = ($no_sitemap[$p['cidade']] ?? 0) + 1;
     if (isset($fichas_vistas[$p['id']])) $visitadas[$p['cidade']] = ($visitadas[$p['cidade']] ?? 0) + 1;
 }
