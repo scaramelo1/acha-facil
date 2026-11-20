@@ -2,7 +2,7 @@
 // Recebe a lista do robô direto do PC (scripts/robo/robo-rodar.ps1), sem login: vale a chave do robô
 // (gerada em /admin/novidades.php) no cabeçalho X-Chave-Robo. Confere em modo TESTE e guarda em Novidades;
 // com o modo automático ligado, já importa. Avisa os admins no celular. Responde em texto simples.
-//   curl.exe -H "X-Chave-Robo: af_..." -F "arquivos[]=@leads_sao_joao.html" [-F cidade=sao-joao] https://achafacilapp.com.br/admin/robo-enviar.php
+//   curl.exe -H "X-Chave-Robo: af_..." -F "arquivos[]=@leads_sao_joao.html" [-F cidade=sao-joao] [-F importar=1] https://achafacilapp.com.br/admin/robo-enviar.php
 declare(strict_types=1);
 require __DIR__ . '/../../inc/base.php';
 require_once __DIR__ . '/../../inc/novidades.php';
@@ -40,7 +40,8 @@ $cidade = nome_cidade($m['cidade']);
 $base = url_publica('admin/novidades.php?id=' . $m['id']);
 $tem_novidade = $m['novos'] + $m['mudaram'] + $m['fecharam'] > 0;
 
-if (nov_config()['automatico']) {
+// 20/11: importar=1 (scripts/robo/enviar-listas.ps1) importa na hora, mesmo com o modo automático desligado
+if (nov_config()['automatico'] || ($_POST['importar'] ?? '') === '1') {
     try {
         $m = nov_importar($m, null);
         nov_descartar_antigas($m['cidade'], $m['id']);
