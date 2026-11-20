@@ -1,8 +1,91 @@
-# Cronograma das próximas cidades (pedido do usuário em 17/11/2026)
+# Cronograma das próximas cidades
 
-16 cidades turísticas enviadas pelo usuário. Divididas em 4 levas por região (o robô do PC raspa uma região por vez) e da
-menor para a maior dentro de cada leva (as grandes levam mais tempo para geocodificar, ~1,3 s por comércio).
-Nenhuma estava na tabela `cidades` em 17/11.
+**Desde 20/11/2026 a ordem é a lista de prioridades abaixo** (pedido do usuário; substituiu as 4 levas de 17/11, que
+ficam no fim só como histórico). Vale para as 65 cidades cadastradas e desligadas (amarelo em /admin/mapa.php).
+Critérios: volume de turistas, pouca concorrência no Google, distância da base e porte (cidade grande = geocodificação
+demorada, ~1,3 s por comércio). Cidades vizinhas na mesma prioridade: raspar juntas (uma viagem só do robô).
+Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista de passos.
+
+**Temporada:** Ilhabela e Ubatuba precisam estar importadas até o começo de dezembro para o Google ler antes do verão.
+
+## 🔴 Prioridade 1 — fazer primeiro
+1. [ ] Olímpia (SP) — cidade pequena com milhões de turistas/ano; melhor aposta
+2. [ ] Monte Sião (MG) — colada na base; excursões de compras o ano todo
+3. [ ] Jacutinga (MG) — junto com Monte Sião
+4. [ ] Lindóia (SP) — pequena; fecha o Circuito das Águas
+5. [ ] Amparo (SP) — mesmo circuito
+6. [ ] Ilhabela (SP) — temporada (até início de dezembro)
+7. [ ] Ubatuba (SP) — temporada; grande
+8. [ ] Capitólio (MG) — turismo em alta, comércios quase sem site
+9. [ ] Santo Antônio do Pinhal (SP)
+10. [ ] São Tomé das Letras (MG)
+11. [ ] Joanópolis (SP)
+12. [ ] Águas de São Pedro (SP) — pequena
+13. [ ] São Pedro (SP) — junto com Águas de São Pedro
+14. [ ] Tiradentes (MG)
+15. [ ] Ouro Preto (MG)
+16. [ ] São Lourenço (MG)
+17. [ ] Caxambu (MG) — junto com São Lourenço
+
+## 🟠 Prioridade 2 — em seguida
+18. [ ] Atibaia (SP) — grande
+19. [ ] Itu (SP) — grande
+20. [ ] Embu das Artes (SP)
+21. [ ] Guararema (SP)
+22. [ ] Boituva (SP)
+23. [ ] Gonçalves (MG)
+24. [ ] Passa Quatro (MG)
+25. [ ] Cunha (SP)
+26. [ ] São Luiz do Paraitinga (SP)
+27. [ ] Caraguatatuba (SP) — grande
+28. [ ] São Sebastião (SP)
+29. [ ] Mariana (MG) — junto com Ouro Preto
+30. [ ] Brumadinho (MG)
+31. [ ] Lambari (MG)
+32. [ ] Baependi (MG) — ao lado de Caxambu
+33. [ ] Barra Bonita (SP)
+34. [ ] Vinhedo (SP)
+35. [ ] Ouro Fino (MG)
+36. [ ] Diamantina (MG) — longe
+37. [ ] Araxá (MG) — grande e longe
+
+## 🟡 Prioridade 3 — quando der
+38. [ ] Borda da Mata (MG)
+39. [ ] Cambuquira (MG)
+40. [ ] Maria da Fé (MG)
+41. [ ] Aiuruoca (MG)
+42. [ ] Itamonte (MG)
+43. [ ] São José da Barra (MG) — ao lado de Capitólio
+44. [ ] São Roque de Minas (MG)
+45. [ ] Delfinópolis (MG)
+46. [ ] Vargem Bonita (MG)
+47. [ ] São João del Rei (MG) — grande
+48. [ ] Congonhas (MG)
+49. [ ] Bananal (SP)
+50. [ ] Igaraçu do Tietê (SP) — ao lado de Barra Bonita
+51. [ ] Peruíbe (SP)
+52. [ ] Iguape (SP)
+53. [ ] Ilha Comprida (SP)
+54. [ ] Valinhos (SP)
+55. [ ] Louveira (SP)
+56. [ ] Indaiatuba (SP) — grande
+57. [ ] Jundiaí (SP) — muito grande
+58. [ ] Santana de Parnaíba (SP) — muito grande, região metropolitana
+
+## ⚪ Prioridade 4 — cidades da região, sem turismo
+59. [ ] Itapira (SP)
+60. [ ] Mogi Mirim (SP)
+61. [ ] Santo Antônio de Posse (SP)
+62. [ ] Estiva Gerbi (SP)
+63. [ ] São Sebastião da Grama (SP)
+64. [ ] Tapiratiba (SP)
+65. [ ] Itobi (SP)
+
+---
+
+# Histórico: levas de 17/11 (substituídas pela lista acima em 20/11)
+
+16 cidades turísticas enviadas pelo usuário em 17/11, em 4 levas por região.
 
 | Leva | Semana | Região | Cidades (ordem) |
 |---|---|---|---|
@@ -47,8 +130,7 @@ guararema, atibaia, santana-de-parnaiba, embu-das-artes.
 ## Cidades turísticas sugeridas (20/11, pedido do usuário) — cadastradas DESLIGADAS (amarelo no mapa)
 44 cidades na tabela `cidades`, `ativa = 0`, ordem 48–91, nome oficial do IBGE (o mapa casa pelo nome), centro pelo
 OpenStreetMap. Backup antes: /var/lib/acha-facil/backups/cidades.antes-44-turisticas.202611200802.sql.
-Ainda sem semana marcada: esperar o usuário pedir. Ordem sugerida: Circuito das Malhas → Olímpia → Circuito das Águas MG
-→ Capitólio e região → Litoral Norte (antes da temporada).
+Ordem: ver a lista de prioridades no topo deste arquivo.
 
 | Região | Cidades |
 |---|---|
