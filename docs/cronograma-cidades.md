@@ -20,8 +20,8 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 9. [ ] Santo Antônio do Pinhal (SP)
 10. [x] São Tomé das Letras (MG)
 11. [ ] Joanópolis (SP)
-12. [ ] Águas de São Pedro (SP) — pequena
-13. [ ] São Pedro (SP) — junto com Águas de São Pedro
+12. [x] Águas de São Pedro (SP) — pequena
+13. [x] São Pedro (SP) — junto com Águas de São Pedro
 14. [ ] Tiradentes (MG)
 15. [ ] Ouro Preto (MG)
 16. [x] São Lourenço (MG)
@@ -153,7 +153,7 @@ Ordem: ver a lista de prioridades no topo deste arquivo.
 
 ## Grupos de cidades vizinhas (20/11) — `.\scripts\robo\rodar-cidades.ps1 -Grupo N`
 1 ✅ (20/11, importadas e ligadas: 8.014 comércios) Lindóia, Amparo, Monte Sião, Jacutinga, Ouro Fino, Borda da Mata · 2 ✅ (20/11, ligadas: 15.490 comércios) Ilhabela, Ubatuba, Caraguatatuba, São Sebastião ·
-3 ✅ (20/11, ligadas: 7.353 comércios) São Lourenço, Caxambu, Baependi, São Tomé das Letras, Lambari, Cambuquira, Aiuruoca · 4 Águas de São Pedro, São Pedro ·
+3 ✅ (20/11, ligadas: 7.353 comércios) São Lourenço, Caxambu, Baependi, São Tomé das Letras, Lambari, Cambuquira, Aiuruoca · 4 ✅ (20/11, ligadas: 2.368) Águas de São Pedro, São Pedro ·
 5 Tiradentes, São João del Rei · 6 Ouro Preto, Mariana, Congonhas · 7 Capitólio, São José da Barra ·
 8 Santo Antônio do Pinhal, Gonçalves, Maria da Fé, Passa Quatro, Itamonte · 9 Atibaia, Joanópolis · 10 Itu, Boituva, Indaiatuba ·
 11 Vinhedo, Valinhos, Louveira, Jundiaí · 12 Cunha, São Luiz do Paraitinga, Guararema · 13 Embu das Artes, Santana de Parnaíba ·
