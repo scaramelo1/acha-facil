@@ -79,7 +79,7 @@ const TIPO_AREA_CERTA = [
     // Outros
     'Osteopata' => 'saude', 'Endocrinologista' => 'saude', 'Reumatologista' => 'saude', 'Imunologista' => 'saude', 'Ambulatório' => 'saude',
     'Cuidados com os pés' => 'saude', 'Lotérica' => 'financeiro', 'Cobrança de dívidas' => 'financeiro', 'Casa funerária' => 'servicos',
-    'Centro de Reciclagem' => 'servicos', 'Correios' => 'servicos', 'Serviços gráficos' => 'servicos', 'Serigrafia' => 'servicos',
+    'Centro de Reciclagem' => 'servicos', 'Correios' => 'publicos', 'Serviços gráficos' => 'servicos', 'Serigrafia' => 'servicos',
     'Assistência jurídica' => 'servicos', 'Recrutamento' => 'servicos', 'Serviços de faxina' => 'servicos',
     'Agência de viagens a pontos turísticos' => 'servicos', 'Operador de turismo' => 'servicos', 'Agência de locação de vans' => 'servicos',
     'Pensão' => 'hospedagem', 'Hostel' => 'hospedagem', 'Local para casamentos' => 'hospedagem', 'Desentupidora' => 'casa',
@@ -117,8 +117,23 @@ const TIPO_AREA_CERTA = [
 ];
 
 // Não é comércio (lugar público, prédio, ponte...): a ficha importada sai do app (status pausado; o admin pode voltar).
-const TIPO_NAO_COMERCIO = '/^(ponte|complexo (de condom[íi]nio|residencial|de apartamentos)|pres[íi]dio|reparti[çc][ãa]o p[úu]blica( federal)?|'
-    . 'banheiro p[úu]blico|base militar|cemit[ée]rio|escrit[óo]rio do governo.*|drinking water)$/iu';   // só tipo que nunca é comércio
+// 20/11 (pedido do usuário): igrejas, cemitérios, velórios e órgãos públicos entram no app, cada um na sua área
+// (vale para listas novas e para o limpar-dados.php). Área "Órgãos públicos" = slug publicos.
+const TIPO_AREA_RE = [
+    '/^(prefeitura.*|c[âa]mara (municipal|de vereadores).*|reparti[çc][ãa]o p[úu]blica.*|escrit[óo]rio do governo.*|prestador de servi[çc]os p[úu]blicos|'
+        . 'delegacia.*|departamento de pol[íi]cia|pol[íi]cia.*|posto policial|base comunit[áa]ria.*|(corpo de )?bombeiros|tribunal.*|f[óo]rum.*|'
+        . 'departamento de tr[âa]nsito|detran|departamento de ve[íi]culos automotores|minist[ée]rio p[úu]blico|defensoria p[úu]blica|'
+        . 'secretaria.*|previd[êe]ncia social|ag[êe]ncia do inss|inss|poupatempo|conselho tutelar|cras|creas|'
+        . 'departamento (de registro de domic[íi]lios|do meio ambiente|fiscal|municipal.*|de obras.*|de [áa]gua.*)|'
+        . 'escrit[óo]rio de recrutamento militar|junta militar|quartel.*|correios|ag[êe]ncia dos correios|'
+        . 'centro de informa[çc][ãa]o ao turista|biblioteca( p[úu]blica| municipal)?|cart[óo]rio eleitoral)$/iu' => 'publicos',
+    '/^(cemit[ée]rio.*|vel[óo]rio.*|cremat[óo]rio|capela mortu[áa]ria|casa funer[áa]ria|funer[áa]ria|agente funer[áa]rio.*)$/iu' => 'servicos',
+    '/^(igreja.*|templo.*|par[óo]quia|santu[áa]rio.*|bas[íi]lica|catedral|capela|destino religioso|congrega[çc][ãa]o|centro esp[íi]rita|'
+        . 'terreiro.*|casa de ora[çc][ãa]o|mesquita|sinagoga|mosteiro|convento)$/iu' => 'entidades',
+];
+// 20/11 (pedido do usuário): repartição pública, escritório do governo e cemitério ENTRAM no app (TIPO_AREA_RE abaixo)
+const TIPO_NAO_COMERCIO = '/^(ponte|complexo (de condom[íi]nio|residencial|de apartamentos)|pres[íi]dio|'
+    . 'banheiro p[úu]blico|base militar|drinking water)$/iu';   // só tipo que nunca é comércio
 function tipo_nao_comercio(?string $tipo): bool { return $tipo !== null && preg_match(TIPO_NAO_COMERCIO, trim($tipo)) === 1; }
 
 /** Tipo padronizado (Bares → Bar); endereço no lugar do tipo ("R. Tabapuan, 12") vira vazio. */
@@ -129,7 +144,10 @@ function limpar_tipo(?string $tipo): ?string {
 }
 /** Slug da área certa para o tipo, ou null se o tipo não está na lista de correções. */
 function area_certa_do_tipo(?string $tipo): ?string {
-    return $tipo !== null ? (TIPO_AREA_CERTA[trim($tipo)] ?? null) : null;
+    if ($tipo === null) return null;
+    if (isset(TIPO_AREA_CERTA[trim($tipo)])) return TIPO_AREA_CERTA[trim($tipo)];
+    foreach (TIPO_AREA_RE as $re => $slug) if (preg_match($re, trim($tipo))) return $slug;
+    return null;
 }
 
 /** Bairros já escritos direito na cidade (com maiúscula), do mais usado: chave sem acento → como escrever. */

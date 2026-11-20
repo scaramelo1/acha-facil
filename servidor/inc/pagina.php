@@ -21,7 +21,7 @@ function contatos_html(): string {
 // Emoji de enfeite por ícone da área (o site não carrega a fonte de ícones do app)
 const EMOJI_AREAS = ['silverware-fork-knife' => '🍽️', 'cart-outline' => '🛒', 'tools' => '🛠️', 'heart-pulse' => '🩺', 'lipstick' => '💄', 'content-cut' => '✂️',
     'tshirt-crew-outline' => '👕', 'home-roof' => '🏠', 'car-wrench' => '🚗', 'shopping-outline' => '🛍️', 'school-outline' => '🎓',
-    'dumbbell' => '🏋️', 'paw' => '🐾', 'bed-outline' => '🛏️', 'bank-outline' => '🏦', 'factory' => '🏭', 'hand-heart-outline' => '🤝'];
+    'dumbbell' => '🏋️', 'paw' => '🐾', 'bed-outline' => '🛏️', 'bank-outline' => '🏦', 'factory' => '🏭', 'hand-heart-outline' => '🤝', 'domain' => '🏛️'];
 function emoji_area(?string $icone): string { return EMOJI_AREAS[$icone] ?? '📍'; }
 
 // Anúncios do Google AdSense (15/11). Só nas páginas que pedem com $opc['anuncios'] = true: inicial, cidade, listas, busca
