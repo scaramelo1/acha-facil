@@ -150,3 +150,13 @@ Ordem: ver a lista de prioridades no topo deste arquivo.
 
 - Grandes (muitos comércios, geocodificação demorada): Jundiaí, Indaiatuba, Araxá, Caraguatatuba, São João del Rei, Ubatuba.
 - Litoral e Estrada Real ficam longe da base: conferir a CAIXA do geocodificador antes de importar.
+
+## Grupos de cidades vizinhas (20/11) — `.\scripts\robo\rodar-cidades.ps1 -Grupo N`
+1 Lindóia, Amparo, Monte Sião, Jacutinga, Ouro Fino, Borda da Mata · 2 Ilhabela, Ubatuba, Caraguatatuba, São Sebastião ·
+3 São Lourenço, Caxambu, Baependi, São Tomé das Letras, Lambari, Cambuquira, Aiuruoca · 4 Águas de São Pedro, São Pedro ·
+5 Tiradentes, São João del Rei · 6 Ouro Preto, Mariana, Congonhas · 7 Capitólio, São José da Barra ·
+8 Santo Antônio do Pinhal, Gonçalves, Maria da Fé, Passa Quatro, Itamonte · 9 Atibaia, Joanópolis · 10 Itu, Boituva, Indaiatuba ·
+11 Vinhedo, Valinhos, Louveira, Jundiaí · 12 Cunha, São Luiz do Paraitinga, Guararema · 13 Embu das Artes, Santana de Parnaíba ·
+14 Barra Bonita, Igaraçu do Tietê · 15 São Roque de Minas, Delfinópolis, Vargem Bonita · 16 Peruíbe, Iguape, Ilha Comprida ·
+17 Itapira, Mogi Mirim, Santo Antônio de Posse, Estiva Gerbi · 18 São Sebastião da Grama, Tapiratiba, Itobi ·
+19 (sozinhas) Olímpia, Brumadinho, Araxá, Diamantina, Bananal.

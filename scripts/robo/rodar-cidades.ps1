@@ -5,8 +5,9 @@
 #
 #   .\scripts\robo\rodar-cidades.ps1                  -> todas, na ordem
 #   .\scripts\robo\rodar-cidades.ps1 -Quantas 5       -> so as 5 proximas
+#   .\scripts\robo\rodar-cidades.ps1 -Grupo 1         -> so as cidades vizinhas do grupo 1 (grupos 1 a 19, docs/cronograma-cidades.md)
 #   .\scripts\robo\rodar-cidades.ps1 -Pasta E:\listas -> outra pasta para os arquivos (padrao D:\robo-listas)
-param([int]$Quantas = 0, [string]$Pasta = 'D:\robo-listas')
+param([int]$Quantas = 0, [int]$Grupo = 0, [string]$Pasta = 'D:\robo-listas')
 $robo = Join-Path $PSScriptRoot 'leads_places_api.py'
 $cidades = @(
   "Olímpia;SP",
@@ -75,6 +76,31 @@ $cidades = @(
   "Tapiratiba;SP",
   "Itobi;SP"
 )
+$grupos = @{
+  1 = @("Lindóia;SP", "Amparo;SP", "Monte Sião;MG", "Jacutinga;MG", "Ouro Fino;MG", "Borda da Mata;MG")
+  2 = @("Ilhabela;SP", "Ubatuba;SP", "Caraguatatuba;SP", "São Sebastião;SP")
+  3 = @("São Lourenço;MG", "Caxambu;MG", "Baependi;MG", "São Tomé das Letras;MG", "Lambari;MG", "Cambuquira;MG", "Aiuruoca;MG")
+  4 = @("Águas de São Pedro;SP", "São Pedro;SP")
+  5 = @("Tiradentes;MG", "São João del Rei;MG")
+  6 = @("Ouro Preto;MG", "Mariana;MG", "Congonhas;MG")
+  7 = @("Capitólio;MG", "São José da Barra;MG")
+  8 = @("Santo Antônio do Pinhal;SP", "Gonçalves;MG", "Maria da Fé;MG", "Passa Quatro;MG", "Itamonte;MG")
+  9 = @("Atibaia;SP", "Joanópolis;SP")
+  10 = @("Itu;SP", "Boituva;SP", "Indaiatuba;SP")
+  11 = @("Vinhedo;SP", "Valinhos;SP", "Louveira;SP", "Jundiaí;SP")
+  12 = @("Cunha;SP", "São Luiz do Paraitinga;SP", "Guararema;SP")
+  13 = @("Embu das Artes;SP", "Santana de Parnaíba;SP")
+  14 = @("Barra Bonita;SP", "Igaraçu do Tietê;SP")
+  15 = @("São Roque de Minas;MG", "Delfinópolis;MG", "Vargem Bonita;MG")
+  16 = @("Peruíbe;SP", "Iguape;SP", "Ilha Comprida;SP")
+  17 = @("Itapira;SP", "Mogi Mirim;SP", "Santo Antônio de Posse;SP", "Estiva Gerbi;SP")
+  18 = @("São Sebastião da Grama;SP", "Tapiratiba;SP", "Itobi;SP")
+  19 = @("Olímpia;SP", "Brumadinho;MG", "Araxá;MG", "Diamantina;MG", "Bananal;SP")
+}
+if ($Grupo -gt 0) {
+  if (-not $grupos.ContainsKey($Grupo)) { Write-Host "Grupo $Grupo nao existe (1 a 19)." -ForegroundColor Red; return }
+  $cidades = $grupos[$Grupo]
+}
 New-Item -ItemType Directory -Force $Pasta | Out-Null
 Set-Location $Pasta
 $env:PYTHONUTF8 = '1'
@@ -96,6 +122,7 @@ foreach ($linha in $cidades) {
   Write-Host "`n===== $nome - $uf  ($(Get-Date -Format HH:mm)) =====" -ForegroundColor Green
   python $robo $nome $uf
   if ($LASTEXITCODE -eq 2) { Write-Host "`nO Google recusou (veja a mensagem acima). Parei; $nome NAO foi salva." -ForegroundColor Red; break }
+  if ($LASTEXITCODE -eq 130) { Write-Host "`nParado com Ctrl+C. $nome NAO foi salva." -ForegroundColor Yellow; break }
   if ($LASTEXITCODE -ne 0) { Write-Host "`nErro em $nome. Parei." -ForegroundColor Red; break }
   Add-Content -Path $feitasArq -Value $linha -Encoding UTF8
   $rodadas++

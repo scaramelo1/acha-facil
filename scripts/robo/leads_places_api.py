@@ -130,13 +130,17 @@ def main():
     if not KEY: sys.exit("Defina GOOGLE_MAPS_API_KEY")
     vistos, leads = set(), []
     resultados = []
+    ex = cf.ThreadPoolExecutor(4)   # sem "with": o Ctrl+C não fica esperando as pesquisas em andamento
     try:
-        with cf.ThreadPoolExecutor(4) as ex:
-            resultados = list(ex.map(busca, TERMOS))
+        resultados = list(ex.map(busca, TERMOS))
+        ex.shutdown()
+    except KeyboardInterrupt:
+        print("\nParado com Ctrl+C. Nada foi salvo. Pesquisas feitas:", PESQUISAS[0])
+        os._exit(130)
     except Parar as erro:
         print("\nPAREI SEM SALVAR NADA:", erro)
         print("Pesquisas feitas antes de parar:", PESQUISAS[0])
-        sys.exit(2)
+        os._exit(2)
     for res in resultados:
         for p in res:
             end, cidade = endereco(p)
@@ -204,4 +208,8 @@ a.nm{{font-weight:600;color:#1a56db;text-decoration:none}}a.wa{{color:#128c4b}}<
           "| com ponto no mapa:", sum(1 for l in leads if l["lat"] is not None), "| fechados de vez:", sum(1 for l in leads if l["ativo"] == "inativo"))
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:   # Ctrl+C: sai na hora, sem salvar e sem esperar as pesquisas em andamento
+        print("\nParado com Ctrl+C. Nada foi salvo. Pesquisas feitas:", PESQUISAS[0])
+        os._exit(130)
