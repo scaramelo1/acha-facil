@@ -966,7 +966,7 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
        de comércios, no noindex da ficha (ficha_no_google) e em /admin/google.php. No Google: 64.658 (antes 93.474). As
        outras continuam no site e no app e voltam sozinhas. Backups em /var/lib/acha-facil/backups/*.antes-regra-google.20261120.
    (2) ✅ Pausa combinada com o usuário em 20/11: cidades novas e lotes 2–4 do Search Console parados até o tráfego voltar (~20/h por 1–2 semanas); depois 2–3 cidades/semana.
-   (3) ⬜ Reenviar só o sitemap.xml principal no Search Console (usuário). Não usar Remoções.
+   (3) ✅ Não precisa (20/11): o Google relê os sitemaps sozinho todo dia (48–125 leituras/dia); a pausa é de não enviar nada novo. Não usar Remoções.
    (4) ⬜ Páginas de cidade e categoria mais fortes (texto próprio, bairros, abertos agora, perguntas).
    (5) ⬜ Divulgação fora do Google (Quem chamar, Instagram por cidade, app).
    (6) ⬜ Conferir toda semana: Search Console Desempenho 7 dias + Páginas; registros do servidor.
