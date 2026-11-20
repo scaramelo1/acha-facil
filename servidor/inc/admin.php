@@ -63,7 +63,7 @@ function admin_inicio(string $titulo, ?array $admin): void {
           ['cupons.php', 'Cupons', 0], ['novidades.php', 'Novidades do robô', $nov], ['importar.php', 'Importar lista', 0],
           ['cidades.php', 'Cidades', 0], ['mapa.php', 'Mapa das cidades', 0]]],
       ['📊', 'Números', 0, [
-          ['numeros.php', 'Números', 0], ['entradas.php', 'De onde vêm (entradas)', 0], ['buscas.php', 'O que procuram', 0],
+          ['numeros.php', 'Números', 0], ['conversao.php', 'Conversão e projeção', 0], ['entradas.php', 'De onde vêm (entradas)', 0], ['buscas.php', 'O que procuram', 0],
           ['pedidos-info.php', 'Pedidos de informação', 0], ['google.php', 'Google por cidade', 0]]],
       ['👥', 'Pessoas', $sup, [
           ['pessoas.php', 'Pessoas', 0], ['suporte.php', 'Suporte', $sup], ['notificacoes.php', 'Notificações', 0]]],

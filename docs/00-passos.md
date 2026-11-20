@@ -958,3 +958,12 @@ Legenda: ✅ feito · 🟡 parcial · ⬜ a fazer
    Novidades, Importar, Cidades, Mapa), 📊 Números (Números, Entradas, O que procuram, Pedidos de informação, Google),
    👥 Pessoas (Pessoas, Suporte, Notificações), ⚙️ Mais (Eventos, App, Anúncios, Registro, Senha, Sair). O contador de cada
    grupo soma as pendências de dentro; grupo e página atuais destacados; só um aberto por vez; no celular até 520 px só ícones.
+118. ✅ Conversão e projeção de ganhos (20/11, pedido do usuário: "refazer a projeção com a taxa real de conversão do 1º mês de
+   abordagem, desconsiderando os pagamentos deste mês, começando do zero"): **/admin/conversao.php** (📊 Números > Conversão e
+   projeção; link também no Quem chamar). Conta do zero desde CONVERSAO_INICIO = 20/11/2026 (inc/conversao.php): os
+   pagamentos de 08–17/11 e a chamada de 19/11 ficam fora. Abordagem = registro 'chamou_comercio'; "Desfazer" agora grava
+   'desfez_chamada' e tira da conta. Funil: chamados → assumiram (pedido assumir depois da chamada) → pagaram Básico / Destaque
+   / Destaque + Site (pago de verdade, cortesia não conta); sem chamada antes = orgânico. Renovação = Destaques pagos há 35+
+   dias ainda em dia (até ter 3, cancelamento suposto 25%/15%). Projeção de 12 meses: normal = taxa medida; pessimista =
+   limite de baixo de Wilson (~80%), metade do orgânico e o cancelamento mais alto; ritmo de chamadas (medido, ou 300) e
+   AdSense por mês editáveis; líquido sem ~5% do MP. Aviso de poucos dados até 30 chamadas. Sem migração. Revisar em 20/12.

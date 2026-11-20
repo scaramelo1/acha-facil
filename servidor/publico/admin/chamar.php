@@ -11,6 +11,7 @@ if (e_post()) {
     if ($id > 0 && in_array($acao, ['chamei', 'desfazer'], true)) {
         prospeccao_marcar($id, $acao === 'chamei' ? (string)$admin['nome'] : null, (string)($_POST['como'] ?? 'whatsapp'));
         if ($acao === 'chamei') registrar((int)$admin['id'], 'chamou_comercio', $id, (string)($_POST['como'] ?? 'whatsapp'));
+        else registrar((int)$admin['id'], 'desfez_chamada', $id);   // tira da conta da conversão (admin/conversao.php)
     }
     if (!empty($_POST['ajax'])) { header('Content-Type: application/json'); echo '{"ok":true}'; exit; }
     ir('admin/chamar.php?' . http_build_query(array_filter(['cidade' => $_POST['cidade'] ?? '', 'dias' => $_POST['dias'] ?? '', 'ver' => $_POST['ver'] ?? ''])));
@@ -51,7 +52,8 @@ admin_inicio('Quem chamar hoje', $admin);
 <h1>📞 Quem chamar hoje</h1>
 <p class="discreto">Comércios <strong>sem dono</strong> que mais apareceram nos últimos <?= $dias ?> dias (vistas + 3 x pedidos de informação).
   O botão <strong>WhatsApp</strong> abre a conversa com a mensagem pronta, com os números da ficha e o link para ele cadastrar grátis.
-  Depois de chamar, toque em <strong>✓ Chamei</strong>: o comércio sai da lista por <?= PROSPECCAO_ESCONDER_DIAS ?> dias.</p>
+  Depois de chamar, toque em <strong>✓ Chamei</strong>: o comércio sai da lista por <?= PROSPECCAO_ESCONDER_DIAS ?> dias.
+  Quem assume ou paga depois da chamada aparece em <a href="conversao.php">📈 Conversão e projeção</a>.</p>
 
 <form method="get" class="filtros-numeros">
   <label>Cidade <select name="cidade"><option value="">Todas</option>
