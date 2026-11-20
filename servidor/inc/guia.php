@@ -129,7 +129,7 @@ function nome_curto(string $nome, int $max = 60): string {
     if (mb_strlen($n) <= $max) return $n;
     $c = mb_substr($n, 0, $max);
     $c = preg_replace('/\s+\S*$/u', '', $c) ?: $c;
-    return rtrim($c, " -–,.:;") . '…';
+    return preg_replace('/[\s\-–,.:;]+$/u', '', $c) . '…';   // 20/11: rtrim com "–" cortava meio "Ó" ou "À"
 }
 function ficha_no_google(array $p): bool { return trim((string)($p['telefone'] ?? '')) !== '' || trim((string)($p['whatsapp'] ?? '')) !== ''; }
 
