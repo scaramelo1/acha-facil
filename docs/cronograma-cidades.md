@@ -16,14 +16,14 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 5. [x] Amparo (SP) — mesmo circuito
 6. [x] Ilhabela (SP) — temporada (até início de dezembro)
 7. [x] Ubatuba (SP) — temporada; grande
-8. [ ] Capitólio (MG) — turismo em alta, comércios quase sem site
+8. [x] Capitólio (MG) — turismo em alta, comércios quase sem site
 9. [ ] Santo Antônio do Pinhal (SP)
 10. [x] São Tomé das Letras (MG)
 11. [ ] Joanópolis (SP)
 12. [x] Águas de São Pedro (SP) — pequena
 13. [x] São Pedro (SP) — junto com Águas de São Pedro
 14. [x] Tiradentes (MG)
-15. [ ] Ouro Preto (MG)
+15. [x] Ouro Preto (MG)
 16. [x] São Lourenço (MG)
 17. [x] Caxambu (MG) — junto com São Lourenço
 
@@ -39,7 +39,7 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 26. [ ] São Luiz do Paraitinga (SP)
 27. [x] Caraguatatuba (SP) — grande
 28. [x] São Sebastião (SP)
-29. [ ] Mariana (MG) — junto com Ouro Preto
+29. [x] Mariana (MG) — junto com Ouro Preto
 30. [ ] Brumadinho (MG)
 31. [x] Lambari (MG)
 32. [x] Baependi (MG) — ao lado de Caxambu
@@ -55,12 +55,12 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 40. [ ] Maria da Fé (MG)
 41. [x] Aiuruoca (MG)
 42. [ ] Itamonte (MG)
-43. [ ] São José da Barra (MG) — ao lado de Capitólio
+43. [x] São José da Barra (MG) — ao lado de Capitólio
 44. [ ] São Roque de Minas (MG)
 45. [ ] Delfinópolis (MG)
 46. [ ] Vargem Bonita (MG)
 47. [x] São João del Rei (MG) — grande
-48. [ ] Congonhas (MG)
+48. [x] Congonhas (MG)
 49. [ ] Bananal (SP)
 50. [ ] Igaraçu do Tietê (SP) — ao lado de Barra Bonita
 51. [ ] Peruíbe (SP)
@@ -154,7 +154,7 @@ Ordem: ver a lista de prioridades no topo deste arquivo.
 ## Grupos de cidades vizinhas (20/11) — `.\scripts\robo\rodar-cidades.ps1 -Grupo N`
 1 ✅ (20/11, importadas e ligadas: 8.014 comércios) Lindóia, Amparo, Monte Sião, Jacutinga, Ouro Fino, Borda da Mata · 2 ✅ (20/11, ligadas: 15.490 comércios) Ilhabela, Ubatuba, Caraguatatuba, São Sebastião ·
 3 ✅ (20/11, ligadas: 7.353 comércios) São Lourenço, Caxambu, Baependi, São Tomé das Letras, Lambari, Cambuquira, Aiuruoca · 4 ✅ (20/11, ligadas: 2.368) Águas de São Pedro, São Pedro ·
-5 Tiradentes, São João del Rei · 6 Ouro Preto, Mariana, Congonhas · 7 Capitólio, São José da Barra ·
+5 Tiradentes, São João del Rei · 6 ✅ (20/11, ligadas: 6.710) Ouro Preto, Mariana, Congonhas · 7 ✅ (20/11, ligadas: 1.455) Capitólio, São José da Barra ·
 8 Santo Antônio do Pinhal, Gonçalves, Maria da Fé, Passa Quatro, Itamonte · 9 Atibaia, Joanópolis · 10 Itu, Boituva, Indaiatuba ·
 11 Vinhedo, Valinhos, Louveira, Jundiaí · 12 Cunha, São Luiz do Paraitinga, Guararema · 13 Embu das Artes, Santana de Parnaíba ·
 14 Barra Bonita, Igaraçu do Tietê · 15 São Roque de Minas, Delfinópolis, Vargem Bonita · 16 Peruíbe, Iguape, Ilha Comprida ·
