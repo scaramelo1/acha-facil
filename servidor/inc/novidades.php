@@ -36,6 +36,20 @@ function cidade_do_arquivo(string $html): ?string {
     return null;
 }
 
+/** 20/11: pelo nome do arquivo ("leads-divinolandia-sp (1).html", "leads_monte_sião_novos.html") quando o cabeçalho não diz */
+function cidade_do_nome_arquivo(array $nomes): ?string {
+    $norm = fn($s) => preg_replace('/[^a-z0-9]/', '', strtr(mb_strtolower($s),
+        ['á'=>'a','à'=>'a','â'=>'a','ã'=>'a','é'=>'e','ê'=>'e','í'=>'i','ó'=>'o','ô'=>'o','õ'=>'o','ú'=>'u','ü'=>'u','ç'=>'c']));
+    foreach ($nomes as $n) {
+        $b = mb_strtolower(preg_replace('/\.html?$/i', '', basename((string)$n)));
+        $b = preg_replace(['/^leads[-_ ]*/u', '/\s*\(\d+\)$/u', '/[-_ ](novos|completo)$/u', '/[-_ ](sp|mg)$/u', '/[-_ ](novos|completo)$/u'], '', $b);
+        $b = $norm($b);
+        if ($b === '') continue;
+        foreach (TODAS_CIDADES as $slug => $c) if ($b === $norm($slug) || $b === $norm($c[0])) return $slug;
+    }
+    return null;
+}
+
 // ---------- configuração: chave do robô e modo automático ----------
 function nov_config(): array {
     $f = nov_dir() . '/config.json';
@@ -103,7 +117,7 @@ function nov_resumo(array $m): string {
  */
 function nov_criar(string $html, string $slug, string $origem, array $nomes): array {
     if (!str_contains($html, '<tr data-status=')) throw new RuntimeException('Não parece a lista do robô (não achei a tabela de comércios).');
-    if ($slug === '') $slug = (string)cidade_do_arquivo($html);
+    if ($slug === '') $slug = (string)(cidade_do_arquivo($html) ?? cidade_do_nome_arquivo($nomes));
     if (!isset(TODAS_CIDADES[$slug])) throw new RuntimeException('Não sei de qual cidade é a lista. Cadastre a cidade em /admin/cidades.php (ou escolha a cidade no envio).');
     $id = date('Ymd-His') . '-' . $slug . '-' . bin2hex(random_bytes(3));
     $dir = nov_dir();

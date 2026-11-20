@@ -10,10 +10,10 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 
 ## 🔴 Prioridade 1 — fazer primeiro
 1. [ ] Olímpia (SP) — cidade pequena com milhões de turistas/ano; melhor aposta
-2. [ ] Monte Sião (MG) — colada na base; excursões de compras o ano todo
-3. [ ] Jacutinga (MG) — junto com Monte Sião
-4. [ ] Lindóia (SP) — pequena; fecha o Circuito das Águas
-5. [ ] Amparo (SP) — mesmo circuito
+2. [x] Monte Sião (MG) — colada na base; excursões de compras o ano todo
+3. [x] Jacutinga (MG) — junto com Monte Sião
+4. [x] Lindóia (SP) — pequena; fecha o Circuito das Águas
+5. [x] Amparo (SP) — mesmo circuito
 6. [ ] Ilhabela (SP) — temporada (até início de dezembro)
 7. [ ] Ubatuba (SP) — temporada; grande
 8. [ ] Capitólio (MG) — turismo em alta, comércios quase sem site
@@ -45,12 +45,12 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 32. [ ] Baependi (MG) — ao lado de Caxambu
 33. [ ] Barra Bonita (SP)
 34. [ ] Vinhedo (SP)
-35. [ ] Ouro Fino (MG)
+35. [x] Ouro Fino (MG)
 36. [ ] Diamantina (MG) — longe
 37. [ ] Araxá (MG) — grande e longe
 
 ## 🟡 Prioridade 3 — quando der
-38. [ ] Borda da Mata (MG)
+38. [x] Borda da Mata (MG)
 39. [ ] Cambuquira (MG)
 40. [ ] Maria da Fé (MG)
 41. [ ] Aiuruoca (MG)
@@ -152,7 +152,7 @@ Ordem: ver a lista de prioridades no topo deste arquivo.
 - Litoral e Estrada Real ficam longe da base: conferir a CAIXA do geocodificador antes de importar.
 
 ## Grupos de cidades vizinhas (20/11) — `.\scripts\robo\rodar-cidades.ps1 -Grupo N`
-1 Lindóia, Amparo, Monte Sião, Jacutinga, Ouro Fino, Borda da Mata · 2 Ilhabela, Ubatuba, Caraguatatuba, São Sebastião ·
+1 ✅ (20/11, importadas e ligadas: 8.014 comércios) Lindóia, Amparo, Monte Sião, Jacutinga, Ouro Fino, Borda da Mata · 2 Ilhabela, Ubatuba, Caraguatatuba, São Sebastião ·
 3 São Lourenço, Caxambu, Baependi, São Tomé das Letras, Lambari, Cambuquira, Aiuruoca · 4 Águas de São Pedro, São Pedro ·
 5 Tiradentes, São João del Rei · 6 Ouro Preto, Mariana, Congonhas · 7 Capitólio, São José da Barra ·
 8 Santo Antônio do Pinhal, Gonçalves, Maria da Fé, Passa Quatro, Itamonte · 9 Atibaia, Joanópolis · 10 Itu, Boituva, Indaiatuba ·

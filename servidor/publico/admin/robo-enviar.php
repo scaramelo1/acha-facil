@@ -49,8 +49,20 @@ if (nov_config()['automatico'] || ($_POST['importar'] ?? '') === '1') {
         avisar_admins("Robô: erro em $cidade", mb_substr($e->getMessage(), 0, 150));
         sair('ERRO ao importar: ' . $e->getMessage(), 500);
     }
-    if ($tem_novidade) avisar_admins("Novidades em $cidade", nov_resumo($m) . ' (já no app).');
-    sair("OK: $cidade importada sozinha. " . nov_resumo($m) . ". Detalhes: $base", 200);
+    // 20/11: ligar=1 (enviar-listas.ps1) já liga a cidade no app depois de importar, se ela tiver comércios
+    $ligou = '';
+    if (($_POST['ligar'] ?? '') === '1' && !(TODAS_CIDADES[$m['cidade']][5] ?? false)) {
+        $n = (int)valor("SELECT COUNT(*) FROM profissionais WHERE cidade = ? AND status = 'ativo'", [$m['cidade']]);
+        if ($n > 0) {
+            q('UPDATE cidades SET ativa = 1 WHERE slug = ?', [$m['cidade']]);
+            web_cache_limpar();
+            registrar(null, 'ligou_cidade', null, "$cidade (robô, enviar-listas)");
+            $w = cidade_web($m['cidade']);
+            $ligou = " LIGADA no app ($n comércios). Sitemap para o Search Console: " . url_publica("sitemap-$w-comercios.xml");
+        } else $ligou = ' NÃO liguei: a cidade ficou sem comércios.';
+    }
+    if ($tem_novidade) avisar_admins("Novidades em $cidade", nov_resumo($m) . ' (já no app).' . ($ligou ? ' Cidade ligada.' : ''));
+    sair("OK: $cidade importada sozinha. " . nov_resumo($m) . ".$ligou Detalhes: $base", 200);
 }
 
 nov_descartar_antigas($m['cidade'], $m['id']);
