@@ -25,7 +25,9 @@ function titulo_br(string $s): string {
  */
 function limpar_bairro(?string $b, string $nome_comercio = '', string $cidade = ''): ?string {
     if ($b === null) return null;
-    $b = trim(preg_replace('/\s+/u', ' ', $b), " ,-–;:");
+    if (!mb_check_encoding($b, 'UTF-8')) $b = mb_convert_encoding($b, 'UTF-8', 'UTF-8');   // texto quebrado não derruba a importação
+    // 20/11: sem trim(..., "–"): o trim corta byte a byte e o "–" tem o mesmo byte final do "Ó" ("JARDIM ITAPÓ" quebrava)
+    $b = preg_replace('/^[\s,\-–;:]+|[\s,\-–;:]+$/u', '', (string)preg_replace('/\s+/u', ' ', $b));
     $b = preg_replace('/^bairro:?\s+(?!(de|da|do|das|dos)\b)/iu', '', $b);   // "Bairro Buenos Aires" → "Buenos Aires"; "Bairro do Lote" fica
     $b = trim(preg_replace('/\s*\([^)]*\)\s*/u', ' ', $b));   // "Jardim Satélite (Centro)" → "Jardim Satélite"
     if (in_array(chave_texto($b), ['zona rural', 'rural', 'area rural'], true)) return 'Zona Rural';
