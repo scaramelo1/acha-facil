@@ -43,3 +43,28 @@ guararema, atibaia, santana-de-parnaiba, embu-das-artes.
 - [ ] Santo Antônio do Pinhal · [ ] São Tomé das Letras · [ ] Joanópolis · [x] Monte Verde (17/11, 842 comércios, ligada, sitemap no Search Console)
 - [ ] Águas de São Pedro · [x] Brotas (19/11, 970 importados, todos com mapa, ligada, sitemap no ar; 19 bairros com tipo "Brotas - SP" pausados → 951 no ar) · [ ] Boituva · [ ] Itu
 - [ ] Guararema · [ ] Atibaia · [ ] Santana de Parnaíba · [ ] Embu das Artes
+
+## Cidades turísticas sugeridas (20/11, pedido do usuário) — cadastradas DESLIGADAS (amarelo no mapa)
+44 cidades na tabela `cidades`, `ativa = 0`, ordem 48–91, nome oficial do IBGE (o mapa casa pelo nome), centro pelo
+OpenStreetMap. Backup antes: /var/lib/acha-facil/backups/cidades.antes-44-turisticas.202611200802.sql.
+Ainda sem semana marcada: esperar o usuário pedir. Ordem sugerida: Circuito das Malhas → Olímpia → Circuito das Águas MG
+→ Capitólio e região → Litoral Norte (antes da temporada).
+
+| Região | Cidades |
+|---|---|
+| Circuito das Malhas (MG) | Monte Sião, Jacutinga, Ouro Fino, Borda da Mata |
+| Circuito das Águas (MG) | São Lourenço, Caxambu, Lambari, Cambuquira, Baependi |
+| Mantiqueira mineira | Gonçalves, Passa Quatro, Maria da Fé, Aiuruoca, Itamonte |
+| Vale Histórico (SP) | Cunha, São Luiz do Paraitinga, Bananal |
+| Olímpia (SP) | Olímpia |
+| Circuito das Frutas (SP) | Vinhedo, Valinhos, Louveira, Indaiatuba, Jundiaí |
+| Rio Tietê (SP) | Barra Bonita, São Pedro, Igaraçu do Tietê |
+| Mar de Minas (MG) | Capitólio, São José da Barra (Escarpas do Lago fica em Capitólio: não é município) |
+| Serra da Canastra (MG) | São Roque de Minas, Delfinópolis, Vargem Bonita |
+| Araxá (MG) | Araxá |
+| Estrada Real (MG) | Tiradentes, São João del Rei, Mariana, Congonhas, Brumadinho (Ouro Preto e Diamantina já estavam) |
+| Litoral Norte (SP) | Ubatuba, Ilhabela, São Sebastião, Caraguatatuba |
+| Litoral Sul (SP) | Peruíbe, Ilha Comprida, Iguape |
+
+- Grandes (muitos comércios, geocodificação demorada): Jundiaí, Indaiatuba, Araxá, Caraguatatuba, São João del Rei, Ubatuba.
+- Litoral e Estrada Real ficam longe da base: conferir a CAIXA do geocodificador antes de importar.
