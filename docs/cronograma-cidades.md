@@ -31,19 +31,19 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 18. [ ] Atibaia (SP) — grande
 19. [ ] Itu (SP) — grande
 20. [ ] Embu das Artes (SP)
-21. [ ] Guararema (SP)
+21. [x] Guararema (SP)
 22. [ ] Boituva (SP)
 23. [x] Gonçalves (MG)
 24. [x] Passa Quatro (MG)
-25. [ ] Cunha (SP)
-26. [ ] São Luiz do Paraitinga (SP)
+25. [x] Cunha (SP)
+26. [x] São Luiz do Paraitinga (SP)
 27. [x] Caraguatatuba (SP) — grande
 28. [x] São Sebastião (SP)
 29. [x] Mariana (MG) — junto com Ouro Preto
 30. [ ] Brumadinho (MG)
 31. [x] Lambari (MG)
 32. [x] Baependi (MG) — ao lado de Caxambu
-33. [ ] Barra Bonita (SP)
+33. [x] Barra Bonita (SP)
 34. [ ] Vinhedo (SP)
 35. [x] Ouro Fino (MG)
 36. [ ] Diamantina (MG) — longe
@@ -62,7 +62,7 @@ Fazer só quando o usuário pedir; ao terminar uma, marcar [x] aqui e na lista d
 47. [x] São João del Rei (MG) — grande
 48. [x] Congonhas (MG)
 49. [ ] Bananal (SP)
-50. [ ] Igaraçu do Tietê (SP) — ao lado de Barra Bonita
+50. [x] Igaraçu do Tietê (SP) — ao lado de Barra Bonita
 51. [ ] Peruíbe (SP)
 52. [ ] Iguape (SP)
 53. [ ] Ilha Comprida (SP)
@@ -156,7 +156,7 @@ Ordem: ver a lista de prioridades no topo deste arquivo.
 3 ✅ (20/11, ligadas: 7.353 comércios) São Lourenço, Caxambu, Baependi, São Tomé das Letras, Lambari, Cambuquira, Aiuruoca · 4 ✅ (20/11, ligadas: 2.368) Águas de São Pedro, São Pedro ·
 5 Tiradentes, São João del Rei · 6 ✅ (20/11, ligadas: 6.710) Ouro Preto, Mariana, Congonhas · 7 ✅ (20/11, ligadas: 1.455) Capitólio, São José da Barra ·
 8 ✅ (20/11, ligadas: 3.188) Santo Antônio do Pinhal, Gonçalves, Maria da Fé, Passa Quatro, Itamonte · 9 Atibaia, Joanópolis · 10 Itu, Boituva, Indaiatuba ·
-11 Vinhedo, Valinhos, Louveira, Jundiaí · 12 Cunha, São Luiz do Paraitinga, Guararema · 13 Embu das Artes, Santana de Parnaíba ·
+11 Vinhedo, Valinhos, Louveira, Jundiaí · 12 ✅ (20/11, ligadas: 3.235) Cunha, São Luiz do Paraitinga, Guararema · 13 Embu das Artes, Santana de Parnaíba ·
 14 Barra Bonita, Igaraçu do Tietê · 15 São Roque de Minas, Delfinópolis, Vargem Bonita · 16 Peruíbe, Iguape, Ilha Comprida ·
 17 Itapira, Mogi Mirim, Santo Antônio de Posse, Estiva Gerbi · 18 São Sebastião da Grama, Tapiratiba, Itobi ·
 19 (sozinhas) Olímpia ✅ (20/11, 2.919), Brumadinho, Araxá, Diamantina, Bananal.
