@@ -80,7 +80,7 @@ admin_inicio('Mapa das cidades', $admin);
 <div class="mapa-ferramentas">
   <input type="search" id="mapa-busca" list="mapa-nomes" placeholder="Procurar município..." aria-label="Procurar município">
   <datalist id="mapa-nomes"><?php foreach ($mapa['m'] as $m): ?><option value="<?= h($m['n'] . ($juntos ? ' - ' . $m['u'] : '')) ?>"><?php endforeach ?></datalist>
-  <label class="marcar"><input type="checkbox" id="mapa-nomes-ver" checked> Nomes das cidades do projeto</label>
+  <label class="marcar"><input type="checkbox" id="mapa-nomes-ver"> Mostrar os nomes das cidades do projeto</label>
 </div>
 
 <div class="quadro" id="mapa-info">Toque num município.</div>
