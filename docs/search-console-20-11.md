@@ -82,17 +82,17 @@ O índice https://achafacilapp.com.br/sitemap.xml já lista todas sozinho. Abaix
 
 ## Inspeção de URL (lotes de 10 por dia)
 
-### Dia 1
-- [ ] Olímpia: https://achafacilapp.com.br/olimpia/
-- [ ] Ilhabela: https://achafacilapp.com.br/ilhabela/
-- [ ] Ubatuba: https://achafacilapp.com.br/ubatuba/
-- [ ] Lindóia: https://achafacilapp.com.br/lindoia/
-- [ ] Amparo: https://achafacilapp.com.br/amparo/
-- [ ] Monte Sião: https://achafacilapp.com.br/monte-siao/
-- [ ] Jacutinga: https://achafacilapp.com.br/jacutinga/
-- [ ] Capitólio: https://achafacilapp.com.br/capitolio/
-- [ ] Santo Antônio do Pinhal: https://achafacilapp.com.br/santo-antonio-do-pinhal/
-- [ ] São Tomé das Letras: https://achafacilapp.com.br/sao-tome-das-letras/
+### Dia 1 ✅ (feito em 20/11)
+- [x] Olímpia: https://achafacilapp.com.br/olimpia/
+- [x] Ilhabela: https://achafacilapp.com.br/ilhabela/
+- [x] Ubatuba: https://achafacilapp.com.br/ubatuba/
+- [x] Lindóia: https://achafacilapp.com.br/lindoia/
+- [x] Amparo: https://achafacilapp.com.br/amparo/
+- [x] Monte Sião: https://achafacilapp.com.br/monte-siao/
+- [x] Jacutinga: https://achafacilapp.com.br/jacutinga/
+- [x] Capitólio: https://achafacilapp.com.br/capitolio/
+- [x] Santo Antônio do Pinhal: https://achafacilapp.com.br/santo-antonio-do-pinhal/
+- [x] São Tomé das Letras: https://achafacilapp.com.br/sao-tome-das-letras/
 
 ### Dia 2
 - [ ] Águas de São Pedro: https://achafacilapp.com.br/aguas-de-sao-pedro/
